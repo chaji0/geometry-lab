@@ -1,0 +1,1064 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<script>
+/* 입장 가드: 게이트를 거치지 않고 직접 열면 입장 화면으로 돌려보냄 */
+if (sessionStorage.getItem('geoAppOk') !== '1') location.replace('index.html');
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>원뿔곡선 탐구 — 이중원뿔의 단면</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html, body { width:100%; height:100%; overflow:hidden; }
+  body {
+    font-family: 'Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif;
+    background:#f1f5fb; color:#1e293b; display:flex; flex-direction:column;
+  }
+  header {
+    padding:10px 20px; background:#ffffff; border-bottom:1px solid #e2e8f0;
+    display:flex; align-items:baseline; gap:14px; flex-wrap:wrap;
+  }
+  header h1 { font-size:19px; color:#0f172a; }
+  header p  { font-size:12.5px; color:#64748b; }
+  #main { flex:1; display:flex; min-height:0; }
+  #viewWrap { flex:1; position:relative; min-width:0; }
+  #view { width:100%; height:100%; display:block; cursor:grab; touch-action:none; }
+  #view:active { cursor:grabbing; }
+  .hint3d {
+    position:absolute; left:12px; bottom:10px; font-size:11.5px; color:#94a3b8;
+    background:rgba(255,255,255,.75); padding:4px 8px; border-radius:6px; pointer-events:none;
+  }
+  .legend {
+    position:absolute; left:12px; top:10px; font-size:11.5px; color:#475569;
+    background:rgba(255,255,255,.85); padding:6px 9px; border-radius:8px; pointer-events:none;
+    line-height:1.7; border:1px solid #e2e8f0;
+  }
+  .dotc { display:inline-block; width:10px; height:10px; border-radius:3px; margin-right:5px; vertical-align:-1px; }
+
+  #panel {
+    width:320px; background:#ffffff; border-left:1px solid #e2e8f0;
+    padding:14px 16px; overflow-y:auto; display:flex; flex-direction:column; gap:12px;
+  }
+  .card { border:1px solid #e2e8f0; border-radius:12px; padding:12px 14px; background:#fbfdff; }
+  .card h2 { font-size:13px; color:#334155; margin-bottom:8px; }
+
+  .angleRow { display:flex; align-items:center; gap:10px; }
+  .angleVal { font-size:26px; font-weight:700; color:#0369a1; min-width:64px; text-align:right; }
+  .angleVal small { font-size:14px; color:#64748b; font-weight:400; }
+  input[type=range] { flex:1; accent-color:#0284c7; height:28px; }
+
+  .badge {
+    margin-top:9px; padding:7px 10px; border-radius:8px; font-size:13px; font-weight:600;
+    text-align:center; transition:background .2s;
+  }
+  .badge.lt  { background:#e0f2fe; color:#075985; }
+  .badge.eq  { background:#fef3c7; color:#92400e; }
+  .badge.gt  { background:#fce7f3; color:#9d174d; }
+  .badge.zero{ background:#dcfce7; color:#166534; }
+  .genLine { font-size:12px; color:#64748b; margin-top:7px; text-align:center; }
+
+  #cutBtn {
+    width:100%; padding:12px 0; font-size:16px; font-weight:700; color:#fff;
+    background:linear-gradient(135deg,#0ea5e9,#6366f1); border:none; border-radius:12px;
+    cursor:pointer; box-shadow:0 3px 10px rgba(59,130,246,.35); transition:transform .1s;
+  }
+  #cutBtn:active { transform:scale(.97); }
+
+  #quizCard { display:none; }
+  #quizCard.show { display:block; }
+  .quizBtns { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:8px; }
+  .quizBtns button {
+    padding:11px 0; font-size:15px; font-weight:700; border-radius:10px; cursor:pointer;
+    border:2px solid #cbd5e1; background:#fff; color:#334155; transition:all .12s;
+  }
+  .quizBtns button:hover:not(:disabled) { border-color:#0284c7; color:#0284c7; background:#f0f9ff; }
+  .quizBtns button:disabled { opacity:.45; cursor:default; }
+  .quizBtns button.correctPick { background:#16a34a; border-color:#16a34a; color:#fff; opacity:1; }
+  .quizBtns button.wrongPick { background:#fee2e2; border-color:#ef4444; color:#b91c1c; }
+  #quizResult { margin-top:9px; font-size:13px; line-height:1.6; color:#334155; min-height:18px; }
+
+  .scoreRow { display:flex; justify-content:space-between; align-items:center; }
+  .scoreBox { text-align:center; flex:1; }
+  .scoreBox .lab { font-size:11.5px; color:#64748b; }
+  .scoreBox .val { font-size:21px; font-weight:800; color:#0f172a; }
+  .outDots { font-size:19px; letter-spacing:3px; }
+  .outDots .on { color:#dc2626; } .outDots .off { color:#d1d5db; }
+
+  .note { font-size:11.8px; color:#64748b; line-height:1.65; }
+  details.proof { border:1px dashed #cbd5e1; border-radius:10px; padding:9px 12px; background:#f8fafc; }
+  details.proof summary { font-size:13px; font-weight:700; color:#475569; cursor:pointer; }
+  details.proof p { font-size:12.5px; color:#64748b; margin-top:7px; line-height:1.65; }
+  .proofBtns { display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px; margin-top:9px; }
+  .proofBtns button {
+    padding:8px 0; font-size:12.5px; font-weight:700; border-radius:8px; cursor:pointer;
+    border:1.5px solid #cbd5e1; background:#fff; color:#475569; transition:all .12s;
+  }
+  .proofBtns button:hover { border-color:#16a34a; color:#15803d; }
+  .proofBtns button.on { background:#16a34a; border-color:#16a34a; color:#fff; }
+  #proofDesc { font-size:12.3px; color:#475569; margin-top:8px; line-height:1.7; }
+  .subBtns { display:flex; gap:6px; align-items:center; flex-wrap:wrap; margin-top:9px; }
+  .subBtns button {
+    padding:7px 11px; font-size:12.3px; font-weight:700; border-radius:8px; cursor:pointer;
+    border:1.5px solid #cbd5e1; background:#fff; color:#475569; transition:all .12s;
+  }
+  .subBtns button:hover { border-color:#0284c7; color:#0369a1; }
+  .subBtns button.on { background:#0284c7; border-color:#0284c7; color:#fff; }
+  .eq { font-weight:800; color:#0f172a; font-size:13px; }
+  .eq .seg { text-decoration:overline; }
+
+  /* ===== 이펙트 ===== */
+  #fxLayer { position:fixed; inset:0; pointer-events:none; z-index:99; overflow:hidden; }
+  .fxText {
+    position:absolute; left:50%; top:42%; transform:translate(-50%,-50%);
+    font-weight:900; white-space:nowrap; animation:fxPop 1.5s ease forwards;
+  }
+  .fxWow {
+    font-size:64px;
+    background:linear-gradient(90deg,#f59e0b,#ef4444,#ec4899);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    filter:drop-shadow(0 4px 10px rgba(236,72,153,.4));
+  }
+  .fxHomerun {
+    font-size:70px; color:#f59e0b;
+    text-shadow:0 0 18px rgba(245,158,11,.8), 0 4px 0 #b45309;
+    animation:fxHomer 1.9s ease forwards;
+  }
+  .fxOut {
+    font-size:66px; color:#dc2626; transform:translate(-50%,-50%) rotate(-10deg);
+    text-shadow:0 3px 0 #7f1d1d; animation:fxStamp 1.4s ease forwards;
+    border:6px solid #dc2626; padding:6px 26px; border-radius:14px; background:rgba(255,255,255,.85);
+  }
+  @keyframes fxPop {
+    0% { transform:translate(-50%,-50%) scale(.2); opacity:0; }
+    25%{ transform:translate(-50%,-50%) scale(1.25); opacity:1; }
+    45%{ transform:translate(-50%,-50%) scale(1); }
+    80%{ opacity:1; }
+    100%{ transform:translate(-50%,-58%) scale(1.02); opacity:0; }
+  }
+  @keyframes fxHomer {
+    0% { transform:translate(-50%,40vh) scale(.4); opacity:0; }
+    22%{ transform:translate(-50%,-50%) scale(1.35); opacity:1; }
+    40%{ transform:translate(-50%,-50%) scale(1); }
+    82%{ opacity:1; }
+    100%{ transform:translate(-50%,-90%) scale(1.1); opacity:0; }
+  }
+  @keyframes fxStamp {
+    0% { transform:translate(-50%,-50%) rotate(-10deg) scale(2.4); opacity:0; }
+    28%{ transform:translate(-50%,-50%) rotate(-10deg) scale(1); opacity:1; }
+    75%{ opacity:1; }
+    100%{ opacity:0; }
+  }
+  .confetti {
+    position:absolute; left:50%; top:45%; font-size:26px;
+    animation:confFly 1.7s ease-out forwards;
+  }
+  @keyframes confFly {
+    0% { transform:translate(0,0) rotate(0deg); opacity:1; }
+    100%{ transform:translate(var(--dx), var(--dy)) rotate(var(--rot)); opacity:0; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1><a href="index.html" style="text-decoration:none" title="메뉴로">🏠</a> ⚾ 원뿔곡선 탐구 — 이중원뿔의 단면 자르기</h1>
+  <p>평면의 기울기를 조절해 단면을 자르고, 어떤 곡선인지 맞혀 보세요!</p>
+</header>
+
+<div id="main">
+  <div id="viewWrap">
+    <canvas id="view"></canvas>
+    <div class="legend">
+      <span class="dotc" style="background:rgba(135,206,235,.75)"></span>원뿔 (실제로는 무한히 뻗음)<br>
+      <span class="dotc" style="background:rgba(250,204,21,.85)"></span>단면 — 진한 부분: 그려진 원뿔 안<br>
+      <span class="dotc" style="background:rgba(250,204,21,.35)"></span>단면 — 연한 부분: 계속 뻗는 원뿔 위 (→∞)<br>
+      <span class="dotc" style="background:#ef4444"></span>단면의 테두리 = 원뿔곡선<br>
+      <span class="dotc" style="background:rgba(148,163,184,.6)"></span>자르는 평면
+    </div>
+    <div class="hint3d">드래그: 회전 · 휠/두 손가락 벌리기: 확대·축소</div>
+  </div>
+
+  <div id="panel">
+    <div class="card">
+      <h2>① 자르는 평면의 기울기</h2>
+      <div class="angleRow">
+        <input type="range" id="slider" min="0" max="180" step="1" value="0">
+        <div class="angleVal"><span id="angNum">0</span><small>°</small></div>
+      </div>
+      <div class="badge zero" id="badge">기울기 0° — 밑면과 평행한 수평 평면</div>
+      <div class="genLine">원뿔 모선의 기울기 = <b>60°</b> (고정)</div>
+    </div>
+
+    <button id="cutBtn">🔪 단면 확인</button>
+
+    <div class="card" id="quizCard">
+      <h2>② 이 단면은 어떤 곡선일까요?</h2>
+      <div class="quizBtns">
+        <button data-t="circle">⭕ 원</button>
+        <button data-t="ellipse">🥚 타원</button>
+        <button data-t="parabola">🌈 포물선</button>
+        <button data-t="hyperbola">🎋 쌍곡선</button>
+      </div>
+      <div id="quizResult"></div>
+    </div>
+
+    <div class="card">
+      <h2>⚾ 스코어보드</h2>
+      <div class="scoreRow">
+        <div class="scoreBox"><div class="lab">안타 (정답)</div><div class="val" id="hitVal">0</div></div>
+        <div class="scoreBox"><div class="lab">OUT</div><div class="outDots" id="outDots"><span class="off">●</span><span class="off">●</span><span class="off">●</span></div></div>
+      </div>
+    </div>
+
+    <div class="note">
+      ※ 화면의 원뿔은 잘려 보이지만, 실제로는 <b>무한히 뻗어나가는 이중원뿔</b>입니다.
+      그래서 진한 원뿔 밖으로도 단면이 <b>연한 노란색</b>으로 계속 이어져요 —
+      단면은 반드시 원 · 타원 · 포물선 · 쌍곡선 중 하나가 됩니다.
+      기울기가 모선(60°)보다 조금만 커도 평면은 반대쪽 원뿔과도 만나는데,
+      그 지점이 화면 밖 아주 먼 곳일 수 있어요. (점선 = 표시 범위에서 잘린 부분, 실제로는 계속 이어짐)
+    </div>
+
+    <details class="proof" id="proofBox">
+      <summary>📐 증명으로 이어가기</summary>
+      <div class="proofBtns">
+        <button id="pfParab">포물선 증명</button>
+        <button id="pfEllipse">타원 증명</button>
+        <button id="pfHyper">쌍곡선 증명</button>
+      </div>
+      <div id="proofDesc"></div>
+    </details>
+  </div>
+</div>
+
+<div id="fxLayer"></div>
+
+<script>
+'use strict';
+/* ============================================================
+   자체 3D 렌더러 (Canvas 2D) — 외부 라이브러리·WebGL 불필요
+   → 아이패드/스마트폰/오프라인 어디서나 동작
+   ============================================================ */
+
+/* ===== 수학 상수 =====
+   이중원뿔: y² = 3(x²+z²) → 모선이 수평면과 이루는 각 = 60°
+   자르는 평면: sinα·x + cosα·y = -D (꼭짓점에서 거리 D)      */
+const H  = 3.4;                   // 진하게 그리는 원뿔 높이
+const HX = 6.0;                   // 단면 계산·표시 확장 높이 (무한 원뿔 표현)
+const GEN_DEG = 60;
+const TANG = Math.tan(GEN_DEG*Math.PI/180);   // √3
+const R  = H / TANG;
+const RX = HX / TANG;
+const D60 = 2.1;                  // 포물선(60°/120°)일 때 평면-꼭짓점 거리
+const D0  = 0.9;                  // 수평(원)·가파른 각(쌍곡선)일 때 거리
+// 각도별 평면-꼭짓점 거리: 60° 근처는 멀리, 나머지는 가깝게 (부드럽게 이어짐)
+function Dof(aDeg){
+  const inc = aDeg<=90 ? aDeg : 180-aDeg;
+  return D0 + (D60-D0)*Math.exp(-Math.pow((inc-60)/15,2));
+}
+
+/* ===== 벡터/쿼터니언 유틸 ===== */
+const V   = (x,y,z)=>({x,y,z});
+const add = (a,b)=>V(a.x+b.x, a.y+b.y, a.z+b.z);
+const sub = (a,b)=>V(a.x-b.x, a.y-b.y, a.z-b.z);
+const scl = (a,k)=>V(a.x*k, a.y*k, a.z*k);
+const dot = (a,b)=>a.x*b.x + a.y*b.y + a.z*b.z;
+const crs = (a,b)=>V(a.y*b.z-a.z*b.y, a.z*b.x-a.x*b.z, a.x*b.y-a.y*b.x);
+const nrm = a=>{ const l=Math.hypot(a.x,a.y,a.z)||1; return V(a.x/l,a.y/l,a.z/l); };
+
+function quatFromBasis(e1,e2,n){        // 열벡터 e1,e2,n (오른손 정규직교) → 쿼터니언
+  const m11=e1.x,m12=e2.x,m13=n.x, m21=e1.y,m22=e2.y,m23=n.y, m31=e1.z,m32=e2.z,m33=n.z;
+  const tr=m11+m22+m33; let x,y,z,w;
+  if(tr>0){ const s=0.5/Math.sqrt(tr+1); w=0.25/s; x=(m32-m23)*s; y=(m13-m31)*s; z=(m21-m12)*s; }
+  else if(m11>m22&&m11>m33){ const s=2*Math.sqrt(1+m11-m22-m33); w=(m32-m23)/s; x=0.25*s; y=(m12+m21)/s; z=(m13+m31)/s; }
+  else if(m22>m33){ const s=2*Math.sqrt(1+m22-m11-m33); w=(m13-m31)/s; x=(m12+m21)/s; y=0.25*s; z=(m23+m32)/s; }
+  else { const s=2*Math.sqrt(1+m33-m11-m22); w=(m21-m12)/s; x=(m13+m31)/s; y=(m23+m32)/s; z=0.25*s; }
+  return {x,y,z,w};
+}
+const QID = {x:0,y:0,z:0,w:1};
+function quatSlerp(a,b,t){
+  let cos = a.x*b.x+a.y*b.y+a.z*b.z+a.w*b.w, b2=b;
+  if(cos<0){ cos=-cos; b2={x:-b.x,y:-b.y,z:-b.z,w:-b.w}; }
+  if(cos>0.9995){
+    const q={x:a.x+(b2.x-a.x)*t, y:a.y+(b2.y-a.y)*t, z:a.z+(b2.z-a.z)*t, w:a.w+(b2.w-a.w)*t};
+    const l=Math.hypot(q.x,q.y,q.z,q.w); return {x:q.x/l,y:q.y/l,z:q.z/l,w:q.w/l};
+  }
+  const th=Math.acos(cos), s=Math.sin(th);
+  const wa=Math.sin((1-t)*th)/s, wb=Math.sin(t*th)/s;
+  return {x:a.x*wa+b2.x*wb, y:a.y*wa+b2.y*wb, z:a.z*wa+b2.z*wb, w:a.w*wa+b2.w*wb};
+}
+function quatRotate(q,v){
+  const {x,y,z,w}=q;
+  const ix= w*v.x + y*v.z - z*v.y;
+  const iy= w*v.y + z*v.x - x*v.z;
+  const iz= w*v.z + x*v.y - y*v.x;
+  const iw=-x*v.x - y*v.y - z*v.z;
+  return V(ix*w + iw*-x + iy*-z - iz*-y,
+           iy*w + iw*-y + iz*-x - ix*-z,
+           iz*w + iw*-z + ix*-y - iy*-x);
+}
+
+/* ===== 절단 평면 좌표계 ===== */
+function planeBasis(aDeg){
+  const a=aDeg*Math.PI/180, s=Math.sin(a), c=Math.cos(a), Dv=Dof(aDeg);
+  // 오른손: e1 × e2 = n
+  // 평면을 축의 오른쪽에 배치 (법선 (-s,c,0)) → 60°일 때 왼쪽 ↙ 모선과 평행함이 잘 보임
+  return { s, c, Dv, e1:V(-c,-s,0), e2:V(0,0,1), n:V(-s,c,0), P0:V(Dv*s,-Dv*c,0) };
+}
+function to3D(b,u,v){ return V(b.P0.x + u*b.e1.x + v*b.e2.x,
+                               b.P0.y + u*b.e1.y + v*b.e2.y,
+                               b.P0.z + u*b.e1.z + v*b.e2.z); }
+
+/* ===== 단면 곡선 계산 (α: 0~180°, Hclip: 표시 한계) ===== */
+function computeSection(aDeg, Hclip){
+  const a=aDeg*Math.PI/180, s=Math.sin(a), c=Math.cos(a), Dv=Dof(aDeg);
+  const v2 = u => { const A=Dv*c+u*s, B=u*c-Dv*s; return A*A/3 - B*B; };
+  // v²(u) = qa·u² + qb·u + qc
+  const qa = s*s/3 - c*c, qb = 8*Dv*c*s/3, qc = Dv*Dv*(c*c/3 - s*s);
+  const branches = [];
+  function addBranch(u1,u2,clipL,clipR){
+    if(u2-u1 < 1e-5) return;
+    const M=220, top=[], bot=[];
+    for(let i=0;i<=M;i++){
+      const u=u1+(u2-u1)*i/M, v=Math.sqrt(Math.max(0,v2(u)));
+      top.push({x:u,y:v}); bot.push({x:u,y:-v});
+    }
+    branches.push({top,bot,clipL,clipR});
+  }
+  if(s<1e-9){ const r=Dv/Math.sqrt(3); addBranch(-r,r,false,false); return branches; }
+  const uApex=-Dv*c/s;
+  const winLower=[uApex+1e-6,( Hclip-Dv*c)/s];
+  const winUpper=[(-Hclip-Dv*c)/s,uApex-1e-6];
+  let regions=[];
+  if(Math.abs(qa)<1e-9){                 // 기울어진 정도 60° → 포물선
+    const u0=-qc/qb;
+    regions = qb>0 ? [[u0,Infinity]] : [[-Infinity,u0]];
+  } else {
+    const disc=qb*qb-4*qa*qc;
+    if(disc<=0) return branches;
+    const sq=Math.sqrt(disc);
+    let r1=(-qb-sq)/(2*qa), r2=(-qb+sq)/(2*qa);
+    if(r1>r2){ const t=r1; r1=r2; r2=t; }
+    regions = qa<0 ? [[r1,r2]] : [[-Infinity,r1],[r2,Infinity]];
+  }
+  for(const reg of regions)
+    for(const win of [winLower,winUpper]){
+      const a1=Math.max(reg[0],win[0]), b1=Math.min(reg[1],win[1]);
+      if(b1-a1>1e-5) addBranch(a1,b1, a1>reg[0]+1e-9, b1<reg[1]-1e-9);
+    }
+  return branches;
+}
+
+/* ===== 곡선 종류 ===== */
+function inclOf(a){ return a<=90 ? a : 180-a; }
+function conicType(a){
+  const inc=inclOf(a);
+  if(inc===0) return 'circle';
+  if(inc<GEN_DEG) return 'ellipse';
+  if(inc===GEN_DEG) return 'parabola';
+  return 'hyperbola';
+}
+const typeName={circle:'원',ellipse:'타원',parabola:'포물선',hyperbola:'쌍곡선'};
+const typeReason={
+  circle:'수평(0° 또는 180°)으로 자르면 <b>원</b>!',
+  ellipse:'기울어진 정도가 모선(60°)보다 작으면 <b>타원</b>!',
+  parabola:'모선과 평행하게 자르면(60° 또는 120°) <b>포물선</b>!',
+  hyperbola:'모선보다 크게 기울이면 양쪽 원뿔을 모두 만나 <b>쌍곡선</b>!'
+};
+
+/* ===== 캔버스/카메라 ===== */
+const canvas=document.getElementById('view');
+const ctx=canvas.getContext('2d');
+const camTarget=V(1.7,-0.1,0);
+let camTheta=0.45, camPhi=1.25, camDist=15.5;
+const FOV=45*Math.PI/180;
+let dirty=true;
+
+function viewSetup(w,h){
+  camPhi=Math.max(0.15,Math.min(Math.PI-0.15,camPhi));
+  camDist=Math.max(5,Math.min(30,camDist));
+  const eye=add(camTarget, V(camDist*Math.sin(camPhi)*Math.sin(camTheta),
+                             camDist*Math.cos(camPhi),
+                             camDist*Math.sin(camPhi)*Math.cos(camTheta)));
+  const f=nrm(sub(camTarget,eye));
+  const r=nrm(crs(f,V(0,1,0)));
+  const u=crs(r,f);
+  const fl=(h/2)/Math.tan(FOV/2);
+  return { eye,f,r,u,fl,cx:w/2,cy:h/2 };
+}
+function project(cam,p){
+  const d=sub(p,cam.eye), z=dot(d,cam.f);
+  if(z<0.15) return null;
+  return { x:cam.cx + cam.fl*dot(d,cam.r)/z, y:cam.cy - cam.fl*dot(d,cam.u)/z, z };
+}
+
+/* ===== 정적 지오메트리: 원뿔 + 유령 원뿔 ===== */
+const SEG=48;
+const LIGHT=nrm(V(5,8,6));
+const coneTris=[];   // {a,b,c, rgb:[..], alpha, shaded}
+function ringPt(y,i){ const t=i/SEG*Math.PI*2, r=Math.abs(y)/TANG; return V(r*Math.cos(t),y,r*Math.sin(t)); }
+function addBand(y1,y2,alpha){
+  for(let i=0;i<SEG;i++){
+    const a1=ringPt(y1,i), a2=ringPt(y1,i+1), b1=ringPt(y2,i), b2=ringPt(y2,i+1);
+    if(Math.abs(y1)<1e-9){ coneTris.push({a:a1,b:b1,c:b2,rgb:[135,206,235],alpha,shaded:true}); }
+    else {
+      coneTris.push({a:a1,b:b1,c:b2,rgb:[135,206,235],alpha,shaded:true});
+      coneTris.push({a:a1,b:b2,c:a2,rgb:[135,206,235],alpha,shaded:true});
+    }
+  }
+}
+// 진한 원뿔 (세로 3분할 → 정렬 품질↑)
+for(const sgn of [1,-1]){
+  addBand(0, sgn*H/3, 0.16); addBand(sgn*H/3, sgn*2*H/3, 0.16); addBand(sgn*2*H/3, sgn*H, 0.16);
+  addBand(sgn*H, sgn*(H+(HX-H)/2), 0.055); addBand(sgn*(H+(HX-H)/2), sgn*HX, 0.055);  // 유령 연장부
+}
+
+function circlePts(y,n){ const p=[]; for(let i=0;i<=n;i++) p.push(ringPt(y,i*SEG/n)); return p; }
+
+/* ===== 증명(단델린 구) 데이터 =====
+   원뿔 반각 30° → 축 위 중심 (0,-k,0)의 내접구 반지름 r = k/2,
+   구와 원뿔의 접원: y=-3k/4, 반지름 √3k/4. 구가 자르는 평면에 닿는 점이 F. */
+function makeSphereTris(C,r){
+  const tris=[], LA=12, LO=22;
+  const pt=(i,j)=>{ const th=i/LA*Math.PI, ph=j/LO*2*Math.PI;
+    return V(C.x+r*Math.sin(th)*Math.cos(ph), C.y+r*Math.cos(th), C.z+r*Math.sin(th)*Math.sin(ph)); };
+  for(let i=0;i<LA;i++) for(let j=0;j<LO;j++){
+    const a=pt(i,j), b=pt(i+1,j), c=pt(i+1,j+1), d=pt(i,j+1);
+    tris.push([a,b,c]);
+    if(i>0) tris.push([a,c,d]);
+  }
+  return tris;
+}
+function circle3d(y,r){
+  const p=[]; for(let i=0;i<=72;i++){ const t=i/72*2*Math.PI; p.push(V(r*Math.cos(t),y,r*Math.sin(t))); }
+  return p;
+}
+function buildParabolaProof(){        // α=60°
+  const A=60, b=planeBasis(A), Dv=b.Dv, sA=b.s, cA=b.c;
+  const k=Dv, r=Dv/2;                 // 평면과 접하는 조건: Dv - k·cos60 = k/2 → k=Dv
+  const v2=u=>{ const Au=Dv*cA+u*sA, Bu=u*cA-Dv*sA; return Au*Au/3-Bu*Bu; };
+  const uP=(H-Dv*cA)/sA;              // 포물선이 (원래 그린) 원뿔 밑둘레와 만나는 점, 앞쪽(v>0)
+  return {
+    angle:A, type:'parabola',
+    sphereC:V(0,-k,0), sphereR:r, sphere:makeSphereTris(V(0,-k,0),r),
+    tY:-3*k/4, tR:Math.sqrt(3)*k/4,
+    dirU:Dv/(2*Math.sqrt(3)),
+    F:{u:Math.sqrt(3)*Dv/2, v:0},
+    P:{u:uP, v:Math.sqrt(Math.max(0,v2(uP)))},
+    drag:conicDragPts(A,uP),
+    defLabel:'포물선의 정의',
+    defText:'<span class="seg">PF</span> = <span class="seg">PH</span>'
+  };
+}
+function buildEllipseProof(){         // α=40°
+  const A=40, b=planeBasis(A), Dv=b.Dv, sA=b.s, cA=b.c;
+  const qa=sA*sA/3-cA*cA, qb=8*Dv*cA*sA/3, qc=Dv*Dv*(cA*cA/3-sA*sA);
+  const sq=Math.sqrt(qb*qb-4*qa*qc);
+  let r1=(-qb-sq)/(2*qa), r2=(-qb+sq)/(2*qa);
+  if(r1>r2){ const t=r1; r1=r2; r2=t; }
+  const k=Dv/(cA+0.5), r=k/2;         // 평면과 접하는 조건: Dv - k·cosα = k/2
+  const C=V(0,-k,0);
+  const Fw=V(C.x-b.n.x*r, C.y-b.n.y*r, C.z-b.n.z*r);   // 구가 평면에 닿는 점
+  const uF=dot(sub(Fw,b.P0), b.e1);   // (v=0, 대칭)
+  const v2=u=>{ const Au=Dv*cA+u*sA, Bu=u*cA-Dv*sA; return Au*Au/3-Bu*Bu; };
+  const uc=(r1+r2)/2;
+  return {
+    angle:A, type:'ellipse',
+    sphereC:C, sphereR:r, sphere:makeSphereTris(C,r),
+    tY:-3*k/4, tR:Math.sqrt(3)*k/4,
+    F:{u:uF, v:0},
+    F2:{u:r1+r2-uF, v:0},             // 타원 대칭으로 반대쪽 점
+    P:{u:uc, v:Math.sqrt(Math.max(0,v2(uc)))},   // 타원 위 정면(v>0) 점
+    drag:conicDragPts(A,uc),
+    defLabel:'타원의 정의',
+    defText:'<span class="seg">PF</span> + <span class="seg">PF′</span> = (일정)'
+  };
+}
+function buildHyperbolaProof(){       // α=90° (수직 평면 x=Dv)
+  const A=90, b=planeBasis(A), Dv=b.Dv;
+  const k=2*Dv, r=k;                  // 평면과 접하는 조건: Dv = (k/2) → k=2Dv, 반지름 k/2
+  const rr=k/2;
+  const v2=u=>u*u/3-Dv*Dv;
+  const uP=H;                         // 아래 가지가 원래 원뿔 밑둘레(y=-H)와 만나는 점 (y=-u)
+  return {
+    angle:A, type:'hyperbola',
+    sphereC:V(0,-k,0), sphereR:rr, sphere:makeSphereTris(V(0,-k,0),rr),
+    sphere2C:V(0,k,0), sphere2:makeSphereTris(V(0,k,0),rr),
+    tY:-3*k/4, tR:Math.sqrt(3)*k/4,   // 아래 구의 접원
+    tY2:3*k/4,                        // 위 구의 접원
+    F:{u:k, v:0},                     // 아래쪽 (y=-k)
+    F2:{u:-k, v:0},                   // 위쪽 (y=+k)
+    P:{u:uP, v:Math.sqrt(Math.max(0,v2(uP)))},
+    drag:conicDragPts(A,uP),
+    defLabel:'쌍곡선의 정의',
+    defText:'| <span class="seg">PF</span> − <span class="seg">PF′</span> | = (일정)'
+  };
+}
+// P가 움직일 수 있는 곡선 위 후보점들 (해당 가지 전체, 양쪽 v)
+function conicDragPts(angle, uP){
+  const brs=computeSection(angle,HX);
+  const br=brs.find(b=>uP>=b.top[0].x-1e-6 && uP<=b.top[b.top.length-1].x+1e-6) || brs[0];
+  const pts=[];
+  br.top.forEach(p=>pts.push({u:p.x, v:p.y}));
+  br.bot.forEach(p=>pts.push({u:p.x, v:p.y}));
+  return pts;
+}
+let proofMode=null, proofData=null, proofDef=false, proofExp=false;
+let pScreen=null, dragPActive=false;   // P 드래그 상태
+
+/* ===== 상태 ===== */
+let alphaDeg=0;
+let currentFull=[], currentInner=[];
+let sectionGeom=null;     // {fillsOuter, fillsInner, edgesRed(closed?), edgesDash, bounds}
+let extractState=null;    // {geom(재중심), anim:{t}, startPos,startQ, endPos, endScale}
+let genHi1=false, genHi2=false;
+
+function decimate(pts,step){ const out=[]; for(let i=0;i<pts.length;i+=step) out.push(pts[i]); if(out[out.length-1]!==pts[pts.length-1]) out.push(pts[pts.length-1]); return out; }
+
+function buildSectionGeom(fullBr, innerBr){
+  const g={fillsOuter:[],fillsInner:[],edgesRed:[],edgesDash:[],bounds:null};
+  let minU=1e9,maxU=-1e9,minV=1e9,maxV=-1e9;
+  const fillPoly = br => decimate(br.top,4).concat(decimate(br.bot,4).reverse());
+  fullBr.forEach(br=>{
+    g.fillsOuter.push(fillPoly(br));
+    br.top.forEach((p,i)=>{ minU=Math.min(minU,p.x); maxU=Math.max(maxU,p.x);
+                            maxV=Math.max(maxV,p.y); minV=Math.min(minV,br.bot[i].y); });
+    const top=br.top, bot=br.bot;
+    if(!br.clipL && !br.clipR){
+      g.edgesRed.push({pts:top.concat(bot.slice().reverse()), closed:true});
+    } else {
+      if(br.clipR && !br.clipL)      g.edgesRed.push({pts:bot.slice().reverse().concat(top),closed:false});
+      else if(br.clipL && !br.clipR) g.edgesRed.push({pts:top.concat(bot.slice().reverse()),closed:false});
+      else { g.edgesRed.push({pts:top,closed:false}); g.edgesRed.push({pts:bot,closed:false}); }
+      if(br.clipR) g.edgesDash.push([top[top.length-1], bot[bot.length-1]]);
+      if(br.clipL) g.edgesDash.push([top[0], bot[0]]);
+    }
+  });
+  innerBr.forEach(br=>g.fillsInner.push(fillPoly(br)));
+  g.bounds={minU,maxU,minV,maxV, cu:(minU+maxU)/2, cv:(minV+maxV)/2,
+            span:Math.max(maxU-minU, maxV-minV, 0.01)};
+  return g;
+}
+
+/* ===== 상태 갱신 ===== */
+function refresh(){
+  currentFull =computeSection(alphaDeg,HX);
+  currentInner=computeSection(alphaDeg,H);
+  sectionGeom =buildSectionGeom(currentFull,currentInner);
+  genHi1=(alphaDeg===120); genHi2=(alphaDeg===60);   // 평면이 ↙ 방향으로 내려가므로
+  dirty=true;
+}
+
+function extractSection(){
+  if(!sectionGeom || !sectionGeom.bounds) return;
+  const b=planeBasis(alphaDeg), bd=sectionGeom.bounds;
+  extractState={
+    t:0,
+    startPos: to3D(b, bd.cu, bd.cv),
+    startQ:   quatFromBasis(b.e1,b.e2,b.n),
+    endPos:   V(5.3,0.1,0.4),
+    endScale: Math.min(3.6/bd.span, 2.2),
+    cu:bd.cu, cv:bd.cv,
+    geom:sectionGeom
+  };
+  dirty=true;
+}
+
+/* ===== 렌더 ===== */
+const easeInOut=t=>t<0.5 ? 2*t*t : 1-Math.pow(-2*t+2,2)/2;
+
+function render(){
+  const w=canvas.clientWidth, h=canvas.clientHeight;
+  const dpr=Math.min(window.devicePixelRatio||1,2);
+  if(canvas.width!==Math.round(w*dpr)||canvas.height!==Math.round(h*dpr)){
+    canvas.width=Math.round(w*dpr); canvas.height=Math.round(h*dpr);
+  }
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.fillStyle='#eef3fa'; ctx.fillRect(0,0,w,h);
+  const cam=viewSetup(w,h);
+
+  const b=planeBasis(alphaDeg);
+  const mapLive =(u,v)=>to3D(b,u,v);
+  pScreen=null;   // 증명 P가 그려질 때만 다시 채워짐
+
+  // 추출된 단면 포즈
+  let mapExt=null, extK=0;
+  if(extractState){
+    extK=easeInOut(extractState.t);
+    const es=extractState;
+    const pos=V(es.startPos.x+(es.endPos.x-es.startPos.x)*extK,
+                es.startPos.y+(es.endPos.y-es.startPos.y)*extK,
+                es.startPos.z+(es.endPos.z-es.startPos.z)*extK);
+    const q=quatSlerp(es.startQ, QID, extK);
+    const sc=1+(es.endScale-1)*extK;
+    mapExt=(u,v)=>add(pos, quatRotate(q, V((u-es.cu)*sc,(v-es.cv)*sc,0)));
+  }
+
+  /* --- 면 수집 (삼각형 + 볼록다각형) --- */
+  const faces=[];
+  const pushTri=(a3,b3,c3,rgb,alpha,shaded)=>{
+    const pa=project(cam,a3), pb=project(cam,b3), pc=project(cam,c3);
+    if(!pa||!pb||!pc) return;
+    let sh=1;
+    if(shaded){
+      const n=nrm(crs(sub(b3,a3),sub(c3,a3)));
+      sh=0.72+0.34*Math.abs(dot(n,LIGHT));
+    }
+    faces.push({pts:[pa,pb,pc], z:(pa.z+pb.z+pc.z)/3, seam:shaded,
+      col:`rgba(${Math.min(255,rgb[0]*sh)|0},${Math.min(255,rgb[1]*sh)|0},${Math.min(255,rgb[2]*sh)|0},${alpha})`});
+  };
+  // 평면·단면 같은 '평평한 볼록다각형'은 통짜 경로로 (부채꼴 이음선 없음)
+  const pushPoly=(pts3,rgb,alpha,zBias)=>{
+    const pts=[]; let z=0;
+    for(const p of pts3){ const s=project(cam,p); if(!s) return; pts.push(s); z+=s.z; }
+    faces.push({pts, z:z/pts3.length+(zBias||0), seam:false,
+      col:`rgba(${rgb[0]},${rgb[1]},${rgb[2]},${alpha})`});
+  };
+  coneTris.forEach(t=>pushTri(t.a,t.b,t.c,t.rgb,t.alpha,t.shaded));
+
+  // 절단 평면 (4분할 삼각형 → 원뿔과의 앞뒤 정렬 품질 유지)
+  const PC=[[-2.3,-2.8],[7.1,-2.8],[7.1,2.8],[-2.3,2.8]].map(p=>to3D(b,p[0],p[1]));
+  const pcMid=scl(add(add(PC[0],PC[1]),add(PC[2],PC[3])),0.25);
+  for(let i=0;i<4;i++) pushTri(PC[i],PC[(i+1)%4],pcMid,[148,163,184],0.13,false);
+
+  // 단면 채우기 — 라이브 + 추출본 (안쪽 채우기는 살짝 앞으로)
+  const fillPolys=(geom,map,aOut,aIn)=>{
+    geom.fillsOuter.forEach(p=>pushPoly(p.map(q=>map(q.x,q.y)),[250,204,21],aOut,0));
+    geom.fillsInner.forEach(p=>pushPoly(p.map(q=>map(q.x,q.y)),[250,204,21],aIn,-1e-4));
+  };
+  if(sectionGeom) fillPolys(sectionGeom, mapLive, 0.20, 0.34);
+  if(mapExt)      fillPolys(extractState.geom, mapExt, 0.22, 0.36);
+
+  // 증명 모드: 단델린 구(연두) + (포물선) 접원을 품은 평면(보라)
+  const proofOn = (proofMode && proofData && alphaDeg===proofData.angle);
+  let tq=null;
+  if(proofOn){
+    for(const t of proofData.sphere) pushTri(t[0],t[1],t[2],[141,225,110],0.34,true);
+    if(proofData.sphere2) for(const t of proofData.sphere2) pushTri(t[0],t[1],t[2],[141,225,110],0.34,true);
+    if(proofData.type==='parabola'){
+      tq=[[-2.2,-2.2],[2.2,-2.2],[2.2,2.2],[-2.2,2.2]].map(p=>V(p[0],proofData.tY,p[1]));
+      const tqm=V(0,proofData.tY,0);
+      for(let i=0;i<4;i++) pushTri(tq[i],tq[(i+1)%4],tqm,[167,139,250],0.13,false);
+    }
+  }
+
+  /* --- 면: 멀리 → 가까이 --- */
+  faces.sort((p,q)=>q.z-p.z);
+  ctx.lineJoin='round';
+  for(const f of faces){
+    ctx.fillStyle=f.col;
+    ctx.beginPath();
+    ctx.moveTo(f.pts[0].x,f.pts[0].y);
+    for(let i=1;i<f.pts.length;i++) ctx.lineTo(f.pts[i].x,f.pts[i].y);
+    ctx.closePath(); ctx.fill();
+    if(f.seam){ ctx.strokeStyle=f.col; ctx.lineWidth=0.45; ctx.stroke(); }
+  }
+
+  /* --- 선 (위에 그림) --- */
+  const stroke=(pts3,style,width,dash,closed)=>{
+    ctx.strokeStyle=style; ctx.lineWidth=width;
+    ctx.setLineDash(dash||[]);
+    ctx.beginPath();
+    let started=false;
+    for(const p of pts3){
+      const s=project(cam,p);
+      if(!s){ started=false; continue; }
+      if(!started){ ctx.moveTo(s.x,s.y); started=true; } else ctx.lineTo(s.x,s.y);
+    }
+    if(closed) ctx.closePath();
+    ctx.stroke(); ctx.setLineDash([]);
+  };
+
+  // 축
+  stroke([V(0,-HX-0.4,0),V(0,HX+0.4,0)],'rgba(148,163,184,.85)',1,[5,4]);
+  // 밑면 원 (진한 원뿔) / 유령 경계 원 (점선)
+  stroke(circlePts(-H,72),'rgba(59,130,196,.55)',1.2);
+  stroke(circlePts( H,72),'rgba(59,130,196,.55)',1.2);
+  stroke(circlePts(-HX,72),'rgba(147,197,253,.55)',1,[6,5]);
+  stroke(circlePts( HX,72),'rgba(147,197,253,.55)',1,[6,5]);
+  // 모선 2개 (60°/120°일 때 해당 모선 진하게 + 길게)
+  const genLine=(sgn,hi)=>{
+    if(hi){
+      stroke([V(-sgn*RX,HX,0),V(sgn*RX,-HX,0)],'rgba(23,47,143,.20)',9);
+      stroke([V(-sgn*RX,HX,0),V(sgn*RX,-HX,0)],'#172f8f',3.5);
+    } else {
+      stroke([V(-sgn*R,H,0),V(sgn*R,-H,0)],'rgba(59,130,246,.6)',1.6);
+    }
+  };
+  genLine(+1,genHi1); genLine(-1,genHi2);
+  // 평면 테두리
+  stroke([[-2.3,-2.8],[7.1,-2.8],[7.1,2.8],[-2.3,2.8]].map(p=>to3D(b,p[0],p[1])),
+         'rgba(100,116,139,.5)',1,[],true);
+
+  // 단면 테두리 (라이브 + 추출본)
+  const drawEdges=(geom,map)=>{
+    geom.edgesRed.forEach(e=>stroke(e.pts.map(p=>map(p.x,p.y)),'#ef4444',2.2,[],e.closed));
+    geom.edgesDash.forEach(e=>stroke(e.map(p=>map(p.x,p.y)),'#64748b',1.6,[6,5]));
+  };
+  if(sectionGeom) drawEdges(sectionGeom, mapLive);
+  if(mapExt) drawEdges(extractState.geom, mapExt);
+
+  /* --- 증명 모드: 접원 · 준선 · F · 정의/설명 요소 --- */
+  if(proofOn){
+    const pd=proofData;
+    const label=(sp,text,color,dx,dy)=>{
+      if(!sp) return;
+      ctx.font='bold 13px sans-serif'; ctx.lineJoin='round';
+      ctx.strokeStyle='rgba(255,255,255,.92)'; ctx.lineWidth=4;
+      ctx.strokeText(text,sp.x+dx,sp.y+dy);
+      ctx.fillStyle=color; ctx.fillText(text,sp.x+dx,sp.y+dy);
+    };
+    const dot=(w3,color,rad)=>{
+      const sp=project(cam,w3); if(!sp) return null;
+      ctx.beginPath(); ctx.arc(sp.x,sp.y,rad,0,7);
+      ctx.fillStyle=color; ctx.fill();
+      ctx.strokeStyle='#fff'; ctx.lineWidth=2; ctx.stroke();
+      return sp;
+    };
+    // 구와 원뿔의 접원 (라벨 없음)
+    stroke(circle3d(pd.tY,pd.tR),'#16a34a',2.2);
+    if(pd.tY2!==undefined) stroke(circle3d(pd.tY2,pd.tR),'#16a34a',2.2);
+    if(pd.type==='parabola'){
+      stroke(tq,'rgba(124,58,237,.55)',1,[5,4],true);
+      stroke([mapLive(pd.dirU,-2.4),mapLive(pd.dirU,2.4)],'#7c3aed',3);
+      if(mapExt) stroke([mapExt(pd.dirU,-2.4),mapExt(pd.dirU,2.4)],'#7c3aed',2.5);
+    }
+    const Pw=mapLive(pd.P.u,pd.P.v);
+    // '정의' 단계: P(와 H)·선분들
+    if(proofDef){
+      stroke([mapLive(pd.F.u,pd.F.v),Pw],'#ea580c',2.5);
+      if(pd.type==='parabola'){
+        const Hw=mapLive(pd.dirU,pd.P.v);          // P에서 준선에 내린 수선의 발
+        stroke([Pw,Hw],'#ea580c',2.5);
+        label(dot(Hw,'#7c3aed',4.5),'H','#7c3aed',-16,-7);
+      } else {
+        stroke([Pw,mapLive(pd.F2.u,pd.F2.v)],'#ea580c',2.5);
+      }
+      const spP=dot(Pw,'#1e293b',5);
+      if(spP){                                     // 드래그 가능 표시(점선 링)
+        ctx.beginPath(); ctx.arc(spP.x,spP.y,11,0,7);
+        ctx.strokeStyle='rgba(30,41,59,.4)'; ctx.lineWidth=1.5;
+        ctx.setLineDash([3,3]); ctx.stroke(); ctx.setLineDash([]);
+      }
+      label(spP,'P','#1e293b',12,16);
+      pScreen=spP;
+    }
+    if(!proofDef) pScreen=null;
+    // '설명' 단계: 꼭짓점을 지나는 모선 선분과 Q(, H)
+    if(proofExp){
+      if(pd.type==='parabola'){
+        stroke([V(0,0,0),Pw],'#0e7490',2);
+        const Qw=scl(Pw,pd.tY/Pw.y);               // 모선이 접원과 만나는 점
+        label(dot(Qw,'#16a34a',4.5),'Q','#15803d',9,-6);
+      } else if(pd.type==='ellipse'){
+        const Qw=scl(Pw,-H/Pw.y);                  // 원래 원뿔 밑둘레 위의 점
+        stroke([V(0,0,0),Qw],'#0e7490',2);
+        const Hw=scl(Pw,pd.tY/Pw.y);               // PQ 연장선이 접원과 만나는 점
+        label(dot(Qw,'#0e7490',4.5),'Q','#0e7490',9,-6);
+        label(dot(Hw,'#16a34a',4.5),'H','#15803d',-16,-7);
+      } else {                                     // 쌍곡선: P→(꼭짓점)→H, Q는 아래 접원
+        const Hw=scl(Pw,pd.tY2/Pw.y);              // 위 구의 접원과 만나는 점
+        stroke([Pw,Hw],'#0e7490',2);               // 선분 PH (꼭짓점을 지남)
+        const Qw=scl(Pw,pd.tY/Pw.y);               // 아래 구와 접하는 점
+        label(dot(Qw,'#16a34a',4.5),'Q','#15803d',9,-6);
+        label(dot(Hw,'#16a34a',4.5),'H','#15803d',9,-6);
+      }
+    }
+    // F (와 F′) — 항상 표시
+    label(dot(mapLive(pd.F.u,pd.F.v),'#15803d',5),'F','#15803d',9,4);
+    if(pd.F2) label(dot(mapLive(pd.F2.u,pd.F2.v),'#15803d',5),'F′','#15803d',9,17);
+    if(mapExt){
+      dot(mapExt(pd.F.u,pd.F.v),'#15803d',4);
+      if(pd.F2) dot(mapExt(pd.F2.u,pd.F2.v),'#15803d',4);
+    }
+    if(pd.type==='parabola') label(project(cam,mapLive(pd.dirU,2.0)),'준선','#7c3aed',8,-6);
+    label(project(cam,V(pd.sphereR*0.75,pd.sphereC.y+pd.sphereR*0.5,pd.sphereR*0.6)),'단델린 구','#4d7c0f',10,-8);
+  }
+}
+
+/* ===== 루프 (변화 있을 때만 그리기 → 절전) ===== */
+function tick(){
+  requestAnimationFrame(tick);
+  const w=canvas.clientWidth, dpr=Math.min(window.devicePixelRatio||1,2);
+  if(canvas.width!==Math.round(w*dpr)) dirty=true;   // 리사이즈 감지
+  if(extractState && extractState.t<1){ extractState.t=Math.min(1,extractState.t+0.025); dirty=true; }
+  if(dirty){ dirty=false; render(); }
+}
+
+/* ===== 마우스/터치 조작 (드래그 회전 + 휠/핀치 줌) ===== */
+const pointers=new Map();
+let lastPinch=0;
+function dragPTo(mx,my){
+  const w=canvas.clientWidth, h=canvas.clientHeight;
+  const cam=viewSetup(w,h);
+  const b=planeBasis(alphaDeg);
+  let best=null, bd=1e18;
+  for(const q of proofData.drag){
+    const sp=project(cam,to3D(b,q.u,q.v));
+    if(!sp) continue;
+    const dx=sp.x-mx, dy=sp.y-my, d=dx*dx+dy*dy;
+    if(d<bd){ bd=d; best=q; }
+  }
+  if(best){ proofData.P={u:best.u, v:best.v}; dirty=true; }
+}
+canvas.addEventListener('pointerdown',e=>{
+  const rect=canvas.getBoundingClientRect();
+  const mx=e.clientX-rect.left, my=e.clientY-rect.top;
+  if(pScreen && proofData && proofData.drag && proofDef &&
+     Math.hypot(mx-pScreen.x,my-pScreen.y)<22){
+    dragPActive=true;                  // P 잡기 (카메라 회전 대신)
+    canvas.setPointerCapture(e.pointerId);
+    return;
+  }
+  pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  if(pointers.size===2){
+    const p=[...pointers.values()];
+    lastPinch=Math.hypot(p[0].x-p[1].x,p[0].y-p[1].y);
+  }
+  canvas.setPointerCapture(e.pointerId);
+});
+canvas.addEventListener('pointermove',e=>{
+  if(dragPActive){
+    const rect=canvas.getBoundingClientRect();
+    dragPTo(e.clientX-rect.left, e.clientY-rect.top);
+    return;
+  }
+  if(!pointers.has(e.pointerId)) return;
+  const prev=pointers.get(e.pointerId);
+  pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  if(pointers.size===1){
+    camTheta-= (e.clientX-prev.x)*0.006;
+    camPhi  -= (e.clientY-prev.y)*0.006;
+    dirty=true;
+  } else if(pointers.size===2){
+    const p=[...pointers.values()];
+    const d=Math.hypot(p[0].x-p[1].x,p[0].y-p[1].y);
+    if(lastPinch>0){
+      const rect=canvas.getBoundingClientRect();
+      zoomAt((p[0].x+p[1].x)/2-rect.left, (p[0].y+p[1].y)/2-rect.top, lastPinch/d);
+    }
+    lastPinch=d;
+  }
+});
+const endPointer=e=>{ pointers.delete(e.pointerId); lastPinch=0; dragPActive=false; };
+canvas.addEventListener('pointerup',endPointer);
+canvas.addEventListener('pointercancel',endPointer);
+
+// 커서(또는 핀치 중심) 위치를 고정점으로 하는 줌:
+// 줌 후에도 커서 아래 지점이 화면의 같은 자리에 남도록 타깃을 함께 이동
+function zoomAt(mx,my,factor){
+  const w=canvas.clientWidth, h=canvas.clientHeight;
+  const oldDist=camDist;
+  camDist=Math.max(5,Math.min(30,camDist*factor));
+  const k=camDist/oldDist;
+  if(Math.abs(k-1)>1e-9){
+    const eye=add(camTarget, V(oldDist*Math.sin(camPhi)*Math.sin(camTheta),
+                               oldDist*Math.cos(camPhi),
+                               oldDist*Math.sin(camPhi)*Math.cos(camTheta)));
+    const f=nrm(sub(camTarget,eye));
+    const r=nrm(crs(f,V(0,1,0)));
+    const u=crs(r,f);
+    const fl=(h/2)/Math.tan(FOV/2);
+    const m=(1-k)*oldDist/fl;
+    const dx=mx-w/2, dy=my-h/2;
+    camTarget.x += (r.x*dx - u.x*dy)*m;
+    camTarget.y += (r.y*dx - u.y*dy)*m;
+    camTarget.z += (r.z*dx - u.z*dy)*m;
+  }
+  dirty=true;
+}
+canvas.addEventListener('wheel',e=>{
+  e.preventDefault();
+  const rect=canvas.getBoundingClientRect();
+  zoomAt(e.clientX-rect.left, e.clientY-rect.top, 1+Math.sign(e.deltaY)*0.08);
+},{passive:false});
+
+/* ===== UI ===== */
+const slider=document.getElementById('slider');
+const angNum=document.getElementById('angNum');
+const badge =document.getElementById('badge');
+const cutBtn=document.getElementById('cutBtn');
+const quizCard=document.getElementById('quizCard');
+const quizBtns=Array.from(document.querySelectorAll('.quizBtns button'));
+const quizResult=document.getElementById('quizResult');
+const hitVal=document.getElementById('hitVal');
+const outDots=document.getElementById('outDots');
+const fxLayer=document.getElementById('fxLayer');
+
+let hits=0, outs=0, answered=false, quizOpen=false;
+
+function updateBadge(){
+  const a=alphaDeg, inc=inclOf(a);
+  const detail = a>90 ? ` (기울어진 정도 ${inc}°)` : '';
+  if(inc===0){
+    badge.className='badge zero';
+    badge.textContent=`기울기 ${a}° — 밑면과 평행한 수평 평면`;
+  } else if(inc<GEN_DEG){
+    badge.className='badge lt';
+    badge.innerHTML=`기울기 ${a}°${detail} &lt; 모선 기울기 60°`;
+  } else if(a===GEN_DEG){
+    badge.className='badge eq';
+    badge.innerHTML='기울기 60° = 모선 기울기 60° ⚡ 모선과 평행!';
+  } else if(a===180-GEN_DEG){
+    badge.className='badge eq';
+    badge.innerHTML='기울기 120° ⚡ 반대쪽 모선과 평행! (기울어진 정도 60°)';
+  } else {
+    badge.className='badge gt';
+    badge.innerHTML=`기울기 ${a}°${detail} &gt; 모선 기울기 60°`;
+  }
+}
+
+function onSlider(){
+  alphaDeg=parseInt(slider.value,10);
+  angNum.textContent=alphaDeg;
+  updateBadge();
+  refresh();
+  extractState=null;                    // 새 각도 → 이전 추출/퀴즈 무효화
+  quizOpen=false; answered=false;
+  quizCard.classList.remove('show');
+  quizResult.innerHTML='';
+  quizBtns.forEach(btn=>{ btn.disabled=false; btn.className=''; });
+  proofMode=null; proofData=null;       // 각도 변경 → 증명 표시 해제
+  proofDef=false; proofExp=false;
+  pfParab.classList.remove('on');
+  pfEllipse.classList.remove('on');
+  pfHyper.classList.remove('on');
+  proofDesc.innerHTML='';
+}
+slider.addEventListener('input', onSlider);
+
+cutBtn.addEventListener('click',()=>{
+  extractSection();
+  quizOpen=true; answered=false;
+  quizCard.classList.add('show');
+  quizResult.innerHTML='단면이 오른쪽에 나타났어요. 곡선의 이름을 골라 보세요!';
+  quizBtns.forEach(btn=>{ btn.disabled=false; btn.className=''; });
+});
+
+quizBtns.forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    if(!quizOpen || answered) return;
+    const pick=btn.dataset.t, answer=conicType(alphaDeg);
+    if(pick===answer){
+      answered=true; hits++; hitVal.textContent=hits;
+      btn.classList.add('correctPick');
+      quizBtns.forEach(o=>{ if(o!==btn) o.disabled=true; });
+      quizResult.innerHTML=`⭕ 정답! <b>${typeName[answer]}</b> — `+typeReason[answer]+
+        '<br><span style="color:#64748b">기울기를 바꿔 다시 잘라 보세요!</span>';
+      if(hits>=3) fxHomerun(); else fxWow();
+    } else {
+      outs++; renderOuts();
+      btn.classList.add('wrongPick'); btn.disabled=true;
+      if(outs>=3){
+        fxOut('3 OUT! 체인지!');
+        quizResult.innerHTML='🥎 쓰리 아웃! 괜찮아요, OUT 카운트를 비우고 다시 도전!';
+        setTimeout(()=>{ outs=0; renderOuts(); },1600);
+      } else {
+        fxOut(outs+' OUT');
+        quizResult.innerHTML='🥎 아쉬워요! 평면 기울기와 모선 기울기(60°)를 비교해 보세요.';
+      }
+    }
+  });
+});
+
+function renderOuts(){
+  outDots.innerHTML=[0,1,2].map(i=>`<span class="${i<outs?'on':'off'}">●</span>`).join('');
+}
+
+/* ===== 증명 버튼 ===== */
+const pfParab=document.getElementById('pfParab');
+const pfEllipse=document.getElementById('pfEllipse');
+const pfHyper=document.getElementById('pfHyper');
+const proofDesc=document.getElementById('proofDesc');
+
+function showProofPanel(){
+  const pd=proofData;
+  const desc = pd.type==='parabola'
+    ? '🟢 원뿔에 내접하며 자르는 평면과 F에서 접하는 <b>단델린 구</b>. 구와 원뿔이 닿는 원을 품은 평면(보라)과 자르는 평면의 교선이 <b style="color:#7c3aed">준선</b>이에요.'
+    : pd.type==='ellipse'
+    ? '🟢 원뿔에 내접하며 자르는 평면과 F에서 접하는 <b>단델린 구</b>. F′는 반대쪽에 같은 방법으로 잡은 점이에요.'
+    : '🟢 <b>단델린 구 2개</b>: 아래 원뿔·평면과 F에서 접하는 구, 위 원뿔·평면과 F′에서 접하는 구.';
+  proofDesc.innerHTML = desc
+    + '<br><span style="color:#0284c7">✋ 정의를 켜면 <b>P를 드래그</b>해서 곡선 위를 움직일 수 있어요!</span>'
+    + '<div class="subBtns">'
+    + `<button id="pfDef">${pd.defLabel}</button><span id="pfDefEq" class="eq"></span>`
+    + '<button id="pfExp">설명</button></div>';
+  const bDef=document.getElementById('pfDef');
+  const bExp=document.getElementById('pfExp');
+  const eqEl=document.getElementById('pfDefEq');
+  const syncDef=()=>{ bDef.classList.toggle('on',proofDef); eqEl.innerHTML=proofDef?pd.defText:''; };
+  bDef.addEventListener('click',()=>{ proofDef=!proofDef; syncDef(); dirty=true; });
+  bExp.addEventListener('click',()=>{
+    proofExp=!proofExp;
+    if(proofExp && !proofDef){ proofDef=true; syncDef(); }
+    bExp.classList.toggle('on',proofExp);
+    dirty=true;
+  });
+}
+function toggleProof(mode, btn, angle, builder, cam){
+  if(proofMode===mode){
+    proofMode=null; proofData=null; proofDef=false; proofExp=false;
+    btn.classList.remove('on'); proofDesc.innerHTML=''; dirty=true; return;
+  }
+  slider.value=angle; onSlider();       // 각도 맞추기 (증명 상태 초기화 포함)
+  proofMode=mode; proofData=builder();
+  // 단면 평면이 잘 보이는 시점으로 카메라 전환
+  camTheta=cam.th; camPhi=cam.ph; camDist=cam.d;
+  camTarget.x=cam.tx; camTarget.y=cam.ty; camTarget.z=0;
+  btn.classList.add('on');
+  showProofPanel();
+  dirty=true;
+}
+pfParab.addEventListener('click',()=>toggleProof('parabola',pfParab,60,buildParabolaProof,
+  {th:-0.55, ph:1.28, d:18.5, tx:1.2, ty:-1.0}));
+pfEllipse.addEventListener('click',()=>toggleProof('ellipse',pfEllipse,40,buildEllipseProof,
+  {th:-0.55, ph:1.28, d:18.5, tx:1.2, ty:-1.0}));
+pfHyper.addEventListener('click',()=>toggleProof('hyperbola',pfHyper,90,buildHyperbolaProof,
+  {th:-0.55, ph:1.48, d:20.5, tx:0.8, ty:0}));
+
+/* ===== 이펙트 ===== */
+function fxWow(){
+  const el=document.createElement('div');
+  el.className='fxText fxWow'; el.textContent='WOW~ ⭐';
+  fxLayer.appendChild(el);
+  spawnConfetti(10,['⭐','✨']);
+  setTimeout(()=>el.remove(),1600);
+}
+function fxHomerun(){
+  const el=document.createElement('div');
+  el.className='fxText fxHomerun'; el.textContent='⚾ HOMERUN~!!';
+  fxLayer.appendChild(el);
+  spawnConfetti(26,['🎉','⚾','✨','🎊','⭐']);
+  setTimeout(()=>el.remove(),2000);
+}
+function fxOut(text){
+  const el=document.createElement('div');
+  el.className='fxText fxOut'; el.textContent=text;
+  fxLayer.appendChild(el);
+  setTimeout(()=>el.remove(),1500);
+}
+let confSeed=12345;
+function rnd(){ confSeed=(confSeed*1103515245+12345)&0x7fffffff; return confSeed/0x7fffffff; }
+function spawnConfetti(n,emojis){
+  for(let i=0;i<n;i++){
+    const s=document.createElement('div');
+    s.className='confetti'; s.textContent=emojis[i%emojis.length];
+    const ang=rnd()*Math.PI*2, dist=130+rnd()*260;
+    s.style.setProperty('--dx',(Math.cos(ang)*dist)+'px');
+    s.style.setProperty('--dy',(Math.sin(ang)*dist-80)+'px');
+    s.style.setProperty('--rot',(rnd()*720-360)+'deg');
+    fxLayer.appendChild(s);
+    setTimeout(()=>s.remove(),1800);
+  }
+}
+
+/* ===== 시작 ===== */
+updateBadge();
+refresh();
+tick();
+// (디버그용) 모선 강조 상태 확인 훅
+window.__genHi = () => [genHi1, genHi2];
+window.__cam = () => ({t:{...camTarget}, dist:camDist});
+window.__pInfo = () => ({p:proofData&&proofData.P, scr:pScreen});
+</script>
+</body>
+</html>

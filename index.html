@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>기하 탐구실 — 입장</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family:'Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif;
+    min-height:100vh; background:linear-gradient(160deg,#eef4ff 0%,#f8fafc 55%,#fdf6ec 100%);
+    color:#1e293b; display:flex; align-items:center; justify-content:center; padding:22px;
+  }
+  .wrap { width:100%; max-width:460px; }
+  .logo { text-align:center; margin-bottom:18px; }
+  .logo .big { font-size:44px; }
+  .logo h1 { font-size:24px; color:#0f172a; margin-top:6px; }
+  .logo p { font-size:13px; color:#64748b; margin-top:5px; }
+  .card {
+    background:#fff; border:1px solid #e2e8f0; border-radius:18px;
+    padding:22px; box-shadow:0 8px 28px rgba(15,23,42,.07);
+  }
+  label { display:block; font-size:12.5px; font-weight:700; color:#475569; margin:12px 0 5px; }
+  input[type=text] {
+    width:100%; padding:12px 13px; font-size:16px; border:1.5px solid #cbd5e1;
+    border-radius:11px; outline:none; transition:border .15s; background:#fbfdff;
+  }
+  input[type=text]:focus { border-color:#0284c7; }
+  #enterBtn {
+    width:100%; margin-top:16px; padding:13px 0; font-size:16px; font-weight:800; color:#fff;
+    background:linear-gradient(135deg,#0ea5e9,#6366f1); border:none; border-radius:12px;
+    cursor:pointer; box-shadow:0 4px 12px rgba(59,130,246,.35); transition:transform .1s;
+  }
+  #enterBtn:active { transform:scale(.98); }
+  #enterBtn:disabled { opacity:.6; cursor:wait; }
+  .msg { margin-top:13px; padding:11px 13px; border-radius:10px; font-size:13.5px; line-height:1.65; display:none; }
+  .msg.show { display:block; }
+  .msg.wait { background:#fef3c7; color:#92400e; }
+  .msg.err  { background:#fee2e2; color:#b91c1c; }
+  .msg.ok   { background:#dcfce7; color:#166534; }
+  .foot { text-align:center; font-size:11.5px; color:#94a3b8; margin-top:14px; line-height:1.7; }
+
+  /* ── 승인 후 메뉴 ── */
+  #menu { display:none; }
+  #menu.show { display:block; }
+  .hello { font-size:14px; color:#334155; margin-bottom:12px; text-align:center; }
+  .hello b { color:#0369a1; }
+  .mat {
+    display:block; text-decoration:none; color:inherit;
+    border:1.5px solid #e2e8f0; border-radius:14px; padding:15px 16px; margin-top:10px;
+    background:#fbfdff; transition:all .15s;
+  }
+  .mat:hover { border-color:#0284c7; background:#f0f9ff; transform:translateY(-1px); }
+  .mat .t { font-size:15.5px; font-weight:800; color:#0f172a; }
+  .mat .d { font-size:12.5px; color:#64748b; margin-top:4px; line-height:1.6; }
+  .mat .go { font-size:12px; color:#0284c7; font-weight:700; margin-top:7px; }
+  #logout {
+    margin-top:14px; width:100%; padding:9px 0; font-size:12.5px; font-weight:700;
+    background:#fff; color:#94a3b8; border:1.5px solid #e2e8f0; border-radius:10px; cursor:pointer;
+  }
+  #logout:hover { color:#64748b; }
+  .setupWarn {
+    margin-top:12px; padding:11px 13px; border-radius:10px; font-size:12.5px; line-height:1.7;
+    background:#fff7ed; color:#9a3412; border:1px dashed #fdba74; display:none;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="logo">
+    <div class="big">📐</div>
+    <h1>기하 탐구실</h1>
+    <p>2022 개정교육과정 · 기하 수업 자료</p>
+  </div>
+
+  <!-- ── 입장 게이트 ── -->
+  <div class="card" id="gate">
+    <label for="sid">학번</label>
+    <input type="text" id="sid" placeholder="예) 20301" autocomplete="off">
+    <label for="name">이름</label>
+    <input type="text" id="name" placeholder="예) 김기하" autocomplete="off">
+    <button id="enterBtn">입장하기</button>
+    <div class="msg" id="msg"></div>
+    <div class="setupWarn" id="setupWarn">
+      ⚠️ 아직 승인 서버(Apps Script URL)가 설정되지 않았어요.<br>
+      선생님이라면 <b>배포가이드.md</b>의 1~2단계를 따라 URL을 넣어주세요.
+      (설정 전에는 누구나 입장되는 테스트 모드로 동작합니다)
+    </div>
+  </div>
+
+  <!-- ── 승인 후 메뉴 ── -->
+  <div class="card" id="menu">
+    <div class="hello">👋 <b id="helloName"></b>님, 환영해요! 탐구할 자료를 골라 보세요.</div>
+    <div id="matList"></div>
+    <button id="logout">다른 학생으로 입장하기</button>
+  </div>
+
+  <div class="foot">승인된 학생만 입장할 수 있어요.<br>입장이 안 되면 선생님께 승인을 요청하세요 🙂</div>
+</div>
+
+<script>
+'use strict';
+/* ════════════════════════════════════════════════════════
+   ★ 선생님 설정 구역 ★
+   1) 배포가이드.md 를 따라 구글시트 + Apps Script 를 만들고
+   2) 발급받은 웹 앱 URL(https://script.google.com/macros/s/.../exec)을
+      아래 따옴표 안에 붙여넣어 주세요.
+   ════════════════════════════════════════════════════════ */
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx3Ay-gudjjSoRlngyu54umJ9uYRAKhINuwcv229UZUN9_oIQfm9vwAxM32FOPR9wV1/exec";   // ← 여기에 붙여넣기!
+
+/* 자료 목록 — 나중에 자료가 늘어나면 여기에 한 줄씩 추가하면 됩니다 */
+const MATERIALS = [
+  {
+    title: "⚾ 원뿔곡선 탐구 — 이중원뿔의 단면",
+    desc : "평면의 기울기를 바꿔 단면을 자르고(야구 퀴즈!), 단델린 구로 포물선·타원·쌍곡선을 증명해 보세요.",
+    href : "conic.html"
+  }
+];
+/* ════════════════════════════════════════════════════════ */
+
+const $ = id => document.getElementById(id);
+const gate=$('gate'), menu=$('menu'), msg=$('msg'), btn=$('enterBtn');
+
+function showMsg(cls, html){ msg.className='msg show '+cls; msg.innerHTML=html; }
+function hideMsg(){ msg.className='msg'; }
+
+function openMenu(name){
+  sessionStorage.setItem('geoAppOk','1');
+  $('helloName').textContent = name;
+  $('matList').innerHTML = MATERIALS.map(m=>
+    `<a class="mat" href="${m.href}">
+       <div class="t">${m.title}</div>
+       <div class="d">${m.desc}</div>
+       <div class="go">탐구하러 가기 →</div>
+     </a>`).join('');
+  gate.style.display='none';
+  menu.classList.add('show');
+}
+
+async function checkApproval(sid, name){
+  const url = APPS_SCRIPT_URL + '?sid=' + encodeURIComponent(sid) + '&name=' + encodeURIComponent(name);
+  const ctrl = new AbortController();
+  const timer = setTimeout(()=>ctrl.abort(), 12000);
+  try{
+    const res = await fetch(url, {signal:ctrl.signal});
+    return await res.json();          // {status:'approved'|'pending'|'new'}
+  } finally { clearTimeout(timer); }
+}
+
+async function tryEnter(silent){
+  const sid = $('sid').value.trim(), name = $('name').value.trim();
+  if(!sid || !name){ if(!silent) showMsg('err','학번과 이름을 모두 입력해 주세요.'); return; }
+
+  if(!APPS_SCRIPT_URL){               // 설정 전 테스트 모드
+    localStorage.setItem('geoSid',sid); localStorage.setItem('geoName',name);
+    openMenu(name); return;
+  }
+  btn.disabled=true; if(!silent) showMsg('wait','승인 명단을 확인하는 중이에요…');
+  try{
+    const r = await checkApproval(sid, name);
+    if(r.status==='approved'){
+      localStorage.setItem('geoSid',sid); localStorage.setItem('geoName',name);
+      hideMsg(); openMenu(name);
+    } else if(r.status==='new'){
+      showMsg('ok','✅ 입장 신청이 접수됐어요!<br>선생님이 승인하면 들어올 수 있어요. 잠시 후 다시 <b>입장하기</b>를 눌러 보세요.');
+    } else {
+      showMsg('wait','⏳ 아직 승인 대기 중이에요.<br>선생님이 승인하면 바로 입장할 수 있어요.');
+    }
+  }catch(e){
+    if(!silent) showMsg('err','승인 서버에 연결하지 못했어요. 인터넷 연결을 확인하고 다시 시도해 주세요.');
+  }
+  btn.disabled=false;
+}
+
+btn.addEventListener('click', ()=>tryEnter(false));
+[$('sid'),$('name')].forEach(el=>el.addEventListener('keydown',e=>{ if(e.key==='Enter') tryEnter(false); }));
+
+$('logout').addEventListener('click', ()=>{
+  sessionStorage.removeItem('geoAppOk');
+  localStorage.removeItem('geoSid'); localStorage.removeItem('geoName');
+  location.reload();
+});
+
+/* 이전에 승인받은 학생이면 자동 재입장 시도 */
+window.addEventListener('load', ()=>{
+  if(!APPS_SCRIPT_URL) $('setupWarn').style.display='block';
+  const sid=localStorage.getItem('geoSid'), name=localStorage.getItem('geoName');
+  if(sid && name){ $('sid').value=sid; $('name').value=name; tryEnter(true); }
+});
+</script>
+</body>
+</html>
