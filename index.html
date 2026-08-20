@@ -199,10 +199,10 @@ function showView(){
   if(home) renderActs();
 }
 function openMenu(name){
-  sessionStorage.setItem('geoAppOk','1');
-  // 책갈피 이어보기: 앱을 새로 열었을 때 한 번만, 책갈피 활동으로 바로 이동
+  localStorage.setItem('geoAppOk','1');             // 이 아이패드에서 로그인 유지
+  // 책갈피 이어보기: 앱을 '새로 열었을 때' 한 번만 (홈 버튼 등 #home 이동 시에는 생략)
   const bm = localStorage.getItem('geoBookmark');
-  if(bm && sessionStorage.getItem('geoResumed') !== '1'){
+  if(!location.hash && bm && sessionStorage.getItem('geoResumed') !== '1'){
     const act = GEO_CONFIG.ACTIVITIES.find(a=>a.id===bm);
     if(act){ sessionStorage.setItem('geoResumed','1'); location.replace(act.href); return; }
   }
@@ -211,6 +211,14 @@ function openMenu(name){
   showView();
   gate.style.display='none';
   menu.classList.add('show');
+  window.GEO_addGButton();                          // 우측 상단 지오지브라 바로가기
+}
+function hardLogout(){
+  localStorage.removeItem('geoAppOk');
+  localStorage.removeItem('geoSid'); localStorage.removeItem('geoName');
+  localStorage.removeItem('geoBookmark'); localStorage.removeItem('geoDone');
+  sessionStorage.removeItem('geoResumed');
+  location.hash=''; location.reload();
 }
 window.addEventListener('hashchange', ()=>{ if(menu.classList.contains('show')) showView(); });
 
@@ -255,19 +263,23 @@ btn.addEventListener('click', ()=>tryEnter(false));
 $('unit1').addEventListener('click', ()=>{ location.hash = '#home'; });
 $('backToc').addEventListener('click', ()=>{ location.hash = '#toc'; });
 
-$('logout').addEventListener('click', ()=>{
-  sessionStorage.removeItem('geoAppOk');
-  sessionStorage.removeItem('geoResumed');
-  localStorage.removeItem('geoSid'); localStorage.removeItem('geoName');
-  localStorage.removeItem('geoBookmark'); localStorage.removeItem('geoDone');
-  location.hash=''; location.reload();
-});
+$('logout').addEventListener('click', hardLogout);
 
-/* 이전에 승인받은 학생이면 자동 재입장 시도 */
+/* 로그인 유지: 승인받았던 학생은 즉시 입장 (백그라운드로 재확인만) */
 window.addEventListener('load', ()=>{
   if(!APPS_SCRIPT_URL) $('setupWarn').style.display='block';
   const sid=localStorage.getItem('geoSid'), name=localStorage.getItem('geoName');
-  if(sid && name){ $('sid').value=sid; $('name').value=name; tryEnter(true); }
+  if(sid && name){ $('sid').value=sid; $('name').value=name; }
+  if(localStorage.getItem('geoAppOk')==='1' && sid && name){
+    openMenu(name);                                  // 기다리지 않고 바로 입장
+    if(APPS_SCRIPT_URL){
+      checkApproval(sid, name).then(r=>{             // 승인 취소됐으면 내보내기
+        if(r.status && r.status!=='approved') hardLogout();
+      }).catch(()=>{});                              // 오프라인이면 그냥 통과
+    }
+  } else if(sid && name){
+    tryEnter(true);
+  }
 });
 </script>
 </body>

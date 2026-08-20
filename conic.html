@@ -3,7 +3,7 @@
 <head>
 <script>
 /* 입장 가드: 게이트를 거치지 않고 직접 열면 입장 화면으로 돌려보냄 */
-if (sessionStorage.getItem('geoAppOk') !== '1') location.replace('index.html');
+if (localStorage.getItem('geoAppOk') !== '1') location.replace('index.html');
 </script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">

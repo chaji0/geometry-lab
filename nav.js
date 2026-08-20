@@ -20,8 +20,28 @@ window.GEO_CONFIG = {
   ]
 };
 
+/* 지오지브라 바로가기 (우측 상단 G 버튼) — 모든 페이지 공용 */
+window.GEO_addGButton = function(){
+  if(document.getElementById('gBtnFloat')) return;
+  const b = document.createElement('a');
+  b.id = 'gBtnFloat';
+  b.href = 'geogebra.html';
+  b.title = '지오지브라 바로가기';
+  b.textContent = 'G';
+  b.style.cssText =
+    'position:fixed;top:7px;right:12px;z-index:400;width:38px;height:38px;'+
+    'border-radius:50%;background:#fff;border:2.5px solid #8b5cf6;color:#7c3aed;'+
+    'font-weight:900;font-size:19px;display:flex;align-items:center;justify-content:center;'+
+    'text-decoration:none;box-shadow:0 2px 8px rgba(124,58,237,.28);'+
+    'font-family:Georgia,\'Times New Roman\',serif;transition:transform .12s;';
+  b.addEventListener('mouseenter',()=>b.style.transform='scale(1.1)');
+  b.addEventListener('mouseleave',()=>b.style.transform='scale(1)');
+  document.body.appendChild(b);
+};
+
 (function(){
   if(!window.PAGE_ID) return;                       // index.html 에서는 설정만 사용
+  if(window.PAGE_ID !== 'geogebra') window.GEO_addGButton();   // G 바로가기 (지오지브라 페이지 제외)
   const acts = window.GEO_CONFIG.ACTIVITIES;
   const idx = acts.findIndex(a => a.id === window.PAGE_ID);
   if(idx < 0) return;
@@ -48,7 +68,7 @@ window.GEO_CONFIG = {
     position:absolute; left:50%; transform:translateX(-50%);
   }
   #gnavRight { display:flex; gap:8px; }
-  #gnavMark { background:#fff7ed !important; border-color:#fdba74 !important; color:#c2410c !important; }
+  #gnavMark { background:#fff7ed !important; border-color:#fdba74 !important; padding:10px 14px !important; }
   #gnavMark:hover { border-color:#ea580c !important; }
   #gnavNext { background:linear-gradient(135deg,#0ea5e9,#6366f1); border:none !important; color:#fff !important; }
 
@@ -94,7 +114,11 @@ window.GEO_CONFIG = {
     <a href="${prevHref}" id="gnavPrev">‹ 이전</a>
     <a href="index.html#home" id="gnavHome">🏠 홈</a>
     <div id="gnavRight">
-      <button id="gnavMark" title="오늘 여기까지 책갈피">📌 여기까지</button>
+      <button id="gnavMark" title="오늘 여기까지 (책갈피)" aria-label="책갈피">
+        <svg width="15" height="19" viewBox="0 0 16 20" style="display:block">
+          <path d="M2 1 h12 v18 l-6 -5.2 -6 5.2 z" fill="#dc2626"/>
+        </svg>
+      </button>
       <a href="${nextHref}" id="gnavNext">다음 ›</a>
     </div>`;
   document.body.appendChild(bar);
