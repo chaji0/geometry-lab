@@ -201,10 +201,10 @@ function draw(){
   ctx.strokeStyle='#2e9fc4'; ctx.lineWidth=5; ctx.lineCap='round';
   ctx.beginPath(); ctx.moveTo(paper.x,paper.B); ctx.lineTo(paper.x+paper.w,paper.B); ctx.stroke();
 
-  // 접는 중인 플랩
-  if(activeFold && activeFold.t>0.005){
-    const { poly, cr } = flapPolygon(activeFold.px);
-    const t = easeInOut(activeFold.t);
+  // 접는 중인 플랩 / 원리 보기의 접힌 상태
+  function drawFlap(fpx, rawT){
+    const { poly, cr } = flapPolygon(fpx);
+    const t = easeInOut(rawT);
     ctx.beginPath();
     poly.forEach((p,i)=>{
       const r=reflectAcross(cr,p);
@@ -227,11 +227,13 @@ function draw(){
       }
     }
     // 접혀 올라간 P (F로 이동 중)
-    const P={x:activeFold.px,y:paper.B}, Pm=reflectAcross(cr,P);
+    const P={x:fpx,y:paper.B}, Pm=reflectAcross(cr,P);
     const px2=P.x+(Pm.x-P.x)*t, py2=P.y+(Pm.y-P.y)*t;
     dot(px2,py2,6,'#0e7fa8');
     label('P','#0e7fa8',px2+12,py2+4);
   }
+  if(activeFold && activeFold.t>0.005) drawFlap(activeFold.px, activeFold.t);
+  else if(showWhy) drawFlap(whyPx, 1);          // 원리 보기: 접힌 상태 유지
 
   // 원리 보기
   if(showWhy){
@@ -247,7 +249,10 @@ function draw(){
     tick((px+px)/2, (yQ+paper.B)/2, {x:px,y:paper.B}, {x:px,y:yQ});
     tick((px+F.x)/2, (yQ+F.y)/2, {x:F.x,y:F.y}, {x:px,y:yQ});
     dot(px,paper.B,6,'#0e7fa8'); label('P','#0e7fa8',px+11,paper.B-9);
-    dot(px,yQ,6.5,'#16a34a');   label('Q','#15803d',px+11,yQ-8);
+    dot(px,yQ,7.5,'#16a34a');   label('Q','#15803d',px+13,yQ-9);
+    ctx.beginPath(); ctx.arc(px,yQ,15,0,7);      // 드래그 가능 표시
+    ctx.strokeStyle='rgba(22,163,74,.55)'; ctx.lineWidth=1.6;
+    ctx.setLineDash([4,4]); ctx.stroke(); ctx.setLineDash([]);
     // 설명 말풍선
     bubble(px, yQ);
   }
@@ -279,17 +284,19 @@ function draw(){
     }
   }
   function bubble(px,yQ){
+    const msg0='💡 초록 점 Q를 손으로 끌어 보세요';
     const msg1='접는 선은 P̅F̅의 수직이등분선!';
     const msg2='→ QF = QP = (Q에서 준선까지 거리)';
     const msg3='→ Q는 초점 F, 준선이 아랫변인 포물선 위의 점';
     ctx.font='bold 13.5px sans-serif';
-    const bw=Math.max(ctx.measureText(msg1).width,ctx.measureText(msg2).width,ctx.measureText(msg3).width)+26;
+    const bw=Math.max(ctx.measureText(msg0).width,ctx.measureText(msg1).width,ctx.measureText(msg2).width,ctx.measureText(msg3).width)+26;
     let bx=Math.min(Math.max(paper.x+8, px-bw/2), paper.x+paper.w-bw-8);
     let by=paper.y+10;
     ctx.fillStyle='rgba(255,255,255,.94)'; ctx.strokeStyle='#c7d2fe'; ctx.lineWidth=1.5;
-    roundRect(bx,by,bw,74,10); ctx.fill(); ctx.stroke();
+    roundRect(bx,by,bw,96,10); ctx.fill(); ctx.stroke();
+    ctx.fillStyle='#0369a1'; ctx.fillText(msg0,bx+13,by+22);
     ctx.fillStyle='#334155';
-    ctx.fillText(msg1,bx+13,by+22); ctx.fillText(msg2,bx+13,by+44); ctx.fillText(msg3,bx+13,by+64);
+    ctx.fillText(msg1,bx+13,by+44); ctx.fillText(msg2,bx+13,by+66); ctx.fillText(msg3,bx+13,by+86);
   }
   function roundRect(x,y,w2,h2,r){ ctx.beginPath();
     ctx.moveTo(x+r,y); ctx.arcTo(x+w2,y,x+w2,y+h2,r); ctx.arcTo(x+w2,y+h2,x,y+h2,r);
@@ -299,10 +306,12 @@ function draw(){
 const easeInOut=t=>t<0.5 ? 2*t*t : 1-Math.pow(-2*t+2,2)/2;
 
 /* ===== 애니메이션 루프 ===== */
+let lastCW=0, lastCH=0;
 function tickLoop(){
   requestAnimationFrame(tickLoop);
-  const w=cv.clientWidth, dpr=Math.min(window.devicePixelRatio||1,2);
-  if(cv.width!==Math.round(w*dpr)) layout();
+  if(cv.clientWidth!==lastCW || cv.clientHeight!==lastCH){
+    lastCW=cv.clientWidth; lastCH=cv.clientHeight; layout();
+  }
   if(activeFold){
     const speed=0.09;
     if(Math.abs(activeFold.t-activeFold.target)<speed){
@@ -362,8 +371,10 @@ cv.addEventListener('pointerdown',e=>{
   if(Math.hypot(p.x-F.x,p.y-F.y)<26){                 // F 드래그
     draggingF=true; return;
   }
-  if(showWhy && Math.abs(p.y-paper.B)<34 && Math.abs(p.x-whyPx)<30){  // 원리 P 드래그
-    draggingWhy=true; return;
+  if(showWhy){
+    const yQ=parabolaY(whyPx);
+    if(Math.hypot(p.x-whyPx, p.y-yQ)<30){ draggingWhy=true; return; }        // Q 드래그
+    if(Math.abs(p.y-paper.B)<34 && Math.abs(p.x-whyPx)<30){ draggingWhy=true; return; }  // P 드래그
   }
   if(Math.abs(p.y-paper.B)<34 && p.x>paper.x+6 && p.x<paper.x+paper.w-6){  // 접기 시작
     draggingEdge=true;
@@ -394,7 +405,8 @@ layout(); tickLoop();
 window.addEventListener('resize',layout);
 // (디버그)
 window.__fold={ get paper(){return paper;}, get F(){return F;}, get n(){return creases.length;},
-                 get why(){return showWhy;}, get curve(){return showCurve;} };
+                 get why(){return showWhy;}, get curve(){return showCurve;},
+                 get whyPx(){return whyPx;}, get whyY(){return parabolaY(whyPx);} };
 </script>
 <script>window.PAGE_ID="folding";</script>
 <script src="nav.js"></script>

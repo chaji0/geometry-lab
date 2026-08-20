@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<script>
+/* 입장 가드 */
+if (localStorage.getItem('geoAppOk') !== '1') location.replace('index.html');
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="icon" type="image/svg+xml" href="icon.svg">
+<link rel="apple-touch-icon" href="icon-180.png">
+<meta name="apple-mobile-web-app-title" content="기하">
+<title>포물선 개념 정리</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html, body { width:100%; height:100%; overflow:hidden; }
+  body {
+    font-family:'Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif;
+    background:#f1f5fb; color:#1e293b; display:flex; flex-direction:column;
+  }
+  header {
+    padding:9px 16px; background:#fff; border-bottom:1px solid #e2e8f0;
+    display:flex; align-items:baseline; gap:12px; flex-wrap:wrap;
+  }
+  header h1 { font-size:18px; color:#0f172a; }
+  header p { font-size:12px; color:#64748b; }
+  #main { flex:1; display:flex; min-height:0; }
+
+  /* ── 왼쪽: 개념 정리 ── */
+  #panel {
+    width:352px; flex:none; background:#fff; border-right:1px solid #e2e8f0;
+    padding:16px; overflow-y:auto;
+  }
+  #panel h2 { font-size:15.5px; color:#0f172a; margin-bottom:10px; }
+  #panel h2.dim { color:#94a3b8; margin-top:22px; }
+  .defBox {
+    border:1px solid #e2e8f0; background:#f8fafc; border-radius:12px;
+    padding:11px 13px; font-size:13px; color:#475569; line-height:1.7; margin-bottom:12px;
+  }
+  .defBox b { color:#0f172a; }
+  .fcard {
+    border:2px solid #e2e8f0; border-radius:14px; padding:13px 15px; margin-top:10px;
+    cursor:pointer; background:#fbfdff; transition:all .15s; user-select:none;
+  }
+  .fcard .cond { font-size:13px; color:#475569; line-height:1.6; }
+  .fcard .formula {
+    font-size:24px; font-weight:800; margin:7px 0 4px; font-family:Georgia,'Times New Roman',serif;
+    letter-spacing:.5px;
+  }
+  .fcard .now { font-size:12.3px; color:#64748b; line-height:1.6; }
+  .fcard .tapHint { font-size:11.5px; color:#94a3b8; margin-top:5px; }
+  #card1 .formula { color:#dc2626; }
+  #card2 .formula { color:#2563eb; }
+  #card1.on { border-color:#dc2626; background:#fef2f2; }
+  #card2.on { border-color:#2563eb; background:#eff6ff; }
+  .fcard sup { font-size:14px; }
+  .soonBox {
+    border:1px dashed #cbd5e1; border-radius:12px; padding:11px 13px;
+    font-size:12.5px; color:#94a3b8; margin-top:8px;
+  }
+
+  /* ── 오른쪽: 그래프 ── */
+  #graphSide { flex:1; min-width:0; display:flex; flex-direction:column; }
+  #gwrap { flex:1; min-height:0; position:relative; }
+  #graph { width:100%; height:100%; display:block; touch-action:none; }
+  #pbar {
+    padding:10px 16px; background:#fff; border-top:1px solid #e2e8f0;
+    display:flex; align-items:center; gap:13px;
+  }
+  #pbar .pv { font-size:19px; font-weight:800; color:#0f172a; min-width:88px; }
+  #pbar .pv span { color:#7c3aed; }
+  #pbar input[type=range] { flex:1; accent-color:#7c3aed; height:30px; }
+  #pbar .note { font-size:11.5px; color:#94a3b8; flex:none; }
+</style>
+</head>
+<body>
+<header>
+  <h1>📘 포물선 개념 정리</h1>
+  <p>식을 눌러 그래프를 켜고 끄면서, p 값을 움직여 보세요</p>
+</header>
+
+<div id="main">
+  <div id="panel">
+    <h2>1. 포물선의 방정식</h2>
+    <div class="defBox">
+      <b>포물선</b> : 평면 위에서 한 점 <b>F(초점)</b>와 한 직선 <b>l(준선)</b>에
+      이르는 거리가 <b>같은</b> 점들이 그리는 곡선.
+      꼭짓점은 원점, 축은 좌표축이 되도록 놓으면 ↓
+    </div>
+
+    <div class="fcard on" id="card1">
+      <div class="cond">(1) 초점이 <b>F(p, 0)</b>, 준선이 <b>x = −p</b> 인 포물선</div>
+      <div class="formula">y<sup>2</sup> = 4px <span style="font-size:13px;color:#94a3b8">(단, p ≠ 0)</span></div>
+      <div class="now" id="now1"></div>
+      <div class="tapHint">👆 눌러서 빨간 그래프 켜기/끄기</div>
+    </div>
+
+    <div class="fcard" id="card2">
+      <div class="cond">(2) 초점이 <b>F(0, p)</b>, 준선이 <b>y = −p</b> 인 포물선</div>
+      <div class="formula">x<sup>2</sup> = 4py <span style="font-size:13px;color:#94a3b8">(단, p ≠ 0)</span></div>
+      <div class="now" id="now2"></div>
+      <div class="tapHint">👆 눌러서 파란 그래프 켜기/끄기</div>
+    </div>
+
+    <h2 class="dim">2. 접선의 방정식</h2>
+    <div class="soonBox">추후 공개 — 먼저 포물선과 친해져 봅시다 🙂</div>
+  </div>
+
+  <div id="graphSide">
+    <div id="gwrap"><canvas id="graph"></canvas></div>
+    <div id="pbar">
+      <div class="pv">p = <span id="pVal">1</span></div>
+      <input type="range" id="pSlider" min="-3" max="3" step="0.1" value="1">
+      <div class="note">p ≠ 0</div>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+const cv = document.getElementById('graph');
+const ctx = cv.getContext('2d');
+let p = 1;
+let show1 = true, show2 = false;
+let dirty = true;
+
+const fmt = v => {
+  const r = Math.round(v*10)/10;
+  return (Object.is(r,-0)?0:r).toString();
+};
+
+/* ── 좌표계 ── */
+function view(){
+  const w = cv.clientWidth, h = cv.clientHeight;
+  const s = Math.min(w, h) / 9.6;          // ±4.8 범위
+  return { w, h, s, cx: w/2, cy: h/2 };
+}
+const X = (v,x)=> v.cx + x*v.s;
+const Y = (v,y)=> v.cy - y*v.s;
+
+function draw(){
+  const w = cv.clientWidth, h = cv.clientHeight;
+  const dpr = Math.min(window.devicePixelRatio||1, 2);
+  if(cv.width !== Math.round(w*dpr) || cv.height !== Math.round(h*dpr)){
+    cv.width = Math.round(w*dpr); cv.height = Math.round(h*dpr);
+  }
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.fillStyle = '#ffffff'; ctx.fillRect(0,0,w,h);
+  const v = view();
+  const xmax = (w/2)/v.s, ymax = (h/2)/v.s;
+
+  /* 격자 */
+  ctx.strokeStyle = '#eef2f7'; ctx.lineWidth = 1;
+  for(let i=Math.ceil(-xmax); i<=xmax; i++){
+    if(i===0) continue;
+    ctx.beginPath(); ctx.moveTo(X(v,i),0); ctx.lineTo(X(v,i),h); ctx.stroke();
+  }
+  for(let i=Math.ceil(-ymax); i<=ymax; i++){
+    if(i===0) continue;
+    ctx.beginPath(); ctx.moveTo(0,Y(v,i)); ctx.lineTo(w,Y(v,i)); ctx.stroke();
+  }
+
+  /* 축 */
+  ctx.strokeStyle = '#334155'; ctx.lineWidth = 1.6;
+  ctx.beginPath(); ctx.moveTo(0,v.cy); ctx.lineTo(w,v.cy); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(v.cx,0); ctx.lineTo(v.cx,h); ctx.stroke();
+  ctx.fillStyle = '#334155';
+  ctx.beginPath(); ctx.moveTo(w-2,v.cy); ctx.lineTo(w-12,v.cy-5); ctx.lineTo(w-12,v.cy+5); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(v.cx,2); ctx.lineTo(v.cx-5,12); ctx.lineTo(v.cx+5,12); ctx.fill();
+
+  /* 눈금 + 숫자 */
+  ctx.font = '12px sans-serif'; ctx.fillStyle = '#64748b';
+  ctx.textAlign = 'center';
+  for(let i=Math.ceil(-xmax); i<=xmax; i++){
+    if(i===0) continue;
+    ctx.beginPath(); ctx.moveTo(X(v,i), v.cy-4); ctx.lineTo(X(v,i), v.cy+4);
+    ctx.strokeStyle='#334155'; ctx.lineWidth=1.2; ctx.stroke();
+    if(Math.abs(i)<=8) ctx.fillText(i, X(v,i), v.cy+18);
+  }
+  ctx.textAlign = 'right';
+  for(let i=Math.ceil(-ymax); i<=ymax; i++){
+    if(i===0) continue;
+    ctx.beginPath(); ctx.moveTo(v.cx-4, Y(v,i)); ctx.lineTo(v.cx+4, Y(v,i));
+    ctx.strokeStyle='#334155'; ctx.lineWidth=1.2; ctx.stroke();
+    ctx.fillText(i, v.cx-8, Y(v,i)+4);
+  }
+  ctx.fillText('O', v.cx-7, v.cy+16);
+  ctx.font = 'italic bold 15px Georgia'; ctx.fillStyle='#334155';
+  ctx.textAlign='left';
+  ctx.fillText('x', w-16, v.cy-10);
+  ctx.fillText('y', v.cx+10, 16);
+  ctx.textAlign='left';
+
+  const label = (text,color,x,y,align)=>{
+    ctx.font = 'bold 13.5px sans-serif'; ctx.textAlign = align||'left';
+    ctx.lineJoin='round'; ctx.strokeStyle='rgba(255,255,255,.92)'; ctx.lineWidth=4;
+    ctx.strokeText(text,x,y); ctx.fillStyle=color; ctx.fillText(text,x,y);
+    ctx.textAlign='left';
+  };
+  const dot = (x,y,c)=>{
+    ctx.beginPath(); ctx.arc(x,y,5.5,0,7); ctx.fillStyle=c; ctx.fill();
+    ctx.strokeStyle='#fff'; ctx.lineWidth=1.8; ctx.stroke();
+  };
+
+  /* (1) y² = 4px — 빨강 */
+  if(show1){
+    ctx.strokeStyle = '#dc2626'; ctx.lineWidth = 3;
+    ctx.beginPath();
+    let started = false;
+    const yr = ymax + 0.5;
+    for(let t=-yr; t<=yr; t+=0.02){
+      const x = t*t/(4*p);
+      if(Math.abs(x) > xmax + 0.5){ started=false; continue; }
+      const sx = X(v,x), sy = Y(v,t);
+      if(!started){ ctx.moveTo(sx,sy); started=true; } else ctx.lineTo(sx,sy);
+    }
+    ctx.stroke();
+    // 준선 x = -p
+    ctx.strokeStyle = '#dc2626'; ctx.lineWidth = 2; ctx.setLineDash([8,6]);
+    ctx.beginPath(); ctx.moveTo(X(v,-p), 0); ctx.lineTo(X(v,-p), h); ctx.stroke();
+    ctx.setLineDash([]);
+    // 초점
+    dot(X(v,p), Y(v,0), '#dc2626');
+    label(`F(${fmt(p)}, 0)`, '#b91c1c', X(v,p)+9, Y(v,0)-10);
+    label(`x = ${fmt(-p)}`, '#b91c1c', X(v,-p)+6, 20);
+  }
+
+  /* (2) x² = 4py — 파랑 */
+  if(show2){
+    ctx.strokeStyle = '#2563eb'; ctx.lineWidth = 3;
+    ctx.beginPath();
+    let started = false;
+    const xr = xmax + 0.5;
+    for(let t=-xr; t<=xr; t+=0.02){
+      const y = t*t/(4*p);
+      if(Math.abs(y) > ymax + 0.5){ started=false; continue; }
+      const sx = X(v,t), sy = Y(v,y);
+      if(!started){ ctx.moveTo(sx,sy); started=true; } else ctx.lineTo(sx,sy);
+    }
+    ctx.stroke();
+    // 준선 y = -p
+    ctx.strokeStyle = '#2563eb'; ctx.lineWidth = 2; ctx.setLineDash([8,6]);
+    ctx.beginPath(); ctx.moveTo(0, Y(v,-p)); ctx.lineTo(w, Y(v,-p)); ctx.stroke();
+    ctx.setLineDash([]);
+    // 초점
+    dot(X(v,0), Y(v,p), '#2563eb');
+    label(`F(0, ${fmt(p)})`, '#1d4ed8', X(v,0)+10, Y(v,p)-9);
+    label(`y = ${fmt(-p)}`, '#1d4ed8', 10, Y(v,-p)-7);
+  }
+}
+
+/* ── 상태 갱신 ── */
+const card1 = document.getElementById('card1'), card2 = document.getElementById('card2');
+const now1 = document.getElementById('now1'), now2 = document.getElementById('now2');
+const pVal = document.getElementById('pVal'), pSlider = document.getElementById('pSlider');
+
+function updateNow(){
+  pVal.textContent = fmt(p);
+  now1.innerHTML = show1
+    ? `현재: <b style="color:#dc2626">y² = ${fmt(4*p)}x</b> · 초점 F(${fmt(p)}, 0) · 준선 x = ${fmt(-p)}`
+    : '&nbsp;';
+  now2.innerHTML = show2
+    ? `현재: <b style="color:#2563eb">x² = ${fmt(4*p)}y</b> · 초점 F(0, ${fmt(p)}) · 준선 y = ${fmt(-p)}`
+    : '&nbsp;';
+}
+card1.addEventListener('click', ()=>{ show1=!show1; card1.classList.toggle('on',show1); updateNow(); dirty=true; });
+card2.addEventListener('click', ()=>{ show2=!show2; card2.classList.toggle('on',show2); updateNow(); dirty=true; });
+
+let lastP = 1;
+pSlider.addEventListener('input', ()=>{
+  let val = parseFloat(pSlider.value);
+  if(Math.abs(val) < 0.05){                 // p ≠ 0 : 0을 건너뛰기
+    val = lastP > 0 ? -0.1 : 0.1;
+    pSlider.value = val;
+  }
+  p = val; lastP = val;
+  updateNow(); dirty = true;
+});
+
+/* ── 루프 ── */
+let lastW=0, lastH=0;
+(function tick(){
+  requestAnimationFrame(tick);
+  if(cv.clientWidth!==lastW || cv.clientHeight!==lastH){ lastW=cv.clientWidth; lastH=cv.clientHeight; dirty=true; }
+  if(dirty){ dirty=false; draw(); }
+})();
+updateNow();
+</script>
+<script>window.PAGE_ID="concept";</script>
+<script src="nav.js"></script>
+</body>
+</html>

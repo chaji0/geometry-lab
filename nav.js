@@ -14,6 +14,9 @@ window.GEO_CONFIG = {
     { id:'folding',  href:'folding.html',  icon:'📄', short:'종이접기',
       title:'종이접기로 포물선 만들기',
       desc:'아래 변의 점이 F에 닿도록 접고, 또 접고… 접은 선들이 그리는 곡선의 정체를 확인하고 원리까지 파헤쳐요.' },
+    { id:'concept',  href:'concept.html',  icon:'📘', short:'개념정리',
+      title:'포물선 개념 정리',
+      desc:'초점과 준선으로 정의되는 포물선 — p 값을 움직이며 y²=4px, x²=4py의 그래프·초점·준선을 확인해요.' },
     { id:'geogebra', href:'geogebra.html', icon:'📐', short:'지오지브라',
       title:'지오지브라',
       desc:'앱 안에서 바로 열리는 지오지브라 — 클래식·그래핑·기하·3D 계산기. (인터넷 연결 필요)' }
@@ -70,7 +73,10 @@ window.GEO_addGButton = function(){
   #gnavRight { display:flex; gap:8px; }
   #gnavMark { background:#fff7ed !important; border-color:#fdba74 !important; padding:10px 14px !important; }
   #gnavMark:hover { border-color:#ea580c !important; }
-  #gnavNext { background:linear-gradient(135deg,#0ea5e9,#6366f1); border:none !important; color:#fff !important; }
+  #gnav a#gnavNext {
+    background:linear-gradient(135deg,#0ea5e9,#6366f1) !important;
+    border-color:transparent !important; color:#fff !important;
+  }
 
   #gmodalBg {
     position:fixed; inset:0; background:rgba(15,23,42,.45); z-index:200;
@@ -112,7 +118,7 @@ window.GEO_addGButton = function(){
   bar.id = 'gnav';
   bar.innerHTML = `
     <a href="${prevHref}" id="gnavPrev">‹ 이전</a>
-    <a href="index.html#home" id="gnavHome">🏠 홈</a>
+    <a href="index.html#home" id="gnavHome">홈</a>
     <div id="gnavRight">
       <button id="gnavMark" title="오늘 여기까지 (책갈피)" aria-label="책갈피">
         <svg width="15" height="19" viewBox="0 0 16 20" style="display:block">
