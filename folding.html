@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<script>
+/* 입장 가드 */
+if (sessionStorage.getItem('geoAppOk') !== '1') location.replace('index.html');
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="icon" type="image/svg+xml" href="icon.svg">
+<link rel="apple-touch-icon" href="icon-180.png">
+<meta name="apple-mobile-web-app-title" content="기하">
+<title>종이접기로 포물선 만들기</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html, body { width:100%; height:100%; overflow:hidden; }
+  body {
+    font-family:'Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif;
+    background:#f1f5fb; color:#1e293b; display:flex; flex-direction:column;
+  }
+  header {
+    padding:9px 16px; background:#fff; border-bottom:1px solid #e2e8f0;
+    display:flex; align-items:baseline; gap:12px; flex-wrap:wrap;
+  }
+  header h1 { font-size:18px; color:#0f172a; }
+  header h1 a { text-decoration:none; }
+  header p { font-size:12px; color:#64748b; }
+  #stage { flex:1; position:relative; min-height:0; }
+  #cv { width:100%; height:100%; display:block; touch-action:none; }
+  #bar {
+    padding:8px 10px; background:#fff; border-top:1px solid #e2e8f0;
+    display:flex; gap:7px; flex-wrap:wrap; justify-content:center;
+  }
+  #bar button {
+    padding:9px 13px; font-size:13.5px; font-weight:700; border-radius:10px; cursor:pointer;
+    border:1.5px solid #cbd5e1; background:#fff; color:#334155; transition:all .12s;
+  }
+  #bar button:hover { border-color:#0284c7; color:#0369a1; }
+  #bar button.on { background:#0284c7; border-color:#0284c7; color:#fff; }
+  #bar button.play { background:linear-gradient(135deg,#0ea5e9,#6366f1); border:none; color:#fff; }
+  #bar button:disabled { opacity:.5; cursor:default; }
+  .hint {
+    position:absolute; left:50%; transform:translateX(-50%); bottom:12px;
+    background:rgba(255,255,255,.9); border:1px solid #e2e8f0; color:#475569;
+    font-size:13px; padding:6px 14px; border-radius:999px; pointer-events:none;
+    transition:opacity .4s;
+  }
+  .cnt {
+    position:absolute; right:12px; top:10px; background:rgba(255,255,255,.9);
+    border:1px solid #e2e8f0; border-radius:10px; padding:6px 11px;
+    font-size:12.5px; color:#475569; pointer-events:none;
+  }
+  .cnt b { color:#0f172a; font-size:15px; }
+</style>
+</head>
+<body>
+<header>
+  <h1><a href="index.html" title="메뉴로">🏠</a> 📄 종이접기로 포물선 만들기</h1>
+  <p>아래 파란 변의 점이 F에 닿도록 접으면, 접은 선들이 모여 포물선이 됩니다</p>
+</header>
+
+<div id="stage">
+  <canvas id="cv"></canvas>
+  <div class="hint" id="hint">👇 아래 <b style="color:#0e7fa8">파란 변</b>을 손가락으로 꾹 눌러 보세요 (누른 채 옆으로 밀어도 돼요)</div>
+  <div class="cnt">접은 횟수 <b id="foldCnt">0</b></div>
+</div>
+
+<div id="bar">
+  <button id="autoBtn" class="play">▶ 자동으로 접기</button>
+  <button id="curveBtn">📈 포물선 확인</button>
+  <button id="whyBtn">🔍 원리 보기</button>
+  <button id="clearBtn">🧹 모두 지우기</button>
+</div>
+
+<script>
+'use strict';
+const cv = document.getElementById('cv');
+const ctx = cv.getContext('2d');
+const hintEl = document.getElementById('hint');
+const foldCntEl = document.getElementById('foldCnt');
+
+/* ===== 상태 ===== */
+let paper = null;           // {x,y,w,h,B(아랫변 y)}
+let F = null;               // 초점 (드래그 가능)
+let creases = [];           // 접은 선들의 px 목록 (아랫변 위 P의 x좌표)
+let activeFold = null;      // {px, t, target}  현재 접는 중
+let autoTimer = null;
+let showCurve = false, showWhy = false;
+let whyPx = null;           // 원리 보기용 P 위치
+let draggingF = false, draggingEdge = false, draggingWhy = false;
+let dirty = true;
+
+function layout(){
+  const w = cv.clientWidth, h = cv.clientHeight;
+  const mw = Math.min(70, w*0.08), mtop = Math.min(56, h*0.10), mbot = Math.min(46, h*0.10);
+  paper = { x:mw, y:mtop, w:w-2*mw, h:h-mtop-mbot };
+  paper.B = paper.y + paper.h;
+  if(!F) F = { x: paper.x + paper.w*0.5, y: paper.B - paper.h*0.42 };
+  clampF();
+  if(whyPx===null) whyPx = paper.x + paper.w*0.63;
+  dirty = true;
+}
+function clampF(){
+  F.x = Math.max(paper.x+40, Math.min(paper.x+paper.w-40, F.x));
+  F.y = Math.max(paper.y+30, Math.min(paper.B-55, F.y));
+}
+
+/* ===== 수학 =====
+   P=(px, B) 아랫변 위의 점. 접는 선 = PF의 수직이등분선.
+   포물선 위의 점 Q=(px, yQ): QF = Q에서 아랫변(준선)까지 거리     */
+function creaseLine(px){
+  const M = { x:(F.x+px)/2, y:(F.y+paper.B)/2 };
+  let dx = paper.B - F.y, dy = -(px - F.x);          // PF에 수직인 방향
+  const L = Math.hypot(dx,dy)||1; dx/=L; dy/=L;
+  return { M, dx, dy };
+}
+function parabolaY(px){
+  const B = paper.B;
+  return (B*B - F.y*F.y - (px-F.x)*(px-F.x)) / (2*(B - F.y));
+}
+function reflectAcross(cr, p){
+  const vx = p.x-cr.M.x, vy = p.y-cr.M.y;
+  const d = vx*cr.dx + vy*cr.dy;
+  return { x: cr.M.x + 2*d*cr.dx - vx, y: cr.M.y + 2*d*cr.dy - vy };
+}
+// 종이 사각형을 '접히는 쪽(P 포함 반평면)'으로 자른 다각형
+function flapPolygon(px){
+  const cr = creaseLine(px);
+  let nx = px - F.x, ny = paper.B - F.y;             // P쪽 법선
+  const L = Math.hypot(nx,ny)||1; nx/=L; ny/=L;
+  const s = p => (p.x-cr.M.x)*nx + (p.y-cr.M.y)*ny;
+  const rect = [ {x:paper.x,y:paper.y},{x:paper.x+paper.w,y:paper.y},
+                 {x:paper.x+paper.w,y:paper.B},{x:paper.x,y:paper.B} ];
+  const out = [];
+  for(let i=0;i<4;i++){
+    const a = rect[i], b = rect[(i+1)%4], sa = s(a), sb = s(b);
+    if(sa >= 0) out.push(a);
+    if((sa>=0) !== (sb>=0)){
+      const t = sa/(sa-sb);
+      out.push({ x:a.x+(b.x-a.x)*t, y:a.y+(b.y-a.y)*t });
+    }
+  }
+  out.forEach(p=>{ p.onBottom = Math.abs(p.y-paper.B) < 0.5; });   // 아랫변(준선) 위의 점
+  return { poly: out, cr };
+}
+// 접는 선을 종이 안에서 자른 두 끝점
+function creaseSegment(px){
+  const { poly } = flapPolygon(px);
+  // 접힘 다각형 꼭짓점 중 '접는 선 위'에 있는 두 점(모서리 교점)
+  const cr = creaseLine(px);
+  const onLine = poly.filter(p=>{
+    const vx=p.x-cr.M.x, vy=p.y-cr.M.y;
+    return Math.abs(vx*(px-F.x) + vy*(paper.B-F.y)) < 0.5*Math.hypot(px-F.x, paper.B-F.y);
+  });
+  if(onLine.length>=2) return [onLine[0], onLine[onLine.length-1]];
+  return null;
+}
+
+/* ===== 그리기 ===== */
+function draw(){
+  const w=cv.clientWidth, h=cv.clientHeight;
+  const dpr=Math.min(window.devicePixelRatio||1,2);
+  if(cv.width!==Math.round(w*dpr)||cv.height!==Math.round(h*dpr)){
+    cv.width=Math.round(w*dpr); cv.height=Math.round(h*dpr);
+  }
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.fillStyle='#f1f5fb'; ctx.fillRect(0,0,w,h);
+
+  // 종이
+  ctx.fillStyle='#fdf3d8';
+  ctx.strokeStyle='#e8cf96'; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.rect(paper.x,paper.y,paper.w,paper.h);
+  ctx.fill(); ctx.stroke();
+  ctx.save(); ctx.shadowColor='rgba(120,90,20,.18)'; ctx.shadowBlur=14; ctx.shadowOffsetY=5;
+  ctx.strokeStyle='rgba(0,0,0,0)'; ctx.strokeRect(paper.x,paper.y,paper.w,paper.h); ctx.restore();
+
+  // 접은 선들 (회색 주름)
+  ctx.strokeStyle='rgba(120,113,108,.5)'; ctx.lineWidth=1.4;
+  for(const px of creases){
+    const seg=creaseSegment(px);
+    if(seg){ ctx.beginPath(); ctx.moveTo(seg[0].x,seg[0].y); ctx.lineTo(seg[1].x,seg[1].y); ctx.stroke(); }
+  }
+
+  // 포물선 확인
+  if(showCurve){
+    ctx.strokeStyle='#ef4444'; ctx.lineWidth=3;
+    ctx.beginPath(); let started=false;
+    for(let px=paper.x; px<=paper.x+paper.w; px+=3){
+      const y=parabolaY(px);
+      if(y>paper.y && y<paper.B){
+        if(!started){ ctx.moveTo(px,y); started=true; } else ctx.lineTo(px,y);
+      } else started=false;
+    }
+    ctx.stroke();
+    // 준선 라벨
+    label('준선','#0e7fa8', paper.x+paper.w-6, paper.B+22, 'right');
+  }
+
+  // 아랫변 = 준선 (파란색, 교과서처럼)
+  ctx.strokeStyle='#2e9fc4'; ctx.lineWidth=5; ctx.lineCap='round';
+  ctx.beginPath(); ctx.moveTo(paper.x,paper.B); ctx.lineTo(paper.x+paper.w,paper.B); ctx.stroke();
+
+  // 접는 중인 플랩
+  if(activeFold && activeFold.t>0.005){
+    const { poly, cr } = flapPolygon(activeFold.px);
+    const t = easeInOut(activeFold.t);
+    ctx.beginPath();
+    poly.forEach((p,i)=>{
+      const r=reflectAcross(cr,p);
+      const x=p.x+(r.x-p.x)*t, y=p.y+(r.y-p.y)*t;
+      i? ctx.lineTo(x,y) : ctx.moveTo(x,y);
+    });
+    ctx.closePath();
+    ctx.fillStyle='rgba(211,168,116,.92)'; ctx.fill();
+    ctx.strokeStyle='#a97b45'; ctx.lineWidth=2; ctx.stroke();
+    // 접혀 올라간 파란 변 (이 변이 F에 닿는다!)
+    ctx.strokeStyle='#2e9fc4'; ctx.lineWidth=4.5; ctx.lineCap='round';
+    for(let i=0;i<poly.length;i++){
+      const a=poly[i], b=poly[(i+1)%poly.length];
+      if(a.onBottom && b.onBottom){
+        const ra=reflectAcross(cr,a), rb=reflectAcross(cr,b);
+        ctx.beginPath();
+        ctx.moveTo(a.x+(ra.x-a.x)*t, a.y+(ra.y-a.y)*t);
+        ctx.lineTo(b.x+(rb.x-b.x)*t, b.y+(rb.y-b.y)*t);
+        ctx.stroke();
+      }
+    }
+    // 접혀 올라간 P (F로 이동 중)
+    const P={x:activeFold.px,y:paper.B}, Pm=reflectAcross(cr,P);
+    const px2=P.x+(Pm.x-P.x)*t, py2=P.y+(Pm.y-P.y)*t;
+    dot(px2,py2,6,'#0e7fa8');
+    label('P','#0e7fa8',px2+12,py2+4);
+  }
+
+  // 원리 보기
+  if(showWhy){
+    const px=whyPx, cr=creaseLine(px), yQ=parabolaY(px);
+    const seg=creaseSegment(px);
+    if(seg){ ctx.strokeStyle='#8b5cf6'; ctx.lineWidth=3;
+      ctx.beginPath(); ctx.moveTo(seg[0].x,seg[0].y); ctx.lineTo(seg[1].x,seg[1].y); ctx.stroke(); }
+    // PF (점선) — 접는 선이 그 수직이등분선임을 보여줌
+    dash([ {x:px,y:paper.B},{x:F.x,y:F.y} ],'rgba(100,116,139,.8)',1.6);
+    // QP, QF (같은 길이 강조)
+    seg2({x:px,y:yQ},{x:px,y:paper.B},'#ea580c');
+    seg2({x:px,y:yQ},{x:F.x,y:F.y},'#ea580c');
+    tick((px+px)/2, (yQ+paper.B)/2, {x:px,y:paper.B}, {x:px,y:yQ});
+    tick((px+F.x)/2, (yQ+F.y)/2, {x:F.x,y:F.y}, {x:px,y:yQ});
+    dot(px,paper.B,6,'#0e7fa8'); label('P','#0e7fa8',px+11,paper.B-9);
+    dot(px,yQ,6.5,'#16a34a');   label('Q','#15803d',px+11,yQ-8);
+    // 설명 말풍선
+    bubble(px, yQ);
+  }
+
+  // 초점 F
+  dot(F.x,F.y,8,'#dc2626');
+  ctx.strokeStyle='#fff'; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.arc(F.x,F.y,8,0,7); ctx.stroke();
+  label('F','#b91c1c',F.x+13,F.y+5);
+
+  function dot(x,y,r,c){ ctx.fillStyle=c; ctx.beginPath(); ctx.arc(x,y,r,0,7); ctx.fill(); }
+  function label(text,color,x,y,align){
+    ctx.font='bold 15px sans-serif'; ctx.textAlign=align||'left';
+    ctx.lineJoin='round'; ctx.strokeStyle='rgba(255,255,255,.9)'; ctx.lineWidth=4;
+    ctx.strokeText(text,x,y); ctx.fillStyle=color; ctx.fillText(text,x,y);
+    ctx.textAlign='left';
+  }
+  function dash(pts,c,wd){ ctx.strokeStyle=c; ctx.lineWidth=wd; ctx.setLineDash([7,6]);
+    ctx.beginPath(); ctx.moveTo(pts[0].x,pts[0].y); ctx.lineTo(pts[1].x,pts[1].y); ctx.stroke(); ctx.setLineDash([]); }
+  function seg2(a,b,c){ ctx.strokeStyle=c; ctx.lineWidth=3.2; ctx.lineCap='round';
+    ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke(); }
+  function tick(mx,my,a,b){       // 같은 길이 표시 (짧은 이중선)
+    let dx=b.x-a.x, dy=b.y-a.y; const L=Math.hypot(dx,dy)||1;
+    const nx=-dy/L, ny=dx/L;
+    ctx.strokeStyle='#ea580c'; ctx.lineWidth=2.4;
+    for(const o of [-2.6,2.6]){
+      const cx2=mx+(dx/L)*o, cy2=my+(dy/L)*o;
+      ctx.beginPath(); ctx.moveTo(cx2-nx*7,cy2-ny*7); ctx.lineTo(cx2+nx*7,cy2+ny*7); ctx.stroke();
+    }
+  }
+  function bubble(px,yQ){
+    const msg1='접는 선은 P̅F̅의 수직이등분선!';
+    const msg2='→ QF = QP = (Q에서 준선까지 거리)';
+    const msg3='→ Q는 초점 F, 준선이 아랫변인 포물선 위의 점';
+    ctx.font='bold 13.5px sans-serif';
+    const bw=Math.max(ctx.measureText(msg1).width,ctx.measureText(msg2).width,ctx.measureText(msg3).width)+26;
+    let bx=Math.min(Math.max(paper.x+8, px-bw/2), paper.x+paper.w-bw-8);
+    let by=paper.y+10;
+    ctx.fillStyle='rgba(255,255,255,.94)'; ctx.strokeStyle='#c7d2fe'; ctx.lineWidth=1.5;
+    roundRect(bx,by,bw,74,10); ctx.fill(); ctx.stroke();
+    ctx.fillStyle='#334155';
+    ctx.fillText(msg1,bx+13,by+22); ctx.fillText(msg2,bx+13,by+44); ctx.fillText(msg3,bx+13,by+64);
+  }
+  function roundRect(x,y,w2,h2,r){ ctx.beginPath();
+    ctx.moveTo(x+r,y); ctx.arcTo(x+w2,y,x+w2,y+h2,r); ctx.arcTo(x+w2,y+h2,x,y+h2,r);
+    ctx.arcTo(x,y+h2,x,y,r); ctx.arcTo(x,y,x+w2,y,r); ctx.closePath(); }
+}
+
+const easeInOut=t=>t<0.5 ? 2*t*t : 1-Math.pow(-2*t+2,2)/2;
+
+/* ===== 애니메이션 루프 ===== */
+function tickLoop(){
+  requestAnimationFrame(tickLoop);
+  const w=cv.clientWidth, dpr=Math.min(window.devicePixelRatio||1,2);
+  if(cv.width!==Math.round(w*dpr)) layout();
+  if(activeFold){
+    const speed=0.09;
+    if(Math.abs(activeFold.t-activeFold.target)<speed){
+      activeFold.t=activeFold.target;
+      if(activeFold.target===0){
+        if(activeFold.commit) addCrease(activeFold.px);
+        activeFold=null;
+      }
+    } else activeFold.t += (activeFold.target>activeFold.t? speed : -speed);
+    dirty=true;
+  }
+  if(dirty){ dirty=false; draw(); }
+}
+function startFold(px){
+  if(activeFold && activeFold.commit) addCrease(activeFold.px);   // 이전 접기 기록
+  activeFold={px, t:0, target:1, commit:true};
+  dirty=true;
+}
+function addCrease(px){
+  creases.push(px);
+  foldCntEl.textContent=creases.length;
+  if(creases.length===1) hintEl.style.opacity=0;
+  dirty=true;
+}
+
+/* ===== 자동 접기 ===== */
+const autoBtn=document.getElementById('autoBtn');
+autoBtn.addEventListener('click',()=>{
+  if(autoTimer){ return; }
+  autoBtn.disabled=true;
+  const N=26; let i=0;
+  const pad=paper.w*0.04;
+  const step=()=>{
+    if(i>=N){ autoTimer=null; autoBtn.disabled=false; return; }
+    const px=paper.x+pad + (paper.w-2*pad)*(i/(N-1));
+    startFold(px);
+    setTimeout(()=>{ if(activeFold) activeFold.target=0; },200);
+    i++;
+    autoTimer=setTimeout(step, 380);
+  };
+  step();
+});
+
+/* ===== 버튼 ===== */
+const curveBtn=document.getElementById('curveBtn'), whyBtn=document.getElementById('whyBtn');
+curveBtn.addEventListener('click',()=>{ showCurve=!showCurve; curveBtn.classList.toggle('on',showCurve); dirty=true; });
+whyBtn.addEventListener('click',()=>{ showWhy=!showWhy; whyBtn.classList.toggle('on',showWhy); dirty=true; });
+document.getElementById('clearBtn').addEventListener('click',()=>{
+  creases=[]; foldCntEl.textContent=0; dirty=true;
+});
+
+/* ===== 포인터 ===== */
+function pos(e){ const r=cv.getBoundingClientRect(); return {x:e.clientX-r.left, y:e.clientY-r.top}; }
+cv.addEventListener('pointerdown',e=>{
+  const p=pos(e);
+  cv.setPointerCapture(e.pointerId);
+  if(Math.hypot(p.x-F.x,p.y-F.y)<26){                 // F 드래그
+    draggingF=true; return;
+  }
+  if(showWhy && Math.abs(p.y-paper.B)<34 && Math.abs(p.x-whyPx)<30){  // 원리 P 드래그
+    draggingWhy=true; return;
+  }
+  if(Math.abs(p.y-paper.B)<34 && p.x>paper.x+6 && p.x<paper.x+paper.w-6){  // 접기 시작
+    draggingEdge=true;
+    startFold(p.x);
+  }
+});
+cv.addEventListener('pointermove',e=>{
+  const p=pos(e);
+  if(draggingF){
+    F.x=p.x; F.y=p.y; clampF();
+    if(creases.length){ creases=[]; foldCntEl.textContent=0; }   // F가 바뀌면 이전 주름은 무효
+    dirty=true;
+  } else if(draggingWhy){
+    whyPx=Math.max(paper.x+8,Math.min(paper.x+paper.w-8,p.x)); dirty=true;
+  } else if(draggingEdge && activeFold){
+    activeFold.px=Math.max(paper.x+8,Math.min(paper.x+paper.w-8,p.x)); dirty=true;
+  }
+});
+const up=e=>{
+  if(draggingEdge && activeFold) activeFold.target=0;   // 펴기 → 완료 시 주름 기록
+  draggingF=draggingEdge=draggingWhy=false;
+};
+cv.addEventListener('pointerup',up);
+cv.addEventListener('pointercancel',up);
+
+/* ===== 시작 ===== */
+layout(); tickLoop();
+window.addEventListener('resize',layout);
+// (디버그)
+window.__fold={ get paper(){return paper;}, get F(){return F;}, get n(){return creases.length;},
+                 get why(){return showWhy;}, get curve(){return showCurve;} };
+</script>
+</body>
+</html>
