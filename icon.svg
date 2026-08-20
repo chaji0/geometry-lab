@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="board" x1="0" y1="0" x2="0.35" y2="1">
+      <stop offset="0" stop-color="#d3352b"/>
+      <stop offset="0.5" stop-color="#b32017"/>
+      <stop offset="1" stop-color="#7e100c"/>
+    </linearGradient>
+    <filter id="grain">
+      <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" result="n"/>
+      <feColorMatrix in="n" type="matrix" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.05 0"/>
+      <feComposite operator="over" in2="SourceGraphic"/>
+    </filter>
+    <filter id="chalk" x="-10%" y="-10%" width="120%" height="120%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="2" seed="11" result="t"/>
+      <feDisplacementMap in="SourceGraphic" in2="t" scale="7"/>
+    </filter>
+  </defs>
+
+  <!-- 빨간 칠판 -->
+  <rect x="0" y="0" width="512" height="512" rx="100" fill="url(#board)"/>
+  <rect x="0" y="0" width="512" height="512" rx="100" fill="#ffffff" opacity="0.03" filter="url(#grain)"/>
+  <ellipse cx="150" cy="390" rx="130" ry="70" fill="#ffffff" opacity="0.05"/>
+  <ellipse cx="390" cy="130" rx="110" ry="80" fill="#ffffff" opacity="0.045"/>
+  <rect x="13" y="13" width="486" height="486" rx="90" fill="none" stroke="#ffffff" stroke-opacity="0.22" stroke-width="7"/>
+
+  <!-- 정사면체 T(254,96) A(120,400) B(402,386) C(280,306·구 뒤에 숨음) + 내접구 O(264,297) r74 -->
+  <g filter="url(#chalk)" stroke="#ffffff" fill="none" stroke-linecap="round" stroke-linejoin="round">
+
+    <!-- 숨은 모서리 (구 뒤로 사라짐: 실루엣에서 끊김) -->
+    <g stroke-width="11" stroke-dasharray="19 16" stroke-opacity="0.62">
+      <path d="M 75 449 L 194 379"/>
+      <path d="M 447 430 L 348 364"/>
+      <path d="M 252 47 L 273 215"/>
+    </g>
+
+    <!-- 내접구 -->
+    <circle cx="265" cy="313" r="98" stroke-width="15" stroke-opacity="0.95"/>
+    <ellipse cx="265" cy="313" rx="98" ry="30" stroke-width="8.5" stroke-dasharray="14 12" stroke-opacity="0.75"/>
+    <path d="M 206 267 A 77 77 0 0 1 250 238" stroke-width="7.5" stroke-opacity="0.5"/>
+
+    <!-- 보이는 모서리 -->
+    <g stroke-width="18" stroke-opacity="0.96">
+      <path d="M 75 449 L 447 430"/>
+      <path d="M 75 449 L 252 47"/>
+      <path d="M 447 430 L 252 47"/>
+    </g>
+
+    <!-- 꼭짓점 (뒤 꼭짓점은 구에 가려 안 보임) -->
+    <circle cx="75" cy="449" r="14" fill="#ffffff"/>
+    <circle cx="447" cy="430" r="14" fill="#ffffff"/>
+    <circle cx="252" cy="47" r="14" fill="#ffffff"/>
+  </g>
+</svg>
