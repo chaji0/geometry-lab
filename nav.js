@@ -6,7 +6,7 @@
      먼저 선언한 뒤 이 파일을 불러오면 하단 바가 자동으로 생깁니다.
    ════════════════════════════════════════════════════════════ */
 window.GEO_CONFIG = {
-  VERSION: "v6",                    // ★ 업로드할 때마다 하나씩 올려 주세요 (v6, v7, …)
+  VERSION: "v7",                    // ★ 업로드할 때마다 하나씩 올려 주세요 (v6, v7, …)
   APPS_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbx3Ay-gudjjSoRlngyu54umJ9uYRAKhINuwcv229UZUN9_oIQfm9vwAxM32FOPR9wV1/exec",
   ACTIVITIES: [
     { id:'conic',    href:'conic.html',    icon:'⚾', short:'원뿔곡선',
@@ -107,6 +107,21 @@ window.GEO_addGButton = function(){
   .gmBtns #gmSend { background:#1d4ed8; border:none; color:#fff; }
   .gmBtns button:disabled { opacity:.55; cursor:wait; }
 
+  .gmPhotoRow { display:flex; align-items:center; gap:10px; margin-top:10px; }
+  #gmPhotoBtn {
+    display:inline-flex; align-items:center; gap:6px; cursor:pointer;
+    padding:9px 13px; font-size:13.5px; font-weight:700; border-radius:10px;
+    border:1.5px dashed #94a3b8; color:#475569; background:#f8fafc;
+  }
+  #gmPhotoBtn:hover { border-color:#0284c7; color:#0369a1; }
+  #gmThumbWrap { display:none; gap:10px; flex-wrap:wrap; }
+  .gmThumbOne { position:relative; display:inline-block; }
+  .gmThumbOne img { height:56px; border-radius:9px; border:1.5px solid #cbd5e1; display:block; }
+  .gmDel {
+    position:absolute; top:-8px; right:-8px; width:22px; height:22px; border-radius:50%;
+    border:none; background:#ef4444; color:#fff; font-size:12px; font-weight:900; cursor:pointer;
+    line-height:1;
+  }
   #gtoast {
     position:fixed; left:50%; bottom:74px; transform:translateX(-50%);
     background:#111827; color:#fff; font-size:13.5px; padding:10px 18px;
@@ -143,7 +158,13 @@ window.GEO_addGButton = function(){
       <h2>📌 오늘 여기까지!</h2>
       <p>오늘 배운 내용, 한 줄 소감을 선생님께 보낼까요?<br>
          <span style="color:#94a3b8">(${name || '학생'} · ${me.short})</span></p>
-      <textarea id="gmText" placeholder="예: 오늘 배운 것 중 가장 기억에 남는 것을 적어 보세요!"></textarea>
+      <textarea id="gmText" placeholder="예: 포물선의 활용 용도가 궁금해요!"></textarea>
+      <div class="gmPhotoRow">
+        <label id="gmPhotoBtn">📷 사진 추가
+          <input type="file" id="gmPhotoIn" accept="image/*" capture="environment" hidden>
+        </label>
+        <div id="gmThumbWrap"></div>
+      </div>
       <div class="gmBtns">
         <button id="gmSkip">건너뛰기</button>
         <button id="gmSend">보내기</button>
@@ -184,23 +205,69 @@ window.GEO_addGButton = function(){
     showToast(`'오늘 여기까지' 책갈피를 꽂았습니다. 다음에 [${me.short}]부터 열립니다.`);
   });
 
+  /* 사진 선택 → 자동 압축 (긴 변 1600px — 연습장 손글씨가 잘 보이게, 최대 3장) */
+  const photos = [];
+  const MAXPHOTOS = 3;
+  const photoIn = document.getElementById('gmPhotoIn');
+  const thumbWrap = document.getElementById('gmThumbWrap');
+  const photoBtn = document.getElementById('gmPhotoBtn');
+  function renderThumbs(){
+    thumbWrap.style.display = photos.length ? 'flex' : 'none';
+    thumbWrap.innerHTML = photos.map((d,i)=>
+      `<span class="gmThumbOne"><img src="${d}" alt="사진${i+1}">`+
+      `<button data-i="${i}" class="gmDel" title="사진 빼기">✕</button></span>`).join('');
+    photoBtn.style.display = photos.length >= MAXPHOTOS ? 'none' : 'inline-flex';
+    photoBtn.childNodes[0].textContent = photos.length ? `📷 사진 더 추가 (${photos.length}/${MAXPHOTOS})` : '📷 사진 추가 ';
+    thumbWrap.querySelectorAll('.gmDel').forEach(b=>
+      b.addEventListener('click', ()=>{ photos.splice(+b.dataset.i,1); renderThumbs(); }));
+  }
+  photoIn.addEventListener('change', ()=>{
+    const f = photoIn.files && photoIn.files[0];
+    photoIn.value = '';
+    if(!f || photos.length >= MAXPHOTOS) return;
+    const img = new Image();
+    img.onload = ()=>{
+      const MAX = 1600;
+      const k = Math.min(1, MAX/Math.max(img.width, img.height));
+      const c = document.createElement('canvas');
+      c.width = Math.round(img.width*k); c.height = Math.round(img.height*k);
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+      photos.push(c.toDataURL('image/jpeg', 0.75));
+      renderThumbs();
+      URL.revokeObjectURL(img.src);
+    };
+    img.src = URL.createObjectURL(f);
+  });
+
   document.getElementById('gmSend').addEventListener('click', async ()=>{
     const text = document.getElementById('gmText').value.trim();
-    if(!text){ showToast('소감을 한 줄만 적어 주세요 🙂'); return; }
+    if(!text && !photos.length){ showToast('소감 한 줄이나 사진을 담아 주세요 🙂'); return; }
     const btn = document.getElementById('gmSend');
-    btn.disabled = true; btn.textContent = '보내는 중…';
+    btn.disabled = true; btn.textContent = photos.length ? '사진 보내는 중…' : '보내는 중…';
     try{
-      const url = window.GEO_CONFIG.APPS_SCRIPT_URL
-        + '?action=feedback&sid=' + encodeURIComponent(sid)
-        + '&name=' + encodeURIComponent(name)
-        + '&page=' + encodeURIComponent(me.short)
-        + '&text=' + encodeURIComponent(text.slice(0,500));
-      const res = await fetch(url);
-      const r = await res.json();
+      let r;
+      if(photos.length){
+        // 사진은 POST (본문에 담아 전송)
+        const res = await fetch(window.GEO_CONFIG.APPS_SCRIPT_URL, {
+          method: 'POST',
+          body: JSON.stringify({ action:'feedback', sid, name, page:me.short,
+                                 text:text.slice(0,500), photos })
+        });
+        r = await res.json();
+      } else {
+        const url = window.GEO_CONFIG.APPS_SCRIPT_URL
+          + '?action=feedback&sid=' + encodeURIComponent(sid)
+          + '&name=' + encodeURIComponent(name)
+          + '&page=' + encodeURIComponent(me.short)
+          + '&text=' + encodeURIComponent(text.slice(0,500));
+        const res = await fetch(url);
+        r = await res.json();
+      }
       if(!r.ok) throw new Error('server');
       setBookmark(); markDone();
       bg.classList.remove('show');
       document.getElementById('gmText').value = '';
+      photos.length = 0; renderThumbs();
       showToast('소감을 보냈어요! 책갈피도 꽂았습니다. 홈에서 완료 도장을 확인하세요 ✅');
     }catch(e){
       showToast('전송에 실패했어요. 인터넷 연결을 확인하고 다시 시도해 주세요.');
