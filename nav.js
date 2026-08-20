@@ -6,6 +6,7 @@
      먼저 선언한 뒤 이 파일을 불러오면 하단 바가 자동으로 생깁니다.
    ════════════════════════════════════════════════════════════ */
 window.GEO_CONFIG = {
+  VERSION: "v6",                    // ★ 업로드할 때마다 하나씩 올려 주세요 (v6, v7, …)
   APPS_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbx3Ay-gudjjSoRlngyu54umJ9uYRAKhINuwcv229UZUN9_oIQfm9vwAxM32FOPR9wV1/exec",
   ACTIVITIES: [
     { id:'conic',    href:'conic.html',    icon:'⚾', short:'원뿔곡선',
@@ -17,6 +18,9 @@ window.GEO_CONFIG = {
     { id:'concept',  href:'concept.html',  icon:'📘', short:'개념정리',
       title:'포물선 개념 정리',
       desc:'초점과 준선으로 정의되는 포물선 — p 값을 움직이며 y²=4px, x²=4py의 그래프·초점·준선을 확인해요.' },
+    { id:'apply',    href:'apply.html',    icon:'🔦', short:'포물선활용',
+      title:'포물선의 활용',
+      desc:'태양열 조리기와 자동차 전조등 — 초점의 위치가 왜 중요한지 광선 시뮬레이션으로 확인해요.' },
     { id:'geogebra', href:'geogebra.html', icon:'📐', short:'지오지브라',
       title:'지오지브라',
       desc:'앱 안에서 바로 열리는 지오지브라 — 클래식·그래핑·기하·3D 계산기. (인터넷 연결 필요)' }

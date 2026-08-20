@@ -34,6 +34,11 @@ if (localStorage.getItem('geoAppOk') !== '1') location.replace('index.html');
   }
   #panel h2 { font-size:15.5px; color:#0f172a; margin-bottom:10px; }
   #panel h2.dim { color:#94a3b8; margin-top:22px; }
+  .figBox {
+    border:1px solid #e2e8f0; border-radius:12px; padding:6px 8px; background:#fff;
+    margin-bottom:12px; display:flex; justify-content:center;
+  }
+  .fcard i, .cond i { font-family:Georgia,'Times New Roman',serif; }
   .defBox {
     border:1px solid #e2e8f0; background:#f8fafc; border-radius:12px;
     padding:11px 13px; font-size:13px; color:#475569; line-height:1.7; margin-bottom:12px;
@@ -83,24 +88,56 @@ if (localStorage.getItem('geoAppOk') !== '1') location.replace('index.html');
 <div id="main">
   <div id="panel">
     <h2>1. 포물선의 방정식</h2>
-    <div class="defBox">
-      <b>포물선</b> : 평면 위에서 한 점 <b>F(초점)</b>와 한 직선 <b>l(준선)</b>에
-      이르는 거리가 <b>같은</b> 점들이 그리는 곡선.
-      꼭짓점은 원점, 축은 좌표축이 되도록 놓으면 ↓
+    <div class="figBox">
+      <svg viewBox="0 0 230 185" style="width:100%;max-width:270px">
+        <!-- 준선 l -->
+        <line x1="55" y1="10" x2="55" y2="162" stroke="#2ea7d8" stroke-width="3.2"/>
+        <text x="47" y="16" font-family="Georgia" font-style="italic" font-size="14" fill="#111">l</text>
+        <!-- 축 -->
+        <line x1="14" y1="95" x2="222" y2="95" stroke="#475569" stroke-width="1.6"/>
+        <!-- 포물선 -->
+        <path d="M 140.8 17 Q 19.2 95 140.8 173" fill="none" stroke="#e8442e" stroke-width="3"/>
+        <!-- P에서 준선·초점까지 (같은 길이) -->
+        <line x1="112" y1="38" x2="56.5" y2="38" stroke="#334155" stroke-width="1.5"/>
+        <path d="M 62 38 l 0 -6 l -6 0" fill="none" stroke="#334155" stroke-width="1.3"/>
+        <line x1="112" y1="38" x2="105" y2="95" stroke="#334155" stroke-width="1.5"/>
+        <!-- 같은 길이 표시 -->
+        <g stroke="#334155" stroke-width="1.4">
+          <line x1="82" y1="34" x2="80" y2="42"/><line x1="87" y1="34" x2="85" y2="42"/>
+          <line x1="104.5" y1="64" x2="112.5" y2="66"/><line x1="103.5" y1="69" x2="111.5" y2="71"/>
+        </g>
+        <circle cx="112" cy="38" r="2.6" fill="#334155"/>
+        <!-- 초점 F, 꼭짓점 -->
+        <circle cx="105" cy="95" r="3.4" fill="#111"/>
+        <text x="99" y="111" font-family="Georgia" font-size="13.5" fill="#111">F</text>
+        <circle cx="80" cy="95" r="2.6" fill="#e8442e"/>
+        <!-- 라벨 -->
+        <g font-size="11.5" font-weight="700" text-anchor="middle">
+          <line x1="34" y1="66" x2="78" y2="92" stroke="#c4b5fd" stroke-width="1"/>
+          <rect x="8" y="52" width="52" height="17" rx="8" fill="#ede9fe"/>
+          <text x="34" y="64.5" fill="#6d28d9">꼭짓점</text>
+          <line x1="152" y1="76" x2="109" y2="93" stroke="#86efac" stroke-width="1"/>
+          <rect x="132" y="62" width="40" height="17" rx="8" fill="#dcfce7"/>
+          <text x="152" y="74.5" fill="#15803d">초점</text>
+          <rect x="182" y="103" width="30" height="17" rx="8" fill="#ffedd5"/>
+          <text x="197" y="115.5" fill="#c2410c">축</text>
+          <line x1="30" y1="140" x2="54" y2="130" stroke="#93c5fd" stroke-width="1"/>
+          <rect x="8" y="140" width="40" height="17" rx="8" fill="#dbeafe"/>
+          <text x="28" y="152.5" fill="#1d4ed8">준선</text>
+        </g>
+      </svg>
     </div>
 
     <div class="fcard on" id="card1">
-      <div class="cond">(1) 초점이 <b>F(p, 0)</b>, 준선이 <b>x = −p</b> 인 포물선</div>
-      <div class="formula">y<sup>2</sup> = 4px <span style="font-size:13px;color:#94a3b8">(단, p ≠ 0)</span></div>
+      <div class="cond">(1) 초점이 <b>F(<i>p</i>, 0)</b>, 준선이 <b><i>x</i> = −<i>p</i></b> 인 포물선</div>
+      <div class="formula"><i>y</i><sup>2</sup> = 4<i>px</i> <span style="font-size:13px;color:#94a3b8">(단, <i>p</i> ≠ 0)</span></div>
       <div class="now" id="now1"></div>
-      <div class="tapHint">👆 눌러서 빨간 그래프 켜기/끄기</div>
     </div>
 
     <div class="fcard" id="card2">
-      <div class="cond">(2) 초점이 <b>F(0, p)</b>, 준선이 <b>y = −p</b> 인 포물선</div>
-      <div class="formula">x<sup>2</sup> = 4py <span style="font-size:13px;color:#94a3b8">(단, p ≠ 0)</span></div>
+      <div class="cond">(2) 초점이 <b>F(0, <i>p</i>)</b>, 준선이 <b><i>y</i> = −<i>p</i></b> 인 포물선</div>
+      <div class="formula"><i>x</i><sup>2</sup> = 4<i>py</i> <span style="font-size:13px;color:#94a3b8">(단, <i>p</i> ≠ 0)</span></div>
       <div class="now" id="now2"></div>
-      <div class="tapHint">👆 눌러서 파란 그래프 켜기/끄기</div>
     </div>
 
     <h2 class="dim">2. 접선의 방정식</h2>
@@ -258,10 +295,10 @@ const pVal = document.getElementById('pVal'), pSlider = document.getElementById(
 function updateNow(){
   pVal.textContent = fmt(p);
   now1.innerHTML = show1
-    ? `현재: <b style="color:#dc2626">y² = ${fmt(4*p)}x</b> · 초점 F(${fmt(p)}, 0) · 준선 x = ${fmt(-p)}`
+    ? `현재: <b style="color:#dc2626"><i>y</i>² = ${fmt(4*p)}<i>x</i></b> · 초점 F(${fmt(p)}, 0) · 준선 <i>x</i> = ${fmt(-p)}`
     : '&nbsp;';
   now2.innerHTML = show2
-    ? `현재: <b style="color:#2563eb">x² = ${fmt(4*p)}y</b> · 초점 F(0, ${fmt(p)}) · 준선 y = ${fmt(-p)}`
+    ? `현재: <b style="color:#2563eb"><i>x</i>² = ${fmt(4*p)}<i>y</i></b> · 초점 F(0, ${fmt(p)}) · 준선 <i>y</i> = ${fmt(-p)}`
     : '&nbsp;';
 }
 card1.addEventListener('click', ()=>{ show1=!show1; card1.classList.toggle('on',show1); updateNow(); dirty=true; });
