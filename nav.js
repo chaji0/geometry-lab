@@ -6,7 +6,7 @@
      먼저 선언한 뒤 이 파일을 불러오면 하단 바가 자동으로 생깁니다.
    ════════════════════════════════════════════════════════════ */
 window.GEO_CONFIG = {
-  VERSION: "v8",                    // ★ 업로드할 때마다 하나씩 올려 주세요 (v8, v9, …)
+  VERSION: "v9",                    // ★ 업로드할 때마다 하나씩 올려 주세요 (v9, v10, …)
   APPS_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbx3Ay-gudjjSoRlngyu54umJ9uYRAKhINuwcv229UZUN9_oIQfm9vwAxM32FOPR9wV1/exec",
   ACTIVITIES: [
     { id:'conic',    href:'conic.html',    icon:'⚾', short:'원뿔곡선',
@@ -51,6 +51,8 @@ window.GEO_addGButton = function(){
    ════════════════════════════════════════════════════════════ */
 window.GEO_addExtraButtons = function(){
   if(document.getElementById('qnaBtnFloat')) return;
+  // G 버튼이 있으면 그 왼쪽부터, 없으면(지오지브라 페이지) 맨 오른쪽부터
+  const base = document.getElementById('gBtnFloat') ? 60 : 12;
   const mk = (id, right, emoji, border, shadow, title, onClick)=>{
     const b = document.createElement('button');
     b.id = id; b.title = title; b.textContent = emoji;
@@ -64,8 +66,8 @@ window.GEO_addExtraButtons = function(){
     b.addEventListener('click', onClick);
     document.body.appendChild(b);
   };
-  mk('galBtnFloat', 60,  '📸', '#0d9488', 'rgba(13,148,136,.28)',  '나의 과제방', ()=>window.GEO_openGallery());
-  mk('qnaBtnFloat', 108, '💬', '#f59e0b', 'rgba(245,158,11,.30)', '질문',        ()=>window.GEO_openQnA());
+  mk('galBtnFloat', base,    '📸', '#0d9488', 'rgba(13,148,136,.28)',  '나의 과제방', ()=>window.GEO_openGallery());
+  mk('qnaBtnFloat', base+48, '💬', '#f59e0b', 'rgba(245,158,11,.30)', '질문',        ()=>window.GEO_openQnA());
 };
 
 /* ── 공용 모달/토스트 (과제방·질문에서 함께 사용) ── */
@@ -296,6 +298,7 @@ window.GEO_openQnA = async function(){
 (function(){
   if(!window.PAGE_ID) return;                       // index.html 에서는 설정만 사용
   if(window.PAGE_ID !== 'geogebra') window.GEO_addGButton();   // G 바로가기 (지오지브라 페이지 제외)
+  window.GEO_addExtraButtons();                     // 💬 질문 · 📸 나의 과제방 (모든 페이지)
   const acts = window.GEO_CONFIG.ACTIVITIES;
   const idx = acts.findIndex(a => a.id === window.PAGE_ID);
   if(idx < 0) return;
