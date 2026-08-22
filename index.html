@@ -155,7 +155,7 @@
     <button id="logout">다른 학생으로 입장하기</button>
   </div>
 
-  <div class="foot">승인된 학생만 입장할 수 있어요.<br>입장이 안 되면 선생님께 승인을 요청하세요 🙂</div>
+  <div class="foot">승인된 학생만 입장할 수 있어요.<br>입장이 안 되면 선생님께 승인을 요청하세요 🙂<br><span id="verBadge" style="color:#cbd5e1"></span></div>
 </div>
 
 <script>
@@ -212,6 +212,7 @@ function openMenu(name){
   gate.style.display='none';
   menu.classList.add('show');
   window.GEO_addGButton();                          // 우측 상단 지오지브라 바로가기
+  window.GEO_addExtraButtons();                     // 💬 질문 · 📸 나의 과제방
 }
 function hardLogout(){
   localStorage.removeItem('geoAppOk');
@@ -264,6 +265,8 @@ $('unit1').addEventListener('click', ()=>{ location.hash = '#home'; });
 $('backToc').addEventListener('click', ()=>{ location.hash = '#toc'; });
 
 $('logout').addEventListener('click', hardLogout);
+
+document.getElementById('verBadge').textContent = GEO_CONFIG.VERSION;
 
 /* 로그인 유지: 승인받았던 학생은 즉시 입장 (백그라운드로 재확인만) */
 window.addEventListener('load', ()=>{
