@@ -6,7 +6,7 @@
      먼저 선언한 뒤 이 파일을 불러오면 하단 바가 자동으로 생깁니다.
    ════════════════════════════════════════════════════════════ */
 window.GEO_CONFIG = {
-  VERSION: "v1.10",                 // ★ 1단원=v1.x, 2단원=v2.x, 3단원=v3.x — 업로드마다 뒷자리 +1 (v1.11, v1.12, …)
+  VERSION: "v1.11",                 // ★ 1단원=v1.x, 2단원=v2.x, 3단원=v3.x — 업로드마다 뒷자리 +1 (v1.11, v1.12, …)
   APPS_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbx3Ay-gudjjSoRlngyu54umJ9uYRAKhINuwcv229UZUN9_oIQfm9vwAxM32FOPR9wV1/exec",
   ACTIVITIES: [
     { id:'conic',    href:'conic.html',    icon:'⚾', short:'원뿔곡선',
@@ -683,15 +683,16 @@ resize();
 /* ── 스타일 ── */
 var css = document.createElement('style');
 css.textContent =
-  /* 필기바: 하단 내비 안(이전 버튼 오른쪽)에 끼워 넣음 */
-  '#gnBar{display:none;align-items:center;gap:3px;background:#fff;border:1.5px solid #e2e8f0;'+
-  'border-radius:12px;padding:3px 6px;flex:1 1 auto;min-width:0;flex-wrap:wrap;justify-content:flex-start;'+
+  /* 필기바: 상단 중앙 플로팅 팝업 (⋮⋮ 손잡이로 끌어서 이동 가능) */
+  '#gnBar{position:fixed;top:8px;left:50%;transform:translateX(-50%);z-index:1000;display:none;width:max-content;'+
+  'align-items:center;gap:3px;background:#fff;border:1px solid #e2e8f0;border-radius:14px;'+
+  'padding:5px 8px;box-shadow:0 6px 24px rgba(15,23,42,.22);max-width:96vw;flex-wrap:wrap;justify-content:center;'+
   "font-family:'Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif;}"+
   '#gnBar.show{display:flex;}'+
-  '#gnBar.gnFloat{position:fixed;bottom:10px;left:10px;z-index:1000;box-shadow:0 6px 24px rgba(15,23,42,.22);max-width:96vw;}'+
-  /* 필기바는 가운데 홈 버튼을 침범하지 않는 폭까지만 (홈은 제자리 유지) */
-  'body.gnWriting #gnav{flex-wrap:wrap;}'+
-  'body.gnWriting #gnBar{flex:0 1 auto;max-width:calc(50vw - 145px);margin-right:auto;}'+
+  '#gnGrip{cursor:grab;touch-action:none;color:#cbd5e1;display:flex;align-items:center;'+
+  'padding:2px 4px 2px 2px;border-radius:8px;align-self:stretch;}'+
+  '#gnGrip:hover{color:#94a3b8;background:#f8fafc;}'+
+  '#gnGrip:active{cursor:grabbing;}'+
   '#gnBar .sep{width:1px;height:24px;background:#e2e8f0;margin:0 4px;}'+
   '#gnBar button{border:none;background:none;cursor:pointer;border-radius:9px;padding:0;'+
   'width:34px;height:34px;display:flex;align-items:center;justify-content:center;color:#475569;}'+
@@ -748,6 +749,12 @@ var ICON = {
 var bar = document.createElement('div');
 bar.id = 'gnBar';
 bar.innerHTML =
+  '<span id="gnGrip" title="끌어서 이동">'+
+    '<svg width="10" height="20" viewBox="0 0 10 20" fill="currentColor">'+
+    '<circle cx="3" cy="4" r="1.6"/><circle cx="7" cy="4" r="1.6"/>'+
+    '<circle cx="3" cy="10" r="1.6"/><circle cx="7" cy="10" r="1.6"/>'+
+    '<circle cx="3" cy="16" r="1.6"/><circle cx="7" cy="16" r="1.6"/></svg>'+
+  '</span>'+
   '<button id="gnT_pen" title="펜">'+ICON.pen+'</button>'+
   '<button id="gnT_hl" title="형광펜">'+ICON.hl+'</button>'+
   '<button id="gnT_er" title="지우개 (획 단위)">'+ICON.er+'</button>'+
@@ -762,6 +769,46 @@ bar.innerHTML =
   '<button id="gnSave" title="연습장 페이지로 저장">저장</button>'+
   '<button id="gnClose" title="닫기 (저장하지 않고 접기)">✕</button>';
 document.body.appendChild(bar);
+/* 필기바 드래그 이동 (위치는 기기에 기억) */
+var barPos = null;
+try{ barPos = JSON.parse(localStorage.getItem('geo.gnmemo.barPos') || 'null'); }catch(e){}
+function applyBarPos(){
+  if(!barPos){
+    bar.style.transform = 'translateX(-50%)';
+    bar.style.left = '50%'; bar.style.top = '8px';
+    return;
+  }
+  var w = bar.offsetWidth || 540, h = bar.offsetHeight || 46;
+  var x = Math.min(Math.max(barPos.x, 4), window.innerWidth  - w - 4);
+  var y = Math.min(Math.max(barPos.y, 4), window.innerHeight - h - 4);
+  bar.style.transform = 'none';
+  bar.style.left = x + 'px'; bar.style.top = y + 'px';
+}
+(function(){
+  var grip = bar.querySelector('#gnGrip');
+  var gid = null, offX = 0, offY = 0;
+  grip.addEventListener('pointerdown', function(e){
+    e.preventDefault();
+    gid = e.pointerId;
+    var r = bar.getBoundingClientRect();
+    offX = e.clientX - r.left; offY = e.clientY - r.top;
+    try{ grip.setPointerCapture(gid); }catch(err){}
+  });
+  grip.addEventListener('pointermove', function(e){
+    if(e.pointerId !== gid) return;
+    barPos = { x: e.clientX - offX, y: e.clientY - offY };
+    applyBarPos();
+  });
+  function done(e){
+    if(e.pointerId !== gid) return;
+    gid = null;
+    try{ localStorage.setItem('geo.gnmemo.barPos', JSON.stringify(barPos)); }catch(err){}
+  }
+  grip.addEventListener('pointerup', done);
+  grip.addEventListener('pointercancel', done);
+})();
+window.addEventListener('resize', function(){ if(mode) applyBarPos(); });
+
 var hint = document.createElement('div');
 hint.id = 'gnHint';
 document.body.appendChild(hint);
@@ -982,13 +1029,6 @@ function addBtn(){
       'border:1.5px solid #cbd5e1;border-radius:11px;padding:6px 9px;cursor:pointer;';
     document.body.appendChild(btn);
   }
-  // 필기바를 하단 내비 안(이전 버튼 오른쪽)에 끼움
-  var prev = document.getElementById('gnavPrev');
-  if(prev && prev.parentNode){
-    prev.insertAdjacentElement('afterend', bar);
-  } else {
-    bar.classList.add('gnFloat');                 // 내비가 없으면 화면 왼쪽 아래에 띄움
-  }
   // 필기 중에 이전·홈·다음·책갈피를 누르면 자동 저장
   ['gnavPrev','gnavNext','gnavHome','gnavMark'].forEach(function(id){
     var el = document.getElementById(id);
@@ -1017,8 +1057,9 @@ function setMode(on){
   bar.classList.toggle('show', on);
   document.body.classList.toggle('gnWriting', on);
   cv.style.pointerEvents = on ? 'auto' : 'none';
-  resize();                                        // 내비 높이가 변하므로 필기 영역 다시 계산
+  resize();
   if(on){
+    applyBarPos();
     renderBar();
     if(!strokes.length && curPage < 0)
       showHint('화면 아무 곳에나 바로 써 보세요 ✏️ (저장을 눌러야 연습장에 남아요)');
