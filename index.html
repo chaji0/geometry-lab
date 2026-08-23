@@ -100,6 +100,36 @@
 </style>
 </head>
 <body>
+<!-- ── 로딩(스플래시) 화면 ── -->
+<div id="splash">
+  <img id="splashEmblem" src="splash-emblem.png" alt="">
+  <div id="splashTitle">GEOMETRY</div>
+  <div id="splashLine"></div>
+  <div id="splashSub">v1.10&ensp;·&ensp;제작 차지영선생님</div>
+  <!-- ★ 로딩화면의 버전 표기는 자동 갱신하지 않음 — 선생님이 바꿔 달라고 할 때만 수정 -->
+</div>
+<style>
+  #splash {
+    position:fixed; inset:0; z-index:3000;
+    background:radial-gradient(120% 90% at 50% 32%, #c62828 0%, #b71c1c 45%, #7f1010 100%);
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    transition:opacity .55s ease;
+  }
+  #splash.hide { opacity:0; pointer-events:none; }
+  #splashEmblem { width:118px; height:118px; filter:drop-shadow(0 6px 18px rgba(0,0,0,.35)); }
+  #splashTitle {
+    margin-top:34px; color:#fff; font-size:31px; font-weight:500;
+    letter-spacing:.42em; text-indent:.42em; font-family:'Noto Sans KR','Apple SD Gothic Neo',sans-serif;
+  }
+  #splashLine {
+    margin-top:18px; width:270px; height:1.5px; border-radius:1px;
+    background:rgba(203,213,225,.65);
+  }
+  #splashSub {
+    margin-top:15px; color:rgba(255,255,255,.85); font-size:13.5px; font-weight:500;
+    letter-spacing:.06em;
+  }
+</style>
 <div class="wrap">
   <div class="logo">
     <div class="big">📐</div>
@@ -267,6 +297,13 @@ $('backToc').addEventListener('click', ()=>{ location.hash = '#toc'; });
 $('logout').addEventListener('click', hardLogout);
 
 document.getElementById('verBadge').textContent = GEO_CONFIG.VERSION;
+
+/* 스플래시: 잠깐 보여주고 부드럽게 사라짐 (버전 글자는 index.html에 고정 표기) */
+setTimeout(()=>{
+  const sp = document.getElementById('splash');
+  sp.classList.add('hide');
+  setTimeout(()=>sp.remove(), 650);
+}, 1400);
 
 /* 로그인 유지: 승인받았던 학생은 즉시 입장 (백그라운드로 재확인만) */
 window.addEventListener('load', ()=>{
