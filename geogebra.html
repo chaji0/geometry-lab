@@ -96,7 +96,7 @@ function boot(){
     language:'ko',
     showToolBar:true, showAlgebraInput:true, showMenuBar:true,
     allowStyleBar:true, enableFileFeatures:false, borderColor:'#e2e8f0',
-    appletOnLoad: () => { loading.style.display='none'; },
+    appletOnLoad: () => { loading.style.display='none'; if(window.GEO_task) GEO_task('open'); },
     scaleContainerClass:'noscale'
   };
   if(materialId) cfg.material_id = materialId;

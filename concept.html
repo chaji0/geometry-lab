@@ -77,6 +77,20 @@ if (localStorage.getItem('geoAppOk') !== '1') location.replace('index.html');
   #pbar .pv span { color:#7c3aed; }
   #pbar input[type=range] { flex:1; accent-color:#7c3aed; height:30px; }
   #pbar .note { font-size:11.5px; color:#94a3b8; flex:none; }
+  #quizBox {
+    margin-top:10px; background:#fff; border:1.5px solid #bae6fd; border-radius:14px;
+    padding:13px 14px;
+  }
+  #quizBox .qq { font-size:14px; font-weight:800; color:#0c4a6e; line-height:1.6; }
+  #quizBox .qq i { font-family:Georgia,'Times New Roman',serif; }
+  #quizBox textarea {
+    width:100%; box-sizing:border-box; margin-top:9px; height:64px; padding:9px 11px;
+    font-size:14px; font-family:inherit; border:1.5px solid #cbd5e1; border-radius:10px;
+    outline:none; resize:vertical; background:#fbfdff; line-height:1.6;
+  }
+  #quizBox textarea:focus { border-color:#0284c7; }
+  #quizBox .qState { margin-top:6px; font-size:11.5px; color:#94a3b8; }
+  #quizBox .qState.ok { color:#059669; font-weight:700; }
 </style>
 </head>
 <body>
@@ -150,6 +164,11 @@ if (localStorage.getItem('geoAppOk') !== '1') location.replace('index.html');
       <div class="pv">p = <span id="pVal">1</span></div>
       <input type="range" id="pSlider" min="-3" max="3" step="0.1" value="1">
       <div class="note">p ≠ 0</div>
+    </div>
+    <div id="quizBox">
+      <div class="qq">질문. <i>p</i> (<i>p</i> ≠ 0)의 값에 따라 포물선의 모양이 어떻게 변하나요?</div>
+      <textarea id="qAns" placeholder="슬라이더를 움직이며 관찰한 것을 적어 보세요"></textarea>
+      <div class="qState" id="qState">답을 적으면 자동으로 저장돼요 ✏️</div>
     </div>
   </div>
 </div>
@@ -326,5 +345,33 @@ updateNow();
 </script>
 <script>window.PAGE_ID="concept";</script>
 <script src="nav.js"></script>
+<script>
+/* 완료 도장 과제: p 슬라이더 움직이기 + 질문 답 채우기 (5자 이상) */
+(function(){
+  const sid = localStorage.getItem('geoSid') || 'guest';
+  const AKEY = 'geo.ans.concept.' + sid;
+  const ta = document.getElementById('qAns');
+  const st = document.getElementById('qState');
+  const saved = localStorage.getItem(AKEY);
+  function judge(){
+    const ok = ta.value.trim().length >= 5;
+    st.textContent = ok ? '저장했어요 ✓ (완료 조건 달성!)' : '답을 적으면 자동으로 저장돼요 ✏️';
+    st.className = 'qState' + (ok ? ' ok' : '');
+    if(ok && window.GEO_task) GEO_task('answer');
+  }
+  if(saved){ ta.value = saved; judge(); }
+  let tm = null;
+  ta.addEventListener('input', () => {
+    clearTimeout(tm);
+    tm = setTimeout(() => {
+      try{ localStorage.setItem(AKEY, ta.value); }catch(e){}
+      judge();
+    }, 350);
+  });
+  document.getElementById('pSlider').addEventListener('input', () => {
+    if(window.GEO_task) GEO_task('slider');
+  }, { once:false });
+})();
+</script>
 </body>
 </html>

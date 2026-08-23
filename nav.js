@@ -6,7 +6,7 @@
      먼저 선언한 뒤 이 파일을 불러오면 하단 바가 자동으로 생깁니다.
    ════════════════════════════════════════════════════════════ */
 window.GEO_CONFIG = {
-  VERSION: "v1.12",                 // ★ 1단원=v1.x, 2단원=v2.x, 3단원=v3.x — 업로드마다 뒷자리 +1 (v1.11, v1.12, …)
+  VERSION: "v1.13",                 // ★ 1단원=v1.x, 2단원=v2.x, 3단원=v3.x — 업로드마다 뒷자리 +1 (v1.11, v1.12, …)
   APPS_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbx3Ay-gudjjSoRlngyu54umJ9uYRAKhINuwcv229UZUN9_oIQfm9vwAxM32FOPR9wV1/exec",
   ACTIVITIES: [
     { id:'conic',    href:'conic.html',    icon:'⚾', short:'원뿔곡선',
@@ -68,6 +68,40 @@ window.GEO_addExtraButtons = function(){
   };
   mk('galBtnFloat', base,    '📸', '#0d9488', 'rgba(13,148,136,.28)',  '나의 과제방', ()=>window.GEO_openGallery());
   mk('qnaBtnFloat', base+48, '💬', '#f59e0b', 'rgba(245,158,11,.30)', '질문',        ()=>window.GEO_openQnA());
+};
+
+/* ════════════════════════════════════════════════════════════
+   완료 도장 트래커 — 책갈피와 별개! 페이지별 탐구 과제를 모두 수행하면
+   홈 화면에 완료 도장이 찍힌다. 각 페이지가 GEO_task('키')를 호출.
+   ════════════════════════════════════════════════════════════ */
+window.GEO_TASKS = {
+  conic:    ['tilt','cut','proof'],                    // 기울기 조절·단면 확인·증명으로 이어가기
+  folding:  ['autoBtn','curveBtn','whyBtn','clearBtn'],// 활동 버튼 4개 모두 눌러보기
+  concept:  ['slider','answer'],                       // p 슬라이더 + 질문 답 채우기
+  apply:    ['solar','head'],                          // 태양열 끓이기 성공 + 평행광 만들기 성공
+  geogebra: ['open']                                   // 지오지브라 실행
+};
+window.GEO_task = function(key){
+  const page = window.PAGE_ID;
+  if(!page) return;
+  const req = window.GEO_TASKS[page];
+  if(!req || req.indexOf(key) < 0) return;
+  const sid = localStorage.getItem('geoSid') || 'guest';
+  const K = 'geo.prog.v1.' + sid + '.' + page;
+  let d = {};
+  try{ d = JSON.parse(localStorage.getItem(K) || '{}'); }catch(e){}
+  if(d[key]) return;
+  d[key] = 1;
+  try{ localStorage.setItem(K, JSON.stringify(d)); }catch(e){}
+  if(req.every(k => d[k])){
+    let done = [];
+    try{ done = JSON.parse(localStorage.getItem('geoDone') || '[]'); }catch(e){}
+    if(done.indexOf(page) < 0){
+      done.push(page);
+      try{ localStorage.setItem('geoDone', JSON.stringify(done)); }catch(e){}
+      gxToast('🎉 이 활동을 모두 탐구했어요! 홈 화면에 완료 도장이 찍혔습니다');
+    }
+  }
 };
 
 /* ── 공용 모달/토스트 (과제방·질문에서 함께 사용) ── */
@@ -358,12 +392,12 @@ window.GEO_openQnA = async function(){
   .gmBtns button:disabled { opacity:.55; cursor:wait; }
 
   .gmPhotoRow { display:flex; align-items:center; gap:10px; margin-top:10px; }
-  #gmPhotoBtn {
+  #gmPhotoBtn, #gmAlbumBtn {
     display:inline-flex; align-items:center; gap:6px; cursor:pointer;
     padding:9px 13px; font-size:13.5px; font-weight:700; border-radius:10px;
     border:1.5px dashed #94a3b8; color:#475569; background:#f8fafc;
   }
-  #gmPhotoBtn:hover { border-color:#0284c7; color:#0369a1; }
+  #gmPhotoBtn:hover, #gmAlbumBtn:hover { border-color:#0284c7; color:#0369a1; }
   #gmThumbWrap { display:none; gap:10px; flex-wrap:wrap; }
   .gmThumbOne { position:relative; display:inline-block; }
   .gmThumbOne img { height:56px; border-radius:9px; border:1.5px solid #cbd5e1; display:block; }
@@ -410,8 +444,11 @@ window.GEO_openQnA = async function(){
          <span style="color:#94a3b8">(${name || '학생'} · ${me.short})</span></p>
       <textarea id="gmText" placeholder="예: 포물선의 활용 용도가 궁금해요!"></textarea>
       <div class="gmPhotoRow">
-        <label id="gmPhotoBtn">📷 사진 추가
+        <label id="gmPhotoBtn">📷 사진 찍기
           <input type="file" id="gmPhotoIn" accept="image/*" capture="environment" hidden>
+        </label>
+        <label id="gmAlbumBtn">🖼️ 앨범에서
+          <input type="file" id="gmAlbumIn" accept="image/*" multiple hidden>
         </label>
         <div id="gmThumbWrap"></div>
       </div>
@@ -436,12 +473,6 @@ window.GEO_openQnA = async function(){
   function setBookmark(){
     localStorage.setItem('geoBookmark', me.id);
   }
-  function markDone(){
-    let done = [];
-    try{ done = JSON.parse(localStorage.getItem('geoDone')||'[]'); }catch(e){}
-    if(!done.includes(me.id)) done.push(me.id);
-    localStorage.setItem('geoDone', JSON.stringify(done));
-  }
 
   document.getElementById('gnavMark').addEventListener('click', ()=>{
     bg.classList.add('show');
@@ -459,21 +490,23 @@ window.GEO_openQnA = async function(){
   const photos = [];
   const MAXPHOTOS = 3;
   const photoIn = document.getElementById('gmPhotoIn');
+  const albumIn = document.getElementById('gmAlbumIn');
   const thumbWrap = document.getElementById('gmThumbWrap');
   const photoBtn = document.getElementById('gmPhotoBtn');
+  const albumBtn = document.getElementById('gmAlbumBtn');
   function renderThumbs(){
     thumbWrap.style.display = photos.length ? 'flex' : 'none';
     thumbWrap.innerHTML = photos.map((d,i)=>
       `<span class="gmThumbOne"><img src="${d}" alt="사진${i+1}">`+
       `<button data-i="${i}" class="gmDel" title="사진 빼기">✕</button></span>`).join('');
-    photoBtn.style.display = photos.length >= MAXPHOTOS ? 'none' : 'inline-flex';
-    photoBtn.childNodes[0].textContent = photos.length ? `📷 사진 더 추가 (${photos.length}/${MAXPHOTOS})` : '📷 사진 추가 ';
+    const full = photos.length >= MAXPHOTOS;
+    photoBtn.style.display = full ? 'none' : 'inline-flex';
+    albumBtn.style.display = full ? 'none' : 'inline-flex';
+    photoBtn.childNodes[0].textContent = photos.length ? `📷 더 찍기 (${photos.length}/${MAXPHOTOS})` : '📷 사진 찍기 ';
     thumbWrap.querySelectorAll('.gmDel').forEach(b=>
       b.addEventListener('click', ()=>{ photos.splice(+b.dataset.i,1); renderThumbs(); }));
   }
-  photoIn.addEventListener('change', ()=>{
-    const f = photoIn.files && photoIn.files[0];
-    photoIn.value = '';
+  function addPhotoFile(f){
     if(!f || photos.length >= MAXPHOTOS) return;
     const img = new Image();
     img.onload = ()=>{
@@ -487,6 +520,15 @@ window.GEO_openQnA = async function(){
       URL.revokeObjectURL(img.src);
     };
     img.src = URL.createObjectURL(f);
+  }
+  photoIn.addEventListener('change', ()=>{
+    addPhotoFile(photoIn.files && photoIn.files[0]);
+    photoIn.value = '';
+  });
+  albumIn.addEventListener('change', ()=>{          // 앨범에서는 여러 장 한 번에
+    const fs = Array.from(albumIn.files || []).slice(0, MAXPHOTOS - photos.length);
+    fs.forEach(addPhotoFile);
+    albumIn.value = '';
   });
 
   document.getElementById('gmSend').addEventListener('click', async ()=>{
@@ -514,11 +556,11 @@ window.GEO_openQnA = async function(){
         r = await res.json();
       }
       if(!r.ok) throw new Error('server');
-      setBookmark(); markDone();
+      setBookmark();
       bg.classList.remove('show');
       document.getElementById('gmText').value = '';
       photos.length = 0; renderThumbs();
-      showToast('소감을 보냈어요! 책갈피도 꽂았습니다. 홈에서 완료 도장을 확인하세요 ✅');
+      showToast('소감을 보냈어요! 책갈피도 꽂았습니다 ✅');
     }catch(e){
       showToast('전송에 실패했어요. 인터넷 연결을 확인하고 다시 시도해 주세요.');
     }

@@ -19,377 +19,544 @@ if (localStorage.getItem('geoAppOk') !== '1') location.replace('index.html');
     font-family:'Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif;
     background:#f1f5fb; color:#1e293b; display:flex; flex-direction:column;
   }
+  i, .it { font-family:Georgia,'Times New Roman',serif; }
   header {
-    padding:8px 14px; background:#fff; border-bottom:1px solid #e2e8f0;
-    display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+    padding:8px 14px 6px; background:#fff; border-bottom:1px solid #e2e8f0;
+    display:flex; align-items:baseline; gap:10px; flex-wrap:wrap;
   }
-  header h1 { font-size:18px; color:#0f172a; }
-  .tabs { display:flex; gap:7px; }
-  .tabs button {
-    padding:8px 14px; font-size:13.5px; font-weight:800; border-radius:10px; cursor:pointer;
-    border:1.5px solid #cbd5e1; background:#fff; color:#475569; transition:all .12s;
+  header h1 { font-size:17.5px; color:#0f172a; }
+  header .sub { font-size:12.5px; color:#64748b; }
+  #tabs { display:flex; gap:8px; padding:8px 14px 0; background:#fff; }
+  #tabs button {
+    padding:9px 16px; font-size:14px; font-weight:800; border-radius:12px 12px 0 0; cursor:pointer;
+    border:1.5px solid #e2e8f0; border-bottom:none; background:#f8fafc; color:#64748b; font-family:inherit;
   }
-  .tabs button.on { background:#0284c7; border-color:#0284c7; color:#fff; }
-  #stage { flex:1; position:relative; min-height:0; }
-  #cv { width:100%; height:100%; display:block; touch-action:none; }
-  .info {
-    position:absolute; left:12px; top:10px; max-width:330px;
-    background:rgba(255,255,255,.93); border:1px solid #e2e8f0; border-radius:12px;
-    padding:10px 13px; font-size:12.8px; color:#334155; line-height:1.7; pointer-events:none;
+  #tabs button.on { background:linear-gradient(135deg,#0ea5e9,#6366f1); color:#fff; border-color:transparent; }
+
+  #stage { flex:1; min-height:0; position:relative; touch-action:none; }
+  #stage.day  { background:linear-gradient(180deg,#7dd3fc 0%,#bae6fd 46%,#d9f99d 46.2%,#bef264 100%); }
+  #stage.night{ background:linear-gradient(180deg,#0b1026 0%,#151c3a 55%,#1f2430 55.2%,#262b33 100%); }
+  #cv { width:100%; height:100%; display:block; }
+
+  .hud {
+    position:absolute; left:10px; top:10px; background:rgba(255,255,255,.92);
+    border:1px solid #e2e8f0; border-radius:13px; padding:9px 13px; max-width:250px;
+    box-shadow:0 4px 14px rgba(15,23,42,.12); font-size:12.5px; line-height:1.55; color:#334155;
   }
-  .gauge {
-    position:absolute; right:12px; top:10px; background:rgba(255,255,255,.93);
-    border:1px solid #e2e8f0; border-radius:12px; padding:9px 14px;
-    font-size:13px; color:#334155; text-align:center; pointer-events:none; min-width:150px;
+  .hud b { font-size:15px; }
+  #gaugeBar { margin-top:6px; height:10px; border-radius:999px; background:#e2e8f0; overflow:hidden; }
+  #gaugeFill { height:100%; width:0%; border-radius:999px; background:linear-gradient(90deg,#38bdf8,#f59e0b,#ef4444); transition:width .25s; }
+  .drag { position:absolute; right:12px; bottom:10px; font-size:11.5px; color:rgba(255,255,255,.9);
+    background:rgba(15,23,42,.45); padding:5px 11px; border-radius:999px; pointer-events:none; }
+  #stage.day .drag { color:#334155; background:rgba(255,255,255,.7); }
+
+  /* 자동차 선택 칩 */
+  #carRow { position:absolute; left:50%; transform:translateX(-50%); top:10px; display:none; gap:7px; }
+  #carRow button {
+    padding:7px 13px; font-size:12.5px; font-weight:800; border-radius:999px; cursor:pointer;
+    border:1.5px solid rgba(255,255,255,.35); background:rgba(15,23,42,.55); color:#e2e8f0; font-family:inherit;
   }
-  .gauge b { font-size:16px; }
-  #bar {
-    padding:9px 14px; background:#fff; border-top:1px solid #e2e8f0;
-    display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+  #carRow button.on { background:#f59e0b; border-color:#f59e0b; color:#1c1917; }
+
+  /* 하단 컨트롤 */
+  #ctrl {
+    flex:none; background:#fff; border-top:1px solid #e2e8f0; padding:8px 14px 6px;
+    display:flex; gap:18px; align-items:center; flex-wrap:wrap;
   }
-  #bar .pv { font-size:15px; font-weight:800; color:#0f172a; min-width:150px; }
-  #bar .pv span { color:#7c3aed; }
-  #bar input[type=range] { flex:1; min-width:160px; accent-color:#7c3aed; height:30px; }
-  #bar .hint { font-size:12px; color:#64748b; flex:none; }
+  .cItem { display:flex; align-items:center; gap:9px; }
+  .cItem .lb { font-size:12.5px; font-weight:800; color:#475569; white-space:nowrap; }
+  .cItem .lb i { color:#0369a1; }
+  .cItem input[type=range] { width:150px; }
+  .cItem .vv { font-size:12.5px; font-weight:800; color:#0369a1; min-width:52px; font-family:Georgia,serif; }
+  #hintLine { flex-basis:100%; font-size:12px; color:#94a3b8; line-height:1.5; }
 </style>
 </head>
 <body>
 <header>
   <h1>🔦 포물선의 활용</h1>
-  <div class="tabs">
-    <button id="tabSolar" class="on">🌞 태양열 조리기</button>
-    <button id="tabHead">🚗 자동차 전조등</button>
-  </div>
+  <span class="sub">포물면 거울의 성질 — 축과 평행하게 들어온 빛은 초점 F로, 초점에서 나간 빛은 축과 평행하게!</span>
 </header>
-
-<div id="stage">
+<div id="tabs">
+  <button id="tabSolar" class="on">🌞 태양열 조리기</button>
+  <button id="tabHead">🚗 자동차 전조등</button>
+</div>
+<div id="stage" class="day">
   <canvas id="cv"></canvas>
-  <div class="info" id="info"></div>
-  <div class="gauge" id="gauge"></div>
+  <div class="hud" id="hud"></div>
+  <div id="carRow"></div>
+  <div class="drag">한 손가락: 360° 돌려보기 · 두 손가락/휠: 확대·축소</div>
 </div>
-
-<div id="bar">
-  <div class="pv" id="pLabel">접시 깊이 p = <span id="pVal">1.2</span></div>
-  <input type="range" id="pSlider" min="0.6" max="2.4" step="0.05" value="1.2">
-  <div class="hint" id="hint"></div>
-</div>
+<div id="ctrl"></div>
 
 <script>
 'use strict';
+/* ═══════════ 미니 3D 엔진 (원뿔곡선 페이지와 같은 순수 캔버스 방식) ═══════════ */
 const cv = document.getElementById('cv');
 const ctx = cv.getContext('2d');
-let mode = 'solar';                 // 'solar' | 'head'
-let dashOff = 0;
+const stage = document.getElementById('stage');
+let W = 0, H = 0, DPR = 1;
+function resize(){
+  DPR = Math.min(devicePixelRatio || 1, 2);
+  W = stage.clientWidth; H = stage.clientHeight;
+  cv.width = Math.round(W * DPR); cv.height = Math.round(H * DPR);
+  dirty = true;
+}
+addEventListener('resize', resize);
 
-/* ── 상태 ── */
-const solar = { p:1.2, potY:1.2, R:3.0 };     // 접시 반지름 R(단위), 냄비 y위치
-const head  = { p:1.0, bulbX:1.0, R:1.9 };    // 반사경 반높이 R, 전구 x위치
-let draggingPot=false, draggingBulb=false;
+const V3 = {
+  add:(a,b)=>[a[0]+b[0],a[1]+b[1],a[2]+b[2]],
+  sub:(a,b)=>[a[0]-b[0],a[1]-b[1],a[2]-b[2]],
+  mul:(a,k)=>[a[0]*k,a[1]*k,a[2]*k],
+  dot:(a,b)=>a[0]*b[0]+a[1]*b[1]+a[2]*b[2],
+  cross:(a,b)=>[a[1]*b[2]-a[2]*b[1], a[2]*b[0]-a[0]*b[2], a[0]*b[1]-a[1]*b[0]],
+  len:a=>Math.sqrt(a[0]*a[0]+a[1]*a[1]+a[2]*a[2]),
+  norm(a){ const l=this.len(a)||1; return [a[0]/l,a[1]/l,a[2]/l]; },
+  reflect(d,n){ const k=2*(d[0]*n[0]+d[1]*n[1]+d[2]*n[2]); return [d[0]-k*n[0], d[1]-k*n[1], d[2]-k*n[2]]; }
+};
 
-/* ── 사진 지원: repo에 photo-solar.jpg / photo-headlight.jpg 를 올리면 자동 표시 ── */
-const photos = {};
-[['solar','photo-solar.jpg'],['head','photo-headlight.jpg']].forEach(([k,src])=>{
-  const im = new Image();
-  im.onload = ()=>{ photos[k]=im; };
-  im.src = src;
+const cam = { yaw:0.6, pitch:0.32, dist:6.4, target:[0,1.0,0] };
+function camBasis(){
+  const cy=Math.cos(cam.yaw), sy=Math.sin(cam.yaw), cp=Math.cos(cam.pitch), sp=Math.sin(cam.pitch);
+  const fwd=[-sy*cp, -sp, -cy*cp];                       // eye → target
+  const eye=V3.sub(cam.target, V3.mul(fwd, cam.dist));
+  const right=V3.norm(V3.cross(fwd,[0,1,0]));
+  const up=V3.cross(right,fwd);
+  return {eye,fwd,right,up};
+}
+let B = null, FL = 1;
+function project(p){
+  const v=V3.sub(p,B.eye);
+  const z=V3.dot(v,B.fwd);
+  if(z < 0.12) return null;
+  const x=V3.dot(v,B.right), y=V3.dot(v,B.up);
+  return [W/2 + FL*x/z, H/2 - FL*y/z, z];
+}
+let polys=[], lines=[], marks=[];
+const ZN=0.14;
+function toCam(p){ const v=V3.sub(p,B.eye); return [V3.dot(v,B.right), V3.dot(v,B.up), V3.dot(v,B.fwd)]; }
+function toScr(c){ return [W/2 + FL*c[0]/c[2], H/2 - FL*c[1]/c[2], c[2]]; }
+function clipPolyZ(cs){                       // 카메라 근평면(z=ZN) 클리핑
+  const out=[];
+  for(let i=0;i<cs.length;i++){
+    const a=cs[i], b2=cs[(i+1)%cs.length];
+    const ain=a[2]>=ZN, bin=b2[2]>=ZN;
+    if(ain) out.push(a);
+    if(ain!==bin){
+      const t=(ZN-a[2])/(b2[2]-a[2]);
+      out.push([a[0]+(b2[0]-a[0])*t, a[1]+(b2[1]-a[1])*t, ZN]);
+    }
+  }
+  return out;
+}
+function poly(pts, fill, stroke, lw, bias){
+  let cs=pts.map(toCam);
+  if(cs.some(c=>c[2]<ZN)) cs=clipPolyZ(cs);
+  if(cs.length<3) return;
+  let d=0; const pr=cs.map(c=>{ d+=c[2]; return toScr(c); });
+  polys.push({d:d/cs.length+(bias||0), pr, fill, stroke, lw:lw||1});
+}
+function line(a,b,color,lw,dash,depthBias){
+  let ca=toCam(a), cb=toCam(b);
+  if(ca[2]<ZN && cb[2]<ZN) return;
+  if(ca[2]<ZN || cb[2]<ZN){
+    const t=(ZN-ca[2])/(cb[2]-ca[2]);
+    const m=[ca[0]+(cb[0]-ca[0])*t, ca[1]+(cb[1]-ca[1])*t, ZN];
+    if(ca[2]<ZN) ca=m; else cb=m;
+  }
+  const pa=toScr(ca), pb=toScr(cb);
+  lines.push({d:(ca[2]+cb[2])/2+(depthBias||0), pa, pb, color, lw:lw||1.5, dash});
+}
+function mark(p, fn, depthBias){ const q=project(p); if(!q) return; marks.push({d:q[2]+(depthBias||0), q, fn}); }
+function shade(rgb, n, L, amb){
+  const k=(amb||0.42)+(1-(amb||0.42))*Math.max(0,V3.dot(n,L));
+  return `rgb(${Math.round(rgb[0]*k)},${Math.round(rgb[1]*k)},${Math.round(rgb[2]*k)})`;
+}
+function flush(){
+  const all=[...polys.map(o=>({t:'p',o})), ...lines.map(o=>({t:'l',o})), ...marks.map(o=>({t:'m',o}))];
+  all.sort((a,b)=>b.o.d-a.o.d);
+  for(const it of all){
+    if(it.t==='p'){
+      const o=it.o;
+      ctx.beginPath(); ctx.moveTo(o.pr[0][0],o.pr[0][1]);
+      for(let i=1;i<o.pr.length;i++) ctx.lineTo(o.pr[i][0],o.pr[i][1]);
+      ctx.closePath();
+      if(o.fill){ ctx.fillStyle=o.fill; ctx.fill(); }
+      if(o.stroke){ ctx.strokeStyle=o.stroke; ctx.lineWidth=o.lw; ctx.stroke(); }
+    } else if(it.t==='l'){
+      const o=it.o;
+      ctx.beginPath(); ctx.moveTo(o.pa[0],o.pa[1]); ctx.lineTo(o.pb[0],o.pb[1]);
+      ctx.strokeStyle=o.color; ctx.lineWidth=o.lw;
+      ctx.setLineDash(o.dash||[]); ctx.stroke(); ctx.setLineDash([]);
+    } else it.o.fn(it.o.q);
+  }
+  polys=[]; lines=[]; marks=[];
+}
+
+/* 회전·줌 */
+let dragId=null, lx=0, ly=0, pinch=null;
+const ptrs=new Map();
+stage.addEventListener('pointerdown', e=>{
+  if(e.target!==cv) return;
+  ptrs.set(e.pointerId,[e.clientX,e.clientY]);
+  if(ptrs.size===1){ dragId=e.pointerId; lx=e.clientX; ly=e.clientY; }
+  else if(ptrs.size===2){ const a=[...ptrs.values()]; pinch=Math.hypot(a[0][0]-a[1][0],a[0][1]-a[1][1]); dragId=null; }
+  cv.setPointerCapture && cv.setPointerCapture(e.pointerId);
 });
-
-/* ══════════ 태양열 조리기 ══════════
-   접시(포물면 단면): y = x²/(4p), 위로 열림. 수직으로 내려오는 평행광은
-   반사 후 모두 초점 F(0,p)를 지난다.                                    */
-function viewSolar(){
-  const w=cv.clientWidth, h=cv.clientHeight;
-  const s = Math.min(w/8.4, h/7.2);
-  return { w, h, s, ox:w/2, oy:h-70 };            // 원점(접시 꼭짓점)
-}
-const SX=(v,x)=>v.ox+x*v.s, SY=(v,y)=>v.oy-y*v.s;
-
-function drawSolar(){
-  const v=viewSolar(), w=v.w, h=v.h, p=solar.p, R=solar.R;
-  // 하늘
-  const sky=ctx.createLinearGradient(0,0,0,h);
-  sky.addColorStop(0,'#bfe3ff'); sky.addColorStop(1,'#eaf6ff');
-  ctx.fillStyle=sky; ctx.fillRect(0,0,w,h);
-  // 땅
-  ctx.fillStyle='#d9e8d0'; ctx.fillRect(0,v.oy+34,w,h);
-  // 해
-  ctx.font='52px sans-serif'; ctx.textAlign='left';
-  ctx.fillText('☀️', Math.max(366, w*0.36), 72);
-
-  // 광선 (수직 평행광 → 접시 → 초점 방향)
-  const F={x:0,y:p};
-  const pot={x:0,y:solar.potY}, potR=0.42;
-  let hit=0, total=0;
-  ctx.lineWidth=2.2; ctx.setLineDash([9,7]); ctx.lineDashOffset=-dashOff;
-  for(let i=0;i<11;i++){
-    const x = -R+0.28 + (2*R-0.56)*i/10;
-    if(Math.abs(x)<0.12) continue;
-    total++;
-    const py = x*x/(4*p);                         // 접시 위 반사점
-    // 반사 후 방향: 초점을 향해
-    let dx=F.x-x, dy=F.y-py;
-    const L=Math.hypot(dx,dy)||1; dx/=L; dy/=L;
-    // 냄비 명중 판정 (반사 반직선과 냄비 중심 거리)
-    const cx2=pot.x-x, cy2=pot.y-py;
-    const t = cx2*dx+cy2*dy;
-    const dist = Math.hypot(cx2-t*dx, cy2-t*dy);
-    const isHit = t>0 && dist<potR;
-    if(isHit) hit++;
-    ctx.strokeStyle = isHit ? 'rgba(234,88,12,.85)' : 'rgba(250,176,5,.75)';
-    // 내려오는 광선
-    ctx.beginPath(); ctx.moveTo(SX(v,x), 6); ctx.lineTo(SX(v,x), SY(v,py)); ctx.stroke();
-    // 반사 광선
-    const end = isHit ? t : 4.2;
-    ctx.beginPath(); ctx.moveTo(SX(v,x), SY(v,py));
-    ctx.lineTo(SX(v,x+dx*end), SY(v,py+dy*end)); ctx.stroke();
+stage.addEventListener('pointermove', e=>{
+  if(!ptrs.has(e.pointerId)) return;
+  ptrs.set(e.pointerId,[e.clientX,e.clientY]);
+  if(ptrs.size===2 && pinch){
+    const a=[...ptrs.values()]; const d=Math.hypot(a[0][0]-a[1][0],a[0][1]-a[1][1]);
+    cam.dist=Math.min(14,Math.max(2.4,cam.dist*pinch/d)); pinch=d; dirty=true;
+  } else if(e.pointerId===dragId){
+    cam.yaw -= (e.clientX-lx)*0.0085;
+    cam.pitch = Math.min(1.25, Math.max(-0.15, cam.pitch + (e.clientY-ly)*0.006));
+    lx=e.clientX; ly=e.clientY; dirty=true;
   }
-  ctx.setLineDash([]);
+});
+function prUp(e){ ptrs.delete(e.pointerId); if(e.pointerId===dragId) dragId=null; if(ptrs.size<2) pinch=null; }
+stage.addEventListener('pointerup', prUp);
+stage.addEventListener('pointercancel', prUp);
+cv.addEventListener('wheel', e=>{
+  e.preventDefault();
+  cam.dist=Math.min(14,Math.max(2.4,cam.dist*(e.deltaY>0?1.08:0.925))); dirty=true;
+},{passive:false});
 
-  // 접시 (금속)
-  ctx.strokeStyle='#8b9bab'; ctx.lineWidth=9; ctx.lineCap='round';
-  ctx.beginPath();
-  for(let x=-R;x<=R;x+=0.05){
-    const y=x*x/(4*p);
-    (x===-R)? ctx.moveTo(SX(v,x),SY(v,y)) : ctx.lineTo(SX(v,x),SY(v,y));
+/* ═══════════ 공용: 포물면 접시 메쉬 ═══════════ */
+function dishMesh(V, A, U1, U2, p, r0, r1, nR, nS, rgb, L, rimStroke){
+  const pt=(r,th)=>V3.add(V, V3.add(V3.add(V3.mul(U1,r*Math.cos(th)), V3.mul(U2,r*Math.sin(th))), V3.mul(A,r*r/(4*p))));
+  const nrm=(r,th)=>V3.norm(V3.sub(A, V3.mul(V3.add(V3.mul(U1,Math.cos(th)),V3.mul(U2,Math.sin(th))), r/(2*p))));
+  for(let i=0;i<nR;i++){
+    const ra=r0+(r1-r0)*i/nR, rb=r0+(r1-r0)*(i+1)/nR;
+    for(let j=0;j<nS;j++){
+      const ta=j/nS*2*Math.PI, tb=(j+1)/nS*2*Math.PI;
+      const n=nrm((ra+rb)/2,(ta+tb)/2);
+      poly([pt(ra,ta),pt(rb,ta),pt(rb,tb),pt(ra,tb)], shade(rgb,n,L),
+           (j%2===0)?'rgba(90,95,105,.55)':'rgba(120,126,138,.35)', 0.7);
+    }
   }
-  ctx.stroke();
-  ctx.strokeStyle='#c9d4de'; ctx.lineWidth=3.5;
-  ctx.beginPath();
-  for(let x=-R;x<=R;x+=0.05){
-    const y=x*x/(4*p);
-    (x===-R)? ctx.moveTo(SX(v,x),SY(v,y)) : ctx.lineTo(SX(v,x),SY(v,y));
+  if(rimStroke){
+    for(let j=0;j<nS;j++){
+      line(pt(r1,j/nS*2*Math.PI), pt(r1,(j+1)/nS*2*Math.PI), rimStroke, 2.2, null, -0.01);
+    }
   }
-  ctx.stroke();
-  // 받침대
-  ctx.strokeStyle='#7c6f64'; ctx.lineWidth=6;
-  ctx.beginPath(); ctx.moveTo(SX(v,-1.5),SY(v,1.5*1.5/(4*p))); ctx.lineTo(SX(v,-2.1),v.oy+34); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(SX(v,1.5),SY(v,1.5*1.5/(4*p))); ctx.lineTo(SX(v,2.1),v.oy+34); ctx.stroke();
-
-  // 초점 F 표시
-  ctx.setLineDash([5,5]); ctx.strokeStyle='rgba(220,38,38,.6)'; ctx.lineWidth=1.5;
-  ctx.beginPath(); ctx.moveTo(SX(v,-0.7),SY(v,p)); ctx.lineTo(SX(v,0.7),SY(v,p)); ctx.stroke();
-  ctx.setLineDash([]);
-  ctx.fillStyle='#dc2626';
-  ctx.beginPath(); ctx.arc(SX(v,0),SY(v,p),5,0,7); ctx.fill();
-  labelTxt('F (초점)', '#b91c1c', SX(v,0.75), SY(v,p)+5);
-
-  // 냄비 (드래그)
-  const px=SX(v,pot.x), py2=SY(v,pot.y);
-  ctx.font='38px sans-serif'; ctx.textAlign='center';
-  ctx.fillText('🍲', px, py2+14);
-  ctx.beginPath(); ctx.arc(px,py2,30,0,7);
-  ctx.strokeStyle='rgba(30,41,59,.35)'; ctx.lineWidth=1.6; ctx.setLineDash([4,4]); ctx.stroke();
-  ctx.setLineDash([]); ctx.textAlign='left';
-
-  // 게이지
-  const ratio = total? hit/total : 0;
-  const g = document.getElementById('gauge');
-  g.innerHTML = ratio>=0.9 ? '🔥🔥🔥 <b>펄펄 끓어요!</b><br>광선 집중 '+Math.round(ratio*100)+'%'
-    : ratio>=0.4 ? '🔥 <b>따뜻해요</b><br>광선 집중 '+Math.round(ratio*100)+'%'
-    : '🧊 <b>미지근…</b><br>광선 집중 '+Math.round(ratio*100)+'% — 냄비를 초점으로!';
+  return {pt,nrm};
 }
-
-/* ══════════ 자동차 전조등 ══════════
-   반사경: x = y²/(4p), 오른쪽으로 열림. 전구가 초점 F(p,0)에 있으면
-   반사광이 전부 평행하게 나간다.                                        */
-function viewHead(){
-  const w=cv.clientWidth, h=cv.clientHeight;
-  const s = Math.min(w/9.5, h/5.2);
-  return { w, h, s, ox:90, oy:h/2-14 };
-}
-function drawHead(){
-  const v=viewHead(), w=v.w, h=v.h, p=head.p, R=head.R;
-  // 밤 배경
-  const nt=ctx.createLinearGradient(0,0,0,h);
-  nt.addColorStop(0,'#0b1430'); nt.addColorStop(1,'#1b2647');
-  ctx.fillStyle=nt; ctx.fillRect(0,0,w,h);
-  // 달·별
-  ctx.font='30px sans-serif'; ctx.fillText('🌙', w-64, 46);
-  ctx.fillStyle='rgba(255,255,255,.7)';
-  [[w*0.35,40],[w*0.55,70],[w*0.75,34],[w*0.62,110],[w*0.88,90]].forEach(q=>{
-    ctx.beginPath(); ctx.arc(q[0],q[1],1.6,0,7); ctx.fill();
-  });
-  // 도로
-  ctx.fillStyle='#26304f'; ctx.fillRect(0,v.oy+R*v.s+40,w,h);
-  ctx.strokeStyle='rgba(255,255,255,.35)'; ctx.lineWidth=3; ctx.setLineDash([26,20]);
-  ctx.beginPath(); ctx.moveTo(0,v.oy+R*v.s+70); ctx.lineTo(w,v.oy+R*v.s+70); ctx.stroke();
-  ctx.setLineDash([]);
-
-  const B={x:head.bulbX, y:0};
-  // 반사광
-  let angMin=99, angMax=-99;
-  ctx.lineWidth=2.4;
-  for(let i=0;i<10;i++){
-    const t = -R+0.22 + (2*R-0.44)*i/9;
-    if(Math.abs(t)<0.09) continue;
-    const P={x:t*t/(4*p), y:t};
-    // 법선 (안쪽): (1, -t/(2p)) 정규화
-    let nx=1, ny=-t/(2*p);
-    const nl=Math.hypot(nx,ny); nx/=nl; ny/=nl;
-    let dx=P.x-B.x, dy=P.y-B.y;
-    const dl=Math.hypot(dx,dy)||1; dx/=dl; dy/=dl;
-    const dn=dx*nx+dy*ny;
-    let rx=dx-2*dn*nx, ry=dy-2*dn*ny;
-    if(rx<0.02) rx=0.02;
-    const ang=Math.atan2(ry,rx);
-    angMin=Math.min(angMin,ang); angMax=Math.max(angMax,ang);
-    const HX=(x)=>v.ox+x*v.s, HY=(y)=>v.oy-y*v.s;
-    // 전구→반사점
-    ctx.strokeStyle='rgba(255,222,120,.5)';
-    ctx.beginPath(); ctx.moveTo(HX(B.x),HY(B.y)); ctx.lineTo(HX(P.x),HY(P.y)); ctx.stroke();
-    // 반사점→멀리 (빔)
-    const far=(w-v.ox)/v.s+1;
-    ctx.strokeStyle='rgba(255,236,150,.85)';
-    ctx.setLineDash([12,9]); ctx.lineDashOffset=-dashOff;
-    ctx.beginPath(); ctx.moveTo(HX(P.x),HY(P.y));
-    ctx.lineTo(HX(P.x+rx*far), HY(P.y+ry*far)); ctx.stroke();
-    ctx.setLineDash([]);
+function tube(a,b,r,seg,rgb,L){          // 간단한 사각기둥 막대
+  const d=V3.norm(V3.sub(b,a));
+  let u=V3.cross(d,[0,1,0]); if(V3.len(u)<0.01) u=V3.cross(d,[1,0,0]);
+  u=V3.norm(u); const v=V3.norm(V3.cross(d,u));
+  const c=[[1,0],[0,1],[-1,0],[0,-1]];
+  for(let i=0;i<4;i++){
+    const [ua,va]=c[i], [ub,vb]=c[(i+1)%4];
+    const o1=V3.add(V3.mul(u,ua*r),V3.mul(v,va*r)), o2=V3.add(V3.mul(u,ub*r),V3.mul(v,vb*r));
+    const n=V3.norm(V3.add(o1,o2));
+    poly([V3.add(a,o1),V3.add(b,o1),V3.add(b,o2),V3.add(a,o2)], shade(rgb,n,L));
   }
-
-  const HX=(x)=>v.ox+x*v.s, HY=(y)=>v.oy-y*v.s;
-  // 반사경
-  ctx.strokeStyle='#9fb2c8'; ctx.lineWidth=8; ctx.lineCap='round';
-  ctx.beginPath();
-  for(let t=-R;t<=R;t+=0.04){
-    const x=t*t/(4*p);
-    (t===-R)? ctx.moveTo(HX(x),HY(t)) : ctx.lineTo(HX(x),HY(t));
+}
+function discAt(C,axis,r,seg,fill,stroke,bias){
+  let u=V3.cross(axis,[0,1,0]); if(V3.len(u)<0.01) u=V3.cross(axis,[1,0,0]);
+  u=V3.norm(u); const v=V3.norm(V3.cross(axis,u));
+  const pts=[];
+  for(let j=0;j<seg;j++){
+    const t=j/seg*2*Math.PI;
+    pts.push(V3.add(C,V3.add(V3.mul(u,r*Math.cos(t)),V3.mul(v,r*Math.sin(t)))));
   }
-  ctx.stroke();
-  // 하우징
-  ctx.strokeStyle='#3f4a68'; ctx.lineWidth=5;
-  ctx.beginPath(); ctx.moveTo(HX(R*R/(4*p)),HY(R)); ctx.lineTo(HX(R*R/(4*p))-26,HY(R)); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(HX(R*R/(4*p)),HY(-R)); ctx.lineTo(HX(R*R/(4*p))-26,HY(-R)); ctx.stroke();
-
-  // 초점 F
-  ctx.setLineDash([5,5]); ctx.strokeStyle='rgba(248,113,113,.7)'; ctx.lineWidth=1.5;
-  ctx.beginPath(); ctx.moveTo(HX(p),HY(-0.5)); ctx.lineTo(HX(p),HY(0.5)); ctx.stroke();
-  ctx.setLineDash([]);
-  ctx.fillStyle='#f87171';
-  ctx.beginPath(); ctx.arc(HX(p),HY(0),4.5,0,7); ctx.fill();
-  labelTxt('F (초점)', '#fca5a5', HX(p)-14, HY(0)+24, true);
-
-  // 전구 (드래그)
-  ctx.font='30px sans-serif'; ctx.textAlign='center';
-  ctx.fillText('💡', HX(B.x), HY(B.y)+11);
-  ctx.beginPath(); ctx.arc(HX(B.x),HY(B.y),24,0,7);
-  ctx.strokeStyle='rgba(255,255,255,.45)'; ctx.lineWidth=1.6; ctx.setLineDash([4,4]); ctx.stroke();
-  ctx.setLineDash([]); ctx.textAlign='left';
-
-  // 게이지: 빔 퍼짐 각도
-  const spread = (angMax-angMin)*180/Math.PI;
-  const g=document.getElementById('gauge');
-  g.innerHTML = spread<3 ? '🛣️ <b>완벽한 평행광!</b><br>빔 퍼짐 '+spread.toFixed(1)+'° — 멀리까지 밝아요'
-    : spread<15 ? '💡 <b>조금 퍼져요</b><br>빔 퍼짐 '+spread.toFixed(1)+'°'
-    : '🌫️ <b>빛이 흩어져요</b><br>빔 퍼짐 '+spread.toFixed(1)+'° — 전구를 초점으로!';
+  const pr=[]; let d=0;
+  for(const p of pts){ const q=project(p); if(!q) return; pr.push(q); d+=q[2]; }
+  polys.push({d:d/seg+(bias||0), pr, fill, stroke, lw:1.4});
 }
 
-function labelTxt(text,color,x,y,dark){
-  ctx.font='bold 13px sans-serif';
-  ctx.lineJoin='round';
-  ctx.strokeStyle = dark? 'rgba(15,23,42,.85)' : 'rgba(255,255,255,.9)';
-  ctx.lineWidth=4;
-  ctx.strokeText(text,x,y);
-  ctx.fillStyle=color; ctx.fillText(text,x,y);
+/* ═══════════ ① 태양열 조리기 (3D) ═══════════ */
+const solar = { p:0.8, h:0.6, elD:35, done:false };
+const SUN_EL = 55, SUN_AZ = 0.55;                     // 태양은 사선(고도 55°)에서
+function sunDir(){                                     // 태양 쪽을 가리키는 단위벡터
+  const e=SUN_EL*Math.PI/180;
+  return [Math.sin(SUN_AZ)*Math.cos(e), Math.sin(e), Math.cos(SUN_AZ)*Math.cos(e)];
 }
-
-/* ── 사진 카드 (있을 때만) ── */
-function drawPhoto(){
-  const im = photos[mode];
-  if(!im) return;
-  const w=cv.clientWidth;
-  const cw=170, chh=cw*im.height/im.width;
-  const x=w-cw-12, y=64;
-  ctx.save();
-  ctx.shadowColor='rgba(0,0,0,.3)'; ctx.shadowBlur=10;
-  ctx.fillStyle='#fff'; ctx.fillRect(x-5,y-5,cw+10,chh+26);
-  ctx.restore();
-  ctx.drawImage(im,x,y,cw,chh);
-  ctx.fillStyle='#475569'; ctx.font='11.5px sans-serif'; ctx.textAlign='center';
-  ctx.fillText('실제 모습', x+cw/2, y+chh+15);
-  ctx.textAlign='left';
+function solarHeat(){
+  // 접시 방향 오차 + 냄비-초점 거리로 집광률 계산
+  const dEl = Math.abs(solar.elD - SUN_EL);
+  const dh  = Math.abs(solar.h - solar.p);
+  return Math.max(0, Math.min(100, Math.round(100 - dEl*3.2 - dh*95)));
 }
+function drawSolar(t){
+  const S=V3.norm(sunDir());                  // 태양 방향
+  const Ld=S;                                 // 셰이딩 광원 = 태양
+  const e=solar.elD*Math.PI/180;
+  const A=[Math.sin(SUN_AZ)*Math.cos(e), Math.sin(e), Math.cos(SUN_AZ)*Math.cos(e)];   // 접시 축
+  let U1=V3.norm(V3.cross(A,[0,1,0])); const U2=V3.norm(V3.cross(A,U1));
+  const Vx=[0,1.02,0];                        // 접시 꼭짓점(피벗)
+  const F=V3.add(Vx,V3.mul(A,solar.p));       // 초점
+  const C=V3.add(Vx,V3.mul(A,solar.h));       // 냄비 위치
 
-/* ── 렌더 루프 ── */
-function draw(){
-  const w=cv.clientWidth, h=cv.clientHeight;
-  const dpr=Math.min(window.devicePixelRatio||1,2);
-  if(cv.width!==Math.round(w*dpr)||cv.height!==Math.round(h*dpr)){
-    cv.width=Math.round(w*dpr); cv.height=Math.round(h*dpr);
+  // 바닥
+  poly([[-6,0,-6],[6,0,-6],[6,0,6],[-6,0,6]],'rgba(163,230,53,.5)',null,1,60);
+  for(let g=-5;g<=5;g++){
+    line([g,0,-6],[g,0,6],'rgba(77,124,15,.18)',1,null,58);
+    line([-6,0,g],[6,0,g],'rgba(77,124,15,.18)',1,null,58);
   }
-  ctx.setTransform(dpr,0,0,dpr,0,0);
-  if(mode==='solar') drawSolar(); else drawHead();
-  drawPhoto();
+  // 받침대: 십자 다리 + 기둥
+  const legY=0.05;
+  for(const [dx,dz] of [[1,0],[-1,0],[0,1],[0,-1]])
+    tube([0,legY,0],[dx*1.05,legY,dz*1.05],0.05,4,[150,155,163],Ld);
+  tube([0,0.04,0],[0,1.02,0],0.075,4,[168,173,181],Ld);
+
+  // 접시 (안쪽 거울면)
+  dishMesh(Vx,A,U1,U2,solar.p,0.16,1.5,6,16,[203,209,218],Ld,'rgba(70,75,85,.6)');
+  // 중앙 마스트(축 방향) + 냄비 링 + 지지대 3개
+  tube(Vx, V3.add(Vx,V3.mul(A,Math.max(solar.h+0.22,1.0))), 0.035,4,[190,195,203],Ld);
+  discAt(C,A,0.34,14,null,'rgba(120,126,138,.95)');
+  for(const th of [0.3,2.4,4.5]){
+    const rim=V3.add(Vx,V3.add(V3.add(V3.mul(U1,1.5*Math.cos(th)),V3.mul(U2,1.5*Math.sin(th))),V3.mul(A,1.5*1.5/(4*solar.p))));
+    line(rim, V3.add(C,V3.add(V3.mul(U1,0.3*Math.cos(th)),V3.mul(U2,0.3*Math.sin(th)))),'rgba(148,153,161,.9)',2);
+  }
+  // 냄비 (빨간 웍)
+  const potR=0.27, potH=0.16;
+  for(let j=0;j<10;j++){
+    const ta=j/10*2*Math.PI, tb=(j+1)/10*2*Math.PI;
+    const q=(tt,up)=>V3.add(V3.add(C,V3.mul(A,up?potH:0.02)),V3.add(V3.mul(U1,potR*Math.cos(tt)),V3.mul(U2,potR*Math.sin(tt))));
+    const n=V3.norm(V3.add(V3.mul(U1,Math.cos((ta+tb)/2)),V3.mul(U2,Math.sin((ta+tb)/2))));
+    poly([q(ta,false),q(ta,true),q(tb,true),q(tb,false)], shade([172,44,52],n,Ld));
+  }
+  discAt(V3.add(C,V3.mul(A,potH)),A,potR,12,'rgb(120,28,34)','rgba(60,14,17,.8)',-0.02);
+  discAt(V3.add(C,V3.mul(A,potH+0.015)),A,0.05,8,'rgb(40,40,44)',null,-0.03);
+
+  // 태양 + 광선
+  const sunP=V3.add(cam.target,V3.mul(S,7.5));
+  mark(sunP, q=>{
+    const g=ctx.createRadialGradient(q[0],q[1],4,q[0],q[1],34);
+    g.addColorStop(0,'rgba(255,244,150,1)'); g.addColorStop(.5,'rgba(255,210,80,.85)'); g.addColorStop(1,'rgba(255,210,80,0)');
+    ctx.fillStyle=g; ctx.beginPath(); ctx.arc(q[0],q[1],34,0,7); ctx.fill();
+  }, 50);
+  const d=V3.mul(S,-1);                      // 빛의 진행 방향
+  const heat=solarHeat();
+  const {pt,nrm}=(function(){                // 광선용 접점·법선
+    const pt=(r,th)=>V3.add(Vx, V3.add(V3.add(V3.mul(U1,r*Math.cos(th)), V3.mul(U2,r*Math.sin(th))), V3.mul(A,r*r/(4*solar.p))));
+    const nr=(r,th)=>V3.norm(V3.sub(A, V3.mul(V3.add(V3.mul(U1,Math.cos(th)),V3.mul(U2,Math.sin(th))), r/(2*solar.p))));
+    return {pt,nrm:nr};
+  })();
+  const dashOff=(t*0.02)%14;
+  for(const [r,th] of [[1.2,0.4],[1.2,1.5],[1.2,2.6],[1.2,3.7],[1.2,4.8],[1.2,5.9],[0.7,1.0],[0.7,3.1],[0.7,5.2]]){
+    const P=pt(r,th), n=nrm(r,th);
+    const rd=V3.norm(V3.reflect(d,n));
+    mark(P, ()=>{}, 0);
+    // 들어오는 평행광
+    const a0=V3.sub(P,V3.mul(d,2.7));
+    line(a0,P,'rgba(255,196,0,.85)',2,[9,5],-0.02);
+    // 반사광
+    const tEnd=V3.len(V3.sub(F,P))*1.28;
+    line(P,V3.add(P,V3.mul(rd,tEnd)),'rgba(255,140,0,.9)',2.2,null,-0.02);
+  }
+  // 초점 표시 F (로마자)
+  mark(F, q=>{
+    ctx.fillStyle='#ea580c'; ctx.beginPath(); ctx.arc(q[0],q[1],4.5,0,7); ctx.fill();
+    ctx.font='700 15px Georgia,serif'; ctx.fillStyle='#9a3412'; ctx.fillText('F', q[0]+8, q[1]-6);
+  }, -0.5);
+  // 김 (펄펄 끓을 때 — 맨 위에)
+  if(heat>=90){
+    const top=V3.add(C,V3.mul(A,potH+0.03));
+    mark(top, q=>{
+      for(let k=0;k<3;k++){
+        ctx.strokeStyle='rgba(255,255,255,.8)'; ctx.lineWidth=2.6; ctx.beginPath();
+        const bx=q[0]+(k-1)*12, ph=(t*0.05+k*40)%70;
+        ctx.moveTo(bx, q[1]-6-ph*0.6);
+        ctx.bezierCurveTo(bx+8,q[1]-18-ph*0.6, bx-8,q[1]-30-ph*0.6, bx+5,q[1]-46-ph*0.6);
+        ctx.globalAlpha=Math.max(0,1-ph/70); ctx.stroke(); ctx.globalAlpha=1;
+      }
+    }, -100);
+  }
+  return heat;
 }
-(function tick(){
-  requestAnimationFrame(tick);
-  dashOff += 0.9;               // 광선이 흐르는 애니메이션
-  draw();
-})();
 
-/* ── UI ── */
-const pSlider=document.getElementById('pSlider'), pVal=document.getElementById('pVal');
-const pLabel=document.getElementById('pLabel'), hint=document.getElementById('hint');
-const info=document.getElementById('info');
-const tabSolar=document.getElementById('tabSolar'), tabHead=document.getElementById('tabHead');
+/* ═══════════ ② 자동차 전조등 (3D, 실제 차 프리셋) ═══════════ */
+const CARS = [
+  { key:'p911', name:'포르쉐 911',       shape:'circle', a:0.33, p:0.16, body:[35,48,68],   accent:'#e2e8f0', deco:'ring4' },
+  { key:'lambo', name:'람보르기니 우라칸', shape:'hex',    a:0.36, p:0.12, body:[101,90,20],  accent:'#facc15', deco:'ywing' },
+  { key:'gwagen', name:'벤츠 G클래스',    shape:'circle', a:0.42, p:0.22, body:[34,32,30],   accent:'#d6d3d1', deco:'bigring' },
+  { key:'m4', name:'BMW M4',            shape:'rect',   a:0.36, p:0.14, body:[52,58,66],   accent:'#93c5fd', deco:'slats' }
+];
+const head = { car:0, b:0.10, p:CARS[0].p, done:false };
+function headSpread(){
+  // 전구가 초점에서 벗어난 정도 → 퍼짐각(도)
+  return Math.abs(head.b - head.p) / head.p * 34;
+}
+function drawHead(t){
+  const car=CARS[head.car];
+  const Ld=V3.norm([0.45,0.8,0.35]);
+  const Ax=[1,0,0], U1=[0,1,0], U2=[0,0,1];
+  const Vx=[-0.4,0.85,0];                       // 반사경 꼭짓점 (차체 안)
+  const F=V3.add(Vx,V3.mul(Ax,head.p));
+  const Bp=V3.add(Vx,V3.mul(Ax,head.b));        // 전구
 
-function applyMode(){
-  const solarOn = mode==='solar';
-  tabSolar.classList.toggle('on',solarOn);
-  tabHead.classList.toggle('on',!solarOn);
-  if(solarOn){
-    pSlider.min=0.6; pSlider.max=2.4; pSlider.step=0.05; pSlider.value=solar.p;
-    pVal.textContent=solar.p.toFixed(2);
-    pLabel.innerHTML='접시 깊이 p = <span id="pVal">'+solar.p.toFixed(2)+'</span>';
-    hint.textContent='🍲 냄비를 위아래로 끌어서 초점에 맞춰 보세요';
-    info.innerHTML='<b>☀️ 태양 광선은 평행하게 도착!</b><br>포물면 접시는 평행광을 전부 한 점 — '+
-      '<b style="color:#dc2626">초점 F</b> — 로 모아요. 접시 깊이(p)를 바꾸면 초점의 위치도 바뀝니다. '+
-      '냄비가 초점에 있을 때만 뜨거워져요!';
+  // 밤 도로
+  poly([[-3,0,-3.2],[8,0,-3.2],[8,0,3.2],[-3,0,3.2]],'rgba(58,62,70,.95)',null,1,60);
+  for(let x=-2;x<8;x+=1.2) poly([[x,0.002,-0.06],[x+0.6,0.002,-0.06],[x+0.6,0.002,0.06],[x,0.002,0.06]],'rgba(226,232,240,.8)',null,1,58);
+  line([-3,0.003,-1.9],[8,0.003,-1.9],'rgba(226,232,240,.5)',2,null,58);
+  line([-3,0.003, 1.9],[8,0.003, 1.9],'rgba(226,232,240,.5)',2,null,58);
+
+  // 하우징 판 (차마다 다른 개구부 모양)
+  const rimZ=car.a*car.a/(4*head.p);
+  const plateC=V3.add(Vx,V3.mul(Ax,rimZ));
+  const shapePts=(scale)=>{
+    const pts=[];
+    if(car.shape==='circle'){ for(let j=0;j<22;j++){ const th=j/22*2*Math.PI; pts.push([car.a*scale*Math.cos(th), car.a*scale*Math.sin(th)]); } }
+    else if(car.shape==='hex'){ for(let j=0;j<6;j++){ const th=j/6*2*Math.PI+0.26; pts.push([car.a*scale*1.06*Math.cos(th), car.a*scale*0.92*Math.sin(th)]); } }
+    else { const w=car.a*1.25*scale, h=car.a*0.62*scale;
+      pts.push([-w,-h],[w,-h],[w,h],[-w,h]); }
+    return pts.map(([u,v])=>V3.add(plateC,V3.add(V3.mul(U1,v),V3.mul(U2,u))));
+  };
+  const outer=shapePts(1.34), inner=shapePts(1.02);
+  // 바깥 판(어두운 하우징): outer 링을 사각 스트립으로
+  for(let j=0;j<outer.length;j++){
+    const j2=(j+1)%outer.length;
+    poly([outer[j],outer[j2],inner[j2%inner.length],inner[j%inner.length]], shade(car.body,[0.6,0.5,0.6],Ld,0.5),'rgba(15,18,24,.7)',1);
+  }
+  // 반사경 (안쪽 거울)
+  dishMesh(Vx,Ax,U1,U2,head.p,0.05,car.a,5,18,[212,218,228],Ld,'rgba(90,96,108,.5)');
+  // 데코 (차 개성)
+  mark(plateC, q=>{
+    ctx.strokeStyle=car.accent; ctx.lineWidth=2.2;
+    const s=FL*0.32/Math.max(0.5,q[2]);
+    if(car.deco==='ring4'){ for(const [ox,oy] of [[-1,-1],[1,-1],[-1,1],[1,1]]){ ctx.beginPath(); ctx.arc(q[0]+ox*s*0.42,q[1]+oy*s*0.42,s*0.14,0,7); ctx.stroke(); } }
+    else if(car.deco==='ywing'){ for(const sg of [-1,1]){ ctx.beginPath(); ctx.moveTo(q[0]+sg*s*0.62,q[1]-s*0.5); ctx.lineTo(q[0]+sg*s*0.28,q[1]); ctx.lineTo(q[0]+sg*s*0.62,q[1]+s*0.5); ctx.stroke(); } }
+    else if(car.deco==='bigring'){ ctx.beginPath(); ctx.arc(q[0],q[1],s*0.72,0,7); ctx.stroke(); }
+    else { for(const oy of [-0.3,0.3]){ ctx.beginPath(); ctx.moveTo(q[0]-s*0.7,q[1]+oy*s); ctx.lineTo(q[0]+s*0.7,q[1]+oy*s); ctx.stroke(); } }
+  }, 0.15);
+
+  // 전구 (드래그 대신 슬라이더) + 초점 F
+  mark(Bp, q=>{
+    const g=ctx.createRadialGradient(q[0],q[1],1,q[0],q[1],16);
+    g.addColorStop(0,'rgba(255,255,220,1)'); g.addColorStop(1,'rgba(255,230,120,0)');
+    ctx.fillStyle=g; ctx.beginPath(); ctx.arc(q[0],q[1],16,0,7); ctx.fill();
+    ctx.fillStyle='#fff7cf'; ctx.beginPath(); ctx.arc(q[0],q[1],4,0,7); ctx.fill();
+  }, -0.4);
+  mark(F, q=>{
+    ctx.strokeStyle='#fb923c'; ctx.lineWidth=2;
+    ctx.beginPath(); ctx.moveTo(q[0]-6,q[1]); ctx.lineTo(q[0]+6,q[1]);
+    ctx.moveTo(q[0],q[1]-6); ctx.lineTo(q[0],q[1]+6); ctx.stroke();
+    ctx.font='700 14px Georgia,serif'; ctx.fillStyle='#fdba74'; ctx.fillText('F', q[0]+8, q[1]-7);
+  }, -0.35);
+
+  // 광선: 전구 → 반사경 → (초점이면 평행) 도로 저 멀리
+  const samples=[];
+  for(const th of [0.5,1.55,2.6,3.65,4.7,5.75]) samples.push([car.a*0.92,th]);
+  for(const th of [1.05,3.14,5.2]) samples.push([car.a*0.55,th]);
+  for(const [r,th] of samples){
+    const P=V3.add(Vx,V3.add(V3.add(V3.mul(U1,r*Math.sin(th)),V3.mul(U2,r*Math.cos(th))),V3.mul(Ax,r*r/(4*head.p))));
+    const n=V3.norm(V3.sub(Ax,V3.mul(V3.add(V3.mul(U1,Math.sin(th)),V3.mul(U2,Math.cos(th))),r/(2*head.p))));
+    const di=V3.norm(V3.sub(P,Bp));
+    const rd=V3.norm(V3.reflect(di,n));
+    line(Bp,P,'rgba(255,236,150,.5)',1.4,null,-0.02);
+    // 도로(y=0)에 닿으면 거기까지, 아니면 6m
+    let L=6.4;
+    if(rd[1]<-0.001) L=Math.min(L,(0.02-P[1])/rd[1]);
+    const E=V3.add(P,V3.mul(rd,L));
+    line(P,E,'rgba(255,220,90,.85)',2.6,null,-0.02);
+    if(rd[1]<-0.001) mark(E,q=>{
+      const g=ctx.createRadialGradient(q[0],q[1],1,q[0],q[1],13);
+      g.addColorStop(0,'rgba(255,240,160,.85)'); g.addColorStop(1,'rgba(255,240,160,0)');
+      ctx.fillStyle=g; ctx.beginPath(); ctx.arc(q[0],q[1],13,0,7); ctx.fill();
+    }, 0.2);
+  }
+  return headSpread();
+}
+
+/* ═══════════ 화면·컨트롤 ═══════════ */
+const hud=document.getElementById('hud');
+const ctrl=document.getElementById('ctrl');
+const carRow=document.getElementById('carRow');
+let tab='solar', dirty=true;
+
+function fmt(v,d){ return v.toFixed(d===undefined?2:d); }
+function buildCtrl(){
+  if(tab==='solar'){
+    ctrl.innerHTML=`
+      <div class="cItem"><span class="lb">접시 기울기</span>
+        <input type="range" id="sEl" min="20" max="80" step="1" value="${solar.elD}">
+        <span class="vv" id="sElV">${solar.elD}°</span></div>
+      <div class="cItem"><span class="lb">초점거리 <i>p</i></span>
+        <input type="range" id="sP" min="0.5" max="1.2" step="0.01" value="${solar.p}">
+        <span class="vv" id="sPV">${fmt(solar.p)} m</span></div>
+      <div class="cItem"><span class="lb">냄비 위치</span>
+        <input type="range" id="sH" min="0.25" max="1.4" step="0.01" value="${solar.h}">
+        <span class="vv" id="sHV">${fmt(solar.h)} m</span></div>
+      <div id="hintLine">☀️ 태양 고도는 55° — 접시를 태양과 나란히 맞추고, 냄비를 초점 F(= <i>p</i>)에 두면 펄펄 끓어요!</div>`;
+    const on=(id,fn)=>document.getElementById(id).addEventListener('input',e=>{fn(+e.target.value); dirty=true;});
+    on('sEl',v=>{solar.elD=v; document.getElementById('sElV').textContent=v+'°';});
+    on('sP', v=>{solar.p=v;  document.getElementById('sPV').textContent=fmt(v)+' m';});
+    on('sH', v=>{solar.h=v;  document.getElementById('sHV').textContent=fmt(v)+' m';});
   } else {
-    pSlider.min=0.5; pSlider.max=2.0; pSlider.step=0.05; pSlider.value=head.p;
-    pLabel.innerHTML='반사경 깊이 p = <span id="pVal">'+head.p.toFixed(2)+'</span>';
-    hint.textContent='💡 전구를 좌우로 끌어서 초점에 맞춰 보세요';
-    info.innerHTML='<b>🚗 이번엔 거꾸로!</b><br><b style="color:#f87171">초점 F</b>에 놓인 전구의 빛은 '+
-      '반사 후 전부 <b>평행</b>하게 나가 멀리까지 밝게 비춰요. '+
-      '전구가 초점을 벗어나면 빛이 흩어집니다.';
+    const car=CARS[head.car];
+    ctrl.innerHTML=`
+      <div class="cItem"><span class="lb">전구 위치</span>
+        <input type="range" id="hB" min="0.04" max="${(car.p*2.2).toFixed(2)}" step="0.005" value="${head.b}">
+        <span class="vv" id="hBV">${fmt(head.b)} m</span></div>
+      <div class="cItem"><span class="lb">반사경 초점거리 <i>p</i></span>
+        <input type="range" id="hP" min="0.08" max="0.28" step="0.005" value="${head.p}">
+        <span class="vv" id="hPV">${fmt(head.p)} m</span></div>
+      <div id="hintLine">🚗 차마다 반사경 모양이 달라요. 전구를 초점 F(= <i>p</i>)에 두면 빛이 축과 평행하게 나가 멀리 뻗어요!</div>`;
+    const on=(id,fn)=>document.getElementById(id).addEventListener('input',e=>{fn(+e.target.value); dirty=true;});
+    on('hB',v=>{head.b=v; document.getElementById('hBV').textContent=fmt(v)+' m';});
+    on('hP',v=>{head.p=v; document.getElementById('hPV').textContent=fmt(v)+' m';});
   }
 }
-tabSolar.addEventListener('click',()=>{ mode='solar'; applyMode(); });
-tabHead.addEventListener('click',()=>{ mode='head'; applyMode(); });
+function buildCars(){
+  carRow.innerHTML=CARS.map((c,i)=>`<button data-i="${i}" class="${i===head.car?'on':''}">${c.name}</button>`).join('');
+  carRow.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{
+    head.car=+b.dataset.i;
+    head.p=CARS[head.car].p;
+    head.b=Math.min(head.b, head.p*2.2);
+    buildCars(); buildCtrl(); dirty=true;
+  }));
+}
+function setTab(t2){
+  tab=t2;
+  document.getElementById('tabSolar').classList.toggle('on',tab==='solar');
+  document.getElementById('tabHead').classList.toggle('on',tab==='head');
+  stage.className = tab==='solar' ? 'day' : 'night';
+  carRow.style.display = tab==='head' ? 'flex' : 'none';
+  cam.yaw = tab==='solar'?0.6:0.85; cam.pitch = tab==='solar'?0.32:0.18;
+  cam.dist = tab==='solar'?6.4:3.4; cam.target = tab==='solar'?[0,1.0,0]:[1.1,0.7,0];
+  buildCtrl(); dirty=true;
+}
+document.getElementById('tabSolar').addEventListener('click',()=>setTab('solar'));
+document.getElementById('tabHead').addEventListener('click',()=>setTab('head'));
 
-pSlider.addEventListener('input',()=>{
-  const val=parseFloat(pSlider.value);
-  if(mode==='solar') solar.p=val; else head.p=val;
-  document.getElementById('pVal').textContent=val.toFixed(2);
-});
-
-/* ── 드래그 (냄비/전구) ── */
-function pos(e){ const r=cv.getBoundingClientRect(); return {x:e.clientX-r.left, y:e.clientY-r.top}; }
-cv.addEventListener('pointerdown',e=>{
-  const q=pos(e);
-  cv.setPointerCapture(e.pointerId);
-  if(mode==='solar'){
-    const v=viewSolar();
-    if(Math.hypot(q.x-SX(v,0), q.y-SY(v,solar.potY))<40) draggingPot=true;
-  } else {
-    const v=viewHead();
-    if(Math.hypot(q.x-(v.ox+head.bulbX*v.s), q.y-v.oy)<36) draggingBulb=true;
+function frame(t){
+  const heatOn = tab==='solar' && solarHeat()>=90;
+  if(dirty || heatOn){
+    B=camBasis(); FL=1.15*Math.min(W,H)*DPR/DPR;
+    ctx.setTransform(DPR,0,0,DPR,0,0);
+    ctx.clearRect(0,0,W,H);
+    let g;
+    if(tab==='solar'){
+      const heat=drawSolar(t); flush();
+      const lv = heat>=90?'🔥 펄펄 끓어요!':heat>=60?'♨️ 따뜻해요':heat>=30?'🌡️ 미지근…':'🧊 아직 차가워요';
+      hud.innerHTML=`<b>${lv}</b><br>집광률 ${heat}% — 접시 기울기 ${solar.elD}° / 태양 55°<br>`+
+        `냄비 <span class="it">h</span> = ${fmt(solar.h)} m · 초점 <span class="it">p</span> = ${fmt(solar.p)} m`+
+        `<div id="gaugeBar"><div id="gaugeFill" style="width:${heat}%"></div></div>`;
+      if(heat>=90 && !solar.done){ solar.done=true; if(window.GEO_task) GEO_task('solar'); }
+    } else {
+      const sp=drawHead(t); flush();
+      const perfect = sp<0.8;
+      hud.innerHTML=`<b>${perfect?'💡 완벽한 평행광!':'퍼짐각 '+sp.toFixed(1)+'°'}</b><br>`+
+        `${CARS[head.car].name} — ${CARS[head.car].shape==='circle'?'원형':CARS[head.car].shape==='hex'?'육각형':'사각형'} 헤드램프<br>`+
+        `전구 ${fmt(head.b)} m · 초점 <span class="it">p</span> = ${fmt(head.p)} m`+
+        `<div id="gaugeBar"><div id="gaugeFill" style="width:${Math.max(4,100-sp*3)}%"></div></div>`;
+      if(perfect && !head.done){ head.done=true; if(window.GEO_task) GEO_task('head'); }
+    }
+    dirty=false;
   }
-});
-cv.addEventListener('pointermove',e=>{
-  const q=pos(e);
-  if(draggingPot){
-    const v=viewSolar();
-    solar.potY=Math.max(0.25, Math.min(4.6, (v.oy-q.y)/v.s));
-  } else if(draggingBulb){
-    const v=viewHead();
-    head.bulbX=Math.max(0.15, Math.min(3.4, (q.x-v.ox)/v.s));
-  }
-});
-const up=()=>{ draggingPot=draggingBulb=false; };
-cv.addEventListener('pointerup',up);
-cv.addEventListener('pointercancel',up);
-
-applyMode();
+  requestAnimationFrame(frame);
+}
+resize();
+buildCars();
+setTab('solar');
+requestAnimationFrame(frame);
+addEventListener('resize',()=>{resize();});
+/* 회전 중 계속 다시 그리기 */
+(function(){ const iv=setInterval(()=>{ if(ptrs.size>0) dirty=true; },30); })();
 </script>
 <script>window.PAGE_ID="apply";</script>
 <script src="nav.js"></script>

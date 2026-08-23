@@ -410,5 +410,12 @@ window.__fold={ get paper(){return paper;}, get F(){return F;}, get n(){return c
 </script>
 <script>window.PAGE_ID="folding";</script>
 <script src="nav.js"></script>
+<script>
+/* 완료 도장 과제: 활동 버튼 4개 모두 눌러보기 */
+['autoBtn','curveBtn','whyBtn','clearBtn'].forEach(id => {
+  const b = document.getElementById(id);
+  if(b) b.addEventListener('click', () => { if(window.GEO_task) GEO_task(id); });
+});
+</script>
 </body>
 </html>

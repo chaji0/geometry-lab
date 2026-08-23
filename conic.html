@@ -1288,5 +1288,15 @@ window.__ang = () => angleGuide();
 </script>
 <script>window.PAGE_ID="conic";</script>
 <script src="nav.js"></script>
+<script>
+/* 완료 도장 과제: 기울기 조절 + 단면 확인 + 증명으로 이어가기 */
+(function(){
+  const g = id => document.getElementById(id);
+  if(g('slider')) g('slider').addEventListener('input', () => { if(window.GEO_task) GEO_task('tilt'); });
+  if(g('cutBtn')) g('cutBtn').addEventListener('click', () => { if(window.GEO_task) GEO_task('cut'); });
+  const det = document.querySelector('details');
+  if(det) det.addEventListener('toggle', () => { if(det.open && window.GEO_task) GEO_task('proof'); });
+})();
+</script>
 </body>
 </html>
