@@ -33,32 +33,47 @@ if (localStorage.getItem('geoAppOk') !== '1') location.replace('index.html');
   }
   #tabs button.on { background:linear-gradient(135deg,#0ea5e9,#6366f1); color:#fff; border-color:transparent; }
 
-  #stage { flex:1; min-height:0; position:relative; touch-action:none; }
-  #stage.day  { background:linear-gradient(180deg,#7dd3fc 0%,#bae6fd 46%,#d9f99d 46.2%,#bef264 100%); }
-  #stage.night{ background:linear-gradient(180deg,#0b1026 0%,#151c3a 55%,#1f2430 55.2%,#262b33 100%); }
+  #main { flex:1; min-height:0; display:flex; }
+  #stage { flex:6 1 0; min-width:0; min-height:0; position:relative; touch-action:none; }
+  #side {
+    flex:4 1 0; min-width:250px; max-width:430px; display:flex; flex-direction:column;
+    background:#fbfcfd; border-left:1px solid #e2e7ec; padding:14px 16px 12px;
+  }
+  #side .sTag { font-size:11.5px; letter-spacing:0.08em; color:#8d99a6; font-weight:600; }
+  #side .sTitle { font-size:18px; font-weight:800; color:#1a2330; margin-top:2px; }
+  #side .sDesc { font-size:12.5px; line-height:1.5; color:#5c6874; margin-top:5px; }
+  #sSvgWrap { flex:1 1 auto; margin-top:10px; min-height:0; }
+  #sSvgWrap svg { width:100%; height:100%; display:block; }
+  #sCards { display:flex; gap:8px; margin-top:10px; }
+  .sCard { flex:1 1 0; background:#fff; border:1px solid #e6ebf0; border-radius:11px; padding:8px 10px; }
+  .sCard .k { font-size:11px; color:#8d99a6; }
+  .sCard .v { font-size:15.5px; font-weight:800; color:#1a2330; margin-top:1px; font-family:Georgia,serif; }
+  #side.off { display:none; }
+  #stage.day  { background:linear-gradient(180deg,#79c4ef 0%,#a5d9f4 34%,#e4f3fc 52%,#eef8fd 100%); }
+  #stage.night{ background:linear-gradient(180deg,#050a17 0%,#0b1630 40%,#152341 58%,#1b2a4a 100%); }
   #cv { width:100%; height:100%; display:block; }
 
   .hud {
-    position:absolute; left:10px; top:10px; background:rgba(255,255,255,.92);
-    border:1px solid #e2e8f0; border-radius:13px; padding:9px 13px; max-width:250px;
-    box-shadow:0 4px 14px rgba(15,23,42,.12); font-size:12.5px; line-height:1.55; color:#334155;
+    position:absolute; left:12px; top:12px; background:rgba(255,255,255,.95);
+    border-radius:15px; padding:12px 16px; max-width:280px;
+    box-shadow:0 8px 28px rgba(16,24,40,.16),0 1px 2px rgba(16,24,40,.08);
+    font-size:13.5px; line-height:1.5; color:#3d4a5a;
   }
-  .hud b { font-size:15px; }
-  #gaugeBar { margin-top:6px; height:10px; border-radius:999px; background:#e2e8f0; overflow:hidden; }
-  #gaugeFill { height:100%; width:0%; border-radius:999px; background:linear-gradient(90deg,#38bdf8,#f59e0b,#ef4444); transition:width .25s; }
-  .drag { position:absolute; right:12px; bottom:10px; font-size:11.5px; color:rgba(255,255,255,.9);
-    background:rgba(15,23,42,.45); padding:5px 11px; border-radius:999px; pointer-events:none; }
-  #stage.day .drag { color:#334155; background:rgba(255,255,255,.7); }
+  .hud b { font-size:17px; color:#1a2330; }
+  #gaugeBar { margin-top:10px; height:9px; border-radius:999px; background:#e8ebef; overflow:hidden; }
+  #gaugeFill { height:100%; border-radius:999px; background:linear-gradient(90deg,#4fb6e8,#f0b429 55%,#e0442c); transition:width .25s; }
+  .drag { position:absolute; right:14px; bottom:12px; font-size:12px; color:#3d4a5a;
+    background:rgba(255,255,255,.92); padding:7px 13px; border-radius:10px; pointer-events:none;
+    box-shadow:0 3px 12px rgba(16,24,40,.14); }
+  #stage.night .drag { color:rgba(255,255,255,.9); background:rgba(15,23,42,.5); }
 
-  /* 자동차 선택 칩 */
-  #carRow { position:absolute; left:50%; transform:translateX(-50%); top:10px; display:none; gap:7px; }
+  #carRow { position:absolute; right:14px; top:10px; display:none; gap:7px; flex-wrap:wrap; justify-content:flex-end; max-width:46%; }
   #carRow button {
     padding:7px 13px; font-size:12.5px; font-weight:800; border-radius:999px; cursor:pointer;
     border:1.5px solid rgba(255,255,255,.35); background:rgba(15,23,42,.55); color:#e2e8f0; font-family:inherit;
   }
   #carRow button.on { background:#f59e0b; border-color:#f59e0b; color:#1c1917; }
 
-  /* 하단 컨트롤 */
   #ctrl {
     flex:none; background:#fff; border-top:1px solid #e2e8f0; padding:8px 14px 6px;
     display:flex; gap:18px; align-items:center; flex-wrap:wrap;
@@ -68,7 +83,13 @@ if (localStorage.getItem('geoAppOk') !== '1') location.replace('index.html');
   .cItem .lb i { color:#0369a1; }
   .cItem input[type=range] { width:150px; }
   .cItem .vv { font-size:12.5px; font-weight:800; color:#0369a1; min-width:52px; font-family:Georgia,serif; }
+  .capBtn { padding:6px 11px; font-size:12px; font-weight:800; border-radius:999px; cursor:pointer;
+    border:1.5px solid #cbd5e1; background:#f8fafc; color:#64748b; font-family:inherit; }
+  .capBtn.on { background:linear-gradient(135deg,#0ea5e9,#6366f1); border-color:transparent; color:#fff; }
+  #regimeLb { font-size:12.5px; font-weight:800; padding:4px 10px; border-radius:999px; white-space:nowrap; }
   #hintLine { flex-basis:100%; font-size:12px; color:#94a3b8; line-height:1.5; }
+  #glLoad { position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    color:#64748b; font-size:14px; }
 </style>
 </head>
 <body>
@@ -80,483 +101,1289 @@ if (localStorage.getItem('geoAppOk') !== '1') location.replace('index.html');
   <button id="tabSolar" class="on">🌞 태양열 조리기</button>
   <button id="tabHead">🚗 자동차 전조등</button>
 </div>
-<div id="stage" class="day">
-  <canvas id="cv"></canvas>
-  <div class="hud" id="hud"></div>
-  <div id="carRow"></div>
-  <div class="drag">한 손가락: 360° 돌려보기 · 두 손가락/휠: 확대·축소</div>
+<div id="main">
+  <div id="stage" class="day">
+    <canvas id="cv"></canvas>
+    <div id="glLoad">3D 장면을 준비하는 중이에요…</div>
+    <div class="hud" id="hud" style="display:none"></div>
+    <div id="carRow"></div>
+    <div class="drag">한 손가락: 360° 돌려보기 · 두 손가락/휠: 확대·축소</div>
+  </div>
+  <div id="side">
+    <div class="sTag">CROSS SECTION</div>
+    <div class="sTitle" id="sTitle">포물선 단면과 초점</div>
+    <div class="sDesc" id="sDesc">축에 평행하게 들어온 빛은 어디에 닿아도 모두 한 점, 초점 <i>F</i>로 모입니다.</div>
+    <div id="sSvgWrap"></div>
+    <div id="sCards">
+      <div class="sCard"><div class="k" id="cK1">지름 2<i>R</i></div><div class="v" id="cDia">–</div></div>
+      <div class="sCard"><div class="k" id="cK2">모인 광선</div><div class="v" id="cRatio">–</div></div>
+      <div class="sCard"><div class="k" id="cK3">냄비 반지름</div><div class="v" id="cPot">–</div></div>
+    </div>
+  </div>
 </div>
 <div id="ctrl"></div>
 
 <script>
 'use strict';
-/* ═══════════ 미니 3D 엔진 (원뿔곡선 페이지와 같은 순수 캔버스 방식) ═══════════ */
-const cv = document.getElementById('cv');
-const ctx = cv.getContext('2d');
-const stage = document.getElementById('stage');
-let W = 0, H = 0, DPR = 1;
-function resize(){
-  DPR = Math.min(devicePixelRatio || 1, 2);
-  W = stage.clientWidth; H = stage.clientHeight;
-  cv.width = Math.round(W * DPR); cv.height = Math.round(H * DPR);
-  dirty = true;
-}
-addEventListener('resize', resize);
+/* ═════════ 포물선의 활용 — three.js(WebGL) 버전
+   태양열 조리기: 클로드 디자인 원본 씬을 그대로 이식 (three.js는 저장소의 three.module.js)
+   ═════════ */
+const $id = s => document.getElementById(s);
+const stage = $id('stage'), hud = $id('hud'), ctrl = $id('ctrl'), carRow = $id('carRow');
+const fmt = (v,d) => v.toFixed(d===undefined?2:d);
 
-const V3 = {
-  add:(a,b)=>[a[0]+b[0],a[1]+b[1],a[2]+b[2]],
-  sub:(a,b)=>[a[0]-b[0],a[1]-b[1],a[2]-b[2]],
-  mul:(a,k)=>[a[0]*k,a[1]*k,a[2]*k],
-  dot:(a,b)=>a[0]*b[0]+a[1]*b[1]+a[2]*b[2],
-  cross:(a,b)=>[a[1]*b[2]-a[2]*b[1], a[2]*b[0]-a[0]*b[2], a[0]*b[1]-a[1]*b[0]],
-  len:a=>Math.sqrt(a[0]*a[0]+a[1]*a[1]+a[2]*a[2]),
-  norm(a){ const l=this.len(a)||1; return [a[0]/l,a[1]/l,a[2]/l]; },
-  reflect(d,n){ const k=2*(d[0]*n[0]+d[1]*n[1]+d[2]*n[2]); return [d[0]-k*n[0], d[1]-k*n[1], d[2]-k*n[2]]; }
+/* 상태 */
+const solar = { tilt:34, p:0.8, depth:1, hPot:0.95, potR:0.1, done:false };   // 깊이·냄비 반지름 고정
+const SUN_EL = 55;
+const CARS = {
+  p911: {
+    chip: "P", name: "포르쉐 911", spec: "4535 × 1900 × 1300 mm · WB 2450",
+    paint: 0xd4d8dc, clear: 1.0, L: 4.535, W: 1.90, H: 1.30, belt: 0.88,
+    bodyExp: 3.2, roofExp: 4.2, tumble: 0.1, roofGlass: false, roofW: 0.5,
+    glassBands: [[0.05, 0.44], [0.5, 0.93]],
+    wheelR: 0.335, axles: [1.02, 3.47], lampY: 0.76, lampZ: 0.62,
+    lamp: "round", lampR: 0.1, tail: "bar", rim: "dark", spokes: 10,
+    lower: [[0.00, 0.58, 0.28, 0.60], [0.25, 0.72, 0.20, 0.80], [0.60, 0.80, 0.18, 0.88],
+            [1.10, 0.85, 0.18, 0.92], [1.60, 0.88, 0.18, 0.94], [2.40, 0.92, 0.20, 0.97],
+            [3.20, 0.95, 0.22, 1.00], [3.90, 0.99, 0.24, 0.99], [4.30, 0.94, 0.28, 0.93],
+            [4.53, 0.80, 0.36, 0.80]],
+    green: [[1.50, 0.94, 0.74], [1.95, 1.20, 0.82], [2.40, 1.30, 0.84], [2.90, 1.28, 0.84],
+            [3.40, 1.12, 0.78], [3.85, 0.99, 0.62]]
+  },
+  t: {
+    chip: "T", name: "테슬라 모델 Y", spec: "4790 × 1920 × 1624 mm · WB 2890",
+    paint: 0xf0f1f2, clear: 1.0, L: 4.79, W: 1.92, H: 1.624, belt: 1.06,
+    bodyExp: 3.6, roofExp: 4.4, tumble: 0.12, roofGlass: true, roofW: 0.62,
+    glassBands: [[0.04, 0.36], [0.42, 0.66], [0.72, 0.95]],
+    wheelR: 0.36, axles: [1.02, 3.91], lampY: 0.90, lampZ: 0.68,
+    lamp: "bar", lampR: 0.05, tail: "bar", rim: "aero", spokes: 8,
+    lower: [[0.00, 0.84, 0.32, 0.64], [0.30, 0.96, 0.24, 0.84], [0.75, 1.02, 0.22, 0.92],
+            [1.20, 1.06, 0.22, 0.96], [2.00, 1.08, 0.24, 0.99], [3.00, 1.08, 0.24, 1.00],
+            [3.90, 1.10, 0.26, 0.98], [4.45, 1.08, 0.30, 0.92], [4.79, 0.94, 0.42, 0.76]],
+    green: [[1.30, 1.12, 0.78], [1.85, 1.48, 0.86], [2.40, 1.60, 0.88], [3.05, 1.62, 0.88],
+            [3.65, 1.57, 0.86], [4.20, 1.38, 0.80], [4.60, 1.16, 0.64]]
+  },
+  g: {
+    chip: "G", name: "벤츠 G클래스 (G바겐)", spec: "4624 × 1931 × 1969 mm · WB 2890",
+    paint: 0x1c222a, clear: 0.8, L: 4.624, W: 1.931, H: 1.969, belt: 1.30,
+    bodyExp: 9, roofExp: 9, tumble: 0.03, roofGlass: false, boxy: true, roofW: 0.88,
+    glassBands: [[0.03, 0.28], [0.33, 0.58], [0.63, 0.86], [0.9, 0.98]],
+    wheelR: 0.40, axles: [0.98, 3.87], lampY: 1.18, lampZ: 0.72,
+    lamp: "round", lampR: 0.115, tail: "box", rim: "silver", spokes: 6,
+    lower: [[0.00, 1.12, 0.34, 0.84], [0.20, 1.26, 0.28, 0.94], [0.95, 1.28, 0.28, 0.96],
+            [1.12, 1.31, 0.28, 0.98], [4.30, 1.31, 0.28, 0.98], [4.52, 1.28, 0.32, 0.96],
+            [4.62, 1.16, 0.38, 0.88]],
+    green: [[1.05, 1.34, 0.86], [1.32, 1.96, 0.92], [4.10, 1.97, 0.92], [4.24, 1.90, 0.88]]
+  },
+  s: {
+    chip: "S", name: "삼성 SM3", spec: "4620 × 1809 × 1480 mm · WB 2700",
+    paint: 0xc5cad0, clear: 0.95, L: 4.62, W: 1.809, H: 1.48, belt: 0.96,
+    bodyExp: 3.4, roofExp: 4.2, tumble: 0.12, roofGlass: false, roofW: 0.58,
+    glassBands: [[0.04, 0.34], [0.4, 0.64], [0.7, 0.94]],
+    wheelR: 0.325, axles: [1.00, 3.70], lampY: 0.80, lampZ: 0.62,
+    lamp: "sweep", lampR: 0.075, tail: "bar", rim: "silver", spokes: 5,
+    lower: [[0.00, 0.70, 0.30, 0.58], [0.28, 0.86, 0.22, 0.78], [0.75, 0.94, 0.20, 0.86],
+            [1.25, 0.98, 0.20, 0.92], [2.10, 1.00, 0.22, 0.96], [3.00, 1.00, 0.22, 0.97],
+            [3.60, 1.02, 0.24, 0.95], [4.10, 1.10, 0.26, 0.92], [4.45, 1.08, 0.30, 0.88],
+            [4.62, 0.94, 0.38, 0.74]],
+    green: [[1.42, 1.02, 0.76], [1.85, 1.32, 0.82], [2.32, 1.46, 0.84], [2.86, 1.48, 0.84],
+            [3.30, 1.35, 0.80], [3.70, 1.09, 0.62]]
+  }
 };
+/* 전구를 초점보다 살짝 뒤(−)에서 시작 → 학생이 슬라이더로 F를 찾는다 */
+const head = { car:'p911', hp:0.06, hh:0.05, off:-0.012, cap:'차광 캡', showCar:false, done:false };
+let tab = 'solar';
 
-const cam = { yaw:0.6, pitch:0.32, dist:6.4, target:[0,1.0,0] };
-function camBasis(){
-  const cy=Math.cos(cam.yaw), sy=Math.sin(cam.yaw), cp=Math.cos(cam.pitch), sp=Math.sin(cam.pitch);
-  const fwd=[-sy*cp, -sp, -cy*cp];                       // eye → target
-  const eye=V3.sub(cam.target, V3.mul(fwd, cam.dist));
-  const right=V3.norm(V3.cross(fwd,[0,1,0]));
-  const up=V3.cross(right,fwd);
-  return {eye,fwd,right,up};
+/* ── 물리: 집광률 (거울에 닿은 빛 중 냄비에 모인 비율, 광선 추적) ── */
+const M = {
+  dot:(a,b)=>a[0]*b[0]+a[1]*b[1]+a[2]*b[2],
+  norm(a){ const l=Math.hypot(a[0],a[1],a[2])||1; return [a[0]/l,a[1]/l,a[2]/l]; },
+  reflect(d,n){ const k=2*this.dot(d,n); return [d[0]-k*n[0], d[1]-k*n[1], d[2]-k*n[2]]; }
+};
+function potHitLocal(o, d, rp, hp, hh){
+  let best = Infinity;
+  const a = d[0]*d[0] + d[2]*d[2];
+  if(a > 1e-9){
+    const b = 2*(o[0]*d[0] + o[2]*d[2]);
+    const c = o[0]*o[0] + o[2]*o[2] - rp*rp;
+    const disc = b*b - 4*a*c;
+    if(disc >= 0){
+      const sq = Math.sqrt(disc);
+      for(const t of [(-b-sq)/(2*a), (-b+sq)/(2*a)])
+        if(t > 1e-4 && t < best && Math.abs(o[1] + t*d[1] - hp) <= hh) best = t;
+    }
+  }
+  if(Math.abs(d[1]) > 1e-9){
+    for(const yc of [hp-hh, hp+hh]){
+      const t = (yc - o[1]) / d[1];
+      if(t > 1e-4 && t < best){
+        const xx = o[0]+t*d[0], zz = o[2]+t*d[2];
+        if(xx*xx + zz*zz <= rp*rp) best = t;
+      }
+    }
+  }
+  return best;
 }
-let B = null, FL = 1;
-function project(p){
-  const v=V3.sub(p,B.eye);
-  const z=V3.dot(v,B.fwd);
-  if(z < 0.12) return null;
-  const x=V3.dot(v,B.right), y=V3.dot(v,B.up);
-  return [W/2 + FL*x/z, H/2 - FL*y/z, z];
+function solarLocalSun(){
+  const e = solar.tilt*Math.PI/180, se = SUN_EL*Math.PI/180;
+  const A=[Math.cos(e),Math.sin(e),0], U1=[-Math.sin(e),Math.cos(e),0], U2=[0,0,1];
+  const S=[Math.cos(se),Math.sin(se),0];
+  return { d:[-M.dot(S,U1), -M.dot(S,A), -M.dot(S,U2)], R:Math.sqrt(4*solar.p*solar.depth) };
 }
-let polys=[], lines=[], marks=[];
-const ZN=0.14;
-function toCam(p){ const v=V3.sub(p,B.eye); return [V3.dot(v,B.right), V3.dot(v,B.up), V3.dot(v,B.fwd)]; }
-function toScr(c){ return [W/2 + FL*c[0]/c[2], H/2 - FL*c[1]/c[2], c[2]]; }
-function clipPolyZ(cs){                       // 카메라 근평면(z=ZN) 클리핑
-  const out=[];
-  for(let i=0;i<cs.length;i++){
-    const a=cs[i], b2=cs[(i+1)%cs.length];
-    const ain=a[2]>=ZN, bin=b2[2]>=ZN;
-    if(ain) out.push(a);
-    if(ain!==bin){
-      const t=(ZN-a[2])/(b2[2]-a[2]);
-      out.push([a[0]+(b2[0]-a[0])*t, a[1]+(b2[1]-a[1])*t, ZN]);
+function solarHeat(){
+  const {d,R} = solarLocalSun();
+  const p=solar.p, rp=solar.potR, hh=rp*0.75, hp=solar.hPot;
+  let reach=0, cap=0;
+  const N=30;
+  for(let i=0;i<N;i++) for(let j=0;j<N;j++){
+    const x=-R+2*R*(i+0.5)/N, z=-R+2*R*(j+0.5)/N;
+    if(x*x+z*z > R*R) continue;
+    const nl = M.norm([-x/(2*p), 1, -z/(2*p)]);
+    const dn = M.dot(d, nl);
+    if(dn >= 0) continue;
+    const P=[x,(x*x+z*z)/(4*p),z];
+    if(potHitLocal(P,[-d[0],-d[1],-d[2]],rp,hp,hh) < Infinity) continue;   // 냄비 그림자
+    reach += -dn;
+    if(potHitLocal(P, M.reflect(d,nl), rp, hp, hh) < Infinity) cap += -dn;
+  }
+  return reach ? Math.floor(cap/reach*100 + 1e-6) : 0;
+}
+function headSpread(){ return Math.abs(head.off) < 1e-9 ? 0 : Math.min(28, Math.abs(head.off)/head.hp*44); }
+
+/* ── 우측 단면 패널 (클로드 디자인 diagram 이식 + 냄비 위치 표시) ── */
+function updateSide(heat){
+  const P=solar.p, Hd=solar.depth, rp=solar.potR, hp=solar.hPot;
+  const R=Math.sqrt(4*P*Hd);
+  const W2=460, Hh=520;
+  const sc=Math.min((W2-150)/(Hd+P+0.45), (Hh-90)/(2*R));
+  const ox=60+P*sc, oy=Hh/2;
+  const X=x=>ox+x*sc, Y=y=>oy-y*sc;
+  const par=y=>y*y/(4*P);
+  let g='';
+  for(let k=-8;k<=8;k++){
+    const gx=X(k*0.5); if(gx>6&&gx<W2-6) g+=`<path d="M ${gx.toFixed(1)} 12 L ${gx.toFixed(1)} ${Hh-12}" stroke="#eef2f6" fill="none"/>`;
+    const gy=Y(k*0.5); if(gy>12&&gy<Hh-12) g+=`<path d="M 12 ${gy.toFixed(1)} L ${W2-12} ${gy.toFixed(1)}" stroke="#eef2f6" fill="none"/>`;
+  }
+  let curve='';
+  for(let i2=0;i2<=60;i2++){
+    const y=-R+2*R*i2/60;
+    curve+=(i2?' L ':'M ')+X(par(y)).toFixed(1)+' '+Y(y).toFixed(1);
+  }
+  let rays='';
+  for(let k=0;k<9;k++){
+    const y=-R*0.94+1.88*R*k/8, x=par(y);
+    rays+=`<path d="M ${(W2-16)} ${Y(y).toFixed(1)} L ${X(x).toFixed(1)} ${Y(y).toFixed(1)}" stroke="#efa41f" stroke-width="2" stroke-dasharray="9 6" fill="none"/>`;
+    rays+=`<path d="M ${X(x).toFixed(1)} ${Y(y).toFixed(1)} L ${X(P).toFixed(1)} ${Y(0).toFixed(1)}" stroke="#f07a1e" stroke-width="2" fill="none"/>`;
+  }
+  const potW=rp*1.3*sc, potH=rp*1.7*sc;
+  $id('sSvgWrap').innerHTML =
+   `<svg viewBox="0 0 ${W2} ${Hh}" preserveAspectRatio="xMidYMid meet" style="overflow:visible">
+      <rect x="0" y="0" width="${W2}" height="${Hh}" rx="14" fill="#fff" stroke="#e6ebf0"/>${g}
+      <path d="M 16 ${Y(0).toFixed(1)} L ${W2-16} ${Y(0).toFixed(1)}" stroke="#b6c0ca" stroke-width="1.5" fill="none"/>
+      <path d="M ${X(0).toFixed(1)} 16 L ${X(0).toFixed(1)} ${Hh-16}" stroke="#b6c0ca" stroke-width="1.5" fill="none"/>
+      <path d="M ${X(-P).toFixed(1)} 24 L ${X(-P).toFixed(1)} ${Hh-24}" stroke="#9aa7b4" stroke-width="1.5" stroke-dasharray="7 6" fill="none"/>
+      ${rays}
+      <path d="${curve}" stroke="#2f3b48" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <rect x="${(X(hp)-potH/2).toFixed(1)}" y="${(Y(0)-potW/2).toFixed(1)}" width="${potH.toFixed(1)}" height="${potW.toFixed(1)}" rx="3" fill="#a63318" opacity="0.9"/>
+      <circle cx="${X(P).toFixed(1)}" cy="${Y(0).toFixed(1)}" r="17" fill="#f07a1e" opacity="0.16"/>
+      <circle cx="${X(P).toFixed(1)}" cy="${Y(0).toFixed(1)}" r="6" fill="#e0442c"/>
+      <text x="${(X(P)+12).toFixed(1)}" y="${(Y(0)-14).toFixed(1)}" font-size="15" font-weight="700" fill="#c8371f">F(${P.toFixed(2)}, 0)</text>
+      <text x="${(X(0)-18).toFixed(1)}" y="${(Y(0)+18).toFixed(1)}" font-size="14" fill="#8d99a6">O</text>
+      <text x="${(X(-P)-6).toFixed(1)}" y="40" font-size="13" fill="#7c8994" text-anchor="end">준선 x = −${P.toFixed(2)}</text>
+      <text x="${W2-165}" y="${Hh-24}" font-size="17" fill="#2f3b48" font-style="italic">y² = ${(4*P).toFixed(2)} x</text>
+    </svg>`;
+  $id('cDia').textContent=(2*R).toFixed(2)+' m';
+  $id('cRatio').textContent=heat+'%';
+  $id('cPot').textContent=rp.toFixed(2)+' m';
+}
+
+/* ── 우측 단면 패널: 전조등 (전구 위치 실험 — 그림 A·B·C) ── */
+function updateSideHead(){
+  const P=head.hp, Hd=head.hh, off=head.off;
+  const R=Math.sqrt(4*P*Hd);
+  const W2=460, Hh=520;
+  const sc=Math.min((W2-150)/(Hd+P+0.1), (Hh-90)/(2*R));
+  const ox=60+P*sc, oy=Hh/2;
+  const X=x=>ox+x*sc, Y=y=>oy-y*sc;
+  const par=y=>y*y/(4*P);
+  let g='';
+  for(let k=-8;k<=8;k++){
+    const gx=X(k*0.05); if(gx>6&&gx<W2-6) g+=`<path d="M ${gx.toFixed(1)} 12 L ${gx.toFixed(1)} ${Hh-12}" stroke="#eef2f6" fill="none"/>`;
+    const gy=Y(k*0.05); if(gy>12&&gy<Hh-12) g+=`<path d="M 12 ${gy.toFixed(1)} L ${W2-12} ${gy.toFixed(1)}" stroke="#eef2f6" fill="none"/>`;
+  }
+  let curve='';
+  for(let i2=0;i2<=60;i2++){
+    const y=-R+2*R*i2/60;
+    curve+=(i2?' L ':'M ')+X(par(y)).toFixed(1)+' '+Y(y).toFixed(1);
+  }
+  /* 광선: 전구(F+오차) → 반사면 → 반사 방향 (off<0 발산 · 0 평행 · off>0 수렴) */
+  const bx=X(P+off), by=Y(0);
+  let rays='';
+  for(let k=0;k<9;k++){
+    const y=-R*0.94+1.88*R*k/8, x=par(y);
+    const px=X(x), py=Y(y);
+    const dx=x-(P+off), dy=y;
+    const nx=1, ny=-y/(2*P);
+    const nl=Math.hypot(nx,ny);
+    const dot=(dx*nx/nl + dy*ny/nl);
+    const rx=dx-2*dot*nx/nl, ry=dy-2*dot*ny/nl;
+    const rl=Math.hypot(rx,ry)||1;
+    const k2=(W2-16-px)/((rx/rl*sc)||1);
+    const L=Math.min(Math.abs(k2)/sc, 4);
+    rays+=`<path d="M ${bx.toFixed(1)} ${by.toFixed(1)} L ${px.toFixed(1)} ${py.toFixed(1)}" stroke="#efa41f" stroke-width="2" stroke-dasharray="9 6" fill="none"/>`;
+    rays+=`<path d="M ${px.toFixed(1)} ${py.toFixed(1)} L ${(px+rx/rl*sc*L).toFixed(1)} ${(py-ry/rl*sc*L).toFixed(1)}" stroke="#f07a1e" stroke-width="2" fill="none"/>`;
+  }
+  const fx=X(P);
+  $id('sSvgWrap').innerHTML =
+   `<svg viewBox="0 0 ${W2} ${Hh}" preserveAspectRatio="xMidYMid meet" style="overflow:visible">
+      <rect x="0" y="0" width="${W2}" height="${Hh}" rx="14" fill="#fff" stroke="#e6ebf0"/>${g}
+      <path d="M 16 ${Y(0).toFixed(1)} L ${W2-16} ${Y(0).toFixed(1)}" stroke="#b6c0ca" stroke-width="1.5" fill="none"/>
+      <path d="M ${X(0).toFixed(1)} 16 L ${X(0).toFixed(1)} ${Hh-16}" stroke="#b6c0ca" stroke-width="1.5" fill="none"/>
+      <path d="M ${X(-P).toFixed(1)} 24 L ${X(-P).toFixed(1)} ${Hh-24}" stroke="#9aa7b4" stroke-width="1.5" stroke-dasharray="7 6" fill="none"/>
+      ${rays}
+      <path d="${curve}" stroke="#2f3b48" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <circle cx="${fx.toFixed(1)}" cy="${by.toFixed(1)}" r="5" fill="none" stroke="#e0442c" stroke-width="2.5"/>
+      <text x="${(fx+2).toFixed(1)}" y="${(by+24).toFixed(1)}" font-size="14" font-weight="700" fill="#c8371f" text-anchor="middle">F</text>
+      <circle cx="${bx.toFixed(1)}" cy="${by.toFixed(1)}" r="16" fill="#f7c948" opacity="0.25"/>
+      <circle cx="${bx.toFixed(1)}" cy="${by.toFixed(1)}" r="6" fill="#f0a41f"/>
+      <text x="${bx.toFixed(1)}" y="${(by-16).toFixed(1)}" font-size="13" font-weight="700" fill="#b07a10" text-anchor="middle">전구</text>
+      <text x="${(X(0)-18).toFixed(1)}" y="${(Y(0)+18).toFixed(1)}" font-size="14" fill="#8d99a6">O</text>
+      <text x="${(X(-P)-6).toFixed(1)}" y="40" font-size="13" fill="#7c8994" text-anchor="end">준선 x = −${P.toFixed(2)}</text>
+      <text x="${W2-165}" y="${Hh-24}" font-size="17" fill="#2f3b48" font-style="italic">y² = ${(4*P).toFixed(2)} x</text>
+    </svg>`;
+  $id('cDia').textContent=(2*R).toFixed(3)+' m';
+  $id('cRatio').textContent=headSpread().toFixed(1)+'°';
+  $id('cPot').textContent=P.toFixed(3)+' m';
+}
+
+/* ── HUD ── */
+function updateHud(){
+  if(tab==='solar'){
+    const heat = solarHeat();
+    const lv = heat>=100?'🔥 펄펄 끓어요!':heat>=65?'♨️ 뜨거워요':heat>=40?'🌡️ 데워지는 중':'🧊 더 맞춰보세요';
+    hud.innerHTML=`<b>${lv}</b><br>집광률 ${heat}%`+
+      `<div id="gaugeBar"><div id="gaugeFill" style="width:${heat}%"></div></div>`;
+    updateSide(heat);
+    if(heat>=100 && !solar.done){ solar.done=true; if(window.GEO_task) GEO_task('solar'); }
+    return heat;
+  } else {
+    const car = CARS[head.car];
+    const sp = headSpread(), off = head.off;
+    const aligned = Math.abs(off) < 1e-9;
+    const pct = aligned ? 100 : Math.max(0, Math.min(99, Math.round(100-sp*6)));
+    const regime = aligned ? '전구가 초점 F에 딱! → 축과 평행하게 멀리 뻗어요'
+      : off<0 ? '전구가 초점보다 <b style="font-size:13.5px">뒤</b> → 빛이 퍼져요 (발산)'
+              : '전구가 초점보다 <b style="font-size:13.5px">앞</b> → 빛이 한 점으로 모여요 (수렴)';
+    hud.innerHTML=`<b>${aligned?'💡 완벽한 평행광!':'집광률 '+pct+'% · 퍼짐 '+sp.toFixed(1)+'°'}</b><br>`+
+      `${regime}`+
+      `<div id="gaugeBar"><div id="gaugeFill" style="width:${Math.max(4,pct)}%"></div></div>`;
+    updateSideHead();
+    if(pct>=100 && !head.done){ head.done=true; if(window.GEO_task) GEO_task('head'); }
+    return pct;
+  }
+}
+
+/* ═════════ three.js ═════════ */
+let T=null, renderer=null, camera=null;
+let sceneSolar=null, sceneHead=null, dishGroup=null, sunSprite=null, sunLight=null;
+let steamSprites=[];
+const orbitSolar = { radius:12.5, theta:0.66, phi:1.44, target:[1.7,2.7,0] };
+const orbitHead  = { radius:1.3, theta:0.75, phi:1.30, target:[0.42,0.80,-0.62] };
+function orbit(){ return tab==='solar' ? orbitSolar : orbitHead; }
+
+async function loadTHREE(){
+  try { return await import('./three.module.js'); }
+  catch(e){
+    if(window.__THREE_SRC){
+      const u = URL.createObjectURL(new Blob([window.__THREE_SRC], {type:'text/javascript'}));
+      return await import(u);
+    }
+    throw e;
+  }
+}
+function glow(colStops){
+  const c = document.createElement('canvas'); c.width = c.height = 128;
+  const x = c.getContext('2d');
+  const g = x.createRadialGradient(64,64,0,64,64,64);
+  for(const [o,col] of colStops) g.addColorStop(o, col);
+  x.fillStyle = g; x.fillRect(0,0,128,128);
+  return new T.CanvasTexture(c);
+}
+function textSprite(txt, color, size){
+  const c = document.createElement('canvas'); c.width=128; c.height=64;
+  const x = c.getContext('2d');
+  x.font = '700 44px Georgia,serif'; x.fillStyle = color;
+  x.textAlign='center'; x.textBaseline='middle';
+  x.fillText(txt, 64, 32);
+  const sp = new T.Sprite(new T.SpriteMaterial({ map:new T.CanvasTexture(c), transparent:true, depthWrite:false }));
+  sp.scale.set(size*2, size, 1);
+  return sp;
+}
+function applyCamera(){
+  const o = orbit();
+  camera.position.set(
+    o.target[0] + o.radius*Math.sin(o.phi)*Math.sin(o.theta),
+    o.target[1] + o.radius*Math.cos(o.phi),
+    o.target[2] + o.radius*Math.sin(o.phi)*Math.cos(o.theta));
+  camera.lookAt(o.target[0], o.target[1], o.target[2]);
+}
+function disposeGroup(g){
+  while(g.children.length){
+    const ch = g.children.pop();
+    ch.traverse ? ch.traverse(o=>{ if(o.geometry) o.geometry.dispose(); }) : 0;
+  }
+}
+
+/* ── 태양열 씬 (클로드 디자인 원본 이식) ── */
+function buildSolarScene(){
+  const scene = new T.Scene();
+  scene.add(new T.HemisphereLight(0xdff0ff, 0xd8f78a, 0.9));
+  const dir = new T.DirectionalLight(0xfff3d0, 1.1);
+  dir.castShadow = true;
+  dir.shadow.mapSize.set(1024,1024);
+  dir.shadow.camera.left=-8; dir.shadow.camera.right=8;
+  dir.shadow.camera.top=8; dir.shadow.camera.bottom=-8;
+  scene.add(dir);
+  sunLight = dir;
+
+  const ground = new T.Mesh(new T.PlaneGeometry(300,300), new T.MeshLambertMaterial({ color:0xf2ffa4 }));
+  ground.rotation.x = -Math.PI/2;
+  ground.receiveShadow = true;
+  scene.add(ground);
+  const grid = new T.GridHelper(30,15,0x9ed44a,0xa8d94e);
+  grid.position.y = 0.012;
+  grid.material.transparent = true; grid.material.opacity = 0.8;
+  scene.add(grid);
+
+  sunSprite = new T.Sprite(new T.SpriteMaterial({
+    map: glow([[0,'rgba(255,252,214,1)'],[0.26,'rgba(255,226,90,0.95)'],[0.55,'rgba(255,205,60,0.32)'],[1,'rgba(255,200,60,0)']]),
+    transparent:true, depthWrite:false }));
+  sunSprite.scale.set(2.4,2.4,1);
+  scene.add(sunSprite);
+
+  const metal = new T.MeshStandardMaterial({ color:0x7c848c, metalness:0.5, roughness:0.5 });
+  const baseY = 1.15;
+  const mast = new T.Mesh(new T.CylinderGeometry(0.055,0.07,baseY,20), metal);
+  mast.position.y = baseY/2; mast.castShadow = true;
+  scene.add(mast);
+  for(let i=0;i<2;i++){
+    const leg = new T.Mesh(new T.BoxGeometry(2.6,0.09,0.14), metal);
+    leg.position.y = 0.05;
+    leg.rotation.y = i ? Math.PI/4 : -Math.PI/4;
+    leg.castShadow = true;
+    scene.add(leg);
+  }
+  dishGroup = new T.Group();
+  dishGroup.position.y = baseY;
+  scene.add(dishGroup);
+  return scene;
+}
+function rebuildSolar(){
+  const v = solar;
+  const R = Math.sqrt(4*v.p*v.depth);
+  const tiltRad = v.tilt*Math.PI/180, sunRad = SUN_EL*Math.PI/180;
+  disposeGroup(dishGroup);
+  dishGroup.rotation.set(0,0,-(Math.PI/2 - tiltRad));
+
+  const prof=[];
+  for(let i=0;i<=26;i++){ const r=R*i/26; prof.push(new T.Vector2(r, r*r/(4*v.p))); }
+  const mirror = new T.Mesh(new T.LatheGeometry(prof,72), new T.MeshStandardMaterial({
+    color:0xeaeff4, metalness:0.15, roughness:0.5, side:T.DoubleSide }));
+  mirror.castShadow = true;
+  dishGroup.add(mirror);
+  const coarse=[];
+  for(let i=0;i<=6;i++){ const r=R*i/6; coarse.push(new T.Vector2(r, r*r/(4*v.p))); }
+  dishGroup.add(new T.Mesh(new T.LatheGeometry(coarse,18), new T.MeshBasicMaterial({
+    color:0x8d99a5, wireframe:true, transparent:true, opacity:0.32 })));
+
+  const rp = v.potR, hp = v.hPot;
+  const potMat = new T.MeshStandardMaterial({ color:0xa63318, metalness:0.3, roughness:0.5 });
+  const pot = new T.Mesh(new T.CylinderGeometry(rp, rp*0.86, rp*1.5, 26), potMat);
+  pot.position.y = hp + rp*0.75; pot.castShadow = true;
+  dishGroup.add(pot);
+  const lid = new T.Mesh(new T.CylinderGeometry(rp*1.08, rp*1.08, 0.03, 26),
+    new T.MeshStandardMaterial({ color:0x50241a, roughness:0.6 }));
+  lid.position.y = hp + rp*1.53;
+  dishGroup.add(lid);
+  const arm = new T.Mesh(new T.CylinderGeometry(0.022,0.022,hp,12),
+    new T.MeshStandardMaterial({ color:0x4a5158, metalness:0.5, roughness:0.5 }));
+  arm.position.y = hp/2;
+  dishGroup.add(arm);
+
+  // 초점 F 표시
+  const fDot = new T.Mesh(new T.SphereGeometry(0.045,16,12), new T.MeshBasicMaterial({ color:0xe0442c }));
+  fDot.position.y = v.p;
+  dishGroup.add(fDot);
+  const fLb = textSprite('F', '#c8371f', 0.34);
+  fLb.position.set(0.25, v.p + 0.12, 0);
+  dishGroup.add(fLb);
+
+  // 태양 위치 (월드)
+  const sWorld = new T.Vector3(Math.cos(sunRad), Math.sin(sunRad), 0).normalize();
+  sunSprite.position.copy(sWorld.clone().multiplyScalar(7)).add(new T.Vector3(0,0.4,0));
+  sunLight.position.copy(sWorld.clone().multiplyScalar(22));
+  const inv = new T.Matrix4().makeRotationZ(Math.PI/2 - tiltRad);
+  const dL3 = sWorld.clone().negate().applyMatrix4(inv).normalize();
+  const dL = [dL3.x, dL3.y, dL3.z];
+
+  // 광선 (원본 링 샘플 + 냄비 교차 물리)
+  const hh = rp*0.75;
+  const dashMat = new T.LineDashedMaterial({ color:0xefa41f, dashSize:0.9, gapSize:0.55, transparent:true, opacity:0.9 });
+  const hotMat  = new T.LineBasicMaterial({ color:0xf07a1e, transparent:true, opacity:0.9 });
+  const samples = [[0,0]];
+  for(const frac of [0.42,0.74,0.95]){
+    const count = frac<0.5?6:frac<0.8?10:14;
+    for(let k=0;k<count;k++){
+      const a=(k/count)*Math.PI*2 + (frac<0.8?0.2:0);
+      samples.push([R*frac*Math.cos(a), R*frac*Math.sin(a)]);
+    }
+  }
+  for(const [x,z] of samples){
+    const nl = M.norm([-x/(2*v.p), 1, -z/(2*v.p)]);
+    const dn = M.dot(dL, nl);
+    if(dn >= 0) continue;
+    const Pl = [x, (x*x+z*z)/(4*v.p), z];
+    if(potHitLocal(Pl, [-dL[0],-dL[1],-dL[2]], rp, hp, hh) < Infinity) continue;
+    const rl = M.reflect(dL, nl);
+    const Pv = new T.Vector3(...Pl);
+    const start = Pv.clone().sub(new T.Vector3(...dL).multiplyScalar(7.5));
+    const inLine = new T.Line(new T.BufferGeometry().setFromPoints([start, Pv]), dashMat);
+    inLine.computeLineDistances();
+    dishGroup.add(inLine);
+    const tHit = potHitLocal(Pl, rl, rp, hp, hh);
+    const tF = Math.max((new T.Vector3(0,v.p,0)).sub(Pv).dot(new T.Vector3(...rl)), 0.05);
+    const L = tHit<Infinity ? tHit : tF;
+    dishGroup.add(new T.Line(new T.BufferGeometry().setFromPoints(
+      [Pv, Pv.clone().add(new T.Vector3(...rl).multiplyScalar(L))]), hotMat));
+  }
+  // 김 (100%)
+  steamSprites = [];
+  if(solarHeat() >= 100){
+    for(let k=0;k<3;k++){
+      const s = new T.Sprite(new T.SpriteMaterial({
+        map: glow([[0,'rgba(255,255,255,0.9)'],[1,'rgba(255,255,255,0)']]), transparent:true, depthWrite:false, opacity:0.8 }));
+      s.scale.set(0.16,0.16,1);
+      s.userData = { k };
+      dishGroup.add(s);
+      steamSprites.push(s);
+    }
+  }
+}
+
+/* ── 전조등 씬 (클로드 디자인 v3 이식: 실차 로프트 + 전구 위치 실험) ── */
+let carGroup=null, lampGroup=null, glowTex=null, envDay=null, envNight=null;
+function buildEnv(night){
+  const c = document.createElement('canvas');
+  c.width = 256; c.height = 128;
+  const ctx = c.getContext('2d');
+  const g = ctx.createLinearGradient(0,0,0,128);
+  if(night){
+    g.addColorStop(0,'#1b2b4d'); g.addColorStop(0.48,'#0a1225');
+    g.addColorStop(0.52,'#141a22'); g.addColorStop(1,'#05070b');
+  } else {
+    g.addColorStop(0,'#cfeaff'); g.addColorStop(0.5,'#eaf6ff');
+    g.addColorStop(0.52,'#dbf3a0'); g.addColorStop(1,'#9cc94a');
+  }
+  ctx.fillStyle = g; ctx.fillRect(0,0,256,128);
+  if(night){
+    ctx.fillStyle = 'rgba(255,235,190,0.9)';
+    for(let i=0;i<5;i++) ctx.fillRect(20+i*48, 34, 10, 6);
+  } else {
+    ctx.fillStyle = 'rgba(255,255,240,1)';
+    ctx.beginPath(); ctx.arc(70,30,14,0,7); ctx.fill();
+  }
+  const tex = new T.CanvasTexture(c);
+  tex.mapping = T.EquirectangularReflectionMapping;
+  const pm = new T.PMREMGenerator(renderer);
+  const out = pm.fromEquirectangular(tex).texture;
+  pm.dispose(); tex.dispose();
+  return out;
+}
+function buildHeadScene(){
+  const scene = new T.Scene();
+  scene.add(new T.HemisphereLight(0x3b5480, 0x101722, 0.95));
+  const moon = new T.DirectionalLight(0xa9c6ff, 0.45);
+  moon.position.set(-6,9,5);
+  moon.castShadow = true;
+  moon.shadow.mapSize.set(1024,1024);
+  moon.shadow.camera.left=-7; moon.shadow.camera.right=7;
+  moon.shadow.camera.top=7; moon.shadow.camera.bottom=-7;
+  scene.add(moon);
+
+  const road = new T.Mesh(new T.PlaneGeometry(90,16),
+    new T.MeshStandardMaterial({ color:0x181c22, roughness:0.72, metalness:0.05 }));
+  road.rotation.x = -Math.PI/2;
+  road.position.set(12,0,0);
+  road.receiveShadow = true;
+  scene.add(road);
+  const lineMat = new T.MeshBasicMaterial({ color:0xb9c2cb });
+  for(let i=0;i<16;i++){
+    const dash = new T.Mesh(new T.BoxGeometry(1.5,0.005,0.14), lineMat);
+    dash.position.set(2+i*3.2, 0.006, 3.1);
+    scene.add(dash);
+  }
+  carGroup = new T.Group();
+  scene.add(carGroup);
+  lampGroup = new T.Group();
+  scene.add(lampGroup);
+  return scene;
+}
+
+/* 차체 로프트 헬퍼 (원본 그대로) */
+function rows(car, kind){
+  const st = kind==='green' ? car.green : car.lower;
+  const N = kind==='green' ? 64 : 96;
+  const u0 = st[0][0], u1 = st[st.length-1][0];
+  const at = u => {
+    let i = 0;
+    while(i < st.length-2 && st[i+1][0] < u) i++;
+    const a = st[i], b = st[i+1];
+    const t = Math.min(1, Math.max(0, (u-a[0])/(b[0]-a[0])));
+    const s = car.boxy ? t : t*t*(3-2*t);
+    return a.map((_,j)=>a[j]+(b[j]-a[j])*s);
+  };
+  const out = [];
+  for(let i=0;i<=N;i++){
+    const u = u0+(u1-u0)*i/N, r = at(u);
+    out.push(kind==='green'
+      ? { u, x:0.1-u, top:r[1], bot:car.belt-0.07, hw:r[2]*car.W/2 }
+      : { u, x:0.1-u, top:r[1], bot:r[2], hw:r[3]*car.W/2 });
+  }
+  const passes = car.boxy ? 1 : 3;
+  for(let p2=0;p2<passes;p2++){
+    const c = out.map(r=>({ top:r.top, bot:r.bot, hw:r.hw }));
+    for(let i=1;i<out.length-1;i++){
+      out[i].top = (c[i-1].top + 2*c[i].top + c[i+1].top)/4;
+      out[i].bot = (c[i-1].bot + 2*c[i].bot + c[i+1].bot)/4;
+      out[i].hw  = (c[i-1].hw  + 2*c[i].hw  + c[i+1].hw )/4;
     }
   }
   return out;
 }
-function poly(pts, fill, stroke, lw, bias){
-  let cs=pts.map(toCam);
-  if(cs.some(c=>c[2]<ZN)) cs=clipPolyZ(cs);
-  if(cs.length<3) return;
-  let d=0; const pr=cs.map(c=>{ d+=c[2]; return toScr(c); });
-  polys.push({d:d/cs.length+(bias||0), pr, fill, stroke, lw:lw||1});
+function sect(o, row, v, grow){
+  const n = o.exp, yc = (row.top+row.bot)/2, a = (row.top-row.bot)/2;
+  const cv = Math.cos(v), sv = Math.sin(v);
+  const sg = x => (x<0?-1:1);
+  const zz = sg(cv)*Math.pow(Math.abs(cv), 2/n);
+  const yy = sg(sv)*Math.pow(Math.abs(sv), 2/n);
+  const up = Math.max(0, yy);
+  const g = grow || 1;
+  return [row.x, yc + a*yy*g, row.hw*zz*(1 - o.tumble*up*up)*g];
 }
-function line(a,b,color,lw,dash,depthBias){
-  let ca=toCam(a), cb=toCam(b);
-  if(ca[2]<ZN && cb[2]<ZN) return;
-  if(ca[2]<ZN || cb[2]<ZN){
-    const t=(ZN-ca[2])/(cb[2]-ca[2]);
-    const m=[ca[0]+(cb[0]-ca[0])*t, ca[1]+(cb[1]-ca[1])*t, ZN];
-    if(ca[2]<ZN) ca=m; else cb=m;
+function sheet(rws, s0, s1, Mn, fn){
+  const pos = [], idx = [];
+  for(const row of rws) for(let j=0;j<=Mn;j++){
+    const p2 = fn(row, s0+(s1-s0)*j/Mn);
+    pos.push(p2[0], p2[1], p2[2]);
   }
-  const pa=toScr(ca), pb=toScr(cb);
-  lines.push({d:(ca[2]+cb[2])/2+(depthBias||0), pa, pb, color, lw:lw||1.5, dash});
+  const stride = Mn+1;
+  for(let i=0;i<rws.length-1;i++) for(let j=0;j<Mn;j++){
+    const a = i*stride+j, b = a+1, c = a+stride, d = c+1;
+    idx.push(a,c,b, b,c,d);
+  }
+  const g = new T.BufferGeometry();
+  g.setAttribute('position', new T.Float32BufferAttribute(pos,3));
+  g.setIndex(idx);
+  g.computeVertexNormals();
+  return g;
 }
-function mark(p, fn, depthBias){ const q=project(p); if(!q) return; marks.push({d:q[2]+(depthBias||0), q, fn}); }
-function shade(rgb, n, L, amb){
-  const k=(amb||0.42)+(1-(amb||0.42))*Math.max(0,V3.dot(n,L));
-  return `rgb(${Math.round(rgb[0]*k)},${Math.round(rgb[1]*k)},${Math.round(rgb[2]*k)})`;
-}
-function flush(){
-  const all=[...polys.map(o=>({t:'p',o})), ...lines.map(o=>({t:'l',o})), ...marks.map(o=>({t:'m',o}))];
-  all.sort((a,b)=>b.o.d-a.o.d);
-  for(const it of all){
-    if(it.t==='p'){
-      const o=it.o;
-      ctx.beginPath(); ctx.moveTo(o.pr[0][0],o.pr[0][1]);
-      for(let i=1;i<o.pr.length;i++) ctx.lineTo(o.pr[i][0],o.pr[i][1]);
-      ctx.closePath();
-      if(o.fill){ ctx.fillStyle=o.fill; ctx.fill(); }
-      if(o.stroke){ ctx.strokeStyle=o.stroke; ctx.lineWidth=o.lw; ctx.stroke(); }
-    } else if(it.t==='l'){
-      const o=it.o;
-      ctx.beginPath(); ctx.moveTo(o.pa[0],o.pa[1]); ctx.lineTo(o.pb[0],o.pb[1]);
-      ctx.strokeStyle=o.color; ctx.lineWidth=o.lw;
-      ctx.setLineDash(o.dash||[]); ctx.stroke(); ctx.setLineDash([]);
-    } else it.o.fn(it.o.q);
+function loft(o, rws, v0, v1, Mn, grow, caps){
+  const pos = [], idx = [];
+  for(const row of rws) for(let j=0;j<=Mn;j++){
+    const p2 = sect(o, row, v0+(v1-v0)*j/Mn, grow);
+    pos.push(p2[0], p2[1], p2[2]);
   }
-  polys=[]; lines=[]; marks=[];
-}
-
-/* 회전·줌 */
-let dragId=null, lx=0, ly=0, pinch=null;
-const ptrs=new Map();
-stage.addEventListener('pointerdown', e=>{
-  if(e.target!==cv) return;
-  ptrs.set(e.pointerId,[e.clientX,e.clientY]);
-  if(ptrs.size===1){ dragId=e.pointerId; lx=e.clientX; ly=e.clientY; }
-  else if(ptrs.size===2){ const a=[...ptrs.values()]; pinch=Math.hypot(a[0][0]-a[1][0],a[0][1]-a[1][1]); dragId=null; }
-  cv.setPointerCapture && cv.setPointerCapture(e.pointerId);
-});
-stage.addEventListener('pointermove', e=>{
-  if(!ptrs.has(e.pointerId)) return;
-  ptrs.set(e.pointerId,[e.clientX,e.clientY]);
-  if(ptrs.size===2 && pinch){
-    const a=[...ptrs.values()]; const d=Math.hypot(a[0][0]-a[1][0],a[0][1]-a[1][1]);
-    cam.dist=Math.min(14,Math.max(2.4,cam.dist*pinch/d)); pinch=d; dirty=true;
-  } else if(e.pointerId===dragId){
-    cam.yaw -= (e.clientX-lx)*0.0085;
-    cam.pitch = Math.min(1.25, Math.max(-0.15, cam.pitch + (e.clientY-ly)*0.006));
-    lx=e.clientX; ly=e.clientY; dirty=true;
+  const stride = Mn+1;
+  for(let i=0;i<rws.length-1;i++) for(let j=0;j<Mn;j++){
+    const a = i*stride+j, b = a+1, c = a+stride, d = c+1;
+    idx.push(a,c,b, b,c,d);
   }
-});
-function prUp(e){ ptrs.delete(e.pointerId); if(e.pointerId===dragId) dragId=null; if(ptrs.size<2) pinch=null; }
-stage.addEventListener('pointerup', prUp);
-stage.addEventListener('pointercancel', prUp);
-cv.addEventListener('wheel', e=>{
-  e.preventDefault();
-  cam.dist=Math.min(14,Math.max(2.4,cam.dist*(e.deltaY>0?1.08:0.925))); dirty=true;
-},{passive:false});
-
-/* ═══════════ 공용: 포물면 접시 메쉬 ═══════════ */
-function dishMesh(V, A, U1, U2, p, r0, r1, nR, nS, rgb, L, rimStroke){
-  const pt=(r,th)=>V3.add(V, V3.add(V3.add(V3.mul(U1,r*Math.cos(th)), V3.mul(U2,r*Math.sin(th))), V3.mul(A,r*r/(4*p))));
-  const nrm=(r,th)=>V3.norm(V3.sub(A, V3.mul(V3.add(V3.mul(U1,Math.cos(th)),V3.mul(U2,Math.sin(th))), r/(2*p))));
-  for(let i=0;i<nR;i++){
-    const ra=r0+(r1-r0)*i/nR, rb=r0+(r1-r0)*(i+1)/nR;
-    for(let j=0;j<nS;j++){
-      const ta=j/nS*2*Math.PI, tb=(j+1)/nS*2*Math.PI;
-      const n=nrm((ra+rb)/2,(ta+tb)/2);
-      poly([pt(ra,ta),pt(rb,ta),pt(rb,tb),pt(ra,tb)], shade(rgb,n,L),
-           (j%2===0)?'rgba(90,95,105,.55)':'rgba(120,126,138,.35)', 0.7);
-    }
-  }
-  if(rimStroke){
-    for(let j=0;j<nS;j++){
-      line(pt(r1,j/nS*2*Math.PI), pt(r1,(j+1)/nS*2*Math.PI), rimStroke, 2.2, null, -0.01);
-    }
-  }
-  return {pt,nrm};
-}
-function tube(a,b,r,seg,rgb,L){          // 간단한 사각기둥 막대
-  const d=V3.norm(V3.sub(b,a));
-  let u=V3.cross(d,[0,1,0]); if(V3.len(u)<0.01) u=V3.cross(d,[1,0,0]);
-  u=V3.norm(u); const v=V3.norm(V3.cross(d,u));
-  const c=[[1,0],[0,1],[-1,0],[0,-1]];
-  for(let i=0;i<4;i++){
-    const [ua,va]=c[i], [ub,vb]=c[(i+1)%4];
-    const o1=V3.add(V3.mul(u,ua*r),V3.mul(v,va*r)), o2=V3.add(V3.mul(u,ub*r),V3.mul(v,vb*r));
-    const n=V3.norm(V3.add(o1,o2));
-    poly([V3.add(a,o1),V3.add(b,o1),V3.add(b,o2),V3.add(a,o2)], shade(rgb,n,L));
-  }
-}
-function discAt(C,axis,r,seg,fill,stroke,bias){
-  let u=V3.cross(axis,[0,1,0]); if(V3.len(u)<0.01) u=V3.cross(axis,[1,0,0]);
-  u=V3.norm(u); const v=V3.norm(V3.cross(axis,u));
-  const pts=[];
-  for(let j=0;j<seg;j++){
-    const t=j/seg*2*Math.PI;
-    pts.push(V3.add(C,V3.add(V3.mul(u,r*Math.cos(t)),V3.mul(v,r*Math.sin(t)))));
-  }
-  const pr=[]; let d=0;
-  for(const p of pts){ const q=project(p); if(!q) return; pr.push(q); d+=q[2]; }
-  polys.push({d:d/seg+(bias||0), pr, fill, stroke, lw:1.4});
-}
-
-/* ═══════════ ① 태양열 조리기 (3D) ═══════════ */
-const solar = { p:0.8, h:0.6, elD:35, done:false };
-const SUN_EL = 55, SUN_AZ = 0.55;                     // 태양은 사선(고도 55°)에서
-function sunDir(){                                     // 태양 쪽을 가리키는 단위벡터
-  const e=SUN_EL*Math.PI/180;
-  return [Math.sin(SUN_AZ)*Math.cos(e), Math.sin(e), Math.cos(SUN_AZ)*Math.cos(e)];
-}
-function solarHeat(){
-  // 접시 방향 오차 + 냄비-초점 거리로 집광률 계산
-  const dEl = Math.abs(solar.elD - SUN_EL);
-  const dh  = Math.abs(solar.h - solar.p);
-  return Math.max(0, Math.min(100, Math.round(100 - dEl*3.2 - dh*95)));
-}
-function drawSolar(t){
-  const S=V3.norm(sunDir());                  // 태양 방향
-  const Ld=S;                                 // 셰이딩 광원 = 태양
-  const e=solar.elD*Math.PI/180;
-  const A=[Math.sin(SUN_AZ)*Math.cos(e), Math.sin(e), Math.cos(SUN_AZ)*Math.cos(e)];   // 접시 축
-  let U1=V3.norm(V3.cross(A,[0,1,0])); const U2=V3.norm(V3.cross(A,U1));
-  const Vx=[0,1.02,0];                        // 접시 꼭짓점(피벗)
-  const F=V3.add(Vx,V3.mul(A,solar.p));       // 초점
-  const C=V3.add(Vx,V3.mul(A,solar.h));       // 냄비 위치
-
-  // 바닥
-  poly([[-6,0,-6],[6,0,-6],[6,0,6],[-6,0,6]],'rgba(163,230,53,.5)',null,1,60);
-  for(let g=-5;g<=5;g++){
-    line([g,0,-6],[g,0,6],'rgba(77,124,15,.18)',1,null,58);
-    line([-6,0,g],[6,0,g],'rgba(77,124,15,.18)',1,null,58);
-  }
-  // 받침대: 십자 다리 + 기둥
-  const legY=0.05;
-  for(const [dx,dz] of [[1,0],[-1,0],[0,1],[0,-1]])
-    tube([0,legY,0],[dx*1.05,legY,dz*1.05],0.05,4,[150,155,163],Ld);
-  tube([0,0.04,0],[0,1.02,0],0.075,4,[168,173,181],Ld);
-
-  // 접시 (안쪽 거울면)
-  dishMesh(Vx,A,U1,U2,solar.p,0.16,1.5,6,16,[203,209,218],Ld,'rgba(70,75,85,.6)');
-  // 중앙 마스트(축 방향) + 냄비 링 + 지지대 3개
-  tube(Vx, V3.add(Vx,V3.mul(A,Math.max(solar.h+0.22,1.0))), 0.035,4,[190,195,203],Ld);
-  discAt(C,A,0.34,14,null,'rgba(120,126,138,.95)');
-  for(const th of [0.3,2.4,4.5]){
-    const rim=V3.add(Vx,V3.add(V3.add(V3.mul(U1,1.5*Math.cos(th)),V3.mul(U2,1.5*Math.sin(th))),V3.mul(A,1.5*1.5/(4*solar.p))));
-    line(rim, V3.add(C,V3.add(V3.mul(U1,0.3*Math.cos(th)),V3.mul(U2,0.3*Math.sin(th)))),'rgba(148,153,161,.9)',2);
-  }
-  // 냄비 (빨간 웍)
-  const potR=0.27, potH=0.16;
-  for(let j=0;j<10;j++){
-    const ta=j/10*2*Math.PI, tb=(j+1)/10*2*Math.PI;
-    const q=(tt,up)=>V3.add(V3.add(C,V3.mul(A,up?potH:0.02)),V3.add(V3.mul(U1,potR*Math.cos(tt)),V3.mul(U2,potR*Math.sin(tt))));
-    const n=V3.norm(V3.add(V3.mul(U1,Math.cos((ta+tb)/2)),V3.mul(U2,Math.sin((ta+tb)/2))));
-    poly([q(ta,false),q(ta,true),q(tb,true),q(tb,false)], shade([172,44,52],n,Ld));
-  }
-  discAt(V3.add(C,V3.mul(A,potH)),A,potR,12,'rgb(120,28,34)','rgba(60,14,17,.8)',-0.02);
-  discAt(V3.add(C,V3.mul(A,potH+0.015)),A,0.05,8,'rgb(40,40,44)',null,-0.03);
-
-  // 태양 + 광선
-  const sunP=V3.add(cam.target,V3.mul(S,7.5));
-  mark(sunP, q=>{
-    const g=ctx.createRadialGradient(q[0],q[1],4,q[0],q[1],34);
-    g.addColorStop(0,'rgba(255,244,150,1)'); g.addColorStop(.5,'rgba(255,210,80,.85)'); g.addColorStop(1,'rgba(255,210,80,0)');
-    ctx.fillStyle=g; ctx.beginPath(); ctx.arc(q[0],q[1],34,0,7); ctx.fill();
-  }, 50);
-  const d=V3.mul(S,-1);                      // 빛의 진행 방향
-  const heat=solarHeat();
-  const {pt,nrm}=(function(){                // 광선용 접점·법선
-    const pt=(r,th)=>V3.add(Vx, V3.add(V3.add(V3.mul(U1,r*Math.cos(th)), V3.mul(U2,r*Math.sin(th))), V3.mul(A,r*r/(4*solar.p))));
-    const nr=(r,th)=>V3.norm(V3.sub(A, V3.mul(V3.add(V3.mul(U1,Math.cos(th)),V3.mul(U2,Math.sin(th))), r/(2*solar.p))));
-    return {pt,nrm:nr};
-  })();
-  const dashOff=(t*0.02)%14;
-  for(const [r,th] of [[1.2,0.4],[1.2,1.5],[1.2,2.6],[1.2,3.7],[1.2,4.8],[1.2,5.9],[0.7,1.0],[0.7,3.1],[0.7,5.2]]){
-    const P=pt(r,th), n=nrm(r,th);
-    const rd=V3.norm(V3.reflect(d,n));
-    mark(P, ()=>{}, 0);
-    // 들어오는 평행광
-    const a0=V3.sub(P,V3.mul(d,2.7));
-    line(a0,P,'rgba(255,196,0,.85)',2,[9,5],-0.02);
-    // 반사광
-    const tEnd=V3.len(V3.sub(F,P))*1.28;
-    line(P,V3.add(P,V3.mul(rd,tEnd)),'rgba(255,140,0,.9)',2.2,null,-0.02);
-  }
-  // 초점 표시 F (로마자)
-  mark(F, q=>{
-    ctx.fillStyle='#ea580c'; ctx.beginPath(); ctx.arc(q[0],q[1],4.5,0,7); ctx.fill();
-    ctx.font='700 15px Georgia,serif'; ctx.fillStyle='#9a3412'; ctx.fillText('F', q[0]+8, q[1]-6);
-  }, -0.5);
-  // 김 (펄펄 끓을 때 — 맨 위에)
-  if(heat>=90){
-    const top=V3.add(C,V3.mul(A,potH+0.03));
-    mark(top, q=>{
-      for(let k=0;k<3;k++){
-        ctx.strokeStyle='rgba(255,255,255,.8)'; ctx.lineWidth=2.6; ctx.beginPath();
-        const bx=q[0]+(k-1)*12, ph=(t*0.05+k*40)%70;
-        ctx.moveTo(bx, q[1]-6-ph*0.6);
-        ctx.bezierCurveTo(bx+8,q[1]-18-ph*0.6, bx-8,q[1]-30-ph*0.6, bx+5,q[1]-46-ph*0.6);
-        ctx.globalAlpha=Math.max(0,1-ph/70); ctx.stroke(); ctx.globalAlpha=1;
+  if(caps){
+    for(const [ri,dir] of [[0,1],[rws.length-1,-1]]){
+      const base = pos.length/3, row = rws[ri];
+      pos.push(row.x, (row.top+row.bot)/2, 0);
+      for(let j=0;j<=Mn;j++){
+        const p2 = sect(o, row, v0+(v1-v0)*j/Mn, grow);
+        pos.push(p2[0], p2[1], p2[2]);
       }
-    }, -100);
+      for(let j=0;j<Mn;j++){
+        const a = base+1+j, b = a+1;
+        if(dir>0) idx.push(base,b,a); else idx.push(base,a,b);
+      }
+    }
   }
-  return heat;
+  const g = new T.BufferGeometry();
+  g.setAttribute('position', new T.Float32BufferAttribute(pos,3));
+  g.setIndex(idx);
+  g.computeVertexNormals();
+  return g;
 }
 
-/* ═══════════ ② 자동차 전조등 (3D, 실제 차 프리셋) ═══════════ */
-const CARS = [
-  { key:'p911', name:'포르쉐 911',       shape:'circle', a:0.33, p:0.16, body:[35,48,68],   accent:'#e2e8f0', deco:'ring4' },
-  { key:'lambo', name:'람보르기니 우라칸', shape:'hex',    a:0.36, p:0.12, body:[101,90,20],  accent:'#facc15', deco:'ywing' },
-  { key:'gwagen', name:'벤츠 G클래스',    shape:'circle', a:0.42, p:0.22, body:[34,32,30],   accent:'#d6d3d1', deco:'bigring' },
-  { key:'m4', name:'BMW M4',            shape:'rect',   a:0.36, p:0.14, body:[52,58,66],   accent:'#93c5fd', deco:'slats' }
-];
-const head = { car:0, b:0.10, p:CARS[0].p, done:false };
-function headSpread(){
-  // 전구가 초점에서 벗어난 정도 → 퍼짐각(도)
-  return Math.abs(head.b - head.p) / head.p * 34;
+function rebuildHead(){
+  const v = head, car = CARS[head.car];
+  disposeGroup(lampGroup);
+  disposeGroup(carGroup);
+
+  const p = v.hp, R = Math.sqrt(4*p*v.hh);
+  const lamp = new T.Group();
+  lamp.position.set(0.02, car.lampY, -car.lampZ);
+  lamp.rotation.z = -Math.PI/2;   // 포물면의 축을 차 앞쪽(+X)으로
+  lampGroup.add(lamp);
+
+  const prof = [];
+  for(let i=0;i<=24;i++){ const r = R*i/24; prof.push(new T.Vector2(r, r*r/(4*p))); }
+  const refl = new T.Mesh(new T.LatheGeometry(prof,64), new T.MeshPhysicalMaterial({
+    color:0xf6f9fc, metalness:0.75, roughness:0.14, side:T.DoubleSide, envMapIntensity:2.2 }));
+  lamp.add(refl);
+  lamp.add(new T.Mesh(new T.TorusGeometry(R,0.008,8,48).rotateX(Math.PI/2),
+    new T.MeshStandardMaterial({ color:0x2c3138, metalness:0.7, roughness:0.35 })));
+
+  // 전구: 초점 + 오차
+  const bulbY = p + v.off;
+  const bulb = new T.Mesh(new T.SphereGeometry(0.012,20,14),
+    new T.MeshBasicMaterial({ color:0xfff6d0 }));
+  bulb.position.y = bulbY;
+  lamp.add(bulb);
+  const bulbGlow = new T.Sprite(new T.SpriteMaterial({ map:glowTex, transparent:true, depthWrite:false, opacity:0.95 }));
+  bulbGlow.scale.set(0.12,0.12,1);
+  bulbGlow.position.y = bulbY;
+  lamp.add(bulbGlow);
+  const pl = new T.PointLight(0xfff2c8, 2.2, 6, 2);
+  pl.position.y = bulbY;
+  lamp.add(pl);
+
+  // 초점 F 표시 (전구와 구분되는 빨간 링)
+  const fRing = new T.Mesh(new T.TorusGeometry(0.02,0.0035,8,26),
+    new T.MeshBasicMaterial({ color:0xe0442c }));
+  fRing.rotation.x = Math.PI/2;
+  fRing.position.y = p;
+  lamp.add(fRing);
+  const fLb = textSprite('F', '#ff8a70', 0.07);
+  fLb.position.set(0.05, p, 0).applyEuler(lamp.rotation).add(lamp.position);
+  lampGroup.add(fLb);
+
+  // 렌즈 유리
+  lamp.add(new T.Mesh(new T.CircleGeometry(R,48).rotateX(-Math.PI/2), new T.MeshPhysicalMaterial({
+    color:0xdff0ff, transparent:true, opacity:0.16, roughness:0.05, metalness:0, side:T.DoubleSide
+  })).translateY(v.hh+0.004));
+
+  // 광선: 전구 → 반사면 → 밖으로
+  const S = new T.Vector3(0, bulbY, 0);
+  const dimMat = new T.LineBasicMaterial({ color:0xffe9a8, transparent:true, opacity:0.5 });
+  const outMat = new T.LineBasicMaterial({ color:0xfff0b8, transparent:true, opacity:0.6 });
+  for(const frac of [0.35,0.68,0.95]){
+    const count = frac<0.5?6:frac<0.8?8:10;
+    for(let k=0;k<count;k++){
+      const a = (k/count)*Math.PI*2 + frac;
+      const rr = R*frac;
+      const Px = rr*Math.cos(a), Pz = rr*Math.sin(a);
+      const Py = (Px*Px+Pz*Pz)/(4*p);
+      const Pp = new T.Vector3(Px,Py,Pz);
+      const n = new T.Vector3(-Px/(2*p), 1, -Pz/(2*p)).normalize();
+      const d = Pp.clone().sub(S).normalize();
+      const refv = d.clone().sub(n.clone().multiplyScalar(2*d.dot(n))).normalize();
+      lampGroup.add(new T.Line(new T.BufferGeometry().setFromPoints(
+        [S.clone().applyEuler(lamp.rotation).add(lamp.position),
+         Pp.clone().applyEuler(lamp.rotation).add(lamp.position)]), dimMat));
+      const w0 = Pp.clone().applyEuler(lamp.rotation).add(lamp.position);
+      const w1 = w0.clone().add(refv.clone().applyEuler(lamp.rotation).multiplyScalar(9));
+      lampGroup.add(new T.Line(new T.BufferGeometry().setFromPoints([w0,w1]), outMat));
+    }
+  }
+
+  // 전구 앞 캡: 차광(직접광 차단) / 후방 반사(빛을 뒤로 보내 포물면에서 다시 평행 출사)
+  if(head.cap !== '없음'){
+    const capR = R*0.2;
+    const mirrorCap = head.cap === '후방 반사 캡';
+    const cap = new T.Mesh(new T.SphereGeometry(capR,22,12,0,Math.PI*2,0,Math.PI/2),
+      mirrorCap
+        ? new T.MeshPhysicalMaterial({ color:0xf2f6fa, metalness:0.95, roughness:0.08, side:T.DoubleSide, envMapIntensity:2.2 })
+        : new T.MeshStandardMaterial({ color:0x14171b, roughness:0.95, metalness:0.1, side:T.DoubleSide }));
+    cap.position.y = bulbY + capR*0.35;
+    lamp.add(cap);
+    const toWorld = q => q.clone().applyEuler(lamp.rotation).add(lamp.position);
+    const blockMat = new T.LineDashedMaterial({ color:mirrorCap?0xffe9a8:0x8a939e, dashSize:0.02, gapSize:0.015, transparent:true, opacity:0.75 });
+    const backMat = new T.LineBasicMaterial({ color:0xffd86e, transparent:true, opacity:0.75 });
+    for(let k=0;k<6;k++){
+      const ang = (k/6)*Math.PI*2;
+      const dl = new T.Vector3(Math.cos(ang)*0.3, 1, Math.sin(ang)*0.3).normalize();
+      const stop = S.clone().add(dl.clone().multiplyScalar(capR*0.92));
+      const l1 = new T.Line(new T.BufferGeometry().setFromPoints([toWorld(S), toWorld(stop)]), blockMat);
+      l1.computeLineDistances();
+      lampGroup.add(l1);
+      if(!mirrorCap) continue;
+      // 캡(구면, 중심=광원)에서 정반사 → 광원을 지나 반대편 포물면 → 축과 평행 출사
+      // 포물면 교점: a2·t² − 4p·d2y·t − 4p·bulbY = 0  (원본의 부호 오류 수정)
+      const d2 = dl.clone().negate();
+      const a2 = d2.x*d2.x + d2.z*d2.z, b2 = -4*p*d2.y, c2 = -4*p*bulbY;
+      const disc = b2*b2 - 4*a2*c2;
+      if(a2 < 1e-9 || disc < 0) continue;
+      const t2 = (-b2 + Math.sqrt(disc))/(2*a2);
+      if(!(t2 > 0)) continue;
+      const Pb = S.clone().add(d2.clone().multiplyScalar(t2));
+      const nb = new T.Vector3(-Pb.x/(2*p), 1, -Pb.z/(2*p)).normalize();
+      const rb = d2.clone().sub(nb.clone().multiplyScalar(2*d2.dot(nb))).normalize();
+      lampGroup.add(new T.Line(new T.BufferGeometry().setFromPoints([toWorld(stop), toWorld(Pb)]), backMat));
+      lampGroup.add(new T.Line(new T.BufferGeometry().setFromPoints(
+        [toWorld(Pb), toWorld(Pb.clone().add(rb.clone().multiplyScalar(9)))]), backMat));
+    }
+  }
+
+  // 빛다발 글로우 + 노면 스포트 — tanθ = −오차/p (뒤: 발산 · 초점: 평행 · 앞: 수렴)
+  const tanSpread = -v.off/p*0.35;
+  const rNear = R*1.15, rFar = Math.max(0.06, rNear + tanSpread*13);
+  const cone = new T.Mesh(new T.CylinderGeometry(rFar,rNear,13,30,1,true),
+    new T.MeshBasicMaterial({ color:0xffeeb4, transparent:true, opacity:0.05, side:T.DoubleSide, depthWrite:false, blending:T.AdditiveBlending }));
+  cone.rotation.z = -Math.PI/2;
+  cone.position.set(0.02+6.5, car.lampY, -car.lampZ);
+  lampGroup.add(cone);
+  const pool = new T.Mesh(new T.PlaneGeometry(13,3.4), new T.MeshBasicMaterial({
+    map:glowTex, transparent:true, depthWrite:false, opacity:0.32, blending:T.AdditiveBlending }));
+  pool.rotation.x = -Math.PI/2;
+  pool.position.set(7.5, 0.02, -car.lampZ);
+  lampGroup.add(pool);
+
+  if(head.showCar){
+    buildCarBody(car);
+    const coverMat = new T.MeshPhysicalMaterial({
+      color:0xe8f4ff, transparent:true, opacity:0.16, roughness:0.04, metalness:0,
+      side:T.DoubleSide, envMapIntensity:1.6 });
+    let cover;
+    if(car.lamp === 'bar') cover = new T.Mesh(new T.BoxGeometry(0.05, R*1.5, R*5.4), coverMat);
+    else if(car.lamp === 'sweep'){
+      cover = new T.Mesh(new T.SphereGeometry(R*1.15,20,12), coverMat);
+      cover.scale.set(0.4,0.85,1.7);
+    } else cover = new T.Mesh(new T.SphereGeometry(R*1.1,22,14), coverMat);
+    cover.position.set(0.08, car.lampY, -car.lampZ);
+    lampGroup.add(cover);
+  }
 }
-function drawHead(t){
-  const car=CARS[head.car];
-  const Ld=V3.norm([0.45,0.8,0.35]);
-  const Ax=[1,0,0], U1=[0,1,0], U2=[0,0,1];
-  const Vx=[-0.4,0.85,0];                       // 반사경 꼭짓점 (차체 안)
-  const F=V3.add(Vx,V3.mul(Ax,head.p));
-  const Bp=V3.add(Vx,V3.mul(Ax,head.b));        // 전구
 
-  // 밤 도로
-  poly([[-3,0,-3.2],[8,0,-3.2],[8,0,3.2],[-3,0,3.2]],'rgba(58,62,70,.95)',null,1,60);
-  for(let x=-2;x<8;x+=1.2) poly([[x,0.002,-0.06],[x+0.6,0.002,-0.06],[x+0.6,0.002,0.06],[x,0.002,0.06]],'rgba(226,232,240,.8)',null,1,58);
-  line([-3,0.003,-1.9],[8,0.003,-1.9],'rgba(226,232,240,.5)',2,null,58);
-  line([-3,0.003, 1.9],[8,0.003, 1.9],'rgba(226,232,240,.5)',2,null,58);
+/* ── 차체: 벨트라인 아래 바디 + 그 위 캐빈, 두 볼륨을 로프트 (원본 그대로) ── */
+function buildCarBody(car){
+  const body = rows(car,'lower'), cab = rows(car,'green');
+  const pick = (rws,u) => rws[Math.max(0, Math.min(rws.length-1,
+    Math.round((u-rws[0].u)/(rws[rws.length-1].u-rws[0].u)*(rws.length-1))))];
+  const bodyOpt = { exp:car.bodyExp, tumble:car.tumble };
 
-  // 하우징 판 (차마다 다른 개구부 모양)
-  const rimZ=car.a*car.a/(4*head.p);
-  const plateC=V3.add(Vx,V3.mul(Ax,rimZ));
-  const shapePts=(scale)=>{
-    const pts=[];
-    if(car.shape==='circle'){ for(let j=0;j<22;j++){ const th=j/22*2*Math.PI; pts.push([car.a*scale*Math.cos(th), car.a*scale*Math.sin(th)]); } }
-    else if(car.shape==='hex'){ for(let j=0;j<6;j++){ const th=j/6*2*Math.PI+0.26; pts.push([car.a*scale*1.06*Math.cos(th), car.a*scale*0.92*Math.sin(th)]); } }
-    else { const w=car.a*1.25*scale, h=car.a*0.62*scale;
-      pts.push([-w,-h],[w,-h],[w,h],[-w,h]); }
-    return pts.map(([u,v])=>V3.add(plateC,V3.add(V3.mul(U1,v),V3.mul(U2,u))));
+  const paint = new T.MeshPhysicalMaterial({
+    color:car.paint, metalness:0.45, roughness:car.boxy?0.32:0.18,
+    clearcoat:car.clear, clearcoatRoughness:0.05, envMapIntensity:1.4 });
+  const shell = new T.Mesh(loft(bodyOpt, body, 0, Math.PI*2, 56, 1, true), paint);
+  shell.castShadow = true; shell.receiveShadow = true;
+  carGroup.add(shell);
+
+  // 캐빈: 페인트 볼륨(필러·루프) + 창문 유리 패널
+  const glassMat = new T.MeshPhysicalMaterial({
+    color:0x080d14, metalness:0.35, roughness:0.05, clearcoat:1,
+    envMapIntensity:2.2, transparent:true, opacity:0.96, side:T.DoubleSide });
+  const wOf = (row,Y) => {
+    const n = car.roofExp, rw = car.roofW;
+    const s = Math.pow(Math.max(0, 1-Math.pow(Math.max(0,Y),n)), 1/n);   // Y가 −0으로 떨어지는 부동소수 오차 방어
+    return row.hw*(s*(1-rw)+rw);
   };
-  const outer=shapePts(1.34), inner=shapePts(1.02);
-  // 바깥 판(어두운 하우징): outer 링을 사각 스트립으로
-  for(let j=0;j<outer.length;j++){
-    const j2=(j+1)%outer.length;
-    poly([outer[j],outer[j2],inner[j2%inner.length],inner[j%inner.length]], shade(car.body,[0.6,0.5,0.6],Ld,0.5),'rgba(15,18,24,.7)',1);
+  const cabPt = (row,s,grow) => {
+    const g = grow||1;
+    if(s <= 0.42){
+      const Y = s/0.42;
+      return [row.x, row.bot+(row.top-row.bot)*Y, wOf(row,Y)*g];
+    }
+    if(s <= 0.58){
+      const t = (s-0.42)/0.16, w1 = wOf(row,1)*g;
+      return [row.x, row.top+(g-1)*0.01, w1-2*w1*t];
+    }
+    const Y = 1-(s-0.58)/0.42;
+    return [row.x, row.bot+(row.top-row.bot)*Y, -wOf(row,Y)*g];
+  };
+  const cabin = new T.Mesh(sheet(cab, 0, 1, 46, (r,s)=>cabPt(r,s,1)), paint);
+  cabin.castShadow = true;
+  carGroup.add(cabin);
+  if(car.roofGlass){
+    carGroup.add(new T.Mesh(sheet(cab, 0.44, 0.56, 8, (r,s)=>cabPt(r,s,1.006)), glassMat));
   }
-  // 반사경 (안쪽 거울)
-  dishMesh(Vx,Ax,U1,U2,head.p,0.05,car.a,5,18,[212,218,228],Ld,'rgba(90,96,108,.5)');
-  // 데코 (차 개성)
-  mark(plateC, q=>{
-    ctx.strokeStyle=car.accent; ctx.lineWidth=2.2;
-    const s=FL*0.32/Math.max(0.5,q[2]);
-    if(car.deco==='ring4'){ for(const [ox,oy] of [[-1,-1],[1,-1],[-1,1],[1,1]]){ ctx.beginPath(); ctx.arc(q[0]+ox*s*0.42,q[1]+oy*s*0.42,s*0.14,0,7); ctx.stroke(); } }
-    else if(car.deco==='ywing'){ for(const sg of [-1,1]){ ctx.beginPath(); ctx.moveTo(q[0]+sg*s*0.62,q[1]-s*0.5); ctx.lineTo(q[0]+sg*s*0.28,q[1]); ctx.lineTo(q[0]+sg*s*0.62,q[1]+s*0.5); ctx.stroke(); } }
-    else if(car.deco==='bigring'){ ctx.beginPath(); ctx.arc(q[0],q[1],s*0.72,0,7); ctx.stroke(); }
-    else { for(const oy of [-0.3,0.3]){ ctx.beginPath(); ctx.moveTo(q[0]-s*0.7,q[1]+oy*s); ctx.lineTo(q[0]+s*0.7,q[1]+oy*s); ctx.stroke(); } }
-  }, 0.15);
-
-  // 전구 (드래그 대신 슬라이더) + 초점 F
-  mark(Bp, q=>{
-    const g=ctx.createRadialGradient(q[0],q[1],1,q[0],q[1],16);
-    g.addColorStop(0,'rgba(255,255,220,1)'); g.addColorStop(1,'rgba(255,230,120,0)');
-    ctx.fillStyle=g; ctx.beginPath(); ctx.arc(q[0],q[1],16,0,7); ctx.fill();
-    ctx.fillStyle='#fff7cf'; ctx.beginPath(); ctx.arc(q[0],q[1],4,0,7); ctx.fill();
-  }, -0.4);
-  mark(F, q=>{
-    ctx.strokeStyle='#fb923c'; ctx.lineWidth=2;
-    ctx.beginPath(); ctx.moveTo(q[0]-6,q[1]); ctx.lineTo(q[0]+6,q[1]);
-    ctx.moveTo(q[0],q[1]-6); ctx.lineTo(q[0],q[1]+6); ctx.stroke();
-    ctx.font='700 14px Georgia,serif'; ctx.fillStyle='#fdba74'; ctx.fillText('F', q[0]+8, q[1]-7);
-  }, -0.35);
-
-  // 광선: 전구 → 반사경 → (초점이면 평행) 도로 저 멀리
-  const samples=[];
-  for(const th of [0.5,1.55,2.6,3.65,4.7,5.75]) samples.push([car.a*0.92,th]);
-  for(const th of [1.05,3.14,5.2]) samples.push([car.a*0.55,th]);
-  for(const [r,th] of samples){
-    const P=V3.add(Vx,V3.add(V3.add(V3.mul(U1,r*Math.sin(th)),V3.mul(U2,r*Math.cos(th))),V3.mul(Ax,r*r/(4*head.p))));
-    const n=V3.norm(V3.sub(Ax,V3.mul(V3.add(V3.mul(U1,Math.sin(th)),V3.mul(U2,Math.cos(th))),r/(2*head.p))));
-    const di=V3.norm(V3.sub(P,Bp));
-    const rd=V3.norm(V3.reflect(di,n));
-    line(Bp,P,'rgba(255,236,150,.5)',1.4,null,-0.02);
-    // 도로(y=0)에 닿으면 거기까지, 아니면 6m
-    let L=6.4;
-    if(rd[1]<-0.001) L=Math.min(L,(0.02-P[1])/rd[1]);
-    const E=V3.add(P,V3.mul(rd,L));
-    line(P,E,'rgba(255,220,90,.85)',2.6,null,-0.02);
-    if(rd[1]<-0.001) mark(E,q=>{
-      const g=ctx.createRadialGradient(q[0],q[1],1,q[0],q[1],13);
-      g.addColorStop(0,'rgba(255,240,160,.85)'); g.addColorStop(1,'rgba(255,240,160,0)');
-      ctx.fillStyle=g; ctx.beginPath(); ctx.arc(q[0],q[1],13,0,7); ctx.fill();
-    }, 0.2);
+  // 창문: 필러 사이 구간마다 측면 유리
+  const cu0 = cab[0].u, cu1 = cab[cab.length-1].u;
+  for(const [f0,f1] of car.glassBands){
+    const seg = cab.filter(r => r.u >= cu0+(cu1-cu0)*f0 && r.u <= cu0+(cu1-cu0)*f1);
+    if(seg.length < 3) continue;
+    for(const side of [1,-1]){
+      carGroup.add(new T.Mesh(sheet(seg, 0, 1, 14, (r,s)=>{
+        const Y = 0.1+0.78*s;
+        return [r.x, r.bot+(r.top-r.bot)*Y, side*wOf(r,Y)*1.012];
+      }), glassMat));
+    }
   }
-  return headSpread();
+  // 벨트라인 몰딩
+  const beltRows = cab.map(r=>({ u:r.u, x:r.x, top:car.belt+0.015, bot:car.belt-0.045, hw:r.hw*1.004 }));
+  carGroup.add(new T.Mesh(loft({ exp:car.roofExp, tumble:0 }, beltRows, 0.15, Math.PI-0.15, 20, 1, false),
+    new T.MeshStandardMaterial({ color:0x2c3238, metalness:0.8, roughness:0.3, side:T.DoubleSide })));
+
+  // 휠 아치(어두운 개구부) + 바퀴
+  const tireMat = new T.MeshStandardMaterial({ color:0x111317, roughness:0.92, metalness:0.03 });
+  const rimColor = car.rim==='dark'?0x2f333a:car.rim==='aero'?0x99a2ac:0xc4cad1;
+  const rimMat = new T.MeshPhysicalMaterial({ color:rimColor, metalness:1, roughness:car.rim==='dark'?0.3:0.15, envMapIntensity:1.5 });
+  const archMat = new T.MeshStandardMaterial({ color:0x0b0d10, roughness:0.9, side:T.DoubleSide });
+  for(const au of car.axles){
+    const row = pick(body,au), ax = row.x, hw = row.hw;
+    for(const sgn of [-1,1]){
+      const arch = new T.Mesh(new T.TorusGeometry(car.wheelR*1.12, car.boxy?0.05:0.028, 8, 24, Math.PI), archMat);
+      arch.rotation.y = Math.PI/2;
+      arch.position.set(ax, car.wheelR, sgn*(hw-0.005));
+      carGroup.add(arch);
+      if(car.boxy){
+        const flare = new T.Mesh(new T.TorusGeometry(car.wheelR*1.22, 0.055, 6, 20, Math.PI),
+          new T.MeshStandardMaterial({ color:0x14171b, roughness:0.75 }));
+        flare.rotation.y = Math.PI/2;
+        flare.position.set(ax, car.wheelR, sgn*(hw+0.02));
+        carGroup.add(flare);
+      }
+      const wheel = new T.Group();
+      wheel.position.set(ax, car.wheelR, sgn*(hw-0.10));
+      const tire = new T.Mesh(new T.CylinderGeometry(car.wheelR, car.wheelR, 0.24, 30), tireMat);
+      tire.rotation.x = Math.PI/2;
+      tire.castShadow = true;
+      wheel.add(tire);
+      const face = new T.Mesh(new T.CylinderGeometry(car.wheelR*0.7, car.wheelR*0.7, 0.25, 26), rimMat);
+      face.rotation.x = Math.PI/2;
+      wheel.add(face);
+      if(car.rim !== 'aero') for(let s=0;s<car.spokes;s++){
+        const spoke = new T.Mesh(new T.BoxGeometry(car.wheelR*1.26, 0.04, 0.055), rimMat);
+        spoke.rotation.z = s*Math.PI/car.spokes;
+        spoke.position.z = sgn*0.125;
+        wheel.add(spoke);
+      }
+      carGroup.add(wheel);
+    }
+  }
+
+  // 사이드미러
+  const mu = car.green[0][0]+0.3, mcab = pick(cab,mu);
+  const mw = wOf(mcab, 0.13);
+  for(const sgn of [-1,1]){
+    const m = new T.Mesh(new T.BoxGeometry(0.08,0.085,0.14), paint);
+    m.position.set(0.1-mu, car.belt+0.07, sgn*(mw+0.08));
+    carGroup.add(m);
+    const arm = new T.Mesh(new T.BoxGeometry(0.04,0.03,0.09), paint);
+    arm.position.set(0.1-mu, car.belt+0.05, sgn*(mw+0.02));
+    carGroup.add(arm);
+  }
+
+  // ── 전조등: 차종별 실제 형상 ──
+  const key = head.car;
+  const rz = car.lampZ, ly = car.lampY, rL = car.lampR;
+  const litMat = new T.MeshBasicMaterial({ color:0xfff8dd });
+  const chrome = new T.MeshPhysicalMaterial({ color:0xd9dee4, metalness:1, roughness:0.12, envMapIntensity:1.8 });
+  const house = new T.MeshStandardMaterial({ color:0x0a0d11, roughness:0.4, metalness:0.45 });
+  const coverMat2 = new T.MeshPhysicalMaterial({ color:0xe8f4ff, transparent:true, opacity:0.18, roughness:0.04, metalness:0, side:T.DoubleSide, envMapIntensity:1.6 });
+
+  // 반사판 컵(오른쪽 렌즈 뒤) — 차종별 크기
+  const cupProf = [];
+  for(let i=0;i<=18;i++){ const r = rL*i/18; cupProf.push(new T.Vector2(r, r*r/(4*rL*0.55))); }
+  const nCups = key==='t'?3:1;
+  for(let i=0;i<nCups;i++){
+    const cup = new T.Mesh(new T.LatheGeometry(cupProf,36), new T.MeshPhysicalMaterial({
+      color:0xf4f8fc, metalness:0.85, roughness:0.1, side:T.DoubleSide, envMapIntensity:2.0 }));
+    cup.rotation.z = -Math.PI/2;
+    cup.position.set(0.0, ly, rz+(i-(nCups-1)/2)*rL*2.6);
+    carGroup.add(cup);
+    const b = new T.Mesh(new T.SphereGeometry(0.011,14,10), litMat);
+    b.position.set(rL*0.55, ly, cup.position.z);
+    carGroup.add(b);
+    const pl2 = new T.PointLight(0xfff2c8, 1.5/nCups, 5, 2);
+    pl2.position.copy(b.position);
+    carGroup.add(pl2);
+  }
+
+  if(key === 'p911'){
+    // 펜더 위 봉긋한 램프: 링 + 돔 유리 + 4점 DRL
+    for(const sgn of [-1,1]){
+      const bulge = new T.Mesh(new T.SphereGeometry(0.17,20,14), paint);
+      bulge.scale.set(0.75,0.55,0.9);
+      bulge.position.set(-0.06, ly-0.03, sgn*rz);
+      carGroup.add(bulge);
+      const ring = new T.Mesh(new T.TorusGeometry(0.1,0.011,10,36), house);
+      ring.rotation.y = Math.PI/2;
+      ring.position.set(0.1, ly, sgn*rz);
+      carGroup.add(ring);
+      if(sgn > 0){
+        const disc = new T.Mesh(new T.CircleGeometry(0.088,28), litMat);
+        disc.rotation.y = Math.PI/2;
+        disc.position.set(0.104, ly, rz);
+        carGroup.add(disc);
+        for(const [dy,dz] of [[0.045,0.045],[0.045,-0.045],[-0.045,0.045],[-0.045,-0.045]]){
+          const dot = new T.Mesh(new T.CircleGeometry(0.016,12), new T.MeshBasicMaterial({ color:0xffffff }));
+          dot.rotation.y = Math.PI/2;
+          dot.position.set(0.11, ly+dy, rz+dz);
+          carGroup.add(dot);
+        }
+        const dome = new T.Mesh(new T.SphereGeometry(0.1,20,12,0,Math.PI*2,0,Math.PI/2), coverMat2);
+        dome.rotation.z = -Math.PI/2;
+        dome.scale.set(0.55,1,1);
+        dome.position.set(0.1, ly, rz);
+        carGroup.add(dome);
+      }
+    }
+  } else if(key === 't'){
+    // 주니퍼: 차폭 전체 라이트 바 + 코너 슬림 유닛, 그릴 없는 매끈한 프론트
+    const bar = new T.Mesh(new T.BoxGeometry(0.016,0.028,rz*2+0.1), litMat);
+    bar.position.set(0.112, ly+0.07, 0);
+    carGroup.add(bar);
+    for(const sgn of [-1,1]){
+      const recess = new T.Mesh(new T.BoxGeometry(0.03,0.055,0.36), house);
+      recess.position.set(0.095, ly, sgn*rz);
+      carGroup.add(recess);
+      if(sgn > 0){
+        const slim = new T.Mesh(new T.BoxGeometry(0.014,0.024,0.3), litMat);
+        slim.position.set(0.112, ly, rz);
+        carGroup.add(slim);
+      }
+    }
+  } else if(key === 'g'){
+    // G바겐: 원형 램프 + LED 헤일로 링 + 펜더 방향지시등 + 가로 슬랫 그릴
+    for(const sgn of [-1,1]){
+      const ring = new T.Mesh(new T.TorusGeometry(0.115,0.014,10,36), chrome);
+      ring.rotation.y = Math.PI/2;
+      ring.position.set(0.105, ly, sgn*rz);
+      carGroup.add(ring);
+      const ind = new T.Mesh(new T.BoxGeometry(0.07,0.035,0.1), new T.MeshBasicMaterial({ color:0xffc890 }));
+      ind.position.set(-0.05, 1.335, sgn*(pick(body,0.35).hw-0.14));
+      carGroup.add(ind);
+      if(sgn > 0){
+        const halo = new T.Mesh(new T.TorusGeometry(0.088,0.007,8,32), new T.MeshBasicMaterial({ color:0xffffff }));
+        halo.rotation.y = Math.PI/2;
+        halo.position.set(0.108, ly, rz);
+        carGroup.add(halo);
+        const disc = new T.Mesh(new T.CircleGeometry(0.08,28), litMat);
+        disc.rotation.y = Math.PI/2;
+        disc.position.set(0.104, ly, rz);
+        carGroup.add(disc);
+      }
+    }
+    for(let i=0;i<4;i++){
+      const slat = new T.Mesh(new T.BoxGeometry(0.03,0.03,rz*2-0.34), chrome);
+      slat.position.set(0.1, ly-0.1+i*0.07, 0);
+      carGroup.add(slat);
+    }
+  } else {
+    // SM3: 코너로 감기는 스웹백 헤드램프 + 프로젝터 렌즈 + 크롬 스트립
+    for(const sgn of [-1,1]){
+      const swoop = new T.Mesh(new T.SphereGeometry(0.13,20,12), house);
+      swoop.scale.set(0.4,0.42,1.75);
+      swoop.position.set(0.03, ly, sgn*(rz-0.02));
+      carGroup.add(swoop);
+      if(sgn > 0){
+        const pr = new T.Mesh(new T.TorusGeometry(0.045,0.008,8,24), chrome);
+        pr.rotation.y = Math.PI/2;
+        pr.position.set(0.096, ly, rz+0.03);
+        carGroup.add(pr);
+        const disc = new T.Mesh(new T.CircleGeometry(0.04,20), litMat);
+        disc.rotation.y = Math.PI/2;
+        disc.position.set(0.098, ly, rz+0.03);
+        carGroup.add(disc);
+        const dot = new T.Mesh(new T.CircleGeometry(0.024,16), new T.MeshBasicMaterial({ color:0xfff2c0 }));
+        dot.rotation.y = Math.PI/2;
+        dot.position.set(0.085, ly+0.01, rz-0.12);
+        carGroup.add(dot);
+        const cover = new T.Mesh(new T.SphereGeometry(0.128,20,12), coverMat2);
+        cover.scale.set(0.42,0.44,1.78);
+        cover.position.set(0.035, ly, rz-0.02);
+        carGroup.add(cover);
+      }
+    }
+    const strip = new T.Mesh(new T.BoxGeometry(0.02,0.028,rz*2-0.28), chrome);
+    strip.position.set(0.105, ly-0.01, 0);
+    carGroup.add(strip);
+  }
+
+  // 빔(광추 + 노면 스포트 + 광선) — 오른쪽 램프
+  const tanR = -head.off/head.hp*0.35;
+  const rn = rL*1.6, rf = Math.max(0.05, rn+tanR*13);
+  const rCone = new T.Mesh(new T.CylinderGeometry(rf,rn,13,24,1,true),
+    new T.MeshBasicMaterial({ color:0xffeeb4, transparent:true, opacity:0.06, side:T.DoubleSide, depthWrite:false, blending:T.AdditiveBlending }));
+  rCone.rotation.z = -Math.PI/2;
+  rCone.position.set(6.7, ly, rz);
+  carGroup.add(rCone);
+  const rayMat = new T.LineBasicMaterial({ color:0xfff0b8, transparent:true, opacity:0.38 });
+  const LEN = 9.2;
+  for(let i=0;i<6;i++){
+    const a = (i/6)*Math.PI*2;
+    const dy = Math.sin(a)*rL*0.8;
+    const dz = Math.cos(a)*rL*(key==='t'?3.4:0.85);
+    const len = Math.hypot(dy,dz)||1;
+    carGroup.add(new T.Line(new T.BufferGeometry().setFromPoints([
+      new T.Vector3(0.1, ly+dy, rz+dz),
+      new T.Vector3(0.1+LEN, ly+dy+dy/len*tanR*LEN, rz+dz+dz/len*tanR*LEN)
+    ]), rayMat));
+  }
+  const rPool = new T.Mesh(new T.PlaneGeometry(13,3.4), new T.MeshBasicMaterial({
+    map:glowTex, transparent:true, depthWrite:false, opacity:0.32, blending:T.AdditiveBlending }));
+  rPool.rotation.x = -Math.PI/2;
+  rPool.position.set(7.5, 0.02, rz);
+  carGroup.add(rPool);
+
+  // 앞 범퍼 · 번호판 · 후미등
+  const dark = new T.MeshStandardMaterial({ color:0x0d1013, roughness:0.55, metalness:0.3 });
+  const nose = body[0];
+  if(key !== 't'){
+    const intake = new T.Mesh(new T.BoxGeometry(0.055, car.boxy?0.24:0.16, nose.hw*1.45), dark);
+    intake.position.set(0.09, nose.bot+(car.boxy?0.2:0.14), 0);
+    carGroup.add(intake);
+  } else {
+    const lip = new T.Mesh(new T.BoxGeometry(0.04,0.05,nose.hw*1.5), dark);
+    lip.position.set(0.09, nose.bot+0.05, 0);
+    carGroup.add(lip);
+  }
+  const plate = new T.Mesh(new T.BoxGeometry(0.025,0.11,0.33),
+    new T.MeshStandardMaterial({ color:0xe9edf1, roughness:0.6 }));
+  plate.position.set(0.115, nose.bot+(car.boxy?0.52:0.38), car.boxy?-0.24:0);
+  carGroup.add(plate);
+
+  const tailRow = body[body.length-6];
+  const tailMat = new T.MeshBasicMaterial({ color:0xd6231c });
+  if(car.tail === 'box'){
+    for(const sgn of [-1,1]){
+      const t2 = new T.Mesh(new T.BoxGeometry(0.05,0.3,0.13), tailMat);
+      t2.position.set(tailRow.x-0.03, car.belt-0.26, sgn*(tailRow.hw-0.1));
+      carGroup.add(t2);
+    }
+  } else {
+    const t2 = new T.Mesh(new T.BoxGeometry(0.05,0.07,tailRow.hw*1.5), tailMat);
+    t2.position.set(tailRow.x-0.03, tailRow.top-0.22, 0);
+    carGroup.add(t2);
+  }
+  const tGlow = new T.Sprite(new T.SpriteMaterial({ map:glowTex, transparent:true, depthWrite:false, opacity:0.2, color:0xff4530, blending:T.AdditiveBlending }));
+  tGlow.scale.set(0.9,0.55,1);
+  tGlow.position.set(tailRow.x-0.12, tailRow.top-0.24, 0);
+  carGroup.add(tGlow);
+
+  // G바겐 전용 디테일: 루프 레일 · 사이드 스텝 · 스페어 타이어 · 도어 힌지
+  if(car.boxy){
+    const roofY = car.green[2][1];
+    for(const sgn of [-1,1]){
+      const rail = new T.Mesh(new T.BoxGeometry(2.9,0.05,0.06), dark);
+      rail.position.set(-2.5, roofY+0.03, sgn*(pick(cab,2.6).hw-0.1));
+      carGroup.add(rail);
+      const step = new T.Mesh(new T.BoxGeometry(2.2,0.06,0.15),
+        new T.MeshStandardMaterial({ color:0x8d959e, metalness:0.85, roughness:0.35 }));
+      step.position.set(-2.4, 0.44, sgn*(pick(body,2.5).hw+0.05));
+      carGroup.add(step);
+      for(const hu of [2.05,3.35]){
+        const hinge = new T.Mesh(new T.BoxGeometry(0.07,0.09,0.05),
+          new T.MeshStandardMaterial({ color:0x2a3038, metalness:0.7, roughness:0.35 }));
+        hinge.position.set(0.1-hu, car.belt+0.32, sgn*(pick(cab,hu).hw+0.03));
+        carGroup.add(hinge);
+      }
+    }
+    const spare = new T.Mesh(new T.CylinderGeometry(0.36,0.36,0.14,26), dark);
+    spare.rotation.z = Math.PI/2;
+    spare.position.set(0.1-car.L+0.02, 1.05, 0.14);
+    carGroup.add(spare);
+  }
+
+  // 접지 그림자
+  const scv = document.createElement('canvas');
+  scv.width = scv.height = 128;
+  const sx = scv.getContext('2d');
+  const sg2 = sx.createRadialGradient(64,64,0,64,64,64);
+  sg2.addColorStop(0,'rgba(0,0,0,0.72)');
+  sg2.addColorStop(0.6,'rgba(0,0,0,0.26)');
+  sg2.addColorStop(1,'rgba(0,0,0,0)');
+  sx.fillStyle = sg2; sx.fillRect(0,0,128,128);
+  const shadow = new T.Mesh(new T.PlaneGeometry(car.L+1.0, car.W+0.8),
+    new T.MeshBasicMaterial({ map:new T.CanvasTexture(scv), transparent:true, depthWrite:false }));
+  shadow.rotation.x = -Math.PI/2;
+  shadow.position.set(0.1-car.L/2, 0.012, 0);
+  carGroup.add(shadow);
 }
 
-/* ═══════════ 화면·컨트롤 ═══════════ */
-const hud=document.getElementById('hud');
-const ctrl=document.getElementById('ctrl');
-const carRow=document.getElementById('carRow');
-let tab='solar', dirty=true;
+/* 전조등 카메라 프리셋: 램프 클로즈업 / 차 전체 자동 맞춤 */
+function applyHeadPreset(){
+  /* 항상 전조등(램프)이 화면 중심 — 차체가 생겨도 관점 유지, 살짝만 물러나 차가 보이게 */
+  const car = CARS[head.car];
+  orbitHead.target = [0.42, car.lampY+0.04, -car.lampZ];
+  orbitHead.theta = 0.75; orbitHead.phi = 1.30;
+  orbitHead.radius = head.showCar ? 4.2 : 1.3;
+  applyCamera();
+}
 
-function fmt(v,d){ return v.toFixed(d===undefined?2:d); }
+/* ── 컨트롤/탭 ── */
 function buildCtrl(){
   if(tab==='solar'){
     ctrl.innerHTML=`
       <div class="cItem"><span class="lb">접시 기울기</span>
-        <input type="range" id="sEl" min="20" max="80" step="1" value="${solar.elD}">
-        <span class="vv" id="sElV">${solar.elD}°</span></div>
+        <input type="range" id="sTilt" min="0" max="90" step="1" value="${solar.tilt}">
+        <span class="vv" id="sTiltV">${solar.tilt}°</span></div>
       <div class="cItem"><span class="lb">초점거리 <i>p</i></span>
-        <input type="range" id="sP" min="0.5" max="1.2" step="0.01" value="${solar.p}">
+        <input type="range" id="sP" min="0.4" max="1.6" step="0.05" value="${solar.p}">
         <span class="vv" id="sPV">${fmt(solar.p)} m</span></div>
       <div class="cItem"><span class="lb">냄비 위치</span>
-        <input type="range" id="sH" min="0.25" max="1.4" step="0.01" value="${solar.h}">
-        <span class="vv" id="sHV">${fmt(solar.h)} m</span></div>
-      <div id="hintLine">☀️ 태양 고도는 55° — 접시를 태양과 나란히 맞추고, 냄비를 초점 F(= <i>p</i>)에 두면 펄펄 끓어요!</div>`;
-    const on=(id,fn)=>document.getElementById(id).addEventListener('input',e=>{fn(+e.target.value); dirty=true;});
-    on('sEl',v=>{solar.elD=v; document.getElementById('sElV').textContent=v+'°';});
-    on('sP', v=>{solar.p=v;  document.getElementById('sPV').textContent=fmt(v)+' m';});
-    on('sH', v=>{solar.h=v;  document.getElementById('sHV').textContent=fmt(v)+' m';});
+        <input type="range" id="sH" min="0.2" max="1.6" step="0.01" value="${solar.hPot}">
+        <span class="vv" id="sHV">${fmt(solar.hPot)} m</span></div>
+      <div id="hintLine">☀️ 태양 고도는 55° — 접시를 태양과 나란히 맞추고, 냄비를 초점 F(= <i>p</i>)에 두면 집광률 100%! (접시 반지름 <i>R</i> = √(4<i>p</i>·깊이) 는 자동으로 정해져요)</div>`;
+    const on=(id,fn)=>$id(id).addEventListener('input',e=>{fn(+e.target.value); rebuildSolar(); updateHud();});
+    on('sTilt',v=>{solar.tilt=v; $id('sTiltV').textContent=v+'°';});
+    on('sP', v=>{solar.p=v;    $id('sPV').textContent=fmt(v)+' m';});
+    on('sH', v=>{solar.hPot=v; $id('sHV').textContent=fmt(v)+' m';});
   } else {
-    const car=CARS[head.car];
+    const offLb = v => (v>0?'+':'')+(v*1000).toFixed(0)+' mm';
     ctrl.innerHTML=`
-      <div class="cItem"><span class="lb">전구 위치</span>
-        <input type="range" id="hB" min="0.04" max="${(car.p*2.2).toFixed(2)}" step="0.005" value="${head.b}">
-        <span class="vv" id="hBV">${fmt(head.b)} m</span></div>
+      <div class="cItem"><span class="lb">💡 전구 위치 (초점 <i>F</i> 기준)</span>
+        <input type="range" id="hOff" min="-0.03" max="0.03" step="0.002" value="${head.off}" style="width:190px">
+        <span class="vv" id="hOffV" style="min-width:62px">${offLb(head.off)}</span>
+        <span id="regimeLb"></span></div>
       <div class="cItem"><span class="lb">반사경 초점거리 <i>p</i></span>
-        <input type="range" id="hP" min="0.08" max="0.28" step="0.005" value="${head.p}">
-        <span class="vv" id="hPV">${fmt(head.p)} m</span></div>
-      <div id="hintLine">🚗 차마다 반사경 모양이 달라요. 전구를 초점 F(= <i>p</i>)에 두면 빛이 축과 평행하게 나가 멀리 뻗어요!</div>`;
-    const on=(id,fn)=>document.getElementById(id).addEventListener('input',e=>{fn(+e.target.value); dirty=true;});
-    on('hB',v=>{head.b=v; document.getElementById('hBV').textContent=fmt(v)+' m';});
-    on('hP',v=>{head.p=v; document.getElementById('hPV').textContent=fmt(v)+' m';});
+        <input type="range" id="hP" min="0.03" max="0.12" step="0.005" value="${head.hp}" style="width:110px">
+        <span class="vv" id="hPV">${head.hp.toFixed(3)} m</span></div>
+      <div class="cItem"><span class="lb">반사경 깊이</span>
+        <input type="range" id="hH" min="0.02" max="0.1" step="0.005" value="${head.hh}" style="width:110px">
+        <span class="vv" id="hHV">${head.hh.toFixed(3)} m</span></div>
+      <div class="cItem"><span class="lb">전구 앞 캡</span><span id="capBtns" style="display:flex;gap:6px">${
+        ['없음','차광 캡','후방 반사 캡'].map(c=>`<button class="capBtn${head.cap===c?' on':''}" data-cap="${c}">${c}</button>`).join('')
+      }</span></div>
+      <div id="hintLine">🔦 그림 실험 — 전구가 초점 <i>F</i>보다 <b>뒤(−)</b>면 빛이 <b>퍼지고(발산)</b>, <b>앞(+)</b>이면 한 점으로 <b>모여요(수렴)</b>. 딱 <i>F</i>에 두면(0 mm) 축과 <b>평행</b>하게 나가 가장 멀리 비춰요!</div>`;
+    const regime = ()=>{
+      const el=$id('regimeLb'), off=head.off;
+      if(Math.abs(off)<1e-9){ el.textContent='B. 평행 ⟶'; el.style.background='#dcfce7'; el.style.color='#15803d'; }
+      else if(off<0){ el.textContent='A. 발산 ⤢'; el.style.background='#fee2e2'; el.style.color='#b91c1c'; }
+      else { el.textContent='C. 수렴 ⤞'; el.style.background='#fef3c7'; el.style.color='#b45309'; }
+    };
+    regime();
+    const on=(id,fn)=>$id(id).addEventListener('input',e=>{fn(+e.target.value); rebuildHead(); updateHud(); regime();});
+    on('hOff',v=>{head.off=Math.abs(v)<1e-9?0:v; $id('hOffV').textContent=offLb(head.off);});
+    on('hP', v=>{head.hp=v; $id('hPV').textContent=v.toFixed(3)+' m';});
+    on('hH', v=>{head.hh=v; $id('hHV').textContent=v.toFixed(3)+' m';});
+    ctrl.querySelectorAll('.capBtn').forEach(b=>b.addEventListener('click',()=>{
+      head.cap=b.dataset.cap;
+      ctrl.querySelectorAll('.capBtn').forEach(x=>x.classList.toggle('on',x.dataset.cap===head.cap));
+      rebuildHead(); updateHud();
+    }));
   }
 }
 function buildCars(){
-  carRow.innerHTML=CARS.map((c,i)=>`<button data-i="${i}" class="${i===head.car?'on':''}">${c.name}</button>`).join('');
-  carRow.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{
-    head.car=+b.dataset.i;
-    head.p=CARS[head.car].p;
-    head.b=Math.min(head.b, head.p*2.2);
-    buildCars(); buildCtrl(); dirty=true;
+  carRow.innerHTML=Object.keys(CARS).map(k=>`<button data-k="${k}" class="${k===head.car?'on':''}">${CARS[k].chip}</button>`).join('')
+    +`<button id="carBody" class="${head.showCar?'on':''}">🚘 차 ${head.showCar?'숨기기':'보이기'}</button>`;
+  carRow.querySelectorAll('button[data-k]').forEach(b=>b.addEventListener('click',()=>{
+    head.car=b.dataset.k;
+    buildCars(); rebuildHead(); if(T) applyHeadPreset(); updateHud();
   }));
+  $id('carBody').addEventListener('click',()=>{
+    head.showCar=!head.showCar;
+    buildCars(); rebuildHead(); if(T) applyHeadPreset(); updateHud();
+  });
 }
 function setTab(t2){
   tab=t2;
-  document.getElementById('tabSolar').classList.toggle('on',tab==='solar');
-  document.getElementById('tabHead').classList.toggle('on',tab==='head');
-  stage.className = tab==='solar' ? 'day' : 'night';
-  carRow.style.display = tab==='head' ? 'flex' : 'none';
-  cam.yaw = tab==='solar'?0.6:0.85; cam.pitch = tab==='solar'?0.32:0.18;
-  cam.dist = tab==='solar'?6.4:3.4; cam.target = tab==='solar'?[0,1.0,0]:[1.1,0.7,0];
-  buildCtrl(); dirty=true;
-}
-document.getElementById('tabSolar').addEventListener('click',()=>setTab('solar'));
-document.getElementById('tabHead').addEventListener('click',()=>setTab('head'));
-
-function frame(t){
-  const heatOn = tab==='solar' && solarHeat()>=90;
-  if(dirty || heatOn){
-    B=camBasis(); FL=1.15*Math.min(W,H)*DPR/DPR;
-    ctx.setTransform(DPR,0,0,DPR,0,0);
-    ctx.clearRect(0,0,W,H);
-    let g;
-    if(tab==='solar'){
-      const heat=drawSolar(t); flush();
-      const lv = heat>=90?'🔥 펄펄 끓어요!':heat>=60?'♨️ 따뜻해요':heat>=30?'🌡️ 미지근…':'🧊 아직 차가워요';
-      hud.innerHTML=`<b>${lv}</b><br>집광률 ${heat}% — 접시 기울기 ${solar.elD}° / 태양 55°<br>`+
-        `냄비 <span class="it">h</span> = ${fmt(solar.h)} m · 초점 <span class="it">p</span> = ${fmt(solar.p)} m`+
-        `<div id="gaugeBar"><div id="gaugeFill" style="width:${heat}%"></div></div>`;
-      if(heat>=90 && !solar.done){ solar.done=true; if(window.GEO_task) GEO_task('solar'); }
-    } else {
-      const sp=drawHead(t); flush();
-      const perfect = sp<0.8;
-      hud.innerHTML=`<b>${perfect?'💡 완벽한 평행광!':'퍼짐각 '+sp.toFixed(1)+'°'}</b><br>`+
-        `${CARS[head.car].name} — ${CARS[head.car].shape==='circle'?'원형':CARS[head.car].shape==='hex'?'육각형':'사각형'} 헤드램프<br>`+
-        `전구 ${fmt(head.b)} m · 초점 <span class="it">p</span> = ${fmt(head.p)} m`+
-        `<div id="gaugeBar"><div id="gaugeFill" style="width:${Math.max(4,100-sp*3)}%"></div></div>`;
-      if(perfect && !head.done){ head.done=true; if(window.GEO_task) GEO_task('head'); }
-    }
-    dirty=false;
+  const isSolar = tab==='solar';
+  $id('tabSolar').classList.toggle('on',isSolar);
+  $id('tabHead').classList.toggle('on',!isSolar);
+  stage.className = isSolar ? 'day' : 'night';
+  carRow.style.display = isSolar ? 'none' : 'flex';
+  $id('sTitle').innerHTML = isSolar ? '포물선 단면과 초점' : '전조등 — 초점에서 나간 빛';
+  $id('sDesc').innerHTML = isSolar
+    ? '축에 평행하게 들어온 빛은 어디에 닿아도 모두 한 점, 초점 <i>F</i>로 모입니다.'
+    : '초점 <i>F</i>에 놓인 전구의 빛은 반사면에서 튕겨 모두 축과 평행하게 나갑니다. 조리기와 정확히 반대 방향이죠.';
+  $id('cK1').innerHTML = isSolar ? '지름 2<i>R</i>' : '반사판 지름';
+  $id('cK2').innerHTML = isSolar ? '모인 광선' : '빛 퍼짐';
+  $id('cK3').innerHTML = isSolar ? '냄비 반지름' : '초점거리 <i>p</i>';
+  if(T){
+    if(isSolar) applyCamera(); else applyHeadPreset();
+    updateHud();
   }
-  requestAnimationFrame(frame);
+  buildCtrl();
 }
-resize();
+$id('tabSolar').addEventListener('click',()=>setTab('solar'));
+$id('tabHead').addEventListener('click',()=>setTab('head'));
+window.__camSet = c => { orbitHead.radius=c.r; orbitHead.theta=c.th; orbitHead.phi=c.ph; orbitHead.target=c.t; applyCamera(); };
+
+/* 궤도 컨트롤 (원본 방식) */
+function bindControls(canvas){
+  const pts = new Map();
+  let lastDist = 0;
+  const dist = ()=>{ const a=[...pts.values()]; return Math.hypot(a[0].x-a[1].x, a[0].y-a[1].y); };
+  canvas.addEventListener('pointerdown', e=>{
+    canvas.setPointerCapture && canvas.setPointerCapture(e.pointerId);
+    pts.set(e.pointerId,{x:e.clientX,y:e.clientY});
+    if(pts.size===2) lastDist=dist();
+  });
+  canvas.addEventListener('pointermove', e=>{
+    const prev=pts.get(e.pointerId);
+    if(!prev) return;
+    const dx=e.clientX-prev.x, dy=e.clientY-prev.y;
+    pts.set(e.pointerId,{x:e.clientX,y:e.clientY});
+    const o=orbit();
+    if(pts.size===1){
+      o.theta -= dx*0.006;
+      o.phi = Math.max(0.22, Math.min(1.5, o.phi - dy*0.005));
+    } else if(pts.size===2){
+      const d=dist();
+      if(lastDist) o.radius = Math.max(0.4, Math.min(40, o.radius*lastDist/d));
+      lastDist=d;
+    }
+    applyCamera();
+  });
+  const up=e=>{ pts.delete(e.pointerId); lastDist=0; };
+  canvas.addEventListener('pointerup', up);
+  canvas.addEventListener('pointercancel', up);
+  canvas.addEventListener('wheel', e=>{
+    e.preventDefault();
+    const o=orbit();
+    o.radius = Math.max(0.4, Math.min(40, o.radius*(1+e.deltaY*0.0012)));
+    applyCamera();
+  }, {passive:false});
+}
+
+/* ── 초기화 ── */
+(async function init(){
+  try{
+    T = await loadTHREE();
+  }catch(e){
+    $id('glLoad').textContent = '3D 모듈을 불러오지 못했어요. 새로고침 해주세요.';
+    return;
+  }
+  const canvas = $id('cv');
+  renderer = new T.WebGLRenderer({ canvas, antialias:true, alpha:true });
+  renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = T.PCFSoftShadowMap;
+  renderer.toneMapping = T.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.05;
+  camera = new T.PerspectiveCamera(40, 1, 0.05, 400);
+  glowTex = glow([[0,'rgba(255,252,214,1)'],[0.26,'rgba(255,226,90,0.95)'],[0.55,'rgba(255,205,60,0.32)'],[1,'rgba(255,200,60,0)']]);
+  envDay = buildEnv(false);
+  envNight = buildEnv(true);
+  sceneSolar = buildSolarScene();
+  sceneSolar.environment = envDay;
+  sceneHead  = buildHeadScene();
+  sceneHead.environment = envNight;
+  rebuildSolar(); rebuildHead();
+  bindControls(canvas);
+  const doResize = ()=>{
+    const w = stage.clientWidth, h = stage.clientHeight;
+    renderer.setSize(w, h, false);
+    camera.aspect = w/Math.max(h,1);
+    camera.updateProjectionMatrix();
+  };
+  new ResizeObserver(doResize).observe(stage);
+  doResize();
+  applyCamera();
+  $id('glLoad').style.display='none';
+  hud.style.display='block';
+  updateHud();
+  let t0 = performance.now();
+  renderer.setAnimationLoop(()=>{
+    const t = performance.now()-t0;
+    for(const s of steamSprites){
+      const ph = (t*0.00045 + s.userData.k*0.33) % 1;
+      s.position.set(Math.sin(ph*9 + s.userData.k)*0.05,
+        solar.hPot + solar.potR*1.6 + ph*0.55, 0.02*s.userData.k);
+      s.material.opacity = 0.85*(1-ph);
+      s.scale.setScalar(0.14 + ph*0.2);
+    }
+    renderer.render(tab==='solar'?sceneSolar:sceneHead, camera);
+  });
+})();
 buildCars();
 setTab('solar');
-requestAnimationFrame(frame);
-addEventListener('resize',()=>{resize();});
-/* 회전 중 계속 다시 그리기 */
-(function(){ const iv=setInterval(()=>{ if(ptrs.size>0) dirty=true; },30); })();
 </script>
 <script>window.PAGE_ID="apply";</script>
 <script src="nav.js"></script>
