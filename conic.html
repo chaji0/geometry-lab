@@ -510,18 +510,24 @@ function buildEllipseProof(){         // α=40°
   const sq=Math.sqrt(qb*qb-4*qa*qc);
   let r1=(-qb-sq)/(2*qa), r2=(-qb+sq)/(2*qa);
   if(r1>r2){ const t=r1; r1=r2; r2=t; }
-  const k=Dv/(cA+0.5), r=k/2;         // 평면과 접하는 조건: Dv - k·cosα = k/2
+  const k=Dv/(cA+0.5), r=k/2;         // 위 구 — 평면과 접하는 조건: Dv - k·cosα = k/2
   const C=V(0,-k,0);
-  const Fw=V(C.x-b.n.x*r, C.y-b.n.y*r, C.z-b.n.z*r);   // 구가 평면에 닿는 점
+  const Fw=V(C.x-b.n.x*r, C.y-b.n.y*r, C.z-b.n.z*r);   // 구가 평면에 닿는 점 = F
   const uF=dot(sub(Fw,b.P0), b.e1);   // (v=0, 대칭)
+  const k2b=Dv/(cA-0.5), r2b=k2b/2;   // ★ 아래 구 — 평면 반대쪽에서 접: Dv - k₂·cosα = -k₂/2
+  const C2=V(0,-k2b,0);
+  const Fw2=add(C2, scl(b.n, r2b));   // 아래 구가 평면에 닿는 점 = F′
+  const uF2=dot(sub(Fw2,b.P0), b.e1);
   const v2=u=>{ const Au=Dv*cA+u*sA, Bu=u*cA-Dv*sA; return Au*Au/3-Bu*Bu; };
   const uc=(r1+r2)/2;
   return {
     angle:A, type:'ellipse',
     sphereC:C, sphereR:r, sphere:makeSphereTris(C,r),
+    sphere2C:C2, sphere2R:r2b, sphere2:makeSphereTris(C2,r2b),
     tY:-3*k/4, tR:Math.sqrt(3)*k/4,
+    tY2:-3*k2b/4, tR2:Math.sqrt(3)*k2b/4,        // 아래 구의 접원
     F:{u:uF, v:0},
-    F2:{u:r1+r2-uF, v:0},             // 타원 대칭으로 반대쪽 점
+    F2:{u:uF2, v:0},                  // 아래 구가 평면에 닿는 점 (= 타원 대칭점)
     P:{u:uc, v:Math.sqrt(Math.max(0,v2(uc)))},   // 타원 위 정면(v>0) 점
     drag:conicDragPts(A,uc),
     defLabel:'타원의 정의',
@@ -932,7 +938,7 @@ function render(){
     };
     // 구와 원뿔의 접원 (라벨 없음)
     stroke(circle3d(pd.tY,pd.tR),'#16a34a',2.2);
-    if(pd.tY2!==undefined) stroke(circle3d(pd.tY2,pd.tR),'#16a34a',2.2);
+    if(pd.tY2!==undefined) stroke(circle3d(pd.tY2, pd.tR2!==undefined?pd.tR2:pd.tR),'#16a34a',2.2);
     if(pd.type==='parabola'){
       stroke(tq,'rgba(124,58,237,.55)',1,[5,4],true);
       stroke([mapLive(pd.dirU,-2.4),mapLive(pd.dirU,2.4)],'#7c3aed',3);
@@ -966,10 +972,10 @@ function render(){
         const Qw=scl(Pw,pd.tY/Pw.y);               // 모선이 접원과 만나는 점
         label(dot(Qw,'#16a34a',4.5),'Q','#15803d',9,-6);
       } else if(pd.type==='ellipse'){
-        const Qw=scl(Pw,-H/Pw.y);                  // 원래 원뿔 밑둘레 위의 점
-        stroke([V(0,0,0),Qw],'#0e7490',2);
-        const Hw=scl(Pw,pd.tY/Pw.y);               // PQ 연장선이 접원과 만나는 점
-        label(dot(Qw,'#0e7490',4.5),'Q','#0e7490',9,-6);
+        const Hw=scl(Pw,pd.tY/Pw.y);               // 모선이 위 구(접원)와 만나는 점 H
+        const Qw=scl(Pw,pd.tY2/Pw.y);              // ★ 직선 HP가 아래 구(접원)와 만나는 점 Q
+        stroke([Hw,Qw],'#0e7490',2);               // 직선 HP (P를 지나 아래 구까지)
+        label(dot(Qw,'#16a34a',4.5),'Q','#15803d',9,-6);
         label(dot(Hw,'#16a34a',4.5),'H','#15803d',-16,-7);
       } else {                                     // 쌍곡선: P→(꼭짓점)→H, Q는 아래 접원
         const Hw=scl(Pw,pd.tY2/Pw.y);              // 위 구의 접원과 만나는 점
@@ -1199,7 +1205,7 @@ function showProofPanel(){
   const desc = pd.type==='parabola'
     ? '🟢 원뿔에 내접하며 자르는 평면과 F에서 접하는 <b>단델린 구</b>. 구와 원뿔이 닿는 원을 품은 평면(보라)과 자르는 평면의 교선이 <b style="color:#7c3aed">준선</b>이에요.'
     : pd.type==='ellipse'
-    ? '🟢 원뿔에 내접하며 자르는 평면과 F에서 접하는 <b>단델린 구</b>. F′는 반대쪽에 같은 방법으로 잡은 점이에요.'
+    ? '🟢 <b>단델린 구 2개</b>: 위 구는 자르는 평면과 F에서, 아래 구는 반대쪽에서 F′에서 접해요. 둘 다 원뿔에 내접!'
     : '🟢 <b>단델린 구 2개</b>: 아래 원뿔·평면과 F에서 접하는 구, 위 원뿔·평면과 F′에서 접하는 구.';
   proofDesc.innerHTML = desc
     + '<br><span style="color:#0284c7">✋ 정의를 켜면 <b>P를 드래그</b>해서 곡선 위를 움직일 수 있어요!</span>'
