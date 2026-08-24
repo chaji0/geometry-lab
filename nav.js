@@ -6,7 +6,7 @@
      먼저 선언한 뒤 이 파일을 불러오면 하단 바가 자동으로 생깁니다.
    ════════════════════════════════════════════════════════════ */
 window.GEO_CONFIG = {
-  VERSION: "v1.14",                 // ★ 1단원=v1.x, 2단원=v2.x, 3단원=v3.x — 업로드마다 뒷자리 +1 (v1.11, v1.12, …)
+  VERSION: "v1.15",                 // ★ 1단원=v1.x, 2단원=v2.x, 3단원=v3.x — 업로드마다 뒷자리 +1 (v1.11, v1.12, …)
   APPS_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbx3Ay-gudjjSoRlngyu54umJ9uYRAKhINuwcv229UZUN9_oIQfm9vwAxM32FOPR9wV1/exec",
   ACTIVITIES: [
     { id:'conic',    href:'conic.html',    icon:'⚾', short:'원뿔곡선',
@@ -21,6 +21,15 @@ window.GEO_CONFIG = {
     { id:'apply',    href:'apply.html',    icon:'🔦', short:'포물선활용',
       title:'포물선의 활용',
       desc:'태양열 조리기와 자동차 전조등 — 초점의 위치가 왜 중요한지 광선 시뮬레이션으로 확인해요.' },
+    { id:'ellipse',  href:'ellipse.html',  icon:'🧵', short:'타원그리기',
+      title:'타원 그리기 — 실과 자취',
+      desc:'못 2개에 건 실로 직접 타원을 그리고, 공학 도구 자취 활동으로 왜 타원이 되는지 확인해요.' },
+    { id:'econcept', href:'ellipse-concept.html', icon:'📙', short:'타원개념',
+      title:'타원 개념 정리',
+      desc:'a, b 값을 움직이며 타원의 방정식과 초점·꼭짓점·장축·단축이 어떻게 변하는지 확인해요.' },
+    { id:'eapply',   href:'ellipse-apply.html', icon:'🪐', short:'타원활용',
+      title:'타원의 활용 — 케플러 궤도',
+      desc:'소행성 1566 이카루스의 타원 궤도 — 우주에서 케플러 법칙을 눈으로 확인해요. (인터넷 연결 필요)' },
     { id:'geogebra', href:'geogebra.html', icon:'📐', short:'지오지브라',
       title:'지오지브라',
       desc:'앱 안에서 바로 열리는 지오지브라 — 클래식·그래핑·기하·3D 계산기. (인터넷 연결 필요)' }
@@ -79,6 +88,9 @@ window.GEO_TASKS = {
   folding:  ['autoBtn','curveBtn','whyBtn','clearBtn'],// 활동 버튼 4개 모두 눌러보기
   concept:  ['slider','answer'],                       // p 슬라이더 + 질문 답 채우기
   apply:    ['solar','head'],                          // 태양열 끓이기 성공 + 평행광 만들기 성공
+  ellipse:  ['make','trace'],                          // 두 탭에서 각각 '타원 확인' 눌러보기
+  econcept: ['slider'],                                // a·b 슬라이더 움직이기
+  eapply:   ['play'],                                  // 케플러 궤도 재생 버튼
   geogebra: ['open']                                   // 지오지브라 실행
 };
 window.GEO_task = function(key){

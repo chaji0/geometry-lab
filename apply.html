@@ -269,11 +269,51 @@ function updateSide(heat){
     const y=-R+2*R*i2/60;
     curve+=(i2?' L ':'M ')+X(par(y)).toFixed(1)+' '+Y(y).toFixed(1);
   }
+  /* 실제 태양 방향(접시 기울기 vs 태양 고도)을 단면에 반영 */
+  const dL = solarLocalSun().d;                      // 접시 좌표계 입사 방향
+  let sd = { x: dL[1], y: dL[0] };                   // 단면 2D: x=축 방향, y=반지름 방향
+  { const l = Math.hypot(sd.x, sd.y) || 1; sd = { x: sd.x/l, y: sd.y/l }; }
+  const potBox = { x0: hp-rp*0.85, x1: hp+rp*0.85, y0: -rp*0.65, y1: rp*0.65 };
+  const rectHit = (o, dir) => {                      // 광선-냄비 사각형 교차 (월드)
+    let t0 = 1e-6, t1 = Infinity;
+    for(const [oc,dc,lo,hi] of [[o.x,dir.x,potBox.x0,potBox.x1],[o.y,dir.y,potBox.y0,potBox.y1]]){
+      if(Math.abs(dc) < 1e-9){ if(oc < lo || oc > hi) return Infinity; continue; }
+      let ta = (lo-oc)/dc, tb = (hi-oc)/dc;
+      if(ta > tb){ const tmp = ta; ta = tb; tb = tmp; }
+      t0 = Math.max(t0, ta); t1 = Math.min(t1, tb);
+    }
+    return t0 <= t1 ? t0 : Infinity;
+  };
+  const clipBox = (sx, sy, dx, dy) => {              // 화면 상자 [16..W2-16]×[12..Hh-12] 경계까지 t
+    let t = Infinity;
+    if(dx > 1e-9) t = Math.min(t, (W2-16-sx)/dx); else if(dx < -1e-9) t = Math.min(t, (16-sx)/dx);
+    if(dy > 1e-9) t = Math.min(t, (Hh-12-sy)/dy); else if(dy < -1e-9) t = Math.min(t, (12-sy)/dy);
+    return t === Infinity ? 0 : Math.max(0, t);
+  };
   let rays='';
   for(let k=0;k<9;k++){
     const y=-R*0.94+1.88*R*k/8, x=par(y);
-    rays+=`<path d="M ${(W2-16)} ${Y(y).toFixed(1)} L ${X(x).toFixed(1)} ${Y(y).toFixed(1)}" stroke="#efa41f" stroke-width="2" stroke-dasharray="9 6" fill="none"/>`;
-    rays+=`<path d="M ${X(x).toFixed(1)} ${Y(y).toFixed(1)} L ${X(P).toFixed(1)} ${Y(0).toFixed(1)}" stroke="#f07a1e" stroke-width="2" fill="none"/>`;
+    const n0 = { x:1, y:-y/(2*P) };
+    { const l = Math.hypot(n0.x,n0.y); n0.x/=l; n0.y/=l; }
+    const dn = sd.x*n0.x + sd.y*n0.y;
+    if(dn >= -1e-4) continue;                        // 뒷면으로 들어오는 광선 제외
+    if(rectHit({x,y}, {x:-sd.x, y:-sd.y}) < Infinity) continue;   // 냄비 그림자
+    const sx = X(x), sy = Y(y);
+    const dsx = sd.x*sc, dsy = -sd.y*sc;             // 화면 방향
+    const dl2 = Math.hypot(dsx,dsy)||1;
+    const tin = clipBox(sx, sy, -dsx/dl2, -dsy/dl2);
+    rays+=`<path d="M ${(sx-dsx/dl2*tin).toFixed(1)} ${(sy-dsy/dl2*tin).toFixed(1)} L ${sx.toFixed(1)} ${sy.toFixed(1)}" stroke="#efa41f" stroke-width="2" stroke-dasharray="9 6" fill="none"/>`;
+    const rf = { x: sd.x - 2*dn*n0.x, y: sd.y - 2*dn*n0.y };
+    const tp = rectHit({x,y}, rf);
+    let ex, ey;
+    if(tp < Infinity){ ex = X(x+rf.x*tp); ey = Y(y+rf.y*tp); }
+    else {
+      const rsx = rf.x*sc, rsy = -rf.y*sc;
+      const rl2 = Math.hypot(rsx,rsy)||1;
+      const tout = clipBox(sx, sy, rsx/rl2, rsy/rl2);
+      ex = sx + rsx/rl2*tout; ey = sy + rsy/rl2*tout;
+    }
+    rays+=`<path d="M ${sx.toFixed(1)} ${sy.toFixed(1)} L ${ex.toFixed(1)} ${ey.toFixed(1)}" stroke="#f07a1e" stroke-width="2" fill="none"/>`;
   }
   const potW=rp*1.3*sc, potH=rp*1.7*sc;
   $id('sSvgWrap').innerHTML =
@@ -316,9 +356,16 @@ function updateSideHead(){
     const y=-R+2*R*i2/60;
     curve+=(i2?' L ':'M ')+X(par(y)).toFixed(1)+' '+Y(y).toFixed(1);
   }
-  /* 광선: 전구(F+오차) → 반사면 → 반사 방향 (off<0 발산 · 0 평행 · off>0 수렴) */
+  /* 광선: 전구(F+오차) → 반사면 → 반사되어 나가는 실제 방향 (off<0 발산 · 0 평행 · off>0 수렴) */
+  const clipBox=(sx,sy,dx2,dy2)=>{
+    let t=Infinity;
+    if(dx2>1e-9) t=Math.min(t,(W2-16-sx)/dx2); else if(dx2<-1e-9) t=Math.min(t,(16-sx)/dx2);
+    if(dy2>1e-9) t=Math.min(t,(Hh-12-sy)/dy2); else if(dy2<-1e-9) t=Math.min(t,(12-sy)/dy2);
+    return t===Infinity?0:Math.max(0,t);
+  };
   const bx=X(P+off), by=Y(0);
   let rays='';
+  const ends=[];                                    // 빛다발 영역용 (반사점·끝점)
   for(let k=0;k<9;k++){
     const y=-R*0.94+1.88*R*k/8, x=par(y);
     const px=X(x), py=Y(y);
@@ -327,12 +374,21 @@ function updateSideHead(){
     const nl=Math.hypot(nx,ny);
     const dot=(dx*nx/nl + dy*ny/nl);
     const rx=dx-2*dot*nx/nl, ry=dy-2*dot*ny/nl;
-    const rl=Math.hypot(rx,ry)||1;
-    const k2=(W2-16-px)/((rx/rl*sc)||1);
-    const L=Math.min(Math.abs(k2)/sc, 4);
+    const rsx=rx*sc, rsy=-ry*sc;
+    const rl2=Math.hypot(rsx,rsy)||1;
+    const tout=clipBox(px,py,rsx/rl2,rsy/rl2);
+    const ex=px+rsx/rl2*tout, ey=py+rsy/rl2*tout;
+    ends.push({px,py,ex,ey});
     rays+=`<path d="M ${bx.toFixed(1)} ${by.toFixed(1)} L ${px.toFixed(1)} ${py.toFixed(1)}" stroke="#efa41f" stroke-width="2" stroke-dasharray="9 6" fill="none"/>`;
-    rays+=`<path d="M ${px.toFixed(1)} ${py.toFixed(1)} L ${(px+rx/rl*sc*L).toFixed(1)} ${(py-ry/rl*sc*L).toFixed(1)}" stroke="#f07a1e" stroke-width="2" fill="none"/>`;
+    rays+=`<path d="M ${px.toFixed(1)} ${py.toFixed(1)} L ${ex.toFixed(1)} ${ey.toFixed(1)}" stroke="#f07a1e" stroke-width="2" fill="none"/>`;
   }
+  /* 빛다발 (가장 바깥 두 광선 사이) */
+  let beam='';
+  if(ends.length>=2){
+    const a2=ends[0], b2=ends[ends.length-1];
+    beam=`<path d="M ${a2.px.toFixed(1)} ${a2.py.toFixed(1)} L ${a2.ex.toFixed(1)} ${a2.ey.toFixed(1)} L ${b2.ex.toFixed(1)} ${b2.ey.toFixed(1)} L ${b2.px.toFixed(1)} ${b2.py.toFixed(1)} Z" fill="#fbbf24" opacity="0.12"/>`;
+  }
+  rays = beam + rays;
   const fx=X(P);
   $id('sSvgWrap').innerHTML =
    `<svg viewBox="0 0 ${W2} ${Hh}" preserveAspectRatio="xMidYMid meet" style="overflow:visible">

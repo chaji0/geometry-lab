@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<script>
+/* 입장 가드 */
+if (localStorage.getItem('geoAppOk') !== '1') location.replace('index.html');
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="icon" type="image/svg+xml" href="icon.svg">
+<link rel="apple-touch-icon" href="icon-180.png">
+<meta name="apple-mobile-web-app-title" content="기하">
+<title>타원 그리기</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html, body { width:100%; height:100%; overflow:hidden; }
+  body {
+    font-family:'Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif;
+    background:#f1f5fb; color:#1e293b; display:flex; flex-direction:column;
+  }
+  header {
+    padding:8px 14px 6px; background:#fff; border-bottom:1px solid #e2e8f0;
+    display:flex; align-items:baseline; gap:10px; flex-wrap:wrap;
+  }
+  header h1 { font-size:17.5px; color:#0f172a; }
+  header .sub { font-size:12.5px; color:#64748b; }
+  header i { font-family:Georgia,'Times New Roman',serif; }
+  #tabs { display:flex; gap:8px; padding:8px 14px 0; background:#fff; }
+  #tabs button {
+    padding:9px 16px; font-size:14px; font-weight:800; border-radius:12px 12px 0 0; cursor:pointer;
+    border:1.5px solid #e2e8f0; border-bottom:none; background:#f8fafc; color:#64748b; font-family:inherit;
+  }
+  #tabs button.on { background:linear-gradient(135deg,#0ea5e9,#6366f1); color:#fff; border-color:transparent; }
+  .sec { flex:1; min-height:0; display:none; flex-direction:column; }
+  .sec.on { display:flex; }
+  .stage { flex:1; position:relative; min-height:0; }
+  .stage canvas { width:100%; height:100%; display:block; touch-action:none; }
+  .bar {
+    padding:8px 10px; background:#fff; border-top:1px solid #e2e8f0;
+    display:flex; gap:7px; flex-wrap:wrap; justify-content:center; align-items:center;
+  }
+  .bar button {
+    padding:9px 13px; font-size:13.5px; font-weight:700; border-radius:10px; cursor:pointer;
+    border:1.5px solid #cbd5e1; background:#fff; color:#334155; transition:all .12s;
+    font-family:inherit;
+  }
+  .bar button:hover { border-color:#0284c7; color:#0369a1; }
+  .bar button.on { background:#0284c7; border-color:#0284c7; color:#fff; }
+  .bar button.play { background:linear-gradient(135deg,#0ea5e9,#6366f1); border:none; color:#fff; }
+  .bar button:disabled { opacity:.5; cursor:default; }
+  .bar .sl { display:flex; align-items:center; gap:8px; margin-left:8px; padding-left:12px;
+    border-left:1px solid #e2e8f0; }
+  .bar .sl .lb { font-size:12.5px; font-weight:800; color:#475569; white-space:nowrap; }
+  .bar .sl .lb i { font-family:Georgia,serif; color:#0369a1; }
+  .bar .sl input[type=range] { width:130px; accent-color:#0284c7; }
+  .bar .sl .vv { font-size:12.5px; font-weight:800; color:#0369a1; min-width:46px; font-family:Georgia,serif; }
+  .hint {
+    position:absolute; left:50%; transform:translateX(-50%); bottom:12px;
+    background:rgba(255,255,255,.9); border:1px solid #e2e8f0; color:#475569;
+    font-size:13px; padding:6px 14px; border-radius:999px; pointer-events:none;
+    transition:opacity .4s;
+  }
+  .cnt {
+    position:absolute; right:12px; top:10px; background:rgba(255,255,255,.92);
+    border:1px solid #e2e8f0; border-radius:10px; padding:7px 12px;
+    font-size:13px; color:#475569; pointer-events:none; font-family:Georgia,serif;
+  }
+  .cnt b { color:#0f172a; }
+  .step {
+    position:absolute; left:12px; top:10px; background:rgba(255,255,255,.94);
+    border:1px solid #e2e8f0; border-radius:12px; padding:10px 13px;
+    font-size:12.5px; color:#475569; line-height:1.75; pointer-events:none; max-width:300px;
+    word-break:keep-all;
+  }
+  .step b { color:#0f172a; }
+  .step .rm { font-family:Georgia,serif; }
+  .step .no { display:inline-block; width:17px; height:17px; border-radius:50%;
+    background:#0284c7; color:#fff; font-size:11px; font-weight:800; text-align:center;
+    line-height:17px; margin-right:4px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>🧵 타원 그리기</h1>
+  <span class="sub">두 초점으로부터 거리의 합이 일정한 점들의 자취 — 실로도, 자취로도 그려 봐요</span>
+</header>
+<div id="tabs">
+  <button id="tabMake" class="on">🧵 실로 그리기</button>
+  <button id="tabTrace">🖥️ 자취로 그리기</button>
+</div>
+
+<!-- ═══════ 탭 1: 실로 타원 만들기 ═══════ -->
+<div class="sec on" id="secMake">
+  <div class="stage">
+    <canvas id="mkCv"></canvas>
+    <div class="hint" id="mkHint">👇 판 위를 손가락으로 꾹 누른 채 <b style="color:#0e7fa8">한 바퀴 돌려</b> 보세요 (못도 끌어서 옮길 수 있어요)</div>
+    <div class="cnt" id="mkSum">–</div>
+  </div>
+  <div class="bar">
+    <button id="mkAuto" class="play">▶ 자동으로 그리기</button>
+    <button id="mkCurve">📈 타원 확인</button>
+    <button id="mkWhy">🔍 원리 보기</button>
+    <button id="mkClear">🧹 모두 지우기</button>
+    <div class="sl">
+      <span class="lb">실 길이 (= 2<i>a</i>)</span>
+      <input type="range" id="mkLenSl" min="9" max="17" step="0.5" value="13">
+      <span class="vv" id="mkLenV">13.0 cm</span>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ 탭 2: 자취로 타원 그리기 ═══════ -->
+<div class="sec" id="secTrace">
+  <div class="stage">
+    <canvas id="trCv"></canvas>
+    <div class="step">
+      <span class="no">1</span>원의 중심 <b class="rm">F</b>, 원 위의 점 <b class="rm">A</b> → 직선 <b class="rm">AF</b><br>
+      <span class="no">2</span>원 안의 점 <b class="rm">F′</b> → 선분 <b class="rm">AF′</b>의 <b>수직이등분선</b><br>
+      <span class="no">3</span>직선 AF와 수직이등분선의 교점이 <b class="rm">P</b><br>
+      👉 <b class="rm">A</b>를 원 위에서 움직여 <b class="rm">P</b>의 자취를 관찰!
+    </div>
+    <div class="hint" id="trHint">👆 <b style="color:#0e7fa8">A를 끌어서</b> 원을 한 바퀴 돌려 보세요 (F′도 옮길 수 있어요)</div>
+    <div class="cnt" id="trSum">–</div>
+  </div>
+  <div class="bar">
+    <button id="trAuto" class="play">▶ 자동으로 움직이기</button>
+    <button id="trCurve">📈 타원 확인</button>
+    <button id="trWhy">🔍 왜 타원일까?</button>
+    <button id="trClear">🧹 자취 지우기</button>
+    <div class="sl">
+      <span class="lb">원의 반지름</span>
+      <input type="range" id="trRSl" min="8" max="15" step="0.5" value="11">
+      <span class="vv" id="trRV">11</span>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+/* ═══════ 탭 전환 ═══════ */
+const relayouts = [];
+function setTab(t){
+  document.getElementById('tabMake').classList.toggle('on', t==='make');
+  document.getElementById('tabTrace').classList.toggle('on', t==='trace');
+  document.getElementById('secMake').classList.toggle('on', t==='make');
+  document.getElementById('secTrace').classList.toggle('on', t==='trace');
+  requestAnimationFrame(()=>relayouts.forEach(f=>f()));
+}
+document.getElementById('tabMake').addEventListener('click',()=>setTab('make'));
+document.getElementById('tabTrace').addEventListener('click',()=>setTab('trace'));
+
+/* ═══════ 탭 1: 실로 타원 만들기 ═══════ */
+(function(){
+const cv = document.getElementById('mkCv');
+const ctx = cv.getContext('2d');
+const hintEl = document.getElementById('mkHint');
+const sumBox = document.getElementById('mkSum');
+
+let board = null;
+let scale = 1, C = {x:0,y:0};
+let L = 13;
+let cHalf = 4;
+let theta = null;
+let trail = new Array(720).fill(false);
+let showCurve = false, showWhy = false;
+let autoTimer = null;
+let dragMode = null;
+let dirty = true;
+
+const a = ()=> L/2;
+const b = ()=> Math.sqrt(Math.max(0.01, a()*a() - cHalf*cHalf));
+const F1 = ()=> ({ x:C.x + cHalf*scale, y:C.y });
+const F2 = ()=> ({ x:C.x - cHalf*scale, y:C.y });
+const pxOf = t => ({ x: C.x + a()*Math.cos(t)*scale, y: C.y - b()*Math.sin(t)*scale });
+
+function layout(){
+  const w = cv.clientWidth, h = cv.clientHeight;
+  if(!w || !h) return;
+  const mw = Math.min(60, w*0.06), mv = Math.min(46, h*0.09);
+  board = { x:mw, y:mv, w:w-2*mw, h:h-2*mv };
+  C = { x: board.x + board.w/2, y: board.y + board.h/2 };
+  scale = Math.min(board.w/26, board.h/16.5);
+  clampC();
+  dirty = true;
+}
+relayouts.push(layout);
+function clampC(){ cHalf = Math.max(0.5, Math.min(a()-0.7, cHalf)); }
+
+function draw(){
+  const w=cv.clientWidth, h=cv.clientHeight;
+  if(!w || !h || !board) return;
+  const dpr=Math.min(window.devicePixelRatio||1,2);
+  if(cv.width!==Math.round(w*dpr)||cv.height!==Math.round(h*dpr)){
+    cv.width=Math.round(w*dpr); cv.height=Math.round(h*dpr);
+  }
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.fillStyle='#f1f5fb'; ctx.fillRect(0,0,w,h);
+
+  ctx.save();
+  ctx.shadowColor='rgba(120,90,20,.20)'; ctx.shadowBlur=16; ctx.shadowOffsetY=6;
+  ctx.fillStyle='#e7d3ae';
+  rr(board.x,board.y,board.w,board.h,14); ctx.fill();
+  ctx.restore();
+  ctx.strokeStyle='#cdb083'; ctx.lineWidth=2.5;
+  rr(board.x,board.y,board.w,board.h,14); ctx.stroke();
+  ctx.fillStyle='rgba(160,120,60,.10)';
+  for(let i=0;i<140;i++){
+    const gx=board.x+((i*97)%263)/263*board.w, gy=board.y+((i*57)%149)/149*board.h;
+    ctx.beginPath(); ctx.arc(gx,gy,1.4+((i*31)%5)*0.5,0,7); ctx.fill();
+  }
+  const pad=Math.min(26,board.w*0.03);
+  ctx.fillStyle='#fffdf6';
+  rr(board.x+pad,board.y+pad,board.w-2*pad,board.h-2*pad,8); ctx.fill();
+  ctx.strokeStyle='#e8dfc8'; ctx.lineWidth=1.5;
+  rr(board.x+pad,board.y+pad,board.w-2*pad,board.h-2*pad,8); ctx.stroke();
+
+  const f1=F1(), f2=F2();
+
+  ctx.strokeStyle='#3f3a35'; ctx.lineWidth=2.6; ctx.lineCap='round';
+  let run=null;
+  for(let i=0;i<=720;i++){
+    const on = i<720 && trail[i];
+    if(on && run===null) run=i;
+    if((!on || i===720) && run!==null){
+      ctx.beginPath();
+      for(let k=run;k<=i;k++){
+        const p=pxOf(k/720*Math.PI*2);
+        k===run ? ctx.moveTo(p.x,p.y) : ctx.lineTo(p.x,p.y);
+      }
+      ctx.stroke();
+      run=null;
+    }
+  }
+
+  if(showCurve){
+    ctx.strokeStyle='#ef4444'; ctx.lineWidth=3;
+    ctx.beginPath();
+    for(let i=0;i<=240;i++){
+      const p=pxOf(i/240*Math.PI*2);
+      i? ctx.lineTo(p.x,p.y) : ctx.moveTo(p.x,p.y);
+    }
+    ctx.closePath(); ctx.stroke();
+  }
+
+  const t = theta;
+  if(t!==null){
+    const P=pxOf(t);
+    ctx.strokeStyle='#b91c1c'; ctx.lineWidth=2.2; ctx.lineCap='round';
+    ctx.beginPath(); ctx.moveTo(f2.x,f2.y); ctx.lineTo(P.x,P.y); ctx.lineTo(f1.x,f1.y); ctx.stroke();
+    if(showWhy){
+      const d1=Math.hypot(P.x-f1.x,P.y-f1.y)/scale, d2=Math.hypot(P.x-f2.x,P.y-f2.y)/scale;
+      segLabel((P.x+f1.x)/2,(P.y+f1.y)/2, d1.toFixed(1), '#b91c1c');
+      segLabel((P.x+f2.x)/2,(P.y+f2.y)/2, d2.toFixed(1), '#b91c1c');
+    }
+    drawPencil(P.x,P.y);
+    dot(P.x,P.y,4.5,'#3f3a35');
+    label('P','#334155',P.x+13,P.y-10);
+  } else {
+    ctx.strokeStyle='#b91c1c'; ctx.lineWidth=2.2;
+    ctx.beginPath();
+    ctx.moveTo(f2.x,f2.y);
+    ctx.quadraticCurveTo(C.x, C.y + (L-2*cHalf)*scale*0.55, f1.x,f1.y);
+    ctx.stroke();
+  }
+
+  nail(f2.x,f2.y); nail(f1.x,f1.y);
+  label('F′','#b91c1c',f2.x-26,f2.y+22);
+  label('F','#b91c1c',f1.x+14,f1.y+22);
+
+  if(showWhy) bubble();
+
+  function dot(x,y,r,c){ ctx.fillStyle=c; ctx.beginPath(); ctx.arc(x,y,r,0,7); ctx.fill(); }
+  function nail(x,y){
+    ctx.fillStyle='rgba(0,0,0,.18)'; ctx.beginPath(); ctx.ellipse(x+2,y+3,7,4,0,0,7); ctx.fill();
+    const g=ctx.createRadialGradient(x-2,y-2,1,x,y,8);
+    g.addColorStop(0,'#f1f5f9'); g.addColorStop(0.6,'#94a3b8'); g.addColorStop(1,'#475569');
+    ctx.fillStyle=g; ctx.beginPath(); ctx.arc(x,y,7.5,0,7); ctx.fill();
+    ctx.strokeStyle='#334155'; ctx.lineWidth=1.4; ctx.beginPath(); ctx.arc(x,y,7.5,0,7); ctx.stroke();
+    ctx.strokeStyle='rgba(51,65,85,.7)'; ctx.lineWidth=1.1;
+    ctx.beginPath(); ctx.moveTo(x-3,y); ctx.lineTo(x+3,y); ctx.moveTo(x,y-3); ctx.lineTo(x,y+3); ctx.stroke();
+  }
+  function drawPencil(x,y){
+    ctx.save();
+    ctx.translate(x,y); ctx.rotate(-0.5);
+    ctx.fillStyle='#fbbf24';
+    ctx.beginPath(); ctx.moveTo(3,-6); ctx.lineTo(13,-46); ctx.lineTo(24,-42); ctx.lineTo(9,-3); ctx.closePath(); ctx.fill();
+    ctx.strokeStyle='#b45309'; ctx.lineWidth=1.4; ctx.stroke();
+    ctx.fillStyle='#fde8c8';
+    ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(3,-6); ctx.lineTo(9,-3); ctx.closePath(); ctx.fill();
+    ctx.strokeStyle='#b45309'; ctx.stroke();
+    ctx.fillStyle='#3f3a35';
+    ctx.beginPath(); ctx.arc(0.5,-0.5,1.8,0,7); ctx.fill();
+    ctx.restore();
+  }
+  function label(text,color,x,y){
+    ctx.font='bold 16px Georgia,serif';
+    ctx.lineJoin='round'; ctx.strokeStyle='rgba(255,255,255,.92)'; ctx.lineWidth=4;
+    ctx.strokeText(text,x,y); ctx.fillStyle=color; ctx.fillText(text,x,y);
+  }
+  function segLabel(x,y,txt,color){
+    ctx.font='bold 13px Georgia,serif';
+    const tw=ctx.measureText(txt).width+12;
+    ctx.fillStyle='rgba(255,255,255,.95)';
+    rr(x-tw/2,y-11,tw,20,9); ctx.fill();
+    ctx.strokeStyle='#fecaca'; ctx.lineWidth=1.2; rr(x-tw/2,y-11,tw,20,9); ctx.stroke();
+    ctx.fillStyle=color; ctx.textAlign='center'; ctx.fillText(txt,x,y+4); ctx.textAlign='left';
+  }
+  function bubble(){
+    const m0='💡 실의 길이는 변하지 않아요';
+    const m1='P̅F̅ + P̅F̅′ = (실 길이) = 2a  ← 항상 일정!';
+    const m2='→ 두 점 F, F′까지 거리의 합이 일정한';
+    const m3='   점 P가 그리는 자취가 바로 타원';
+    ctx.font='bold 13.5px sans-serif';
+    const bw=Math.max(ctx.measureText(m0).width,ctx.measureText(m1).width,ctx.measureText(m2).width,ctx.measureText(m3).width)+26;
+    const bx=Math.min(Math.max(board.x+10, C.x-bw/2), board.x+board.w-bw-10);
+    const by=board.y+12;
+    ctx.fillStyle='rgba(255,255,255,.95)'; ctx.strokeStyle='#c7d2fe'; ctx.lineWidth=1.5;
+    rr(bx,by,bw,98,10); ctx.fill(); ctx.stroke();
+    ctx.fillStyle='#0369a1'; ctx.fillText(m0,bx+13,by+22);
+    ctx.fillStyle='#334155';
+    ctx.fillText(m1,bx+13,by+44); ctx.fillText(m2,bx+13,by+66); ctx.fillText(m3,bx+13,by+86);
+  }
+  function rr(x,y,w2,h2,r){ ctx.beginPath();
+    ctx.moveTo(x+r,y); ctx.arcTo(x+w2,y,x+w2,y+h2,r); ctx.arcTo(x+w2,y+h2,x,y+h2,r);
+    ctx.arcTo(x,y+h2,x,y,r); ctx.arcTo(x,y,x+w2,y,r); ctx.closePath(); }
+
+  if(t!==null){
+    const P=pxOf(t);
+    const d1=Math.hypot(P.x-f1.x,P.y-f1.y)/scale, d2=Math.hypot(P.x-f2.x,P.y-f2.y)/scale;
+    sumBox.innerHTML=`P̅F̅ ${d1.toFixed(1)} + P̅F̅′ ${d2.toFixed(1)} = <b>${(d1+d2).toFixed(1)} cm</b>`;
+  } else {
+    sumBox.innerHTML=`실 길이 <b>${L.toFixed(1)} cm</b> · 못 간격 F̅F̅′ = ${(2*cHalf).toFixed(1)} cm`;
+  }
+}
+
+function paint(t){
+  const i=((Math.round(t/(Math.PI*2)*720)%720)+720)%720;
+  for(const o of [-2,-1,0,1,2]) trail[(i+o+720)%720]=true;
+}
+
+const autoBtn=document.getElementById('mkAuto');
+autoBtn.addEventListener('click',()=>{
+  if(autoTimer) return;
+  autoBtn.disabled=true;
+  let t0 = theta===null? Math.PI*0.9 : theta;
+  let steps=0, N=150;
+  hintEl.style.opacity=0;
+  autoTimer=setInterval(()=>{
+    steps++;
+    theta = t0 + steps/N*Math.PI*2;
+    paint(theta);
+    dirty=true;
+    if(steps>=N){ clearInterval(autoTimer); autoTimer=null; autoBtn.disabled=false; }
+  },28);
+});
+
+const curveBtn=document.getElementById('mkCurve'), whyBtn=document.getElementById('mkWhy');
+curveBtn.addEventListener('click',()=>{
+  showCurve=!showCurve; curveBtn.classList.toggle('on',showCurve); dirty=true;
+  if(window.GEO_task) GEO_task('make');                 // ★ 완료 과제
+});
+whyBtn.addEventListener('click',()=>{ showWhy=!showWhy; whyBtn.classList.toggle('on',showWhy);
+  if(showWhy && theta===null) theta=Math.PI/3;
+  dirty=true; });
+document.getElementById('mkClear').addEventListener('click',()=>{
+  trail=new Array(720).fill(false); dirty=true;
+});
+const lenSl=document.getElementById('mkLenSl'), lenV=document.getElementById('mkLenV');
+lenSl.addEventListener('input',()=>{
+  L=parseFloat(lenSl.value);
+  lenV.textContent=L.toFixed(1)+' cm';
+  clampC();
+  trail=new Array(720).fill(false);
+  dirty=true;
+});
+
+function pos(e){ const r=cv.getBoundingClientRect(); return {x:e.clientX-r.left, y:e.clientY-r.top}; }
+cv.addEventListener('pointerdown',e=>{
+  const p=pos(e); cv.setPointerCapture(e.pointerId);
+  const f1=F1(), f2=F2();
+  if(Math.hypot(p.x-f1.x,p.y-f1.y)<24){ dragMode='F'; return; }
+  if(Math.hypot(p.x-f2.x,p.y-f2.y)<24){ dragMode='F2'; return; }
+  dragMode='pen';
+  theta=Math.atan2(-(p.y-C.y)/b(), (p.x-C.x)/a());
+  paint(theta); hintEl.style.opacity=0; dirty=true;
+});
+cv.addEventListener('pointermove',e=>{
+  const p=pos(e);
+  if(dragMode==='pen'){
+    const nt=Math.atan2(-(p.y-C.y)/b(), (p.x-C.x)/a());
+    if(theta!==null){
+      let d=nt-theta;
+      while(d>Math.PI) d-=2*Math.PI;
+      while(d<-Math.PI) d+=2*Math.PI;
+      const n=Math.max(1,Math.ceil(Math.abs(d)/(Math.PI/180)));
+      for(let k=1;k<=n;k++) paint(theta+d*k/n);
+    }
+    theta=nt; dirty=true;
+  } else if(dragMode==='F' || dragMode==='F2'){
+    const nc=Math.abs(p.x-C.x)/scale;
+    cHalf=Math.max(0.5, Math.min(a()-0.7, nc));
+    trail=new Array(720).fill(false);
+    dirty=true;
+  }
+});
+const up=()=>{ dragMode=null; };
+cv.addEventListener('pointerup',up);
+cv.addEventListener('pointercancel',up);
+
+layout();
+let lw=0, lh=0;
+(function tick(){
+  requestAnimationFrame(tick);
+  if(cv.clientWidth!==lw || cv.clientHeight!==lh){ lw=cv.clientWidth; lh=cv.clientHeight; layout(); }
+  if(dirty){ dirty=false; draw(); }
+})();
+})();
+
+/* ═══════ 탭 2: 자취로 타원 그리기 ═══════ */
+(function(){
+const cv = document.getElementById('trCv');
+const ctx = cv.getContext('2d');
+const hintEl = document.getElementById('trHint');
+const sumBox = document.getElementById('trSum');
+
+let R = 11;
+let F2 = { x: 3.2, y: -1.6 };
+let alpha = 0.9;
+let trail = new Array(720).fill(false);
+let showCurve = false, showWhy = false;
+let autoTimer = null;
+let dragMode = null;
+let dirty = true;
+let scale = 1, C = { x:0, y:0 };
+
+function layout(){
+  const w = cv.clientWidth, h = cv.clientHeight;
+  if(!w || !h) return;
+  C = { x: w/2, y: h/2 };
+  scale = Math.min(w, h) / (2*15.5 + 3);
+  dirty = true;
+}
+relayouts.push(layout);
+const px = p => ({ x: C.x + p.x*scale, y: C.y - p.y*scale });
+const world = q => ({ x: (q.x - C.x)/scale, y: -(q.y - C.y)/scale });
+
+const Apt = ()=> ({ x: R*Math.cos(alpha), y: R*Math.sin(alpha) });
+function Ppt(a2){
+  const A = a2 || Apt();
+  const d = { x: -A.x/R, y: -A.y/R };
+  const v = { x: F2.x - A.x, y: F2.y - A.y };
+  const vv = v.x*v.x + v.y*v.y;
+  const dv = d.x*v.x + d.y*v.y;
+  const t = vv / (2*dv);
+  return { x: A.x + t*d.x, y: A.y + t*d.y, t };
+}
+
+function draw(){
+  const w=cv.clientWidth, h=cv.clientHeight;
+  if(!w || !h) return;
+  const dpr=Math.min(window.devicePixelRatio||1,2);
+  if(cv.width!==Math.round(w*dpr)||cv.height!==Math.round(h*dpr)){
+    cv.width=Math.round(w*dpr); cv.height=Math.round(h*dpr);
+  }
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.fillStyle='#ffffff'; ctx.fillRect(0,0,w,h);
+
+  ctx.strokeStyle='#eef2f7'; ctx.lineWidth=1;
+  const step = scale;
+  for(let gx=C.x%step; gx<w; gx+=step){ ctx.beginPath(); ctx.moveTo(gx,0); ctx.lineTo(gx,h); ctx.stroke(); }
+  for(let gy=C.y%step; gy<h; gy+=step){ ctx.beginPath(); ctx.moveTo(0,gy); ctx.lineTo(w,gy); ctx.stroke(); }
+
+  const A = Apt(), P = Ppt(A);
+  const pA = px(A), pP = px(P), pF = px({x:0,y:0}), pF2 = px(F2);
+
+  ctx.strokeStyle='#7c3aed'; ctx.lineWidth=2.6; ctx.lineCap='round';
+  let run=null;
+  for(let i=0;i<=720;i++){
+    const on = i<720 && trail[i];
+    if(on && run===null) run=i;
+    if((!on || i===720) && run!==null){
+      ctx.beginPath();
+      for(let k=run;k<=i;k++){
+        const a2 = k/720*Math.PI*2;
+        const q = px(Ppt({x:R*Math.cos(a2), y:R*Math.sin(a2)}));
+        k===run ? ctx.moveTo(q.x,q.y) : ctx.lineTo(q.x,q.y);
+      }
+      ctx.stroke();
+      run=null;
+    }
+  }
+
+  if(showCurve){
+    const c = Math.hypot(F2.x, F2.y)/2;
+    const a = R/2, b = Math.sqrt(Math.max(0.01, a*a - c*c));
+    const cx = F2.x/2, cy = F2.y/2, rot = Math.atan2(F2.y, F2.x);
+    ctx.strokeStyle='#ef4444'; ctx.lineWidth=3;
+    ctx.beginPath();
+    const cen = px({x:cx,y:cy});
+    ctx.ellipse(cen.x, cen.y, a*scale, b*scale, -rot, 0, Math.PI*2);
+    ctx.stroke();
+  }
+
+  ctx.strokeStyle='#f4691e'; ctx.lineWidth=2.6;
+  ctx.beginPath(); ctx.arc(pF.x, pF.y, R*scale, 0, Math.PI*2); ctx.stroke();
+
+  const dxa = pF.x-pA.x, dya = pF.y-pA.y;
+  const L = Math.hypot(dxa,dya)||1, ux = dxa/L, uy = dya/L;
+  const EXT = Math.hypot(w,h);
+  ctx.strokeStyle='#1f2937'; ctx.lineWidth=2;
+  ctx.beginPath();
+  ctx.moveTo(pA.x-ux*EXT, pA.y-uy*EXT);
+  ctx.lineTo(pA.x+ux*EXT, pA.y+uy*EXT);
+  ctx.stroke();
+
+  ctx.strokeStyle='#f59e0b'; ctx.lineWidth=2.2;
+  ctx.beginPath(); ctx.moveTo(pA.x,pA.y); ctx.lineTo(pF2.x,pF2.y); ctx.stroke();
+
+  const M = { x:(A.x+F2.x)/2, y:(A.y+F2.y)/2 };
+  const pM = px(M);
+  const vx = F2.x-A.x, vy = F2.y-A.y;
+  const vl = Math.hypot(vx,vy)||1;
+  const nx = -vy/vl, ny = vx/vl;
+  const pnx = nx*scale, pny = -ny*scale;
+  const pl = Math.hypot(pnx,pny)||1;
+  ctx.strokeStyle='#2ea7d8'; ctx.lineWidth=2;
+  ctx.beginPath();
+  ctx.moveTo(pM.x-pnx/pl*EXT, pM.y-pny/pl*EXT);
+  ctx.lineTo(pM.x+pnx/pl*EXT, pM.y+pny/pl*EXT);
+  ctx.stroke();
+  const s2 = 9;
+  const tvx = (pF2.x-pA.x), tvy = (pF2.y-pA.y), tl = Math.hypot(tvx,tvy)||1;
+  const ex = tvx/tl, ey = tvy/tl;
+  ctx.strokeStyle='#64748b'; ctx.lineWidth=1.4;
+  ctx.beginPath();
+  ctx.moveTo(pM.x+ex*s2, pM.y+ey*s2);
+  ctx.lineTo(pM.x+ex*s2+pnx/pl*s2, pM.y+ey*s2+pny/pl*s2);
+  ctx.lineTo(pM.x+pnx/pl*s2, pM.y+pny/pl*s2);
+  ctx.stroke();
+
+  if(showWhy){
+    ctx.strokeStyle='#7c3aed'; ctx.lineWidth=3; ctx.setLineDash([7,5]);
+    ctx.beginPath(); ctx.moveTo(pP.x,pP.y); ctx.lineTo(pA.x,pA.y); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(pP.x,pP.y); ctx.lineTo(pF2.x,pF2.y); ctx.stroke();
+    ctx.setLineDash([]);
+    tick2((pP.x+pA.x)/2,(pP.y+pA.y)/2);
+    tick2((pP.x+pF2.x)/2,(pP.y+pF2.y)/2);
+    ctx.strokeStyle='#dc2626'; ctx.lineWidth=3.4;
+    ctx.beginPath(); ctx.moveTo(pP.x,pP.y); ctx.lineTo(pF.x,pF.y); ctx.stroke();
+    bubble();
+  }
+
+  dot(pF.x,pF.y,4.5,'#111');   label('F', pF.x-18, pF.y+18);
+  dot(pF2.x,pF2.y,4.5,'#111'); label('F′', pF2.x+10, pF2.y+18);
+  dot(pA.x,pA.y,5.5,'#111');   label('A', pA.x+11, pA.y-11);
+  dot(pP.x,pP.y,5.5,'#7c3aed'); labelC('P', '#6d28d9', pP.x-6, pP.y-13);
+
+  const d1 = Math.hypot(P.x, P.y);
+  const d2 = Math.hypot(P.x-F2.x, P.y-F2.y);
+  sumBox.innerHTML = `P̅F̅ ${d1.toFixed(1)} + P̅F̅′ ${d2.toFixed(1)} = <b>${(d1+d2).toFixed(1)}</b> = 반지름`;
+
+  function dot(x,y,r,c){ ctx.fillStyle=c; ctx.beginPath(); ctx.arc(x,y,r,0,7); ctx.fill();
+    ctx.strokeStyle='#fff'; ctx.lineWidth=1.6; ctx.stroke(); }
+  function label(t,x,y){ labelC(t,'#111',x,y); }
+  function labelC(t,c,x,y){
+    ctx.font='bold 16px Georgia,serif';
+    ctx.lineJoin='round'; ctx.strokeStyle='rgba(255,255,255,.92)'; ctx.lineWidth=4;
+    ctx.strokeText(t,x,y); ctx.fillStyle=c; ctx.fillText(t,x,y);
+  }
+  function tick2(x,y){
+    ctx.strokeStyle='#7c3aed'; ctx.lineWidth=2.4;
+    ctx.beginPath(); ctx.moveTo(x-4,y-6); ctx.lineTo(x+4,y+6); ctx.stroke();
+  }
+  function bubble(){
+    const m0 = '💡 P는 선분 A̅F̅′의 수직이등분선 위 → P̅F̅′ = P̅A̅';
+    const m1 = 'P̅F̅ + P̅F̅′ = P̅F̅ + P̅A̅ = F̅A̅ = (원의 반지름) ← 일정!';
+    const m2 = '→ 두 점 F, F′까지 거리의 합이 일정한 P의 자취 = 타원';
+    ctx.font='bold 13.5px sans-serif';
+    const bw = Math.max(ctx.measureText(m0).width, ctx.measureText(m1).width, ctx.measureText(m2).width)+26;
+    const bx = Math.min(Math.max(10, C.x-bw/2), w-bw-10), by = h-152;
+    ctx.fillStyle='rgba(255,255,255,.96)'; ctx.strokeStyle='#c7d2fe'; ctx.lineWidth=1.5;
+    rr(bx,by,bw,76,10); ctx.fill(); ctx.stroke();
+    ctx.fillStyle='#0369a1'; ctx.fillText(m0,bx+13,by+22);
+    ctx.fillStyle='#334155'; ctx.fillText(m1,bx+13,by+44);
+    ctx.fillStyle='#6d28d9'; ctx.fillText(m2,bx+13,by+66);
+  }
+  function rr(x,y,w2,h2,r){ ctx.beginPath();
+    ctx.moveTo(x+r,y); ctx.arcTo(x+w2,y,x+w2,y+h2,r); ctx.arcTo(x+w2,y+h2,x,y+h2,r);
+    ctx.arcTo(x,y+h2,x,y,r); ctx.arcTo(x,y,x+w2,y,r); ctx.closePath(); }
+}
+
+function paint(a2){
+  const i=((Math.round(a2/(Math.PI*2)*720)%720)+720)%720;
+  for(const o of [-2,-1,0,1,2]) trail[(i+o+720)%720]=true;
+}
+function resetTrail(){ trail=new Array(720).fill(false); }
+
+const autoBtn=document.getElementById('trAuto');
+autoBtn.addEventListener('click',()=>{
+  if(autoTimer) return;
+  autoBtn.disabled=true;
+  hintEl.style.opacity=0;
+  const a0=alpha;
+  let steps=0, N=170;
+  autoTimer=setInterval(()=>{
+    steps++;
+    alpha = a0 + steps/N*Math.PI*2;
+    paint(alpha);
+    dirty=true;
+    if(steps>=N){ clearInterval(autoTimer); autoTimer=null; autoBtn.disabled=false; }
+  },26);
+});
+
+const curveBtn=document.getElementById('trCurve'), whyBtn=document.getElementById('trWhy');
+curveBtn.addEventListener('click',()=>{
+  showCurve=!showCurve; curveBtn.classList.toggle('on',showCurve); dirty=true;
+  if(window.GEO_task) GEO_task('trace');                 // ★ 완료 과제
+});
+whyBtn.addEventListener('click',()=>{ showWhy=!showWhy; whyBtn.classList.toggle('on',showWhy); dirty=true; });
+document.getElementById('trClear').addEventListener('click',()=>{ resetTrail(); dirty=true; });
+const rSl=document.getElementById('trRSl'), rV=document.getElementById('trRV');
+rSl.addEventListener('input',()=>{
+  R=parseFloat(rSl.value); rV.textContent=R;
+  clampF2(); resetTrail(); dirty=true;
+});
+function clampF2(){
+  const d=Math.hypot(F2.x,F2.y);
+  const lim=R-1.2;
+  if(d>lim){ F2.x*=lim/d; F2.y*=lim/d; }
+  if(d<0.6){ F2.x=0.6; F2.y=0; }
+}
+
+function pos(e){ const r=cv.getBoundingClientRect(); return {x:e.clientX-r.left, y:e.clientY-r.top}; }
+cv.addEventListener('pointerdown',e=>{
+  const q=pos(e); cv.setPointerCapture(e.pointerId);
+  const pF2=px(F2);
+  if(Math.hypot(q.x-pF2.x,q.y-pF2.y)<26){ dragMode='F2'; return; }
+  dragMode='A';
+  const wpt=world(q);
+  moveA(Math.atan2(wpt.y,wpt.x));
+  hintEl.style.opacity=0;
+});
+cv.addEventListener('pointermove',e=>{
+  if(!dragMode) return;
+  const wpt=world(pos(e));
+  if(dragMode==='A'){
+    moveA(Math.atan2(wpt.y,wpt.x));
+  } else {
+    F2.x=wpt.x; F2.y=wpt.y;
+    clampF2(); resetTrail(); dirty=true;
+  }
+});
+function moveA(na){
+  let d=na-alpha;
+  while(d>Math.PI) d-=2*Math.PI;
+  while(d<-Math.PI) d+=2*Math.PI;
+  const n=Math.max(1,Math.ceil(Math.abs(d)/(Math.PI/180)));
+  for(let k=1;k<=n;k++) paint(alpha+d*k/n);
+  alpha=na; dirty=true;
+}
+const up=()=>{ dragMode=null; };
+cv.addEventListener('pointerup',up);
+cv.addEventListener('pointercancel',up);
+
+layout();
+let lw=0, lh=0;
+(function tick(){
+  requestAnimationFrame(tick);
+  if(cv.clientWidth!==lw || cv.clientHeight!==lh){ lw=cv.clientWidth; lh=cv.clientHeight; layout(); }
+  if(dirty){ dirty=false; draw(); }
+})();
+})();
+</script>
+<script>window.PAGE_ID="ellipse";</script>
+<script src="nav.js"></script>
+</body>
+</html>

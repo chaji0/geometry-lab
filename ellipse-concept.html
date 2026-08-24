@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<script>
+/* 입장 가드 */
+if (localStorage.getItem('geoAppOk') !== '1') location.replace('index.html');
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="icon" type="image/svg+xml" href="icon.svg">
+<link rel="apple-touch-icon" href="icon-180.png">
+<meta name="apple-mobile-web-app-title" content="기하">
+<title>타원 개념 정리</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html, body { width:100%; height:100%; overflow:hidden; }
+  body {
+    font-family:'Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif;
+    background:#f1f5fb; color:#1e293b; display:flex; flex-direction:column;
+  }
+  header {
+    padding:9px 16px; background:#fff; border-bottom:1px solid #e2e8f0;
+    display:flex; align-items:baseline; gap:12px; flex-wrap:wrap;
+  }
+  header h1 { font-size:18px; color:#0f172a; }
+  header p { font-size:12px; color:#64748b; }
+  header i { font-family:Georgia,'Times New Roman',serif; }
+  #main { flex:1; display:flex; min-height:0; }
+
+  /* ── 왼쪽: 개념 정리 ── */
+  #panel {
+    width:352px; flex:none; background:#fff; border-right:1px solid #e2e8f0;
+    padding:16px; overflow-y:auto;
+  }
+  #panel h2 { font-size:15.5px; color:#0f172a; margin-bottom:10px; }
+  .figBox {
+    border:1px solid #e2e8f0; border-radius:12px; padding:6px 8px; background:#fff;
+    margin-bottom:12px; display:flex; justify-content:center;
+  }
+  .fcard i, .cond i, .defBox i { font-family:Georgia,'Times New Roman',serif; }
+  .defBox {
+    border:1px solid #e2e8f0; background:#f8fafc; border-radius:12px;
+    padding:11px 13px; font-size:13px; color:#475569; line-height:1.7; margin-bottom:12px;
+  }
+  .defBox b { color:#0f172a; }
+  .defBox .term { display:inline-block; padding:0 7px; border-radius:8px; font-weight:800; font-size:12.3px; }
+  .t-focus { background:#dcfce7; color:#15803d; }
+  .t-vertex { background:#ede9fe; color:#6d28d9; }
+  .t-axis { background:#dbeafe; color:#1d4ed8; }
+  .t-center { background:#ffedd5; color:#c2410c; }
+  .fcard {
+    border:2px solid #dc2626; border-radius:14px; padding:13px 15px; margin-top:10px;
+    background:#fef9f9; user-select:none;
+  }
+  .fcard .cond { font-size:13px; color:#475569; line-height:1.6; }
+  .fcard .formula {
+    font-size:22px; font-weight:800; margin:8px 0 4px; font-family:Georgia,'Times New Roman',serif;
+    letter-spacing:.5px; color:#dc2626; text-align:center;
+  }
+  .fcard .formula .frac { display:inline-block; text-align:center; vertical-align:middle; margin:0 2px; }
+  .fcard .formula .frac .top { display:block; border-bottom:2px solid currentColor; padding:0 5px 1px; font-size:17px; }
+  .fcard .formula .frac .bot { display:block; padding:1px 5px 0; font-size:17px; }
+  .fcard .sub { font-size:12.6px; color:#475569; line-height:1.8; margin-top:6px; }
+  .fcard .sub b { color:#0f172a; }
+  .fcard .now { font-size:12.6px; line-height:1.7; margin-top:8px; border-top:1px dashed #fecaca;
+    padding-top:8px; color:#64748b; min-height:18px; }
+
+  /* ── 오른쪽: 그래프 ── */
+  #graphSide { flex:1; min-width:0; display:flex; flex-direction:column; }
+  #gwrap { flex:1; min-height:0; position:relative; }
+  #graph { width:100%; height:100%; display:block; touch-action:none; }
+  #pbar {
+    padding:9px 16px; background:#fff; border-top:1px solid #e2e8f0;
+    display:flex; align-items:center; gap:13px; flex-wrap:wrap;
+  }
+  #pbar .grp { display:flex; align-items:center; gap:10px; flex:1 1 260px; }
+  #pbar .pv { font-size:18px; font-weight:800; color:#0f172a; min-width:74px; font-family:Georgia,serif; }
+  #pbar .pv.va span { color:#dc2626; }
+  #pbar .pv.vb span { color:#2563eb; }
+  #pbar input[type=range] { flex:1; height:30px; }
+  #aSlider { accent-color:#dc2626; }
+  #bSlider { accent-color:#2563eb; }
+  #circNote { font-size:12px; font-weight:800; color:#7c3aed; flex-basis:100%; display:none; }
+</style>
+</head>
+<body>
+<header>
+  <h1>📙 타원 개념 정리</h1>
+  <p><i>a</i>, <i>b</i> 값을 움직여 초점·꼭짓점·장축·단축이 어떻게 변하는지 살펴보세요</p>
+</header>
+
+<div id="main">
+  <div id="panel">
+    <h2>1. 타원의 뜻</h2>
+    <div class="figBox">
+      <svg viewBox="0 0 262 206" style="width:100%;max-width:290px">
+        <line x1="8" y1="103" x2="254" y2="103" stroke="#111" stroke-width="1.6"/>
+        <line x1="131" y1="6" x2="131" y2="200" stroke="#111" stroke-width="1.6"/>
+        <line x1="40" y1="103" x2="222" y2="103" stroke="#0e8ac2" stroke-width="3.4"/>
+        <line x1="131" y1="45" x2="131" y2="161" stroke="#0e8ac2" stroke-width="3.4"/>
+        <ellipse cx="131" cy="103" rx="91" ry="58" fill="none" stroke="#e8442e" stroke-width="3"/>
+        <circle cx="66" cy="103" r="3.4" fill="#111"/>
+        <circle cx="196" cy="103" r="3.4" fill="#111"/>
+        <g font-family="Georgia,serif" font-size="14.5" fill="#111">
+          <text x="228" y="120">A</text>
+          <text x="22" y="120">A′</text>
+          <text x="124" y="36">B</text>
+          <text x="121" y="180">B′</text>
+          <text x="188" y="121">F</text>
+          <text x="56" y="121">F′</text>
+        </g>
+        <g font-size="11.5" font-weight="700" text-anchor="middle" font-family="'Apple SD Gothic Neo','Malgun Gothic',sans-serif">
+          <line x1="46" y1="58" x2="64" y2="99" stroke="#86efac" stroke-width="1.2"/>
+          <rect x="24" y="43" width="42" height="17" rx="8" fill="#dcfce7"/>
+          <text x="45" y="55.5" fill="#15803d">초점</text>
+          <line x1="214" y1="150" x2="198" y2="107" stroke="#86efac" stroke-width="1.2"/>
+          <rect x="194" y="150" width="42" height="17" rx="8" fill="#dcfce7"/>
+          <text x="215" y="162.5" fill="#15803d">초점</text>
+          <line x1="216" y1="30" x2="140" y2="45" stroke="#c4b5fd" stroke-width="1.2"/>
+          <line x1="216" y1="30" x2="221" y2="98" stroke="#c4b5fd" stroke-width="1.2"/>
+          <rect x="196" y="16" width="54" height="17" rx="8" fill="#ede9fe"/>
+          <text x="223" y="28.5" fill="#6d28d9">꼭짓점</text>
+          <line x1="46" y1="185" x2="41" y2="110" stroke="#c4b5fd" stroke-width="1.2"/>
+          <line x1="46" y1="185" x2="123" y2="164" stroke="#c4b5fd" stroke-width="1.2"/>
+          <rect x="18" y="182" width="54" height="17" rx="8" fill="#ede9fe"/>
+          <text x="45" y="194.5" fill="#6d28d9">꼭짓점</text>
+          <line x1="92" y1="72" x2="100" y2="100" stroke="#93c5fd" stroke-width="1.2"/>
+          <rect x="70" y="58" width="42" height="17" rx="8" fill="#dbeafe"/>
+          <text x="91" y="70.5" fill="#1d4ed8">장축</text>
+          <line x1="160" y1="72" x2="133" y2="82" stroke="#93c5fd" stroke-width="1.2"/>
+          <rect x="140" y="58" width="42" height="17" rx="8" fill="#dbeafe"/>
+          <text x="161" y="70.5" fill="#1d4ed8">단축</text>
+          <line x1="150" y1="135" x2="133" y2="106" stroke="#fdba74" stroke-width="1.2"/>
+          <rect x="130" y="134" width="42" height="17" rx="8" fill="#ffedd5"/>
+          <text x="151" y="146.5" fill="#c2410c">중심</text>
+        </g>
+      </svg>
+    </div>
+
+    <div class="defBox">
+      평면 위의 두 점 F, F′으로부터의 <b>거리의 합이 일정한</b> 점들의 자취를 <b>타원</b>이라 합니다.<br>
+      · 두 점 F, F′ → <span class="term t-focus">초점</span><br>
+      · 두 초점을 지나는 직선이 타원과 만나는 점 A, A′과 그 수직이등분선이 타원과 만나는 점 B, B′ → <span class="term t-vertex">꼭짓점</span><br>
+      · 선분 AA′ → <span class="term t-axis">장축</span> , 선분 BB′ → <span class="term t-axis">단축</span><br>
+      · 장축과 단축의 교점 → <span class="term t-center">중심</span>
+    </div>
+
+    <h2>2. 타원의 방정식</h2>
+    <div class="fcard">
+      <div class="cond">두 초점으로부터 거리의 합이 일정한 타원의 방정식</div>
+      <div class="formula"><span class="frac"><span class="top"><i>x</i><sup style="font-size:12px">2</sup></span><span class="bot"><i>a</i><sup style="font-size:12px">2</sup></span></span> + <span class="frac"><span class="top"><i>y</i><sup style="font-size:12px">2</sup></span><span class="bot"><i>b</i><sup style="font-size:12px">2</sup></span></span> = 1</div>
+      <div class="sub">
+        · <i>a</i> &gt; <i>b</i> &gt; 0 → 초점이 <b><i>x</i>축 위</b>: F(<i>c</i>, 0), F′(−<i>c</i>, 0), <i>c</i> = √(<i>a</i>² − <i>b</i>²)<br>
+        &nbsp;&nbsp;거리의 합 = 장축 = 2<i>a</i> · 단축 = 2<i>b</i><br>
+        · <i>b</i> &gt; <i>a</i> &gt; 0 → 초점이 <b><i>y</i>축 위</b>: F(0, <i>c</i>), F′(0, −<i>c</i>), <i>c</i> = √(<i>b</i>² − <i>a</i>²)<br>
+        &nbsp;&nbsp;거리의 합 = 장축 = 2<i>b</i> · 단축 = 2<i>a</i>
+      </div>
+      <div class="now" id="nowLine"></div>
+    </div>
+  </div>
+
+  <div id="graphSide">
+    <div id="gwrap"><canvas id="graph"></canvas></div>
+    <div id="pbar">
+      <div class="grp">
+        <div class="pv va"><i style="font-family:Georgia">a</i> = <span id="aVal">4</span></div>
+        <input type="range" id="aSlider" min="1" max="4.5" step="0.1" value="4">
+      </div>
+      <div class="grp">
+        <div class="pv vb"><i style="font-family:Georgia">b</i> = <span id="bVal">2.5</span></div>
+        <input type="range" id="bSlider" min="1" max="4.5" step="0.1" value="2.5">
+      </div>
+      <div id="circNote">⭕ <i style="font-family:Georgia">a</i> = <i style="font-family:Georgia">b</i> 이면 두 초점이 중심에서 하나로 — 바로 원!</div>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+const cv = document.getElementById('graph');
+const ctx = cv.getContext('2d');
+let A = 4, B = 2.5;
+let dirty = true;
+
+const fmt = v => {
+  const r = Math.round(v*100)/100;
+  return (Object.is(r,-0)?0:r).toString();
+};
+
+function view(){
+  const w = cv.clientWidth, h = cv.clientHeight;
+  const s = Math.min(w, h) / 10.6;
+  return { w, h, s, cx: w/2, cy: h/2 };
+}
+const X = (v,x)=> v.cx + x*v.s;
+const Y = (v,y)=> v.cy - y*v.s;
+
+function draw(){
+  const w = cv.clientWidth, h = cv.clientHeight;
+  const dpr = Math.min(window.devicePixelRatio||1, 2);
+  if(cv.width !== Math.round(w*dpr) || cv.height !== Math.round(h*dpr)){
+    cv.width = Math.round(w*dpr); cv.height = Math.round(h*dpr);
+  }
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.fillStyle = '#ffffff'; ctx.fillRect(0,0,w,h);
+  const v = view();
+  const xmax = (w/2)/v.s, ymax = (h/2)/v.s;
+
+  ctx.strokeStyle = '#eef2f7'; ctx.lineWidth = 1;
+  for(let i=Math.ceil(-xmax); i<=xmax; i++){
+    if(i===0) continue;
+    ctx.beginPath(); ctx.moveTo(X(v,i),0); ctx.lineTo(X(v,i),h); ctx.stroke();
+  }
+  for(let i=Math.ceil(-ymax); i<=ymax; i++){
+    if(i===0) continue;
+    ctx.beginPath(); ctx.moveTo(0,Y(v,i)); ctx.lineTo(w,Y(v,i)); ctx.stroke();
+  }
+
+  ctx.strokeStyle = '#334155'; ctx.lineWidth = 1.6;
+  ctx.beginPath(); ctx.moveTo(0,v.cy); ctx.lineTo(w,v.cy); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(v.cx,0); ctx.lineTo(v.cx,h); ctx.stroke();
+  ctx.fillStyle = '#334155';
+  ctx.beginPath(); ctx.moveTo(w-2,v.cy); ctx.lineTo(w-12,v.cy-5); ctx.lineTo(w-12,v.cy+5); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(v.cx,2); ctx.lineTo(v.cx-5,12); ctx.lineTo(v.cx+5,12); ctx.fill();
+
+  ctx.font = '12px sans-serif'; ctx.fillStyle = '#64748b'; ctx.textAlign = 'center';
+  for(let i=Math.ceil(-xmax); i<=xmax; i++){
+    if(i===0) continue;
+    ctx.beginPath(); ctx.moveTo(X(v,i), v.cy-4); ctx.lineTo(X(v,i), v.cy+4);
+    ctx.strokeStyle='#334155'; ctx.lineWidth=1.2; ctx.stroke();
+    ctx.fillText(i, X(v,i), v.cy+18);
+  }
+  ctx.textAlign = 'right';
+  for(let i=Math.ceil(-ymax); i<=ymax; i++){
+    if(i===0) continue;
+    ctx.beginPath(); ctx.moveTo(v.cx-4, Y(v,i)); ctx.lineTo(v.cx+4, Y(v,i));
+    ctx.strokeStyle='#334155'; ctx.lineWidth=1.2; ctx.stroke();
+    ctx.fillText(i, v.cx-8, Y(v,i)+4);
+  }
+  ctx.fillText('O', v.cx-7, v.cy+16);
+  ctx.font = 'italic bold 15px Georgia'; ctx.fillStyle='#334155'; ctx.textAlign='left';
+  ctx.fillText('x', w-16, v.cy-10);
+  ctx.fillText('y', v.cx+10, 16);
+
+  const label = (text,color,x,y,align)=>{
+    ctx.font = 'bold 15px Georgia,serif'; ctx.textAlign = align||'left';
+    ctx.lineJoin='round'; ctx.strokeStyle='rgba(255,255,255,.92)'; ctx.lineWidth=4;
+    ctx.strokeText(text,x,y); ctx.fillStyle=color; ctx.fillText(text,x,y);
+    ctx.textAlign='left';
+  };
+  const dot = (x,y,c,r)=>{
+    ctx.beginPath(); ctx.arc(x,y,r||5.5,0,7); ctx.fillStyle=c; ctx.fill();
+    ctx.strokeStyle='#fff'; ctx.lineWidth=1.8; ctx.stroke();
+  };
+
+  const focusX = A >= B;
+  const c = Math.sqrt(Math.abs(A*A - B*B));
+  const col = focusX ? '#dc2626' : '#2563eb';
+
+  ctx.strokeStyle='#0e8ac2'; ctx.lineCap='round';
+  ctx.lineWidth = focusX ? 4.5 : 3;
+  ctx.beginPath(); ctx.moveTo(X(v,-A),Y(v,0)); ctx.lineTo(X(v,A),Y(v,0)); ctx.stroke();
+  ctx.lineWidth = focusX ? 3 : 4.5;
+  ctx.beginPath(); ctx.moveTo(X(v,0),Y(v,-B)); ctx.lineTo(X(v,0),Y(v,B)); ctx.stroke();
+
+  ctx.strokeStyle = '#e8442e'; ctx.lineWidth = 3.2;
+  ctx.beginPath();
+  ctx.ellipse(v.cx, v.cy, A*v.s, B*v.s, 0, 0, Math.PI*2);
+  ctx.stroke();
+
+  dot(X(v,A),Y(v,0),'#7c3aed',4.5);  label('A','#111', X(v,A)+9, Y(v,0)+20);
+  dot(X(v,-A),Y(v,0),'#7c3aed',4.5); label('A′','#111', X(v,-A)-9, Y(v,0)+20,'right');
+  dot(X(v,0),Y(v,B),'#7c3aed',4.5);  label('B','#111', X(v,0)+10, Y(v,B)-10);
+  dot(X(v,0),Y(v,-B),'#7c3aed',4.5); label('B′','#111', X(v,0)+10, Y(v,-B)+20);
+
+  if(c > 0.01){
+    if(focusX){
+      dot(X(v,c),Y(v,0),col);  label('F('+fmt(c)+', 0)',col, X(v,c)+9, Y(v,0)-12);
+      dot(X(v,-c),Y(v,0),col); label('F′(−'+fmt(c)+', 0)',col, X(v,-c)-9, Y(v,0)-12,'right');
+    } else {
+      dot(X(v,0),Y(v,c),col);  label('F(0, '+fmt(c)+')',col, X(v,0)+12, Y(v,c)+5);
+      dot(X(v,0),Y(v,-c),col); label('F′(0, −'+fmt(c)+')',col, X(v,0)+12, Y(v,-c)+5);
+    }
+  } else {
+    dot(v.cx,v.cy,'#7c3aed');
+    label('F = F′ (중심)','#7c3aed', v.cx+12, v.cy-12);
+  }
+}
+
+/* ── 상태 갱신 ── */
+const nowLine = document.getElementById('nowLine');
+const aVal = document.getElementById('aVal'), bVal = document.getElementById('bVal');
+const aSlider = document.getElementById('aSlider'), bSlider = document.getElementById('bSlider');
+const circNote = document.getElementById('circNote');
+
+function updateNow(){
+  aVal.textContent = fmt(A); bVal.textContent = fmt(B);
+  const c = Math.sqrt(Math.abs(A*A-B*B));
+  const eq = `<i>x</i>²/${fmt(A*A)} + <i>y</i>²/${fmt(B*B)} = 1`;
+  const isCirc = Math.abs(A-B) < 0.001;
+  circNote.style.display = isCirc ? 'block' : 'none';
+  if(isCirc){
+    nowLine.innerHTML = `현재: <b style="color:#7c3aed">${eq}</b> — <i>a</i> = <i>b</i>, 원! (초점이 중심에서 하나로)`;
+  } else if(A > B){
+    nowLine.innerHTML = `현재: <b style="color:#dc2626">${eq}</b> · 초점 F(±${fmt(c)}, 0) — <i>x</i>축 위 · 장축 ${fmt(2*A)} · 단축 ${fmt(2*B)}`;
+  } else {
+    nowLine.innerHTML = `현재: <b style="color:#2563eb">${eq}</b> · 초점 F(0, ±${fmt(c)}) — <i>y</i>축 위 · 장축 ${fmt(2*B)} · 단축 ${fmt(2*A)}`;
+  }
+}
+aSlider.addEventListener('input', ()=>{ A=parseFloat(aSlider.value); updateNow(); dirty=true; });
+bSlider.addEventListener('input', ()=>{ B=parseFloat(bSlider.value); updateNow(); dirty=true; });
+
+/* ── 루프 ── */
+let lastW=0, lastH=0;
+(function tick(){
+  requestAnimationFrame(tick);
+  if(cv.clientWidth!==lastW || cv.clientHeight!==lastH){ lastW=cv.clientWidth; lastH=cv.clientHeight; dirty=true; }
+  if(dirty){ dirty=false; draw(); }
+})();
+updateNow();
+</script>
+<script>window.PAGE_ID="econcept";</script>
+<script src="nav.js"></script>
+<script>
+/* 완료 도장 과제: a 또는 b 슬라이더 움직이기 */
+(function(){
+  const fire = ()=>{ if(window.GEO_task) GEO_task('slider'); };
+  document.getElementById('aSlider').addEventListener('input', fire);
+  document.getElementById('bSlider').addEventListener('input', fire);
+})();
+</script>
+</body>
+</html>

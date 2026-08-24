@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<script>
+/* 입장 가드 */
+if (localStorage.getItem('geoAppOk') !== '1') location.replace('index.html');
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="icon" type="image/svg+xml" href="icon.svg">
+<link rel="apple-touch-icon" href="icon-180.png">
+<meta name="apple-mobile-web-app-title" content="기하">
+<title>타원의 활용</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html, body { width:100%; height:100%; overflow:hidden; }
+  body {
+    font-family:'Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif;
+    background:#f1f5fb; color:#1e293b; display:flex; flex-direction:column;
+  }
+  header {
+    padding:8px 14px 6px; background:#fff; border-bottom:1px solid #e2e8f0;
+    display:flex; align-items:baseline; gap:10px; flex-wrap:wrap;
+  }
+  header h1 { font-size:17.5px; color:#0f172a; }
+  header .sub { font-size:12.5px; color:#64748b; }
+  #kwrap { flex:1; min-height:0; position:relative; background:#faf9f5; }
+  #kframe { width:100%; height:100%; border:none; display:block; }
+</style>
+</head>
+<body>
+<header>
+  <h1>🪐 타원의 활용</h1>
+  <span class="sub">소행성 1566 이카루스 — 우주에서 보는 타원 궤도. 행성과 소행성은 태양을 한 초점으로 하는 타원 궤도를 돌아요 (케플러 1법칙)</span>
+</header>
+<div id="kwrap">
+  <iframe id="kframe" src="kepler.html" title="타원 궤도 시뮬레이션"></iframe>
+</div>
+
+<script>window.PAGE_ID="eapply";</script>
+<script src="nav.js"></script>
+<script>
+/* 완료 도장 과제: 시뮬레이션의 재생(일시정지) 버튼 누르기 */
+(function(){
+  const f = document.getElementById('kframe');
+  const timer = setInterval(()=>{
+    try{
+      const doc = f.contentDocument;
+      const btn = doc && doc.getElementById('play');
+      if(btn && !btn.__geoHooked){
+        btn.__geoHooked = true;
+        btn.addEventListener('click', ()=>{ if(window.GEO_task) GEO_task('play'); });
+        clearInterval(timer);
+      }
+    }catch(e){}
+  }, 500);
+})();
+</script>
+</body>
+</html>
