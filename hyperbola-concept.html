@@ -51,20 +51,31 @@ if (localStorage.getItem('geoAppOk') !== '1') location.replace('index.html');
   .t-center { background:#ffedd5; color:#c2410c; }
   .t-asym { background:#e0f2fe; color:#0369a1; }
   .fcard {
-    border:2px solid #dc2626; border-radius:14px; padding:13px 15px; margin-top:10px;
-    background:#fef9f9; user-select:none;
+    border:2px solid #e2e8f0; border-radius:14px; padding:13px 15px; margin-top:10px;
+    background:#fbfdff; user-select:none; cursor:pointer; transition:all .15s;
   }
+  #card1.on { border-color:#dc2626; background:#fef2f2; }
+  #card2.on { border-color:#2563eb; background:#eff6ff; }
+  #card1 .formula { color:#dc2626; }
+  #card2 .formula { color:#2563eb; }
+  .fcard .tapHint { font-size:11.5px; color:#94a3b8; margin-top:5px; }
+  .conjNote {
+    border:1px dashed #93c5fd; background:#f0f7ff; border-radius:12px;
+    padding:9px 12px; font-size:12.4px; color:#1d4ed8; line-height:1.65; margin-top:10px;
+    display:none;
+  }
+  .conjNote i { font-family:Georgia,serif; }
   .fcard .cond { font-size:13px; color:#475569; line-height:1.6; }
   .fcard .formula {
     font-size:22px; font-weight:800; margin:8px 0 4px; font-family:Georgia,'Times New Roman',serif;
-    letter-spacing:.5px; color:#dc2626; text-align:center;
+    letter-spacing:.5px; text-align:center;
   }
   .fcard .formula .frac { display:inline-block; text-align:center; vertical-align:middle; margin:0 2px; }
   .fcard .formula .frac .top { display:block; border-bottom:2px solid currentColor; padding:0 5px 1px; font-size:17px; }
   .fcard .formula .frac .bot { display:block; padding:1px 5px 0; font-size:17px; }
   .fcard .sub { font-size:12.6px; color:#475569; line-height:1.8; margin-top:6px; }
   .fcard .sub b { color:#0f172a; }
-  .fcard .now { font-size:12.6px; line-height:1.7; margin-top:8px; border-top:1px dashed #fecaca;
+  .fcard .now { font-size:12.6px; line-height:1.7; margin-top:8px; border-top:1px dashed #e2e8f0;
     padding-top:8px; color:#64748b; min-height:18px; }
 
   /* ── 오른쪽: 그래프 ── */
@@ -89,7 +100,7 @@ if (localStorage.getItem('geoAppOk') !== '1') location.replace('index.html');
 <body>
 <header>
   <h1>📕 쌍곡선 개념 정리</h1>
-  <p><i>a</i>, <i>b</i> 값을 움직여 초점·꼭짓점·주축·점근선이 어떻게 변하는지 살펴보세요</p>
+  <p>식을 눌러 그래프를 켜고 끄면서, <i>a</i>·<i>b</i> 값을 움직여 초점·꼭짓점·주축·점근선을 살펴보세요</p>
 </header>
 
 <div id="main">
@@ -155,16 +166,31 @@ if (localStorage.getItem('geoAppOk') !== '1') location.replace('index.html');
     </div>
 
     <h2>2. 쌍곡선의 방정식</h2>
-    <div class="fcard">
-      <div class="cond">두 초점으로부터 거리의 차가 일정한 쌍곡선의 방정식</div>
+    <div class="fcard on" id="card1">
+      <div class="cond">(1) 초점이 <b><i>x</i>축 위</b>에 있을 때 — 좌우로 벌어진 쌍곡선</div>
       <div class="formula"><span class="frac"><span class="top"><i>x</i><sup style="font-size:12px">2</sup></span><span class="bot"><i>a</i><sup style="font-size:12px">2</sup></span></span> − <span class="frac"><span class="top"><i>y</i><sup style="font-size:12px">2</sup></span><span class="bot"><i>b</i><sup style="font-size:12px">2</sup></span></span> = 1</div>
       <div class="sub">
-        · 초점 F(<i>c</i>, 0), F′(−<i>c</i>, 0) — <b><i>c</i> = √(<i>a</i>² + <i>b</i>²)</b><br>
-        · 거리의 차 = 주축의 길이 = 2<i>a</i> · 꼭짓점 A(<i>a</i>, 0), A′(−<i>a</i>, 0)<br>
-        · 점근선: <i>y</i> = ±(<i>b</i>/<i>a</i>)<i>x</i><br>
-        · 초점이 <i>y</i>축 위면 우변이 <b>−1</b>: 초점 F(0, <i>c</i>), F′(0, −<i>c</i>), 거리의 차 2<i>b</i>
+        초점 F(<i>c</i>, 0), F′(−<i>c</i>, 0) — <b><i>c</i> = √(<i>a</i>² + <i>b</i>²)</b><br>
+        꼭짓점 A(<i>a</i>, 0), A′(−<i>a</i>, 0) · 거리의 차 = 주축의 길이 = <b>2<i>a</i></b>
       </div>
-      <div class="now" id="nowLine"></div>
+      <div class="now" id="now1"></div>
+      <div class="tapHint">👆 카드를 누르면 그래프를 켜고 끌 수 있어요</div>
+    </div>
+
+    <div class="fcard" id="card2">
+      <div class="cond">(2) 초점이 <b><i>y</i>축 위</b>에 있을 때 — 위아래로 벌어진 쌍곡선</div>
+      <div class="formula"><span class="frac"><span class="top"><i>x</i><sup style="font-size:12px">2</sup></span><span class="bot"><i>a</i><sup style="font-size:12px">2</sup></span></span> − <span class="frac"><span class="top"><i>y</i><sup style="font-size:12px">2</sup></span><span class="bot"><i>b</i><sup style="font-size:12px">2</sup></span></span> = −1</div>
+      <div class="sub">
+        초점 F(0, <i>c</i>), F′(0, −<i>c</i>) — <b><i>c</i> = √(<i>a</i>² + <i>b</i>²)</b> (같아요!)<br>
+        꼭짓점 B(0, <i>b</i>), B′(0, −<i>b</i>) · 거리의 차 = 주축의 길이 = <b>2<i>b</i></b>
+      </div>
+      <div class="now" id="now2"></div>
+      <div class="tapHint">👆 카드를 누르면 그래프를 켜고 끌 수 있어요</div>
+    </div>
+
+    <div class="conjNote" id="conjNote">
+      🔎 두 쌍곡선을 함께 켜 보세요 — <b>점근선 <i>y</i> = ±(<i>b</i>/<i>a</i>)<i>x</i>가 완전히 똑같아요!</b>
+      이렇게 우변만 1과 −1로 다른 두 쌍곡선을 <b>켤레쌍곡선</b>이라고 해요.
     </div>
   </div>
 
@@ -179,7 +205,7 @@ if (localStorage.getItem('geoAppOk') !== '1') location.replace('index.html');
         <div class="pv vb"><i style="font-family:Georgia">b</i> = <span id="bVal">1.5</span></div>
         <input type="range" id="bSlider" min="0.5" max="4" step="0.1" value="1.5">
       </div>
-      <div id="asymNote">📐 하늘색 점선 = 점근선 <i>y</i> = ±(<i>b</i>/<i>a</i>)<i>x</i> — 쌍곡선은 멀리 갈수록 이 직선에 한없이 가까워져요 (타원과 달리 <i>c</i>² = <i>a</i>² <b>+</b> <i>b</i>²!)</div>
+      <div id="asymNote">📐 하늘색 점선 = 점근선 <i>y</i> = ±(<i>b</i>/<i>a</i>)<i>x</i> — 두 경우가 <b>같은 점근선</b>을 공유해요 (타원과 달리 <i>c</i>² = <i>a</i>² <b>+</b> <i>b</i>²!)</div>
     </div>
   </div>
 </div>
@@ -189,6 +215,7 @@ if (localStorage.getItem('geoAppOk') !== '1') location.replace('index.html');
 const cv = document.getElementById('graph');
 const ctx = cv.getContext('2d');
 let A = 2, B = 1.5;
+let show1 = true, show2 = false;
 let dirty = true;
 
 const fmt = v => {
@@ -264,7 +291,7 @@ function draw(){
 
   const c = Math.sqrt(A*A + B*B);
 
-  /* 점근선 (하늘 점선) */
+  /* 점근선 (하늘 점선) — 두 쌍곡선이 공유! */
   ctx.strokeStyle='#2ea7d8'; ctx.lineWidth=1.8; ctx.setLineDash([8,6]);
   for(const sgn of [1,-1]){
     ctx.beginPath();
@@ -274,32 +301,42 @@ function draw(){
   }
   ctx.setLineDash([]);
 
-  /* 주축 (파랑) */
-  ctx.strokeStyle='#0e8ac2'; ctx.lineWidth=4.5; ctx.lineCap='round';
-  ctx.beginPath(); ctx.moveTo(X(v,-A),Y(v,0)); ctx.lineTo(X(v,A),Y(v,0)); ctx.stroke();
-
-  /* 쌍곡선 (빨강, 두 가지) */
-  ctx.strokeStyle = '#e8442e'; ctx.lineWidth = 3.2;
-  for(const sgn of [1,-1]){
-    ctx.beginPath(); let started=false;
-    for(let i=0;i<=160;i++){
-      const t=-3+6*i/160;
-      const x=sgn*A*Math.cosh(t), y=B*Math.sinh(t);
-      const sx=X(v,x), sy=Y(v,y);
-      if(sx>-40&&sx<w+40&&sy>-40&&sy<h+40){
-        if(!started){ ctx.moveTo(sx,sy); started=true; } else ctx.lineTo(sx,sy);
-      } else started=false;
+  const drawBranch=(fx,fy,col)=>{           // t → (x,y) 를 받아 두 가지 그리기
+    ctx.strokeStyle=col; ctx.lineWidth=3.2;
+    for(const sgn of [1,-1]){
+      ctx.beginPath(); let started=false;
+      for(let i=0;i<=160;i++){
+        const t=-3+6*i/160;
+        const sx=X(v,fx(t,sgn)), sy=Y(v,fy(t,sgn));
+        if(sx>-40&&sx<w+40&&sy>-40&&sy<h+40){
+          if(!started){ ctx.moveTo(sx,sy); started=true; } else ctx.lineTo(sx,sy);
+        } else started=false;
+      }
+      ctx.stroke();
     }
-    ctx.stroke();
+  };
+
+  /* (1) x²/a² − y²/b² = 1 — 빨강 (좌우) */
+  if(show1){
+    ctx.strokeStyle='#0e8ac2'; ctx.lineWidth=4.5; ctx.lineCap='round';   // 주축
+    ctx.beginPath(); ctx.moveTo(X(v,-A),Y(v,0)); ctx.lineTo(X(v,A),Y(v,0)); ctx.stroke();
+    drawBranch((t,s)=>s*A*Math.cosh(t), t=>B*Math.sinh(t), '#e8442e');
+    dot(X(v,A),Y(v,0),'#7c3aed',4.5);  label('A','#111', X(v,A)+8, Y(v,0)+20);
+    dot(X(v,-A),Y(v,0),'#7c3aed',4.5); label('A′','#111', X(v,-A)-8, Y(v,0)+20,'right');
+    dot(X(v,c),Y(v,0),'#dc2626');  label('F('+fmt(c)+', 0)','#b91c1c', X(v,c)+9, Y(v,0)-12);
+    dot(X(v,-c),Y(v,0),'#dc2626'); label('F′(−'+fmt(c)+', 0)','#b91c1c', X(v,-c)-9, Y(v,0)-12,'right');
   }
 
-  /* 꼭짓점 */
-  dot(X(v,A),Y(v,0),'#7c3aed',4.5);  label('A','#111', X(v,A)+8, Y(v,0)+20);
-  dot(X(v,-A),Y(v,0),'#7c3aed',4.5); label('A′','#111', X(v,-A)-8, Y(v,0)+20,'right');
-
-  /* 초점 */
-  dot(X(v,c),Y(v,0),'#dc2626');  label('F('+fmt(c)+', 0)','#b91c1c', X(v,c)+9, Y(v,0)-12);
-  dot(X(v,-c),Y(v,0),'#dc2626'); label('F′(−'+fmt(c)+', 0)','#b91c1c', X(v,-c)-9, Y(v,0)-12,'right');
+  /* (2) x²/a² − y²/b² = −1 — 파랑 (위아래) */
+  if(show2){
+    ctx.strokeStyle='#0e8ac2'; ctx.lineWidth=4.5; ctx.lineCap='round';   // 주축
+    ctx.beginPath(); ctx.moveTo(X(v,0),Y(v,-B)); ctx.lineTo(X(v,0),Y(v,B)); ctx.stroke();
+    drawBranch(t=>A*Math.sinh(t), (t,s)=>s*B*Math.cosh(t), '#2563eb');
+    dot(X(v,0),Y(v,B),'#7c3aed',4.5);  label('B','#111', X(v,0)+11, Y(v,B)+16);
+    dot(X(v,0),Y(v,-B),'#7c3aed',4.5); label('B′','#111', X(v,0)+11, Y(v,-B)-8);
+    dot(X(v,0),Y(v,c),'#2563eb');  label('F(0, '+fmt(c)+')','#1d4ed8', X(v,0)+12, Y(v,c)-10);
+    dot(X(v,0),Y(v,-c),'#2563eb'); label('F′(0, −'+fmt(c)+')','#1d4ed8', X(v,0)+12, Y(v,-c)+20);
+  }
 
   /* 점근선 라벨 */
   const lx=Math.min(xmax*0.8, 4.4);
@@ -307,16 +344,25 @@ function draw(){
 }
 
 /* ── 상태 갱신 ── */
-const nowLine = document.getElementById('nowLine');
+const card1 = document.getElementById('card1'), card2 = document.getElementById('card2');
+const now1 = document.getElementById('now1'), now2 = document.getElementById('now2');
+const conjNote = document.getElementById('conjNote');
 const aVal = document.getElementById('aVal'), bVal = document.getElementById('bVal');
 const aSlider = document.getElementById('aSlider'), bSlider = document.getElementById('bSlider');
 
 function updateNow(){
   aVal.textContent = fmt(A); bVal.textContent = fmt(B);
   const c = Math.sqrt(A*A+B*B);
-  const eq = `<i>x</i>²/${fmt(A*A)} − <i>y</i>²/${fmt(B*B)} = 1`;
-  nowLine.innerHTML = `현재: <b style="color:#dc2626">${eq}</b> · 초점 F(±${fmt(c)}, 0) · 주축 ${fmt(2*A)} · 점근선 <i>y</i> = ±${fmt(B/A)}<i>x</i>`;
+  now1.innerHTML = show1
+    ? `현재: <b style="color:#dc2626"><i>x</i>²/${fmt(A*A)} − <i>y</i>²/${fmt(B*B)} = 1</b> · 초점 F(±${fmt(c)}, 0) · 주축 ${fmt(2*A)} · 점근선 <i>y</i> = ±${fmt(B/A)}<i>x</i>`
+    : '&nbsp;';
+  now2.innerHTML = show2
+    ? `현재: <b style="color:#2563eb"><i>x</i>²/${fmt(A*A)} − <i>y</i>²/${fmt(B*B)} = −1</b> · 초점 F(0, ±${fmt(c)}) · 주축 ${fmt(2*B)} · 점근선 <i>y</i> = ±${fmt(B/A)}<i>x</i>`
+    : '&nbsp;';
+  conjNote.style.display = (show1 && show2) ? 'block' : 'none';
 }
+card1.addEventListener('click', ()=>{ show1=!show1; card1.classList.toggle('on',show1); updateNow(); dirty=true; });
+card2.addEventListener('click', ()=>{ show2=!show2; card2.classList.toggle('on',show2); updateNow(); dirty=true; });
 aSlider.addEventListener('input', ()=>{ A=parseFloat(aSlider.value); updateNow(); dirty=true; });
 bSlider.addEventListener('input', ()=>{ B=parseFloat(bSlider.value); updateNow(); dirty=true; });
 
