@@ -1,0 +1,1164 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<script>
+/* 입장 가드 */
+if (localStorage.getItem('geoAppOk') !== '1') location.replace('index.html');
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="icon" type="image/svg+xml" href="icon.svg">
+<link rel="apple-touch-icon" href="icon-180.png">
+<meta name="apple-mobile-web-app-title" content="기하">
+<title>쌍곡선의 활용</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html, body { width:100%; height:100%; overflow:hidden; }
+  body {
+    font-family:'Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif;
+    background:#f1f5fb; color:#1e293b; display:flex; flex-direction:column;
+  }
+  i, .it { font-family:Georgia,'Times New Roman',serif; }
+  header {
+    padding:8px 14px 6px; background:#fff; border-bottom:1px solid #e2e8f0;
+    display:flex; align-items:baseline; gap:10px; flex-wrap:wrap;
+  }
+  header h1 { font-size:17.5px; color:#0f172a; }
+  header .sub { font-size:12.5px; color:#64748b; }
+  #tabs { display:flex; gap:8px; padding:8px 14px 0; background:#fff; }
+  #tabs button {
+    padding:9px 16px; font-size:14px; font-weight:800; border-radius:12px 12px 0 0; cursor:pointer;
+    border:1.5px solid #e2e8f0; border-bottom:none; background:#f8fafc; color:#64748b; font-family:inherit;
+  }
+  #tabs button.on { background:linear-gradient(135deg,#0ea5e9,#6366f1); color:#fff; border-color:transparent; }
+  #main { flex:1; min-height:0; display:flex; }
+  #stage { flex:6 1 0; min-width:0; position:relative; touch-action:none; }
+  #cv { width:100%; height:100%; display:block; }
+  #stage3 { flex:6 1 0; min-width:0; position:relative; touch-action:none; display:none; }
+  #stage3.sea   { background:linear-gradient(180deg,#8ecdf0 0%,#b9e2f7 45%,#7db8d8 45.2%,#5da3cc 100%); }
+  #stage3.tower { background:linear-gradient(180deg,#9fd0ef 0%,#cfe9fa 55%,#e8f4ea 100%); }
+  #cv3 { width:100%; height:100%; display:block; }
+  .drag3 { position:absolute; right:14px; bottom:12px; font-size:12px; color:#3d4a5a;
+    background:rgba(255,255,255,.9); padding:7px 13px; border-radius:10px; pointer-events:none;
+    box-shadow:0 3px 12px rgba(16,24,40,.14); }
+  #glLoad3 { position:absolute; inset:0; display:none; align-items:center; justify-content:center;
+    color:#475569; font-size:14px; pointer-events:none; }
+  .stepBanner {
+    position:absolute; top:12px; left:50%; transform:translateX(-50%);
+    background:rgba(15,23,42,.88); color:#fff; padding:9px 18px; border-radius:999px;
+    font-size:13.5px; font-weight:700; display:none; max-width:88%; text-align:center;
+    box-shadow:0 6px 20px rgba(15,23,42,.35); pointer-events:none; z-index:6; line-height:1.5;
+  }
+  .stepBanner .rm { font-family:Georgia,serif; }
+  .stepBtn {
+    width:36px; height:36px; border-radius:50% !important; padding:0 !important;
+    font-size:14px !important; font-weight:800 !important;
+  }
+  .stepBtn.on { background:#16a34a !important; border-color:#16a34a !important; color:#fff !important; }
+  .hud {
+    position:absolute; left:12px; top:12px; background:rgba(255,255,255,.95);
+    border-radius:14px; padding:11px 15px; max-width:275px;
+    box-shadow:0 8px 28px rgba(16,24,40,.16); font-size:13.5px; line-height:1.55; color:#3d4a5a;
+  }
+  .hud b { font-size:15.5px; color:#1a2330; }
+  .hud .ok { color:#059669; font-weight:800; }
+  .hud .rm { font-family:Georgia,serif; }
+
+  /* ── 오른쪽 패널 ── */
+  #side {
+    flex:4 1 0; min-width:270px; max-width:420px; background:#fff;
+    border-left:1px solid #e2e7ec; padding:14px 16px; overflow-y:auto;
+  }
+  #side h2 { font-size:15px; color:#0f172a; margin:2px 0 8px; }
+  .card {
+    border:1px solid #e2e8f0; border-radius:12px; padding:11px 13px;
+    font-size:13px; color:#475569; line-height:1.7; margin-bottom:12px; background:#f8fafc;
+  }
+  .card b { color:#0f172a; }
+  .card.prob { background:#fffbeb; border-color:#fde68a; }
+  .card.why { background:#fef2f2; border-color:#fecaca; }
+  .card .rm { font-family:Georgia,serif; }
+  .formula {
+    font-size:19px; font-weight:800; margin:8px 0 4px; font-family:Georgia,serif;
+    color:#dc2626; text-align:center; letter-spacing:.3px;
+  }
+  .formula .frac { display:inline-block; text-align:center; vertical-align:middle; margin:0 2px; }
+  .formula .frac .top { display:block; border-bottom:2px solid currentColor; padding:0 5px 1px; font-size:15px; }
+  .formula .frac .bot { display:block; padding:1px 5px 0; font-size:15px; }
+  .caseRow { display:flex; gap:8px; align-items:flex-start; margin-top:8px; }
+  .caseRow .ic { font-size:21px; flex:none; }
+  .caseRow .tx { font-size:12.6px; line-height:1.65; color:#475569; }
+  .caseRow .tx b { color:#0f172a; }
+  #degNote { font-size:12.3px; font-weight:800; color:#7c3aed; margin-top:6px; display:none; }
+
+  /* ── 하단 컨트롤 ── */
+  #ctrl {
+    flex:none; background:#fff; border-top:1px solid #e2e8f0; padding:8px 14px 6px;
+    display:flex; gap:14px; align-items:center; flex-wrap:wrap;
+  }
+  #ctrl button {
+    padding:9px 13px; font-size:13.5px; font-weight:700; border-radius:10px; cursor:pointer;
+    border:1.5px solid #cbd5e1; background:#fff; color:#334155; font-family:inherit; transition:all .12s;
+  }
+  #ctrl button:hover { border-color:#0284c7; color:#0369a1; }
+  #ctrl button.on { background:#0284c7; border-color:#0284c7; color:#fff; }
+  #ctrl button.play { background:linear-gradient(135deg,#0ea5e9,#6366f1); border:none; color:#fff; }
+  #ctrl button:disabled { opacity:.5; cursor:default; }
+  .cItem { display:flex; align-items:center; gap:9px; }
+  .cItem .lb { font-size:12.5px; font-weight:800; color:#475569; white-space:nowrap; }
+  .cItem input[type=range] { width:170px; accent-color:#dc2626; }
+  .cItem .vv { font-size:13px; font-weight:800; color:#dc2626; min-width:52px; font-family:Georgia,serif; }
+  #hintLine { flex-basis:100%; font-size:12px; color:#94a3b8; line-height:1.5; }
+</style>
+</head>
+<body>
+<header>
+  <h1>🚢 쌍곡선의 활용</h1>
+  <span class="sub" id="subT">두 기지국 전파의 <b>도착 시간 차</b> → 거리의 차 → 배는 쌍곡선 위에! (교과서 문제 그대로)</span>
+</header>
+<div id="tabs">
+  <button id="tabMap" class="on">🗺️ 좌표평면</button>
+  <button id="tabSea">🌊 3D 현장</button>
+  <button id="tabTow">🏭 냉각탑</button>
+</div>
+
+<div id="main">
+  <div id="stage">
+    <canvas id="cv"></canvas>
+    <div class="hud" id="hud"></div>
+    <div class="stepBanner" id="stepBanner"></div>
+  </div>
+  <div id="stage3" class="sea">
+    <canvas id="cv3"></canvas>
+    <div id="glLoad3">3D 장면을 준비하는 중이에요…</div>
+    <div class="drag3">한 손가락: 360° 돌려보기 · 두 손가락/휠: 확대·축소</div>
+    <div class="stepBanner" id="stepBanner3"></div>
+  </div>
+
+  <div id="side">
+   <div id="sideLoran">
+    <h2>📖 교과서 문제</h2>
+    <div class="card prob">
+      <b>120 km</b> 떨어진 두 기지국 A, B에서 <b>배로 동시에 전파</b>를 보낸 결과,
+      배는 두 기지국 A, B로부터 <b>거리의 차가 60 km</b>인 지점에 있었다.
+      배가 위치할 수 있는 점들로 이루어진 <b>곡선의 방정식</b>을 구하시오.
+    </div>
+
+    <h2>💡 왜 쌍곡선일까?</h2>
+    <div class="card why">
+      전파의 속력은 일정 → <b>도착 시간의 차</b>는 곧 <b>거리의 차</b>!<br>
+      두 점 A, B로부터 <b>거리의 차가 일정한</b> 점들의 자취 = <b>쌍곡선</b> (A, B는 초점)<br>
+      <span id="derive">
+        · 거리의 차 2<i>a</i> = <b id="dV2">60</b> km → <i>a</i> = <b id="aV">30</b>, <i>a</i>² = <b id="a2V">900</b><br>
+        · 초점 A(−60, 0), B(60, 0) → <i>c</i> = 60<br>
+        · <i>b</i>² = <i>c</i>² − <i>a</i>² = 3600 − <span id="a2V2">900</span> = <b id="b2V">2700</b>
+      </span>
+      <div class="formula" id="eqLine">
+        <span class="frac"><span class="top"><i>x</i>²</span><span class="bot" id="eqA2">900</span></span> −
+        <span class="frac"><span class="top"><i>y</i>²</span><span class="bot" id="eqB2">2700</span></span> = 1
+      </div>
+      <div id="degNote"></div>
+    </div>
+
+    <h2>🌍 실생활 — 이 문제가 바로 현실!</h2>
+    <div class="card">
+      <div class="caseRow"><span class="ic">🚢</span><div class="tx">
+        <b>로란(LORAN) 전파 항법</b> — 이 문제 그대로예요! 바다 위 배가 두 기지국 전파의 시간차로
+        자기가 놓인 <b>쌍곡선 하나</b>를 알아내고, <b>기지국 한 쌍을 더</b> 쓰면 쌍곡선이 2개 →
+        <b>교점이 곧 배의 위치</b>! GPS 이전까지 배·비행기의 표준 항법이었어요.
+        (아래 <b>📡 기지국 C 추가</b>를 눌러 보세요)
+      </div></div>
+      <div class="caseRow"><span class="ic">🛰️</span><div class="tx">
+        <b>GPS·휴대폰 위치 추적(TDOA)</b> — 위성·기지국들이 보낸 신호의 <b>도착 시간차</b>로
+        쌍곡면들을 그리고 그 교점으로 위치를 계산해요.
+      </div></div>
+      <div class="caseRow"><span class="ic">💥</span><div class="tx">
+        <b>소리로 위치 찾기</b> — 여러 지점에서 잰 포성·천둥·지진파의 도착 시간차로
+        발생 지점을 찾는 것도 같은 원리예요.
+      </div></div>
+    </div>
+   </div>
+
+   <div id="sideTower" style="display:none">
+    <h2>🏭 냉각탑 — 쌍곡선을 돌려 만든 건물</h2>
+    <div class="card why">
+      발전소 냉각탑의 옆모습은 <b>쌍곡선</b>! 쌍곡선을 축 둘레로 빙 돌리면
+      <b>일엽쌍곡면</b>이라는 곡면이 되는데, 놀랍게도 이 곡면은
+      <b>곧은 막대(직선)만으로 짤 수 있어요</b>. 그래서 얇은 콘크리트로도
+      엄청나게 튼튼하고 재료도 적게 들어, 100 m가 넘는 냉각탑의 표준 모양이 되었답니다.
+      <div class="formula" style="font-size:16px">
+        <span class="frac"><span class="top"><i>x</i>²</span><span class="bot"><i>a</i>²</span></span> −
+        <span class="frac"><span class="top"><i>y</i>²</span><span class="bot"><i>b</i>²</span></span> = 1
+        <span style="font-size:12px;color:#94a3b8">(빨간 곡선)</span>
+      </div>
+    </div>
+    <h2>💨 어떻게 식힐까? (화살표를 따라가요)</h2>
+    <div class="card">
+      <div class="caseRow"><span class="ic">🔴</span><div class="tx">
+        <b>① 뜨거운 물</b>이 발전소(터빈을 식히고 온 물)에서 <b>빨간 관</b>을 타고 올라와
+        탑 안쪽에 <b>비처럼 뿌려져요</b>.
+      </div></div>
+      <div class="caseRow"><span class="ic">💨</span><div class="tx">
+        <b>② 공기</b>는 탑 아래 뚫린 틈으로 들어와 위로 올라가요. 탑의 <b>잘록한 목</b>에서
+        공기가 <b>빨라지며</b>(굴뚝 효과) 떨어지는 물방울과 만나 물을 증발·냉각시켜요.
+      </div></div>
+      <div class="caseRow"><span class="ic">🔵</span><div class="tx">
+        <b>③ 차가워진 물</b>은 바닥 수조에 모여 <b>파란 관</b>으로 발전소에 되돌아가요 — 계속 <b>순환</b>!
+      </div></div>
+      <div class="caseRow"><span class="ic">☁️</span><div class="tx">
+        <b>④ 데워진 습한 공기</b>는 꼭대기로 빠져나가요. 냉각탑 위 하얀 연기처럼 보이는 건
+        연기가 아니라 <b>수증기(김)</b>랍니다.
+      </div></div>
+    </div>
+    <div class="card">
+      💡 잘록한 목(쌍곡선의 꼭짓점 부분)이 <b>공기 통로를 좁혀 유속을 높이고</b>,
+      위로 갈수록 다시 넓어져 <b>습한 공기를 부드럽게 내보내요</b> —
+      모양 자체가 거대한 자연 환풍기인 셈이에요. (전기 팬 없이도 작동!)
+    </div>
+   </div>
+  </div>
+</div>
+
+<div id="ctrl">
+ <div id="ctrlLoran" style="display:contents">
+  <button id="pulseBtn" class="play">▶ 전파 동시 발사</button>
+  <button id="ringBtn">🌀 동심원 보기</button>
+  <button id="cBtn">📡 기지국 C 추가</button>
+  <div class="cItem"><span class="lb">거리의 차 |<span class="rm" style="font-family:Georgia,serif">P̅A̅ − P̅B̅</span>| =</span>
+    <input type="range" id="dSl" min="0" max="110" step="10" value="60">
+    <span class="vv" id="dV">60 km</span></div>
+  <div class="cItem"><span class="lb">🧭 위치 찾기 순서</span>
+    <button class="stepBtn" data-s="1">1</button>
+    <button class="stepBtn" data-s="2">2</button>
+    <button class="stepBtn" data-s="3">3</button>
+    <button class="stepBtn" data-s="4">4</button>
+    <button class="stepBtn" data-s="0" title="해제">✕</button></div>
+  <div id="hintLine">🚢 배를 끌어서 빨간 쌍곡선 위에 올려 보세요 — 또는 🧭 <b>위치 찾기 1→2→3→4</b>를 차례로 눌러 전파 항법의 흐름을 따라가 보세요!</div>
+ </div>
+ <div id="ctrlTower" style="display:none">
+  <button id="twSpinBtn" class="on">🔄 자동 회전</button>
+  <button id="twCurveBtn" class="on">📐 쌍곡선 강조</button>
+  <button id="twFlowBtn" class="on">💧 물·공기 순환</button>
+  <div id="hintTower" style="flex-basis:100%;font-size:12px;color:#94a3b8;line-height:1.5">🏭 빨간 화살표=뜨거운 물, 파란 화살표=차가워진 물, 하늘색 화살표=공기 — 잘록한 허리(쌍곡선!)가 공기를 빨아올려요</div>
+ </div>
+</div>
+
+<script>
+'use strict';
+const cv = document.getElementById('cv');
+const ctx = cv.getContext('2d');
+const hud = document.getElementById('hud');
+
+/* ===== 상태 (단위: km) ===== */
+const A = { x:-60, y:0 }, B = { x:60, y:0 }, Cst = { x:0, y:88 };
+let ship = { x:75, y:52 };
+let dSel = 60;                       // 슬라이더 거리차
+let showRings = false, showC = false;
+let pulse = null;                    // {r} 전파 반지름(km)
+let arrivedA = false, arrivedB = false;
+let draggingShip = false;
+let dirty = true;
+let scale = 1, O = { x:0, y:0 };     // px/km, 원점 화면 위치
+
+function layout(){
+  const w = cv.clientWidth, h = cv.clientHeight;
+  if(!w || !h) return;
+  scale = Math.min(w/330, h/230);
+  O = { x: w/2, y: h*0.66 };
+  dirty = true;
+}
+const px = p => ({ x: O.x + p.x*scale, y: O.y - p.y*scale });
+const world = q => ({ x: (q.x-O.x)/scale, y: -(q.y-O.y)/scale });
+const dist = (p,q) => Math.hypot(p.x-q.x, p.y-q.y);
+
+/* ===== 그리기 ===== */
+function draw(){
+  const w=cv.clientWidth, h=cv.clientHeight;
+  const dpr=Math.min(window.devicePixelRatio||1,2);
+  if(cv.width!==Math.round(w*dpr)||cv.height!==Math.round(h*dpr)){
+    cv.width=Math.round(w*dpr); cv.height=Math.round(h*dpr);
+  }
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+
+  // 바다
+  const g=ctx.createLinearGradient(0,0,0,h);
+  g.addColorStop(0,'#dff2fc'); g.addColorStop(0.5,'#bfe4f6'); g.addColorStop(1,'#9fd4ee');
+  ctx.fillStyle=g; ctx.fillRect(0,0,w,h);
+
+  // 격자 (30 km)
+  ctx.strokeStyle='rgba(255,255,255,.5)'; ctx.lineWidth=1;
+  for(let k=-300;k<=300;k+=30){
+    const gx=px({x:k,y:0}).x;
+    if(gx>0&&gx<w){ ctx.beginPath(); ctx.moveTo(gx,0); ctx.lineTo(gx,h); ctx.stroke(); }
+    const gy=px({x:0,y:k}).y;
+    if(gy>0&&gy<h){ ctx.beginPath(); ctx.moveTo(0,gy); ctx.lineTo(w,gy); ctx.stroke(); }
+  }
+  // 축
+  ctx.strokeStyle='rgba(51,65,85,.75)'; ctx.lineWidth=1.6;
+  ctx.beginPath(); ctx.moveTo(0,O.y); ctx.lineTo(w,O.y); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(O.x,0); ctx.lineTo(O.x,h); ctx.stroke();
+  ctx.font='italic bold 14px Georgia'; ctx.fillStyle='#334155';
+  ctx.fillText('x', w-16, O.y-8);
+  ctx.fillText('y', O.x+8, 16);
+  ctx.font='12px sans-serif'; ctx.fillStyle='#475569'; ctx.textAlign='center';
+  ctx.fillText('−60', px(A).x, O.y+16);
+  ctx.fillText('60', px(B).x, O.y+16);
+  ctx.fillText('O', O.x-9, O.y+16);
+  ctx.textAlign='left';
+
+  // 동심원 (전파 파면 간격 = 20 km)
+  if(showRings){
+    for(let r=20;r<=300;r+=20){
+      ring(A, r, 'rgba(234,88,12,.20)');
+      ring(B, r, 'rgba(13,148,136,.20)');
+    }
+  }
+
+  // 발사된 전파 (달리는 파면 3겹)
+  if(pulse){
+    for(const off of [0,26,52]){
+      const r=pulse.r-off;
+      if(r>0){
+        ring(A, r, 'rgba(234,88,12,.55)', 2.2);
+        ring(B, r, 'rgba(13,148,136,.55)', 2.2);
+      }
+    }
+  }
+
+  const diffNow=Math.abs(dist(ship,A)-dist(ship,B));
+  const cVisible = (step===0 && showC) || step===4;
+
+  // 쌍곡선 (빨강): 자유 모드=슬라이더 값 · STEP 3부터=현재 거리차
+  if(step===0) drawHyperbolaAB(dSel, '#ef4444', 3);
+  else if(step>=3) drawHyperbolaAB(diffNow, '#ef4444', 3.4);
+
+  // 기지국 C: 배를 지나는 쌍곡선 2개 (LORAN)
+  if(cVisible){
+    const dBC=Math.abs(dist(ship,B)-dist(ship,Cst));
+    drawHyperbolaAB(diffNow, 'rgba(234,88,12,.85)', 2);
+    drawHyperbola2(B, Cst, dBC, 'rgba(124,58,237,.85)', 2);
+  }
+
+  // STEP 3: 유령 배들 — "곡선 위 어딘가"
+  if(step===3 && diffNow>=1 && diffNow<119){
+    const a=diffNow/2, b=Math.sqrt(Math.max(1,3600-a*a));
+    const sgn = dist(ship,A)>dist(ship,B) ? 1 : -1;
+    ctx.globalAlpha=0.3; ctx.font='30px serif'; ctx.textAlign='center';
+    for(const t of [-1.7,-0.9,0.9,1.7]){
+      const q=px({ x:sgn*a*Math.cosh(t), y:b*Math.sinh(t) });
+      if(Math.hypot(q.x-px(ship).x, q.y-px(ship).y)>40) ctx.fillText('🚢', q.x, q.y+8);
+    }
+    ctx.globalAlpha=1; ctx.textAlign='left';
+  }
+
+  // 배 ↔ 기지국 거리선 (STEP 2부터 굵게 강조)
+  const pS=px(ship), pA=px(A), pB=px(B);
+  const emph = step>=2;
+  segment(pS,pA,'rgba(234,88,12,'+(emph?'1':'.8')+')', emph?3.4:2, emph);
+  segment(pS,pB,'rgba(13,148,136,'+(emph?'1':'.8')+')', emph?3.4:2, emph);
+  midLabel(pS,pA, dist(ship,A).toFixed(0), '#c2410c');
+  midLabel(pS,pB, dist(ship,B).toFixed(0), '#0f766e');
+  if(cVisible){
+    const pC=px(Cst);
+    segment(pS,pC,'rgba(124,58,237,.8)', step===4?2.6:1.6, step===4);
+    midLabel(pS,pC, dist(ship,Cst).toFixed(0), '#6d28d9');
+  }
+
+  // 기지국
+  station(A,'A','#c2410c');
+  station(B,'B','#0f766e');
+  if(cVisible) station(Cst,'C','#6d28d9');
+
+  // 배
+  ctx.font='34px serif'; ctx.textAlign='center';
+  ctx.fillText('🚢', pS.x, pS.y+8);
+  ctx.textAlign='left';
+  const on = step===0 && Math.abs(diffNow - dSel) < 2.5;
+  if(on){
+    ctx.beginPath(); ctx.arc(pS.x,pS.y-2,26,0,7);
+    ctx.strokeStyle='rgba(5,150,105,.8)'; ctx.lineWidth=3;
+    ctx.setLineDash([6,5]); ctx.stroke(); ctx.setLineDash([]);
+  }
+  label('P','#0f172a',pS.x+16,pS.y-16);
+
+  // STEP 4: 위치 확정 마커 (맥동 링)
+  if(step===4){
+    const tt=performance.now()/1000;
+    const r0=24+5*Math.sin(tt*4);
+    ctx.strokeStyle='rgba(22,163,74,.9)'; ctx.lineWidth=3.4;
+    ctx.beginPath(); ctx.arc(pS.x,pS.y-2,r0,0,7); ctx.stroke();
+    ctx.strokeStyle='rgba(22,163,74,.4)'; ctx.lineWidth=2;
+    ctx.beginPath(); ctx.arc(pS.x,pS.y-2,r0+9,0,7); ctx.stroke();
+    label('위치 확정!','#15803d',pS.x+30,pS.y+36);
+  }
+  updateStepBanner();
+
+  updateHud(on);
+
+  function ring(c,r,col,wd){
+    const p=px(c);
+    ctx.strokeStyle=col; ctx.lineWidth=wd||1.2;
+    ctx.beginPath(); ctx.arc(p.x,p.y,r*scale,0,Math.PI*2); ctx.stroke();
+  }
+  function segment(a,b,c,wd,solid){
+    ctx.strokeStyle=c; ctx.lineWidth=wd; ctx.setLineDash(solid?[]:[2,4]);
+    ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke(); ctx.setLineDash([]);
+  }
+  function midLabel(a,b,txt,col){
+    const mx=(a.x+b.x)/2, my=(a.y+b.y)/2;
+    ctx.font='bold 12.5px Georgia,serif';
+    const tw=ctx.measureText(txt).width+12;
+    ctx.fillStyle='rgba(255,255,255,.92)';
+    rr(mx-tw/2,my-10,tw,19,8); ctx.fill();
+    ctx.fillStyle=col; ctx.textAlign='center'; ctx.fillText(txt,mx,my+4); ctx.textAlign='left';
+  }
+  function station(c,name,col){
+    const p=px(c);
+    ctx.fillStyle='rgba(0,0,0,.15)';
+    ctx.beginPath(); ctx.ellipse(p.x,p.y+9,12,3.5,0,0,7); ctx.fill();
+    ctx.strokeStyle=col; ctx.lineWidth=2.6; ctx.lineCap='round';
+    ctx.beginPath();
+    ctx.moveTo(p.x-8,p.y+8); ctx.lineTo(p.x,p.y-13); ctx.lineTo(p.x+8,p.y+8);
+    ctx.moveTo(p.x-4.5,p.y-1); ctx.lineTo(p.x+4.5,p.y-1);
+    ctx.stroke();
+    ctx.fillStyle=col;
+    ctx.beginPath(); ctx.arc(p.x,p.y-15,3,0,7); ctx.fill();
+    for(const s of [1,2]){
+      ctx.strokeStyle=col; ctx.lineWidth=1.4;
+      ctx.beginPath(); ctx.arc(p.x,p.y-15,4+s*4,-2.1,-1.05); ctx.stroke();
+      ctx.beginPath(); ctx.arc(p.x,p.y-15,4+s*4, -2.1+Math.PI, -1.05+Math.PI); ctx.stroke();
+    }
+    label(name,col,p.x+12,p.y+6);
+  }
+  function label(t,c,x,y){
+    ctx.font='bold 16px Georgia,serif';
+    ctx.lineJoin='round'; ctx.strokeStyle='rgba(255,255,255,.92)'; ctx.lineWidth=4;
+    ctx.strokeText(t,x,y); ctx.fillStyle=c; ctx.fillText(t,x,y);
+  }
+  function rr(x,y,w2,h2,r){ ctx.beginPath();
+    ctx.moveTo(x+r,y); ctx.arcTo(x+w2,y,x+w2,y+h2,r); ctx.arcTo(x+w2,y+h2,x,y+h2,r);
+    ctx.arcTo(x,y+h2,x,y,r); ctx.arcTo(x,y,x+w2,y,r); ctx.closePath(); }
+}
+
+/* 초점 A(−60,0),B(60,0) 쌍곡선 |PA−PB|=d */
+function drawHyperbolaAB(d, col, wd){
+  const c=60, a=d/2;
+  ctx.strokeStyle=col; ctx.lineWidth=wd;
+  if(d<1){                                     // 거리차 0 → 수직이등분선
+    ctx.beginPath();
+    ctx.moveTo(O.x, 0); ctx.lineTo(O.x, cv.clientHeight); ctx.stroke();
+    return;
+  }
+  if(a>=c-0.5) return;                         // 퇴화(반직선)는 곡선 없음
+  const b=Math.sqrt(c*c-a*a);
+  for(const sgn of [1,-1]){
+    ctx.beginPath(); let started=false;
+    for(let i=0;i<=140;i++){
+      const t=-3+6*i/140;
+      const p=px({ x:sgn*a*Math.cosh(t), y:b*Math.sinh(t) });
+      if(p.x>-40&&p.x<cv.clientWidth+40&&p.y>-40&&p.y<cv.clientHeight+40){
+        if(!started){ ctx.moveTo(p.x,p.y); started=true; } else ctx.lineTo(p.x,p.y);
+      } else started=false;
+    }
+    ctx.stroke();
+  }
+}
+/* 일반 두 초점 F1,F2 쌍곡선 |PF1−PF2|=d (회전) */
+function drawHyperbola2(F1a, F2a, d, col, wd){
+  const cx=(F1a.x+F2a.x)/2, cy=(F1a.y+F2a.y)/2;
+  const c=dist(F1a,F2a)/2, a=d/2;
+  if(a<0.5 || a>=c-0.5){
+    if(a<0.5){                                 // 수직이등분선
+      const nx=-(F2a.y-F1a.y), ny=F2a.x-F1a.x;
+      const L=Math.hypot(nx,ny)||1;
+      const p1=px({x:cx+nx/L*400, y:cy+ny/L*400}), p2=px({x:cx-nx/L*400, y:cy-ny/L*400});
+      ctx.strokeStyle=col; ctx.lineWidth=wd;
+      ctx.beginPath(); ctx.moveTo(p1.x,p1.y); ctx.lineTo(p2.x,p2.y); ctx.stroke();
+    }
+    return;
+  }
+  const b=Math.sqrt(c*c-a*a);
+  const rot=Math.atan2(F2a.y-F1a.y, F2a.x-F1a.x);
+  const cr=Math.cos(rot), sr=Math.sin(rot);
+  ctx.strokeStyle=col; ctx.lineWidth=wd;
+  for(const sgn of [1,-1]){
+    ctx.beginPath(); let started=false;
+    for(let i=0;i<=140;i++){
+      const t=-3+6*i/140;
+      const ex=sgn*a*Math.cosh(t), ey=b*Math.sinh(t);
+      const p=px({ x:cx+ex*cr-ey*sr, y:cy+ex*sr+ey*cr });
+      if(p.x>-40&&p.x<cv.clientWidth+40&&p.y>-40&&p.y<cv.clientHeight+40){
+        if(!started){ ctx.moveTo(p.x,p.y); started=true; } else ctx.lineTo(p.x,p.y);
+      } else started=false;
+    }
+    ctx.stroke();
+  }
+}
+
+/* ===== HUD & 수식 ===== */
+function updateHud(onCurve){
+  const dA=dist(ship,A), dB=dist(ship,B);
+  const diff=Math.abs(dA-dB);
+  let pulseLine='';
+  if(pulse){
+    const gotA=pulse.r>=dA, gotB=pulse.r>=dB;
+    pulseLine = `<br>📡 전파: A ${gotA?'도착 ✓':'…'} · B ${gotB?'도착 ✓':'…'}`
+      + (gotA&&gotB ? ` → <b>시간차 = 거리차 ${diff.toFixed(0)} km</b>` : '');
+  }
+  hud.innerHTML =
+    `<b>배 P</b> — <span class="rm">P̅A̅</span> = ${dA.toFixed(0)} km · <span class="rm">P̅B̅</span> = ${dB.toFixed(0)} km<br>`+
+    `거리의 차 |<span class="rm">P̅A̅−P̅B̅</span>| = <b>${diff.toFixed(0)} km</b>`+
+    (onCurve ? `<br><span class="ok">✓ 거리차 ${dSel} km — 배는 빨간 쌍곡선 위!</span>` : '')+
+    (showC ? `<br>📡 쌍곡선 2개의 <b>교점</b>이 배의 위치!` : '')+
+    pulseLine;
+}
+function updateDerive(){
+  const a=dSel/2, a2=a*a, b2=3600-a2;
+  document.getElementById('dV').textContent=dSel+' km';
+  document.getElementById('dV2').textContent=dSel;
+  document.getElementById('aV').textContent=a;
+  document.getElementById('a2V').textContent=a2;
+  document.getElementById('a2V2').textContent=a2;
+  document.getElementById('b2V').textContent=b2;
+  document.getElementById('eqA2').innerHTML=a2;
+  document.getElementById('eqB2').innerHTML=b2;
+  const deg=document.getElementById('degNote');
+  const eq=document.getElementById('eqLine'), dv=document.getElementById('derive');
+  if(dSel===0){
+    deg.style.display='block';
+    deg.textContent='⭕ 거리차 0 → 두 점에서 같은 거리 = 선분 AB의 수직이등분선(직선)!';
+    eq.style.opacity=0.25; dv.style.opacity=0.4;
+  } else {
+    deg.style.display='none'; eq.style.opacity=1; dv.style.opacity=1;
+  }
+}
+
+/* ===== 전파 발사 ===== */
+const pulseBtn=document.getElementById('pulseBtn');
+pulseBtn.addEventListener('click',()=>{
+  pulse={ r:0 }; arrivedA=arrivedB=false;
+  pulseBtn.disabled=true;
+  dirty=true;
+});
+
+/* ===== 버튼/슬라이더 ===== */
+const ringBtn=document.getElementById('ringBtn'), cBtn=document.getElementById('cBtn');
+ringBtn.addEventListener('click',()=>{ showRings=!showRings; ringBtn.classList.toggle('on',showRings); dirty=true; });
+cBtn.addEventListener('click',()=>{ showC=!showC; cBtn.classList.toggle('on',showC); dirty=true; });
+
+/* ===== 🧭 위치 찾기 단계 (Step 1~4) ===== */
+let step=0;
+const STEP_TXT={
+  1:'STEP 1 — 두 기지국 A, B가 <b>동시에</b> 전파를 쏩니다 (전파의 속력은 같아요!)',
+  2:'STEP 2 — 도착 <b>시간차</b> × 전파 속력 = <b>거리의 차</b>  |<span class="rm">P̅A̅−P̅B̅</span>| = <b id="stepDiff">?</b> km',
+  3:'STEP 3 — 거리의 차가 일정한 점들의 자취 = <b>쌍곡선</b>. 배는 이 빨간 곡선 위 <b>어딘가!</b>',
+  4:'STEP 4 — 기지국 <b>한 쌍 더</b>(C)! 쌍곡선이 2개 → <b>교점 = 배의 위치 확정</b> 🎯'
+};
+function setStep(n){
+  step=n;
+  document.querySelectorAll('.stepBtn').forEach(b=>b.classList.toggle('on', +b.dataset.s===n && n>0));
+  const txt = n>0 ? STEP_TXT[n] : '';
+  for(const id of ['stepBanner','stepBanner3']){
+    const el=document.getElementById(id);
+    el.style.display = n>0?'block':'none';
+    el.innerHTML=txt;
+  }
+  if(n===1){ pulse={ r:0 }; pulseBtn.disabled=true; }
+  if(n===4 && window.GEO_task) GEO_task('steps');
+  updateStepBanner();
+  dirty=true;
+}
+function updateStepBanner(){
+  if(step<2) return;
+  const diff=Math.abs(dist(ship,A)-dist(ship,B)).toFixed(0);
+  document.querySelectorAll('#stepBanner #stepDiff, #stepBanner3 #stepDiff')
+    .forEach(el=>el.textContent=diff);
+}
+document.querySelectorAll('.stepBtn').forEach(b=>b.addEventListener('click',()=>setStep(+b.dataset.s)));
+document.getElementById('dSl').addEventListener('input',e=>{
+  dSel=parseInt(e.target.value,10);
+  updateDerive(); dirty=true;
+});
+
+/* ===== 포인터 (배 드래그) ===== */
+function pos(e){ const r=cv.getBoundingClientRect(); return {x:e.clientX-r.left, y:e.clientY-r.top}; }
+cv.addEventListener('pointerdown',e=>{
+  const p=pos(e); cv.setPointerCapture(e.pointerId);
+  const pS=px(ship);
+  if(Math.hypot(p.x-pS.x,p.y-pS.y)<46){ draggingShip=true; }
+  else { ship=world(p); clampShip(); draggingShip=true; }
+  dirty=true;
+});
+cv.addEventListener('pointermove',e=>{
+  if(!draggingShip) return;
+  ship=world(pos(e)); clampShip(); dirty=true;
+});
+function clampShip(){
+  ship.x=Math.max(-158,Math.min(158,ship.x));
+  ship.y=Math.max(-46,Math.min(148,ship.y));
+}
+const up=()=>{ draggingShip=false; };
+cv.addEventListener('pointerup',up);
+cv.addEventListener('pointercancel',up);
+
+/* ===== 루프 ===== */
+let lastT=performance.now();
+(function tick(){
+  requestAnimationFrame(tick);
+  const now=performance.now(), dt=(now-lastT)/1000; lastT=now;
+  if(cv.clientWidth!==window.__lw||cv.clientHeight!==window.__lh){
+    window.__lw=cv.clientWidth; window.__lh=cv.clientHeight; layout();
+  }
+  if(step===4) dirty=true;
+  if(pulse){
+    pulse.r += dt*95;                                    // 전파 속도 (연출)
+    const need=Math.max(dist(ship,A),dist(ship,B))+70;
+    if(pulse.r>need && pulse.r>340){ pulse=null; pulseBtn.disabled=false; }
+    dirty=true;
+  }
+  if(dirty){ dirty=false; draw(); }
+})();
+layout(); updateDerive();
+
+/* ═════════ 탭 & three.js 3D ═════════ */
+let tab='map';
+let T=null, renderer3=null, cam3=null;
+let sceneSea=null, sceneTower=null;
+let seaObjs=null, towerObjs=null, seaKey='';
+const orbitSea   = { radius:310, theta:0.45, phi:1.20, target:[0,0,-25] };
+const orbitTower = { radius:280, theta:0.55, phi:1.28, target:[0,52,0] };
+let towerSpin=true, towerCurveOn=true, towerFlowOn=true;
+
+async function loadTHREE(){
+  try { return await import('./three.module.js'); }
+  catch(e){
+    if(window.__THREE_SRC){
+      const u = URL.createObjectURL(new Blob([window.__THREE_SRC], {type:'text/javascript'}));
+      return await import(u);
+    }
+    throw e;
+  }
+}
+function textSprite(txt, color, size){
+  const c = document.createElement('canvas'); c.width=160; c.height=80;
+  const x = c.getContext('2d');
+  x.font = '700 52px Georgia,serif'; x.fillStyle = color;
+  x.lineJoin='round'; x.strokeStyle='rgba(255,255,255,.9)'; x.lineWidth=10;
+  x.textAlign='center'; x.textBaseline='middle';
+  x.strokeText(txt, 80, 40); x.fillText(txt, 80, 40);
+  const sp = new T.Sprite(new T.SpriteMaterial({ map:new T.CanvasTexture(c), transparent:true, depthWrite:false }));
+  sp.scale.set(size*2, size, 1);
+  return sp;
+}
+function glowTex(){
+  const c=document.createElement('canvas'); c.width=c.height=128;
+  const x=c.getContext('2d');
+  const g=x.createRadialGradient(64,64,0,64,64,64);
+  g.addColorStop(0,'rgba(255,255,255,.95)'); g.addColorStop(1,'rgba(255,255,255,0)');
+  x.fillStyle=g; x.fillRect(0,0,128,128);
+  return new T.CanvasTexture(c);
+}
+function applyCam3(){
+  const o = tab==='sea' ? orbitSea : orbitTower;
+  cam3.position.set(
+    o.target[0]+o.radius*Math.sin(o.phi)*Math.sin(o.theta),
+    o.target[1]+o.radius*Math.cos(o.phi),
+    o.target[2]+o.radius*Math.sin(o.phi)*Math.cos(o.theta));
+  cam3.lookAt(o.target[0],o.target[1],o.target[2]);
+}
+function resize3(){
+  const st=document.getElementById('stage3');
+  const w=st.clientWidth, h=st.clientHeight;
+  if(!w||!h||!renderer3) return;
+  renderer3.setSize(w,h,false);
+  cam3.aspect=w/Math.max(h,1);
+  cam3.updateProjectionMatrix();
+}
+function strut(p1,p2,r,mat){
+  const d=new T.Vector3().subVectors(p2,p1);
+  const m=new T.Mesh(new T.CylinderGeometry(r,r,d.length(),8), mat);
+  m.position.copy(p1).add(p2).multiplyScalar(0.5);
+  m.quaternion.setFromUnitVectors(new T.Vector3(0,1,0), d.clone().normalize());
+  return m;
+}
+
+/* ── 🌊 3D 현장 (LORAN 바다) ── */
+function buildSea(){
+  const sc=new T.Scene();
+  sc.add(new T.HemisphereLight(0xdff4ff, 0x1f4a63, 1.0));
+  const dir=new T.DirectionalLight(0xfff3d0, 0.85);
+  dir.position.set(120,180,90);
+  sc.add(dir);
+  const sea=new T.Mesh(new T.CircleGeometry(560,72),
+    new T.MeshStandardMaterial({ color:0x2e7cab, roughness:0.5, metalness:0.15 }));
+  sea.rotation.x=-Math.PI/2;
+  sc.add(sea);
+  const grid=new T.GridHelper(360,12,0xffffff,0xffffff);
+  grid.position.y=0.35;
+  grid.material.transparent=true; grid.material.opacity=0.16;
+  sc.add(grid);
+
+  const mast=(st,letter,col)=>{
+    const g=new T.Group();
+    for(let i=0;i<6;i++){
+      const r1=3-0.38*i, r2=3-0.38*(i+1);
+      const seg=new T.Mesh(new T.CylinderGeometry(r2,r1,7,10),
+        new T.MeshStandardMaterial({ color:(i%2? 0xf5f5f5:0xd94141), roughness:0.55 }));
+      seg.position.y=3.5+7*i;
+      g.add(seg);
+    }
+    const tip=new T.Mesh(new T.CylinderGeometry(0.35,0.35,9,6),
+      new T.MeshStandardMaterial({ color:0x64748b, metalness:0.6, roughness:0.4 }));
+    tip.position.y=46;
+    g.add(tip);
+    const bec=new T.Mesh(new T.SphereGeometry(1.5,12,10),
+      new T.MeshBasicMaterial({ color:0xff5533 }));
+    bec.position.y=51;
+    g.add(bec);
+    g.userData.beacon=bec;
+    const lb=textSprite(letter, col, 16);
+    lb.position.y=62;
+    g.add(lb);
+    g.position.set(st.x,0,-st.y);
+    return g;
+  };
+  const mA=mast(A,'A','#c2410c'), mB=mast(B,'B','#0f766e'), mC=mast(Cst,'C','#6d28d9');
+  mC.visible=false;
+  sc.add(mA); sc.add(mB); sc.add(mC);
+
+  // 배
+  const shipG=new T.Group();
+  const hullM=new T.MeshStandardMaterial({ color:0x24455f, roughness:0.5, metalness:0.3 });
+  const hull=new T.Mesh(new T.BoxGeometry(22,5,8), hullM);
+  hull.position.y=2.5; shipG.add(hull);
+  const bow=new T.Mesh(new T.ConeGeometry(4,9,4), hullM);
+  bow.rotation.z=-Math.PI/2; bow.rotation.y=Math.PI/4;
+  bow.position.set(15,2.5,0); shipG.add(bow);
+  const sup=new T.Mesh(new T.BoxGeometry(9,6.5,6.4),
+    new T.MeshStandardMaterial({ color:0xf1f5f9, roughness:0.6 }));
+  sup.position.set(-4,8,0); shipG.add(sup);
+  const fun=new T.Mesh(new T.CylinderGeometry(1.7,1.9,5,12),
+    new T.MeshStandardMaterial({ color:0xd94141, roughness:0.5 }));
+  fun.position.set(-8.5,13,0); shipG.add(fun);
+  const lbP=textSprite('P','#0f172a',15);
+  lbP.position.y=24;
+  shipG.add(lbP);
+  sc.add(shipG);
+
+  // 곡선/동심원 (상태 바뀔 때 재생성)
+  const curves=new T.Group(); sc.add(curves);
+  // 전파 링 (선 원 6개 — 반지름만 스케일)
+  const rings=[];
+  const circPts=[];
+  for(let i=0;i<=96;i++){ const t=i/96*Math.PI*2; circPts.push(new T.Vector3(Math.cos(t),0,Math.sin(t))); }
+  const circGeo=new T.BufferGeometry().setFromPoints(circPts);
+  for(const [st,col] of [[A,0xea580c],[B,0x0d9488]]){
+    for(let k2=0;k2<3;k2++){
+      const m=new T.Line(circGeo,
+        new T.LineBasicMaterial({ color:col, transparent:true, opacity:0.9-0.22*k2 }));
+      m.position.set(st.x,0.6,-st.y);
+      m.visible=false;
+      sc.add(m); rings.push({m,off:k2*26});
+    }
+  }
+  // STEP 4 위치 확정 마커 (맥동 원)
+  const marker=new T.Line(circGeo, new T.LineBasicMaterial({ color:0x22c55e }));
+  marker.visible=false;
+  sc.add(marker);
+  seaObjs={ mA,mB,mC,shipG,curves,rings,marker };
+  return sc;
+}
+function hyperPts3(F1a,F2a,d,yUp){
+  const out=[];
+  const cx=(F1a.x+F2a.x)/2, cy=(F1a.y+F2a.y)/2;
+  const c=dist(F1a,F2a)/2, a=d/2;
+  if(a<0.5 || a>=c-0.5) return out;
+  const b=Math.sqrt(c*c-a*a);
+  const rot=Math.atan2(F2a.y-F1a.y,F2a.x-F1a.x), cr=Math.cos(rot), sr=Math.sin(rot);
+  for(const sgn of [1,-1]){
+    const br=[];
+    for(let i=0;i<=120;i++){
+      const t=-2.6+5.2*i/120;
+      const ex=sgn*a*Math.cosh(t), ey=b*Math.sinh(t);
+      br.push(new T.Vector3(cx+ex*cr-ey*sr, yUp, -(cy+ex*sr+ey*cr)));
+    }
+    out.push(br);
+  }
+  return out;
+}
+function rebuildSeaCurves(){
+  const g=seaObjs.curves;
+  while(g.children.length){ const ch=g.children.pop(); if(ch.geometry) ch.geometry.dispose(); }
+  const addLines=(brs,col,op)=>{
+    for(const br of brs)
+      g.add(new T.Line(new T.BufferGeometry().setFromPoints(br),
+        new T.LineBasicMaterial({ color:col, transparent:true, opacity:op })));
+  };
+  const diffNow=Math.abs(dist(ship,A)-dist(ship,B));
+  const cVis=(step===0 && showC) || step===4;
+  const dRed = step===0 ? dSel : (step>=3 ? diffNow : -1);
+  if(dRed>=1) addLines(hyperPts3(A,B,dRed,0.7), 0xef4444, 0.95);
+  else if(dRed>=0){                    // 수직이등분선
+    g.add(new T.Line(new T.BufferGeometry().setFromPoints(
+      [new T.Vector3(0,0.7,-420), new T.Vector3(0,0.7,420)]),
+      new T.LineBasicMaterial({ color:0xef4444 })));
+  }
+  if(cVis){
+    addLines(hyperPts3(A,B,diffNow,0.9), 0xea580c, 0.8);
+    addLines(hyperPts3(B,Cst,Math.abs(dist(ship,B)-dist(ship,Cst)),0.9), 0x7c3aed, 0.8);
+  }
+  if(step>=2){                         // 거리선 강조 (기지국 → 배)
+    const segLine=(st,col)=>g.add(new T.Line(new T.BufferGeometry().setFromPoints(
+      [new T.Vector3(st.x,1.6,-st.y), new T.Vector3(ship.x,1.6,-ship.y)]),
+      new T.LineBasicMaterial({ color:col, transparent:true, opacity:0.95 })));
+    segLine(A,0xea580c); segLine(B,0x0d9488);
+    if(step===4) segLine(Cst,0x7c3aed);
+  }
+  if(showRings){
+    for(const [st,col] of [[A,0xea580c],[B,0x0d9488]]){
+      for(let r=20;r<=300;r+=20){
+        const pts=[];
+        for(let i=0;i<=72;i++){
+          const t=i/72*Math.PI*2;
+          pts.push(new T.Vector3(st.x+r*Math.cos(t), 0.45, -st.y+r*Math.sin(t)));
+        }
+        g.add(new T.Line(new T.BufferGeometry().setFromPoints(pts),
+          new T.LineBasicMaterial({ color:col, transparent:true, opacity:0.22 })));
+      }
+    }
+  }
+}
+
+/* ── 🏭 냉각탑 ── */
+const aT=14, ycT=66, cT=46, yBot=8, yTop=104;
+const rT=y=>aT*Math.sqrt(1+((y-ycT)/cT)**2);
+/* 곡선을 "높이별 단면적에 반비례하는 속력"으로 달리도록 τ→u 시간표 생성 (목에서 빨라짐) */
+function airTimeTable(curve){
+  const N=240, M=200;
+  const pts=[]; for(let i=0;i<=N;i++) pts.push(curve.getPointAt(i/N));
+  const cum=[0];
+  for(let i=0;i<N;i++){
+    const my=(pts[i].y+pts[i+1].y)/2;
+    const r=Math.max(aT, Math.min(rT(Math.max(yBot,Math.min(yTop,my))), rT(yBot)));
+    const sp=(aT/r)**2;                              // v ∝ 1/단면적
+    cum.push(cum[cum.length-1] + pts[i].distanceTo(pts[i+1])/Math.max(0.06,sp));
+  }
+  const total=cum[N], u=[];
+  let j=0;
+  for(let k=0;k<=M;k++){
+    const target=k/M*total;
+    while(j<N-1 && cum[j+1]<target) j++;
+    const f=(target-cum[j])/Math.max(1e-9,(cum[j+1]-cum[j]));
+    u.push(Math.min(1,(j+f)/N));
+  }
+  return u;
+}
+function buildTower(){
+  const sc=new T.Scene();
+  sc.add(new T.HemisphereLight(0xe8f4ff, 0x5a7a52, 1.0));
+  const dir=new T.DirectionalLight(0xfff3d0, 0.8);
+  dir.position.set(150,220,110);
+  sc.add(dir);
+  const ground=new T.Mesh(new T.CircleGeometry(560,64),
+    new T.MeshStandardMaterial({ color:0x9dbb8b, roughness:0.9 }));
+  ground.rotation.x=-Math.PI/2;
+  sc.add(ground);
+
+  // 쌍곡면 몸체 (반투명 → 내부 순환이 보임)
+  const prof=[];
+  for(let i=0;i<=44;i++){ const y=yBot+(yTop-yBot)*i/44; prof.push(new T.Vector2(rT(y), y)); }
+  const shell=new T.Mesh(new T.LatheGeometry(prof,72), new T.MeshPhysicalMaterial({
+    color:0xdad9d4, roughness:0.75, metalness:0.05,
+    transparent:true, opacity:0.42, side:T.DoubleSide, depthWrite:false }));
+  sc.add(shell);
+  // 시공 링
+  for(const y of [yBot, 24, 42, ycT, 84, yTop]){
+    const pts=[];
+    for(let i=0;i<=72;i++){ const t=i/72*Math.PI*2;
+      pts.push(new T.Vector3(rT(y)*Math.cos(t), y, rT(y)*Math.sin(t))); }
+    sc.add(new T.Line(new T.BufferGeometry().setFromPoints(pts),
+      new T.LineBasicMaterial({ color:0x8d9aa5, transparent:true, opacity:0.35 })));
+  }
+  // 다리 (X자)
+  const legMat=new T.MeshStandardMaterial({ color:0xb9bcb6, roughness:0.7 });
+  const rb=rT(yBot);
+  for(let k2=0;k2<16;k2++){
+    const t1=k2/16*Math.PI*2, t2=(k2+1)/16*Math.PI*2;
+    sc.add(strut(new T.Vector3((rb+2.5)*Math.cos(t1),0,(rb+2.5)*Math.sin(t1)),
+                 new T.Vector3(rb*Math.cos(t2),yBot,rb*Math.sin(t2)),0.55,legMat));
+    sc.add(strut(new T.Vector3((rb+2.5)*Math.cos(t2),0,(rb+2.5)*Math.sin(t2)),
+                 new T.Vector3(rb*Math.cos(t1),yBot,rb*Math.sin(t1)),0.55,legMat));
+  }
+  // 수조
+  const basin=new T.Mesh(new T.CylinderGeometry(rb+1,rb+1,2.4,48),
+    new T.MeshStandardMaterial({ color:0x2e7cab, roughness:0.3, metalness:0.2 }));
+  basin.position.y=1.2;
+  sc.add(basin);
+
+  // 빨간 쌍곡선 강조 (정면 단면) + 회전 모선
+  const curveG=new T.Group();
+  const mk=side=>{
+    const pts=[];
+    for(let i=0;i<=60;i++){ const y=yBot-4+(yTop-yBot+10)*i/60;
+      pts.push(new T.Vector3(side*rT(Math.max(yBot,Math.min(yTop,y))), y, 0)); }
+    return new T.Line(new T.BufferGeometry().setFromPoints(pts),
+      new T.LineBasicMaterial({ color:0xdc2626 }));
+  };
+  curveG.add(mk(1)); curveG.add(mk(-1));
+  const sweep=new T.Group();
+  sweep.add(mk(1).clone());
+  sweep.children[0].material=new T.LineBasicMaterial({ color:0xf59e0b, transparent:true, opacity:0.75 });
+  curveG.add(sweep);
+  sc.add(curveG);
+
+  // 발전소 + 관
+  const plant=new T.Group();
+  const bld=new T.Mesh(new T.BoxGeometry(28,15,20),
+    new T.MeshStandardMaterial({ color:0xbcc3ca, roughness:0.7 }));
+  bld.position.set(66,7.5,0); plant.add(bld);
+  const roof=new T.Mesh(new T.BoxGeometry(30,2,22),
+    new T.MeshStandardMaterial({ color:0x8d99a6, roughness:0.6 }));
+  roof.position.set(66,16,0); plant.add(roof);
+  sc.add(plant);
+  const hotPath=new T.CatmullRomCurve3([
+    new T.Vector3(60,14,6), new T.Vector3(42,17,6), new T.Vector3(24,18,3), new T.Vector3(6,16.5,0)]);
+  const coldPath=new T.CatmullRomCurve3([
+    new T.Vector3(6,2.2,-8), new T.Vector3(28,2.6,-9), new T.Vector3(46,3.4,-8), new T.Vector3(60,5,-8)]);
+  sc.add(new T.Mesh(new T.TubeGeometry(hotPath,40,1.1,10),
+    new T.MeshStandardMaterial({ color:0xd64545, roughness:0.45 })));
+  sc.add(new T.Mesh(new T.TubeGeometry(coldPath,40,1.1,10),
+    new T.MeshStandardMaterial({ color:0x3b74d6, roughness:0.45 })));
+  // 살수 링
+  const spray=new T.Mesh(new T.TorusGeometry(12,0.9,10,40),
+    new T.MeshStandardMaterial({ color:0xef6a50, roughness:0.5 }));
+  spray.rotation.x=Math.PI/2; spray.position.y=16.5;
+  sc.add(spray);
+
+  // 물방울
+  const drops=[];
+  const dropM=new T.MeshBasicMaterial({ color:0x7db8e8, transparent:true, opacity:0.85 });
+  for(let i=0;i<46;i++){
+    const m=new T.Mesh(new T.SphereGeometry(0.65,8,6), dropM);
+    m.userData={ ang:Math.random()*Math.PI*2, r:3+Math.random()*9.5, ph:Math.random() };
+    sc.add(m); drops.push(m);
+  }
+
+  // 순환 화살표 (원뿔들이 경로를 따라 이동)
+  const flows=[];
+  const addFlow=(curve,color,n,scl2,table)=>{
+    for(let i=0;i<n;i++){
+      const cone=new T.Mesh(new T.ConeGeometry(1.5*(scl2||1), 4.2*(scl2||1), 8),
+        new T.MeshBasicMaterial({ color, transparent:true, opacity:0.9 }));
+      cone.userData={ curve, off:i/n, speed:0.12, table };
+      sc.add(cone); flows.push(cone);
+    }
+  };
+  addFlow(hotPath, 0xef4444, 4);
+  addFlow(coldPath, 0x3b82f6, 4);
+  for(let k2=0;k2<6;k2++){                                   // 공기: 아래에서 들어와 목을 지나 위로
+    const th=k2/6*Math.PI*2+0.3;
+    const ct=Math.cos(th), st2=Math.sin(th);
+    const air=new T.CatmullRomCurve3([
+      new T.Vector3(44*ct,2.5,44*st2), new T.Vector3(28*ct,4,28*st2),
+      new T.Vector3(15*ct,10,15*st2), new T.Vector3(9.5*ct,38,9.5*st2),
+      new T.Vector3(10.5*ct,ycT,10.5*st2), new T.Vector3(12.5*ct,92,12.5*st2),
+      new T.Vector3(14.5*ct,116,14.5*st2)]);
+    addFlow(air, 0x7dd3fc, 3, 0.9, airTimeTable(air));
+  }
+
+  // 증기
+  const gtex=glowTex();
+  const steams=[];
+  for(let i=0;i<12;i++){
+    const s=new T.Sprite(new T.SpriteMaterial({ map:gtex, transparent:true, depthWrite:false, opacity:0.8 }));
+    s.userData={ ph:Math.random(), ox:(Math.random()-0.5)*14, oz:(Math.random()-0.5)*14 };
+    sc.add(s); steams.push(s);
+  }
+  towerObjs={ curveG, sweep, drops, flows, steams };
+  return sc;
+}
+
+/* ── 3D 애니메이션 ── */
+const upV=()=>new T.Vector3(0,1,0);
+function anim3(t, dt2){
+  if(tab==='sea' && seaObjs){
+    const shipDep = (showC||step>=2) ? ship.x.toFixed(1)+','+ship.y.toFixed(1) : '';
+    const key=dSel+'|'+showC+'|'+showRings+'|'+step+'|'+shipDep;
+    if(key!==seaKey){ seaKey=key; rebuildSeaCurves(); }
+    seaObjs.mC.visible = showC || step===4;
+    if(step===4){
+      seaObjs.marker.visible=true;
+      const mr=9+2.5*Math.sin(t*4);
+      seaObjs.marker.position.set(ship.x,1.2,-ship.y);
+      seaObjs.marker.scale.set(mr,1,mr);
+    } else seaObjs.marker.visible=false;
+    if(step>=2) updateStepBanner();
+    seaObjs.shipG.position.set(ship.x,0,-ship.y);
+    seaObjs.shipG.rotation.y=0.25*Math.sin(t*0.4);
+    seaObjs.shipG.position.y=0.5+0.5*Math.sin(t*1.4);
+    for(const g of [seaObjs.mA,seaObjs.mB,seaObjs.mC])
+      g.userData.beacon.material.color.setHex((Math.floor(t*2)%2)? 0xff5533:0x7f1d1d);
+    for(let i=0;i<seaObjs.rings.length;i++){
+      const {m,off}=seaObjs.rings[i];
+      if(pulse){
+        const r=pulse.r-off;
+        if(r>2){ m.visible=true; m.scale.set(r,1,r); }
+        else m.visible=false;
+      } else m.visible=false;
+    }
+  }
+  if(tab==='tow' && towerObjs){
+    towerObjs.sweep.rotation.y = t*0.7;
+    towerObjs.curveG.visible = towerCurveOn;
+    for(const d of towerObjs.drops){
+      const ph=(t*0.32+d.userData.ph)%1;
+      d.position.set(d.userData.r*Math.cos(d.userData.ang), 15.5-13*ph, d.userData.r*Math.sin(d.userData.ang));
+      d.visible = towerFlowOn;
+    }
+    for(const f of towerObjs.flows){
+      const tau=(t*f.userData.speed+f.userData.off)%1;
+      let ph=tau, stretch=1;
+      const tb=f.userData.table;
+      if(tb){                                        // 목에서 가속 (v ∝ 1/r²)
+        const M=tb.length-1, x=tau*M, i0=Math.min(M-1,Math.floor(x)), fr=x-i0;
+        ph = tb[i0]+(tb[i0+1]-tb[i0])*fr;
+        stretch = Math.max(0.55, Math.min(2.6, (tb[i0+1]-tb[i0])*M));   // 국소 속도 배율
+      }
+      const p=f.userData.curve.getPointAt(ph);
+      const tg=f.userData.curve.getTangentAt(ph);
+      f.position.copy(p);
+      f.quaternion.setFromUnitVectors(upV(), tg.normalize());
+      f.scale.set(1, tb? stretch : 1, 1);
+      f.visible = towerFlowOn;
+    }
+    for(const s of towerObjs.steams){
+      const ph=(t*0.13+s.userData.ph)%1;
+      s.position.set(s.userData.ox*(1+ph*1.6), yTop+4+ph*52, s.userData.oz*(1+ph*1.6));
+      const sc2=10+ph*26;
+      s.scale.set(sc2,sc2,1);
+      s.material.opacity=0.75*(1-ph);
+      s.visible = towerFlowOn;
+    }
+    if(towerSpin) orbitTower.theta += dt2*0.10;
+    applyCam3();
+  }
+}
+
+/* ── 3D 초기화/컨트롤 ── */
+async function initThree(){
+  if(T || window.__threeLoading) return;
+  window.__threeLoading=true;
+  document.getElementById('glLoad3').style.display='flex';
+  try{ T=await loadTHREE(); }
+  catch(e){
+    document.getElementById('glLoad3').textContent='3D 모듈을 불러오지 못했어요.';
+    window.__threeLoading=false; return;
+  }
+  const cv3=document.getElementById('cv3');
+  renderer3=new T.WebGLRenderer({ canvas:cv3, antialias:true, alpha:true });
+  renderer3.setPixelRatio(Math.min(devicePixelRatio,2));
+  cam3=new T.PerspectiveCamera(45,1,0.5,3000);
+  sceneSea=buildSea();
+  sceneTower=buildTower();
+  bind3(cv3);
+  resize3(); applyCam3();
+  document.getElementById('glLoad3').style.display='none';
+  window.__threeLoading=false;
+}
+function bind3(canvas){
+  const pts=new Map(); let lastD=0;
+  const dd=()=>{ const a2=[...pts.values()]; return Math.hypot(a2[0].x-a2[1].x,a2[0].y-a2[1].y); };
+  canvas.addEventListener('pointerdown',e=>{
+    canvas.setPointerCapture && canvas.setPointerCapture(e.pointerId);
+    pts.set(e.pointerId,{x:e.clientX,y:e.clientY});
+    if(pts.size===2) lastD=dd();
+  });
+  canvas.addEventListener('pointermove',e=>{
+    const prev=pts.get(e.pointerId);
+    if(!prev) return;
+    const dx=e.clientX-prev.x, dy=e.clientY-prev.y;
+    pts.set(e.pointerId,{x:e.clientX,y:e.clientY});
+    const o=tab==='sea'?orbitSea:orbitTower;
+    if(pts.size===1){
+      o.theta-=dx*0.006;
+      o.phi=Math.max(0.25,Math.min(1.52,o.phi-dy*0.005));
+      if(tab==='tow') towerSpin=false, syncTwBtns();
+    } else if(pts.size===2){
+      const d2=dd();
+      if(lastD) o.radius=Math.max(70,Math.min(900,o.radius*lastD/d2));
+      lastD=d2;
+    }
+    applyCam3();
+  });
+  const up3=e=>{ pts.delete(e.pointerId); lastD=0; };
+  canvas.addEventListener('pointerup',up3);
+  canvas.addEventListener('pointercancel',up3);
+  canvas.addEventListener('wheel',e=>{
+    e.preventDefault();
+    const o=tab==='sea'?orbitSea:orbitTower;
+    o.radius=Math.max(70,Math.min(900,o.radius*(1+e.deltaY*0.0012)));
+    applyCam3();
+  },{passive:false});
+}
+
+/* ── 탭 전환 ── */
+function setTab3(t2){
+  tab=t2;
+  document.getElementById('tabMap').classList.toggle('on',t2==='map');
+  document.getElementById('tabSea').classList.toggle('on',t2==='sea');
+  document.getElementById('tabTow').classList.toggle('on',t2==='tow');
+  document.getElementById('stage').style.display = t2==='map'?'block':'none';
+  const st3=document.getElementById('stage3');
+  st3.style.display = t2==='map'?'none':'block';
+  st3.className = t2==='tow'?'tower':'sea';
+  document.getElementById('sideLoran').style.display = t2==='tow'?'none':'block';
+  document.getElementById('sideTower').style.display = t2==='tow'?'block':'none';
+  document.getElementById('ctrlLoran').style.display = t2==='tow'?'none':'contents';
+  document.getElementById('ctrlTower').style.display = t2==='tow'?'contents':'none';
+  document.getElementById('subT').innerHTML = t2==='tow'
+    ? '발전소 냉각탑이 <b>쌍곡선 모양</b>인 이유 — 잘록한 허리가 공기를 빨아올려요'
+    : '두 기지국 전파의 <b>도착 시간 차</b> → 거리의 차 → 배는 쌍곡선 위에! (교과서 문제 그대로)';
+  if(t2!=='map'){
+    initThree().then(()=>{ requestAnimationFrame(()=>{ resize3(); applyCam3(); }); });
+  } else dirty=true;
+}
+document.getElementById('tabMap').addEventListener('click',()=>setTab3('map'));
+document.getElementById('tabSea').addEventListener('click',()=>setTab3('sea'));
+document.getElementById('tabTow').addEventListener('click',()=>setTab3('tow'));
+
+/* 냉각탑 컨트롤 */
+function syncTwBtns(){
+  document.getElementById('twSpinBtn').classList.toggle('on',towerSpin);
+  document.getElementById('twCurveBtn').classList.toggle('on',towerCurveOn);
+  document.getElementById('twFlowBtn').classList.toggle('on',towerFlowOn);
+}
+document.getElementById('twSpinBtn').addEventListener('click',()=>{ towerSpin=!towerSpin; syncTwBtns(); });
+document.getElementById('twCurveBtn').addEventListener('click',()=>{ towerCurveOn=!towerCurveOn; syncTwBtns(); });
+document.getElementById('twFlowBtn').addEventListener('click',()=>{ towerFlowOn=!towerFlowOn; syncTwBtns(); });
+
+/* 3D 렌더 — 기존 루프에 올라탐 */
+(function tick3(){
+  requestAnimationFrame(tick3);
+  if(tab==='map' || !renderer3) return;
+  const st3=document.getElementById('stage3');
+  if(st3.clientWidth!==window.__l3w || st3.clientHeight!==window.__l3h){
+    window.__l3w=st3.clientWidth; window.__l3h=st3.clientHeight; resize3(); applyCam3();
+  }
+  const now=performance.now()/1000;
+  const dt2=Math.min(0.05, now-(window.__t3||now));
+  window.__t3=now;
+  anim3(now, dt2);
+  renderer3.render(tab==='sea'?sceneSea:sceneTower, cam3);
+})();
+
+// (디버그)
+window.__hb={ get ship(){return {...ship};}, get d(){return dSel;},
+  get diff(){return Math.abs(dist(ship,A)-dist(ship,B));},
+  get rings(){return showRings;}, get c(){return showC;}, get pulsing(){return !!pulse;},
+  get tab(){return tab;}, get three(){return !!T;} };
+</script>
+<script>window.PAGE_ID="happly";</script>
+<script src="nav.js"></script>
+</body>
+</html>

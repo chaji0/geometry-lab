@@ -6,7 +6,7 @@
      먼저 선언한 뒤 이 파일을 불러오면 하단 바가 자동으로 생깁니다.
    ════════════════════════════════════════════════════════════ */
 window.GEO_CONFIG = {
-  VERSION: "v1.16",                 // ★ 1단원=v1.x, 2단원=v2.x, 3단원=v3.x — 업로드마다 뒷자리 +1 (v1.11, v1.12, …)
+  VERSION: "v1.17",                 // ★ 1단원=v1.x, 2단원=v2.x, 3단원=v3.x — 업로드마다 뒷자리 +1 (v1.11, v1.12, …)
   APPS_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbx3Ay-gudjjSoRlngyu54umJ9uYRAKhINuwcv229UZUN9_oIQfm9vwAxM32FOPR9wV1/exec",
   ACTIVITIES: [
     { id:'conic',    href:'conic.html',    icon:'⚾', short:'원뿔곡선',
@@ -30,6 +30,15 @@ window.GEO_CONFIG = {
     { id:'eapply',   href:'ellipse-apply.html', icon:'🪐', short:'타원활용',
       title:'타원의 활용 — 케플러 궤도',
       desc:'소행성 1566 이카루스의 타원 궤도 — 우주에서 케플러 법칙을 눈으로 확인해요. (인터넷 연결 필요)' },
+    { id:'hdraw',    href:'hyperbola.html', icon:'📄', short:'쌍곡선그리기',
+      title:'쌍곡선 그리기 — 종이접기',
+      desc:'원 위의 점이 F′에 닿도록 접고 또 접으면 — F′이 원 안이면 타원, 원 밖이면 쌍곡선이 나타나요!' },
+    { id:'hconcept', href:'hyperbola-concept.html', icon:'📕', short:'쌍곡선개념',
+      title:'쌍곡선 개념 정리',
+      desc:'a, b 값을 움직이며 쌍곡선의 방정식과 초점·꼭짓점·주축·점근선이 어떻게 변하는지 확인해요.' },
+    { id:'happly',   href:'hyperbola-apply.html', icon:'🚢', short:'쌍곡선활용',
+      title:'쌍곡선의 활용 — 전파로 배를 찾아라',
+      desc:'두 기지국 전파의 시간차로 배의 위치를 찾는 교과서 문제를 3D 바다와 냉각탑까지 — 위치 찾기 Step 1~4!' },
     { id:'geogebra', href:'geogebra.html', icon:'📐', short:'지오지브라',
       title:'지오지브라',
       desc:'앱 안에서 바로 열리는 지오지브라 — 클래식·그래핑·기하·3D 계산기. (인터넷 연결 필요)' }
@@ -91,6 +100,9 @@ window.GEO_TASKS = {
   ellipse:  ['make','trace'],                          // 두 탭에서 각각 '타원 확인' 눌러보기
   econcept: ['slider'],                                // a·b 슬라이더 움직이기
   eapply:   ['play'],                                  // 케플러 궤도 재생 버튼
+  hdraw:    ['ell','hyp'],                             // 두 탭에서 각각 '곡선 확인' 눌러보기
+  hconcept: ['slider'],                                // a·b 슬라이더 움직이기
+  happly:   ['steps'],                                 // 위치 찾기 Step 4까지 완주
   geogebra: ['open']                                   // 지오지브라 실행
 };
 window.GEO_task = function(key){
