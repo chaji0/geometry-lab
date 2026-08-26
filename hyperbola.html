@@ -62,13 +62,9 @@ if (localStorage.getItem('geoAppOk') !== '1') location.replace('index.html');
 </head>
 <body>
 <header>
-  <h1>📄 쌍곡선 그리기 — 종이접기로 타원·쌍곡선</h1>
-  <span class="sub" id="subT">파란 원 위의 점이 F′에 닿도록 접으면, 접은 선들이 모여 곡선이 됩니다</span>
+  <h1>🥂 쌍곡선 그리기 — 종이접기</h1>
+  <span class="sub" id="subT">원 <b>밖</b>의 점 F′ — 원 위의 점이 F′에 닿도록 접으면 주름들이 <b>쌍곡선</b>을 그려요</span>
 </header>
-<div id="tabs">
-  <button id="tabEll" class="on">🥚 타원 접기 — F′이 원 안</button>
-  <button id="tabHyp">🥂 쌍곡선 접기 — F′이 원 밖</button>
-</div>
 
 <div id="stage">
   <canvas id="cv"></canvas>
@@ -78,7 +74,7 @@ if (localStorage.getItem('geoAppOk') !== '1') location.replace('index.html');
 
 <div id="bar">
   <button id="autoBtn" class="play">▶ 자동으로 접기</button>
-  <button id="curveBtn">📈 곡선 확인</button>
+  <button id="curveBtn">📈 쌍곡선 확인</button>
   <button id="whyBtn">🔍 원리 보기</button>
   <button id="clearBtn">🧹 모두 지우기</button>
 </div>
@@ -91,7 +87,7 @@ const hintEl = document.getElementById('hint');
 const foldCntEl = document.getElementById('foldCnt');
 
 /* ===== 상태 ===== */
-let mode = 'ell';            // 'ell' | 'hyp'
+const mode = 'hyp';
 let paper = null;            // {x,y,w,h}
 let Fc = null, R = 0;        // 원의 중심(=초점 F)과 반지름
 let F2 = null;               // 두 번째 초점 F′ (드래그 가능)
@@ -191,6 +187,7 @@ function creaseSegment(phi){            // 주름을 종이 안에서 자른 두
 /* ===== 그리기 ===== */
 function draw(){
   const w=cv.clientWidth, h=cv.clientHeight;
+  if(!w || !h || !paper) return;                 // 탭이 숨겨져 있으면 그리지 않음
   const dpr=Math.min(window.devicePixelRatio||1,2);
   if(cv.width!==Math.round(w*dpr)||cv.height!==Math.round(h*dpr)){
     cv.width=Math.round(w*dpr); cv.height=Math.round(h*dpr);
@@ -424,25 +421,10 @@ autoBtn.addEventListener('click',()=>{
 /* ===== 버튼/탭 ===== */
 const curveBtn=document.getElementById('curveBtn'), whyBtn=document.getElementById('whyBtn');
 curveBtn.addEventListener('click',()=>{ showCurve=!showCurve; curveBtn.classList.toggle('on',showCurve); dirty=true;
-  if(window.GEO_task) GEO_task(mode==='ell'?'ell':'hyp'); });
+  if(window.GEO_task) GEO_task('hyp'); });
 whyBtn.addEventListener('click',()=>{ showWhy=!showWhy; whyBtn.classList.toggle('on',showWhy); dirty=true; });
 document.getElementById('clearBtn').addEventListener('click',resetCreases);
 
-function setMode(m){
-  if(mode===m) return;
-  mode=m;
-  document.getElementById('tabEll').classList.toggle('on',m==='ell');
-  document.getElementById('tabHyp').classList.toggle('on',m==='hyp');
-  document.getElementById('subT').textContent = m==='ell'
-    ? '원 안의 점 F′ — 원 위의 점이 F′에 닿도록 접으면 주름들이 타원을 그려요'
-    : '원 밖의 점 F′ — 원 위의 점이 F′에 닿도록 접으면 주름들이 쌍곡선을 그려요';
-  F2=null; resetCreases();
-  if(autoTimer){ clearTimeout(autoTimer); autoTimer=null; autoBtn.disabled=false; }
-  activeFold=null;
-  layout(); presetF2(); clampF2(); dirty=true;
-}
-document.getElementById('tabEll').addEventListener('click',()=>setMode('ell'));
-document.getElementById('tabHyp').addEventListener('click',()=>setMode('hyp'));
 
 /* ===== 포인터 ===== */
 function pos(e){ const r=cv.getBoundingClientRect(); return {x:e.clientX-r.left, y:e.clientY-r.top}; }

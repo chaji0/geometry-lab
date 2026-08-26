@@ -83,11 +83,12 @@ if (localStorage.getItem('geoAppOk') !== '1') location.replace('index.html');
 <body>
 <header>
   <h1>🧵 타원 그리기</h1>
-  <span class="sub">두 초점으로부터 거리의 합이 일정한 점들의 자취 — 실로도, 자취로도 그려 봐요</span>
+  <span class="sub">두 초점으로부터 거리의 합이 일정한 점들의 자취 — 실·자취·종이접기 세 가지 방법으로 그려 봐요</span>
 </header>
 <div id="tabs">
   <button id="tabMake" class="on">🧵 실로 그리기</button>
   <button id="tabTrace">🖥️ 자취로 그리기</button>
+  <button id="tabFold">📄 종이접기</button>
 </div>
 
 <!-- ═══════ 탭 1: 실로 타원 만들기 ═══════ -->
@@ -136,19 +137,41 @@ if (localStorage.getItem('geoAppOk') !== '1') location.replace('index.html');
   </div>
 </div>
 
+<!-- ═══════ 탭 3: 종이접기로 타원 만들기 ═══════ -->
+<div class="sec" id="secFold">
+  <div class="stage">
+    <canvas id="fdCv"></canvas>
+    <div class="step">
+      원 <b>안</b>의 점 <b class="rm">F′</b>을 정하고, 파란 원 위의 점 <b class="rm">A</b>가
+      <b class="rm">F′</b>에 닿도록 접어요.<br>
+      주름은 선분 <b class="rm">AF′</b>의 <b>수직이등분선</b> —
+      접은 선들이 모여 <b>타원</b>을 그립니다!
+    </div>
+    <div class="hint" id="fdHint">👇 <b style="color:#0e7fa8">파란 원</b>을 손가락으로 꾹 눌러 보세요 (F′도 끌어서 옮길 수 있어요)</div>
+    <div class="cnt">접은 횟수 <b id="fdCnt">0</b></div>
+  </div>
+  <div class="bar">
+    <button id="fdAuto" class="play">▶ 자동으로 접기</button>
+    <button id="fdCurve">📈 타원 확인</button>
+    <button id="fdWhy">🔍 원리 보기</button>
+    <button id="fdClear">🧹 모두 지우기</button>
+  </div>
+</div>
+
 <script>
 'use strict';
 /* ═══════ 탭 전환 ═══════ */
 const relayouts = [];
 function setTab(t){
-  document.getElementById('tabMake').classList.toggle('on', t==='make');
-  document.getElementById('tabTrace').classList.toggle('on', t==='trace');
-  document.getElementById('secMake').classList.toggle('on', t==='make');
-  document.getElementById('secTrace').classList.toggle('on', t==='trace');
+  for(const [k,tab,sec] of [['make','tabMake','secMake'],['trace','tabTrace','secTrace'],['fold','tabFold','secFold']]){
+    document.getElementById(tab).classList.toggle('on', t===k);
+    document.getElementById(sec).classList.toggle('on', t===k);
+  }
   requestAnimationFrame(()=>relayouts.forEach(f=>f()));
 }
 document.getElementById('tabMake').addEventListener('click',()=>setTab('make'));
 document.getElementById('tabTrace').addEventListener('click',()=>setTab('trace'));
+document.getElementById('tabFold').addEventListener('click',()=>setTab('fold'));
 
 /* ═══════ 탭 1: 실로 타원 만들기 ═══════ */
 (function(){
@@ -670,6 +693,401 @@ let lw=0, lh=0;
   if(cv.clientWidth!==lw || cv.clientHeight!==lh){ lw=cv.clientWidth; lh=cv.clientHeight; layout(); }
   if(dirty){ dirty=false; draw(); }
 })();
+})();
+
+/* ═══════ 탭 3: 종이접기 (타원) ═══════ */
+(function(){
+const cv = document.getElementById('fdCv');
+const ctx = cv.getContext('2d');
+const hintEl = document.getElementById('fdHint');
+const foldCntEl = document.getElementById('fdCnt');
+
+/* ===== 상태 ===== */
+const mode = 'ell';
+let paper = null;            // {x,y,w,h}
+let Fc = null, R = 0;        // 원의 중심(=초점 F)과 반지름
+let F2 = null;               // 두 번째 초점 F′ (드래그 가능)
+let creases = [];            // 접은 각도 φ 목록
+let activeFold = null;       // {phi, t, target, commit}
+let autoTimer = null;
+let showCurve = false, showWhy = false;
+let whyPhi = 0.7;
+let draggingF2 = false, draggingRim = false, draggingWhy = false;
+let dirty = true;
+
+function layout(){
+  const w = cv.clientWidth, h = cv.clientHeight;
+  if(!w || !h) return;
+  const mw = Math.min(70, w*0.07), mtop = Math.min(46, h*0.09), mbot = Math.min(42, h*0.09);
+  paper = { x:mw, y:mtop, w:w-2*mw, h:h-mtop-mbot };
+  R = Math.min(paper.h*0.335, paper.w*0.24);
+  Fc = { x: paper.x + paper.w*(mode==='hyp' ? 0.36 : 0.5), y: paper.y + paper.h*0.5 };
+  if(!F2) presetF2();
+  clampF2();
+  dirty = true;
+}
+function presetF2(){
+  F2 = mode==='ell'
+    ? { x: Fc.x + R*0.55, y: Fc.y - R*0.10 }
+    : { x: Fc.x + R*1.55, y: Fc.y - R*0.12 };
+}
+function clampF2(){
+  let gx = F2.x-Fc.x, gy = F2.y-Fc.y;
+  let d = Math.hypot(gx,gy) || 1;
+  if(mode==='ell'){
+    const lo = R*0.10, hi = R - 24;
+    if(d < lo){ gx*=lo/d; gy*=lo/d; d=lo; }
+    if(d > hi){ gx*=hi/d; gy*=hi/d; d=hi; }
+  } else {
+    const lo = R + 22;
+    if(d < lo){ gx*=lo/d; gy*=lo/d; d=lo; }
+  }
+  F2.x = Fc.x+gx; F2.y = Fc.y+gy;
+  // 종이 안에 머무르기
+  F2.x = Math.max(paper.x+26, Math.min(paper.x+paper.w-26, F2.x));
+  F2.y = Math.max(paper.y+26, Math.min(paper.y+paper.h-26, F2.y));
+}
+
+/* ===== 수학 ===== */
+const Apt = phi => ({ x: Fc.x + R*Math.cos(phi), y: Fc.y + R*Math.sin(phi) });
+function creaseOf(phi){                 // 접는 선 = A̅F̅′의 수직이등분선
+  const A = Apt(phi);
+  const M = { x:(A.x+F2.x)/2, y:(A.y+F2.y)/2 };
+  let nx = A.x-F2.x, ny = A.y-F2.y;     // A쪽 법선
+  const L = Math.hypot(nx,ny)||1; nx/=L; ny/=L;
+  return { A, M, nx, ny, dx:-ny, dy:nx };
+}
+function tangentPt(phi){                // 접선(주름)과 직선 FA의 접점 P
+  const gx = F2.x-Fc.x, gy = F2.y-Fc.y;
+  const ux = Math.cos(phi), uy = Math.sin(phi);
+  const den = 2*(ux*gx + uy*gy - R);
+  if(Math.abs(den) < 1e-6) return null; // 점근선 방향
+  const t = (gx*gx+gy*gy - R*R) / den;
+  return { x: Fc.x + t*ux, y: Fc.y + t*uy, t };
+}
+function reflectAcross(cr, p){
+  const vx = p.x-cr.M.x, vy = p.y-cr.M.y;
+  const d = vx*cr.dx + vy*cr.dy;
+  return { x: cr.M.x + 2*d*cr.dx - vx, y: cr.M.y + 2*d*cr.dy - vy };
+}
+function flapPolygon(phi){              // A를 포함하는 반평면으로 자른 종이 조각
+  const cr = creaseOf(phi);
+  const s = p => (p.x-cr.M.x)*cr.nx + (p.y-cr.M.y)*cr.ny;
+  const rect = [ {x:paper.x,y:paper.y},{x:paper.x+paper.w,y:paper.y},
+                 {x:paper.x+paper.w,y:paper.y+paper.h},{x:paper.x,y:paper.y+paper.h} ];
+  const out = [];
+  for(let i=0;i<4;i++){
+    const a = rect[i], b = rect[(i+1)%4], sa = s(a), sb = s(b);
+    if(sa >= 0) out.push(a);
+    if((sa>=0) !== (sb>=0)){
+      const t = sa/(sa-sb);
+      out.push({ x:a.x+(b.x-a.x)*t, y:a.y+(b.y-a.y)*t });
+    }
+  }
+  return { poly:out, cr, s };
+}
+function creaseSegment(phi){            // 주름을 종이 안에서 자른 두 끝점 (Liang–Barsky)
+  const cr = creaseOf(phi);
+  let t0=-1e9, t1=1e9;
+  const clip=(p,q)=>{ if(Math.abs(p)<1e-9) return q>=0;
+    const r=q/p; if(p<0){ if(r>t1) return false; if(r>t0) t0=r; }
+    else { if(r<t0) return false; if(r<t1) t1=r; } return true; };
+  const {M,dx,dy}=cr;
+  if(!clip(-dx, M.x-paper.x)) return null;
+  if(!clip( dx, paper.x+paper.w-M.x)) return null;
+  if(!clip(-dy, M.y-paper.y)) return null;
+  if(!clip( dy, paper.y+paper.h-M.y)) return null;
+  return [ {x:M.x+t0*dx, y:M.y+t0*dy}, {x:M.x+t1*dx, y:M.y+t1*dy} ];
+}
+
+/* ===== 그리기 ===== */
+function draw(){
+  const w=cv.clientWidth, h=cv.clientHeight;
+  if(!w || !h || !paper) return;                 // 탭이 숨겨져 있으면 그리지 않음
+  const dpr=Math.min(window.devicePixelRatio||1,2);
+  if(cv.width!==Math.round(w*dpr)||cv.height!==Math.round(h*dpr)){
+    cv.width=Math.round(w*dpr); cv.height=Math.round(h*dpr);
+  }
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.fillStyle='#f1f5fb'; ctx.fillRect(0,0,w,h);
+
+  // 종이
+  ctx.save(); ctx.shadowColor='rgba(120,90,20,.18)'; ctx.shadowBlur=14; ctx.shadowOffsetY=5;
+  ctx.fillStyle='#fdf3d8';
+  ctx.beginPath(); ctx.rect(paper.x,paper.y,paper.w,paper.h); ctx.fill(); ctx.restore();
+  ctx.strokeStyle='#e8cf96'; ctx.lineWidth=2;
+  ctx.strokeRect(paper.x,paper.y,paper.w,paper.h);
+
+  // 접은 선들 (회색 주름)
+  ctx.strokeStyle='rgba(120,113,108,.5)'; ctx.lineWidth=1.4;
+  for(const phi of creases){
+    const seg=creaseSegment(phi);
+    if(seg){ ctx.beginPath(); ctx.moveTo(seg[0].x,seg[0].y); ctx.lineTo(seg[1].x,seg[1].y); ctx.stroke(); }
+  }
+
+  // 곡선 확인 (빨강)
+  if(showCurve) drawConic();
+
+  // 파란 원 (이 원 위의 점을 F′에 닿게 접는다)
+  ctx.strokeStyle='#2e9fc4'; ctx.lineWidth=4.5; ctx.lineCap='round';
+  ctx.beginPath(); ctx.arc(Fc.x,Fc.y,R,0,Math.PI*2); ctx.stroke();
+
+  // 접는 중인 플랩 / 원리 보기의 접힌 상태
+  if(activeFold && activeFold.t>0.005) drawFlap(activeFold.phi, activeFold.t);
+  else if(showWhy) drawFlap(whyPhi, 1);
+
+  // 원리 보기
+  if(showWhy) drawWhy();
+
+  // 초점들
+  dot(Fc.x,Fc.y,7,'#dc2626');
+  label('F','#b91c1c',Fc.x-24,Fc.y+5);
+  dot(F2.x,F2.y,8,'#dc2626');
+  ctx.strokeStyle='#fff'; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.arc(F2.x,F2.y,8,0,7); ctx.stroke();
+  label('F′','#b91c1c',F2.x+12,F2.y+5);
+}
+
+function drawFlap(phi, rawT){
+  const { poly, cr, s } = flapPolygon(phi);
+  if(poly.length<3) return;
+  const t = easeInOut(rawT);
+  ctx.beginPath();
+  poly.forEach((p,i)=>{
+    const r=reflectAcross(cr,p);
+    const x=p.x+(r.x-p.x)*t, y=p.y+(r.y-p.y)*t;
+    i? ctx.lineTo(x,y) : ctx.moveTo(x,y);
+  });
+  ctx.closePath();
+  ctx.fillStyle='rgba(211,168,116,.92)'; ctx.fill();
+  ctx.strokeStyle='#a97b45'; ctx.lineWidth=2; ctx.stroke();
+  // 접혀 넘어가는 파란 원의 호
+  ctx.strokeStyle='#2e9fc4'; ctx.lineWidth=4; ctx.lineCap='round';
+  ctx.beginPath(); let started=false;
+  for(let i=0;i<=140;i++){
+    const a2=i/140*Math.PI*2;
+    const p=Apt(a2);
+    if(s(p) >= 0){
+      const r=reflectAcross(cr,p);
+      const x=p.x+(r.x-p.x)*t, y=p.y+(r.y-p.y)*t;
+      if(!started){ ctx.moveTo(x,y); started=true; } else ctx.lineTo(x,y);
+    } else started=false;
+  }
+  ctx.stroke();
+  // 접혀 가는 점 A (F′로 이동 중)
+  const A=cr.A, Am=reflectAcross(cr,A);
+  const ax=A.x+(Am.x-A.x)*t, ay=A.y+(Am.y-A.y)*t;
+  dot(ax,ay,6,'#0e7fa8');
+  label('A','#0e7fa8',ax+12,ay+4);
+}
+
+function drawWhy(){
+  const phi=whyPhi, cr=creaseOf(phi), P=tangentPt(phi);
+  const seg=creaseSegment(phi);
+  if(seg){ ctx.strokeStyle='#8b5cf6'; ctx.lineWidth=3;
+    ctx.beginPath(); ctx.moveTo(seg[0].x,seg[0].y); ctx.lineTo(seg[1].x,seg[1].y); ctx.stroke(); }
+  // A–F′ (점선) — 주름이 그 수직이등분선
+  dash([cr.A, F2],'rgba(100,116,139,.8)',1.6);
+  if(P){
+    // 직선 FA (P가 그 위에)
+    dash([Fc, P.t>R ? P : cr.A],'rgba(100,116,139,.55)',1.3);
+    // PF′, PA (같은 길이) + PF
+    seg2(P, F2, '#ea580c'); seg2(P, cr.A, '#ea580c');
+    tick((P.x+F2.x)/2,(P.y+F2.y)/2, P, F2);
+    tick((P.x+cr.A.x)/2,(P.y+cr.A.y)/2, P, cr.A);
+    seg2(P, Fc, '#0e7490');
+    dot(P.x,P.y,7,'#16a34a'); label('P','#15803d',P.x+12,P.y-9);
+    ctx.beginPath(); ctx.arc(P.x,P.y,15,0,7);
+    ctx.strokeStyle='rgba(22,163,74,.55)'; ctx.lineWidth=1.6;
+    ctx.setLineDash([4,4]); ctx.stroke(); ctx.setLineDash([]);
+  }
+  bubble();
+}
+
+function drawConic(){
+  const gx=F2.x-Fc.x, gy=F2.y-Fc.y;
+  const c2=Math.hypot(gx,gy)/2, a2=R/2;
+  const cen={ x:(Fc.x+F2.x)/2, y:(Fc.y+F2.y)/2 };
+  const rot=Math.atan2(gy,gx), cr2=Math.cos(rot), sr2=Math.sin(rot);
+  ctx.strokeStyle='#ef4444'; ctx.lineWidth=3;
+  const inPaper=p=>p.x>paper.x-2&&p.x<paper.x+paper.w+2&&p.y>paper.y-2&&p.y<paper.y+paper.h+2;
+  if(mode==='ell'){
+    const b2=Math.sqrt(Math.max(4,a2*a2-c2*c2));
+    ctx.beginPath();
+    for(let i=0;i<=180;i++){
+      const th=i/180*Math.PI*2;
+      const ex=a2*Math.cos(th), ey=b2*Math.sin(th);
+      const x=cen.x+ex*cr2-ey*sr2, y=cen.y+ex*sr2+ey*cr2;
+      i? ctx.lineTo(x,y) : ctx.moveTo(x,y);
+    }
+    ctx.closePath(); ctx.stroke();
+  } else {
+    const b2=Math.sqrt(Math.max(4,c2*c2-a2*a2));
+    for(const sgn of [1,-1]){
+      ctx.beginPath(); let started=false;
+      for(let i=0;i<=160;i++){
+        const s3=-2.6+5.2*i/160;
+        const ex=sgn*a2*Math.cosh(s3), ey=b2*Math.sinh(s3);
+        const p={ x:cen.x+ex*cr2-ey*sr2, y:cen.y+ex*sr2+ey*cr2 };
+        if(inPaper(p)){
+          if(!started){ ctx.moveTo(p.x,p.y); started=true; } else ctx.lineTo(p.x,p.y);
+        } else started=false;
+      }
+      ctx.stroke();
+    }
+  }
+}
+
+function dot(x,y,r,c){ ctx.fillStyle=c; ctx.beginPath(); ctx.arc(x,y,r,0,7); ctx.fill(); }
+function label(text,color,x,y,align){
+  ctx.font='bold 15px Georgia,serif'; ctx.textAlign=align||'left';
+  ctx.lineJoin='round'; ctx.strokeStyle='rgba(255,255,255,.9)'; ctx.lineWidth=4;
+  ctx.strokeText(text,x,y); ctx.fillStyle=color; ctx.fillText(text,x,y);
+  ctx.textAlign='left';
+}
+function dash(pts,c,wd){ ctx.strokeStyle=c; ctx.lineWidth=wd; ctx.setLineDash([7,6]);
+  ctx.beginPath(); ctx.moveTo(pts[0].x,pts[0].y); ctx.lineTo(pts[1].x,pts[1].y); ctx.stroke(); ctx.setLineDash([]); }
+function seg2(a,b,c){ ctx.strokeStyle=c; ctx.lineWidth=3.2; ctx.lineCap='round';
+  ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke(); }
+function tick(mx,my,a,b){
+  let dx=b.x-a.x, dy=b.y-a.y; const L=Math.hypot(dx,dy)||1;
+  const nx=-dy/L, ny=dx/L;
+  ctx.strokeStyle='#ea580c'; ctx.lineWidth=2.4;
+  for(const o of [-2.6,2.6]){
+    const cx2=mx+(dx/L)*o, cy2=my+(dy/L)*o;
+    ctx.beginPath(); ctx.moveTo(cx2-nx*7,cy2-ny*7); ctx.lineTo(cx2+nx*7,cy2+ny*7); ctx.stroke();
+  }
+}
+function bubble(){
+  const msgs = mode==='ell'
+    ? ['💡 초록 점 P를 손으로 끌어 보세요',
+       '주름은 A̅F̅′의 수직이등분선 → P̅F̅′ = P̅A̅',
+       'P̅F̅ + P̅F̅′ = P̅F̅ + P̅A̅ = F̅A̅ = (반지름, 일정!)',
+       '→ 주름들이 그리는 곡선은 타원']
+    : ['💡 초록 점 P를 손으로 끌어 보세요',
+       '주름은 A̅F̅′의 수직이등분선 → P̅F̅′ = P̅A̅',
+       '| P̅F̅ − P̅F̅′ | = | P̅F̅ − P̅A̅ | = F̅A̅ = (반지름, 일정!)',
+       '→ 주름들이 그리는 곡선은 쌍곡선'];
+  ctx.font='bold 13.5px sans-serif';
+  const bw=Math.max(...msgs.map(m=>ctx.measureText(m).width))+26;
+  const bx=Math.min(Math.max(paper.x+8, Fc.x-bw/2), paper.x+paper.w-bw-8);
+  const by=paper.y+10;
+  ctx.fillStyle='rgba(255,255,255,.94)'; ctx.strokeStyle='#c7d2fe'; ctx.lineWidth=1.5;
+  roundRect(bx,by,bw,96,10); ctx.fill(); ctx.stroke();
+  ctx.fillStyle='#0369a1'; ctx.fillText(msgs[0],bx+13,by+22);
+  ctx.fillStyle='#334155';
+  ctx.fillText(msgs[1],bx+13,by+44); ctx.fillText(msgs[2],bx+13,by+66);
+  ctx.fillStyle='#b91c1c'; ctx.fillText(msgs[3],bx+13,by+88);
+}
+function roundRect(x,y,w2,h2,r){ ctx.beginPath();
+  ctx.moveTo(x+r,y); ctx.arcTo(x+w2,y,x+w2,y+h2,r); ctx.arcTo(x+w2,y+h2,x,y+h2,r);
+  ctx.arcTo(x,y+h2,x,y,r); ctx.arcTo(x,y,x+w2,y,r); ctx.closePath(); }
+
+const easeInOut=t=>t<0.5 ? 2*t*t : 1-Math.pow(-2*t+2,2)/2;
+
+/* ===== 애니메이션 루프 ===== */
+let lastCW=0, lastCH=0;
+function tickLoop(){
+  requestAnimationFrame(tickLoop);
+  if(cv.clientWidth!==lastCW || cv.clientHeight!==lastCH){
+    lastCW=cv.clientWidth; lastCH=cv.clientHeight; layout();
+  }
+  if(activeFold){
+    const speed=0.09;
+    if(Math.abs(activeFold.t-activeFold.target)<speed){
+      activeFold.t=activeFold.target;
+      if(activeFold.target===0){
+        if(activeFold.commit) addCrease(activeFold.phi);
+        activeFold=null;
+      }
+    } else activeFold.t += (activeFold.target>activeFold.t? speed : -speed);
+    dirty=true;
+  }
+  if(dirty){ dirty=false; draw(); }
+}
+function startFold(phi){
+  if(activeFold && activeFold.commit) addCrease(activeFold.phi);
+  activeFold={phi, t:0, target:1, commit:true};
+  dirty=true;
+}
+function addCrease(phi){
+  creases.push(phi);
+  foldCntEl.textContent=creases.length;
+  if(creases.length===1) hintEl.style.opacity=0;
+  dirty=true;
+}
+function resetCreases(){ creases=[]; foldCntEl.textContent=0; dirty=true; }
+
+/* ===== 자동 접기 ===== */
+const autoBtn=document.getElementById('fdAuto');
+autoBtn.addEventListener('click',()=>{
+  if(autoTimer) return;
+  autoBtn.disabled=true;
+  const N=32; let i=0;
+  const step=()=>{
+    if(i>=N){ autoTimer=null; autoBtn.disabled=false; return; }
+    startFold(i/N*Math.PI*2 + 0.13);
+    setTimeout(()=>{ if(activeFold) activeFold.target=0; },170);
+    i++;
+    autoTimer=setTimeout(step, 300);
+  };
+  step();
+});
+
+/* ===== 버튼/탭 ===== */
+const curveBtn=document.getElementById('fdCurve'), whyBtn=document.getElementById('fdWhy');
+curveBtn.addEventListener('click',()=>{ showCurve=!showCurve; curveBtn.classList.toggle('on',showCurve); dirty=true;
+  if(window.GEO_task) GEO_task('fold'); });
+whyBtn.addEventListener('click',()=>{ showWhy=!showWhy; whyBtn.classList.toggle('on',showWhy); dirty=true; });
+document.getElementById('fdClear').addEventListener('click',resetCreases);
+
+
+/* ===== 포인터 ===== */
+function pos(e){ const r=cv.getBoundingClientRect(); return {x:e.clientX-r.left, y:e.clientY-r.top}; }
+const angOf = p => Math.atan2(p.y-Fc.y, p.x-Fc.x);
+cv.addEventListener('pointerdown',e=>{
+  const p=pos(e);
+  cv.setPointerCapture(e.pointerId);
+  if(Math.hypot(p.x-F2.x,p.y-F2.y)<26){ draggingF2=true; return; }   // F′ 드래그
+  if(showWhy){
+    const P=tangentPt(whyPhi);
+    if(P && Math.hypot(p.x-P.x,p.y-P.y)<30){ draggingWhy=true; return; }
+    const A=Apt(whyPhi);
+    if(Math.hypot(p.x-A.x,p.y-A.y)<30){ draggingWhy=true; return; }
+  }
+  const d=Math.hypot(p.x-Fc.x,p.y-Fc.y);
+  if(Math.abs(d-R)<38){                                               // 원 위 → 접기 시작
+    draggingRim=true;
+    startFold(angOf(p));
+  }
+});
+cv.addEventListener('pointermove',e=>{
+  const p=pos(e);
+  if(draggingF2){
+    F2.x=p.x; F2.y=p.y; clampF2();
+    if(creases.length) resetCreases();                                 // F′ 이동 → 주름 무효
+    dirty=true;
+  } else if(draggingWhy){
+    whyPhi=angOf(p); dirty=true;
+  } else if(draggingRim && activeFold){
+    activeFold.phi=angOf(p); dirty=true;
+  }
+});
+const up=()=>{
+  if(draggingRim && activeFold) activeFold.target=0;   // 펴기 → 주름 기록
+  draggingF2=draggingRim=draggingWhy=false;
+};
+cv.addEventListener('pointerup',up);
+cv.addEventListener('pointercancel',up);
+
+/* ===== 시작 ===== */
+layout(); tickLoop();
+relayouts.push(layout);
+// (디버그)
+window.__fd={ get mode(){return mode;}, get n(){return creases.length;}, get R(){return R;},
+  get F2(){return {...F2};}, get Fc(){return {...Fc};},
+  get curve(){return showCurve;}, get why(){return showWhy;} };
+
 })();
 </script>
 <script>window.PAGE_ID="ellipse";</script>

@@ -52,14 +52,24 @@
   .hello { font-size:14px; color:#334155; margin-bottom:12px; text-align:center; }
   .hello b { color:#0369a1; }
   .mat {
-    display:block; text-decoration:none; color:inherit;
-    border:1.5px solid #e2e8f0; border-radius:14px; padding:15px 16px; margin-top:10px;
-    background:#fbfdff; transition:all .15s;
+    display:block; border:1.5px solid #e2e8f0; border-radius:14px; padding:14px 16px;
+    background:#fff; text-decoration:none; transition:all .13s; cursor:pointer;
   }
   .mat:hover { border-color:#0284c7; background:#f0f9ff; transform:translateY(-1px); }
-  .mat .t { font-size:15.5px; font-weight:800; color:#0f172a; }
-  .mat .d { font-size:12.5px; color:#64748b; margin-top:4px; line-height:1.6; }
-  .mat .go { font-size:12px; color:#0284c7; font-weight:700; margin-top:7px; }
+  .mat .t { font-size:16.5px; font-weight:800; color:#0f172a; display:flex; align-items:center; gap:8px; }
+  .mat .t .arw { margin-left:auto; font-size:13px; color:#94a3b8; transition:transform .18s; }
+  .mat.open .arw { transform:rotate(180deg); }
+  .subList { display:none; margin:8px 0 2px; padding-left:4px; }
+  .mat.open + .subList, .subList.open { display:block; }
+  .subItem {
+    display:flex; align-items:center; gap:9px; padding:11px 14px; margin-top:7px;
+    border:1.5px solid #e2e8f0; border-radius:12px; background:#fbfdff;
+    text-decoration:none; color:#334155; font-size:14.5px; font-weight:700; transition:all .12s;
+  }
+  .subItem:hover { border-color:#0284c7; background:#f0f9ff; color:#0369a1; }
+  .subItem .ic { font-size:17px; }
+  .subItem .chk { margin-left:auto; font-size:12px; font-weight:800; color:#2563eb; }
+  .subItem.done { border-color:#93c5fd; background:#eff6ff; }
   #logout {
     margin-top:14px; width:100%; padding:9px 0; font-size:12.5px; font-weight:700;
     background:#fff; color:#94a3b8; border:1.5px solid #e2e8f0; border-radius:10px; cursor:pointer;
@@ -87,7 +97,7 @@
   }
   .homeHead b { font-size:16px; color:#0f172a; }
   .mat { position:relative; }
-  .mat.done { border:3px solid #2563eb; background:#eff6ff; }
+  .mat.done { border:2.5px solid #2563eb; background:#eff6ff; }
   .stamp {
     position:absolute; right:11px; bottom:10px; color:#2563eb;
     border:2.5px solid #2563eb; border-radius:9px; padding:2px 9px;
@@ -212,15 +222,47 @@ function doneList(){
 }
 function renderActs(){
   const done = doneList();
-  $('matList').innerHTML = GEO_CONFIG.ACTIVITIES.map(m=>{
-    const d = done.includes(m.id);
-    return `<a class="mat${d?' done':''}" href="${m.href}">
-       <div class="t">${m.icon} ${m.title}</div>
-       <div class="d">${m.desc}</div>
-       <div class="go">탐구하러 가기 →</div>
-       ${d? '<div class="stamp">완료</div>':''}
-     </a>`;
+  const acts = GEO_CONFIG.ACTIVITIES;
+  const open = (()=>{ try{ return JSON.parse(sessionStorage.getItem('geoOpenGrp')||'[]'); }catch(e){ return []; } })();
+  const html = GEO_CONFIG.HOME_GROUPS.map(g=>{
+    const kids = acts.filter(a=>a.grp===g.key);
+    if(kids.length===1 && g.key==='conic'){                       // 단일 활동 → 바로 이동
+      const k = kids[0], d = done.includes(k.id);
+      return `<a class="mat${d?' done':''}" href="${k.href}">
+         <div class="t">${g.icon} ${g.title}</div>
+         ${d? '<div class="stamp">완료</div>':''}
+       </a>`;
+    }
+    const allDone = kids.length>0 && kids.every(k=>done.includes(k.id));
+    const isOpen = open.includes(g.key);
+    return `<div class="mat grpHead${allDone?' done':''}${isOpen?' open':''}" data-grp="${g.key}">
+         <div class="t">${g.icon} ${g.title}<span class="arw">▼</span></div>
+         ${allDone? '<div class="stamp">완료</div>':''}
+       </div>
+       <div class="subList${isOpen?' open':''}" data-sub="${g.key}">
+         ${kids.map(k=>{
+            const d = done.includes(k.id);
+            return `<a class="subItem${d?' done':''}" href="${k.href}">
+              <span class="ic">${k.icon}</span>${k.curve || k.title}
+              ${d? '<span class="chk">완료 ✓</span>':''}</a>`;
+         }).join('')}
+       </div>`;
   }).join('');
+  $('matList').innerHTML = html;
+  $('matList').querySelectorAll('.grpHead').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      const key = el.dataset.grp;
+      const sub = $('matList').querySelector('.subList[data-sub="'+key+'"]');
+      const nowOpen = !el.classList.contains('open');
+      el.classList.toggle('open', nowOpen);
+      sub.classList.toggle('open', nowOpen);
+      let arr = [];
+      try{ arr = JSON.parse(sessionStorage.getItem('geoOpenGrp')||'[]'); }catch(e){}
+      arr = arr.filter(k=>k!==key);
+      if(nowOpen) arr.push(key);
+      sessionStorage.setItem('geoOpenGrp', JSON.stringify(arr));
+    });
+  });
 }
 function showView(){
   const home = location.hash === '#home';

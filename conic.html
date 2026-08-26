@@ -385,6 +385,25 @@ function hyperWin(aDeg){
   return [r1-D, r2+D];
 }
 
+/* ===== 쌍곡선 단면의 점근선 (자르는 평면 위의 직선 2개) =====
+   v² = qa·u² + qb·u + qc 에서 qa>0(쌍곡선)일 때
+   중심 uc = −qb/(2qa), 기울기 ±√qa 인 두 직선이 점근선. */
+function asymptoteSegs(aDeg){
+  const a=aDeg*Math.PI/180, s=Math.sin(a), c=Math.cos(a), Dv=Dof(aDeg);
+  const qa=s*s/3-c*c;
+  if(qa<=1e-6) return [];
+  const qb=8*Dv*c*s/3;
+  const uc=-qb/(2*qa), k=Math.sqrt(qa);
+  const U0=-2.3, U1=7.1, VM=2.8;          // 그려진 평면 사각형 범위
+  const out=[];
+  for(const sgn of [1,-1]){
+    const ua=uc+(-VM)/(sgn*k), ub=uc+VM/(sgn*k);
+    const u0=Math.max(U0, Math.min(ua,ub)), u1=Math.min(U1, Math.max(ua,ub));
+    if(u1>u0+1e-3) out.push([{u:u0,v:sgn*k*(u0-uc)},{u:u1,v:sgn*k*(u1-uc)}]);
+  }
+  return out;
+}
+
 /* ===== 곡선 종류 ===== */
 function inclOf(a){ return a<=90 ? a : 180-a; }
 function conicType(a){
@@ -876,6 +895,23 @@ function render(){
   // 평면 테두리
   stroke([[-2.3,-2.8],[7.1,-2.8],[7.1,2.8],[-2.3,2.8]].map(p=>to3D(b,p[0],p[1])),
          'rgba(100,116,139,.5)',1,[],true);
+
+  // 쌍곡선 단면이면 점근선을 점선으로 (증명 모드에서는 생략)
+  if(sectionGeom && !proofOn && conicType(alphaDeg)==='hyperbola'){
+    const segs=asymptoteSegs(alphaDeg);
+    segs.forEach((sg,i)=>{
+      stroke(sg.map(p=>mapLive(p.u,p.v)), 'rgba(37,99,235,.8)', 1.8, [8,6]);
+      if(i===0){
+        const sp=project(cam, mapLive(sg[1].u*0.86+sg[0].u*0.14, sg[1].v*0.86+sg[0].v*0.14));
+        if(sp){
+          ctx.font='bold 12.5px sans-serif'; ctx.lineJoin='round';
+          ctx.strokeStyle='rgba(255,255,255,.92)'; ctx.lineWidth=4;
+          ctx.strokeText('점근선', sp.x+8, sp.y-6);
+          ctx.fillStyle='#1d4ed8'; ctx.fillText('점근선', sp.x+8, sp.y-6);
+        }
+      }
+    });
+  }
 
   // 단면 테두리 (라이브 + 추출본)
   const drawEdges=(geom,map)=>{

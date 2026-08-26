@@ -6,42 +6,38 @@
      먼저 선언한 뒤 이 파일을 불러오면 하단 바가 자동으로 생깁니다.
    ════════════════════════════════════════════════════════════ */
 window.GEO_CONFIG = {
-  VERSION: "v1.18",                 // ★ 1단원=v1.x, 2단원=v2.x, 3단원=v3.x — 업로드마다 뒷자리 +1 (v1.11, v1.12, …)
+  VERSION: "v1.19",                 // ★ 1단원=v1.x, 2단원=v2.x, 3단원=v3.x — 업로드마다 뒷자리 +1 (v1.11, v1.12, …)
   APPS_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbx3Ay-gudjjSoRlngyu54umJ9uYRAKhINuwcv229UZUN9_oIQfm9vwAxM32FOPR9wV1/exec",
   ACTIVITIES: [
-    { id:'conic',    href:'conic.html',    icon:'⚾', short:'원뿔곡선',
-      title:'원뿔곡선 탐구 — 이중원뿔의 단면',
-      desc:'평면의 기울기를 바꿔 단면을 자르고(야구 퀴즈!), 단델린 구로 포물선·타원·쌍곡선을 증명해 보세요.' },
-    { id:'folding',  href:'folding.html',  icon:'📄', short:'종이접기',
-      title:'종이접기로 포물선 만들기',
-      desc:'아래 변의 점이 F에 닿도록 접고, 또 접고… 접은 선들이 그리는 곡선의 정체를 확인하고 원리까지 파헤쳐요.' },
-    { id:'concept',  href:'concept.html',  icon:'📘', short:'개념정리',
-      title:'포물선 개념 정리',
-      desc:'초점과 준선으로 정의되는 포물선 — p 값을 움직이며 y²=4px, x²=4py의 그래프·초점·준선을 확인해요.' },
-    { id:'apply',    href:'apply.html',    icon:'🔦', short:'포물선활용',
-      title:'포물선의 활용',
-      desc:'태양열 조리기와 자동차 전조등 — 초점의 위치가 왜 중요한지 광선 시뮬레이션으로 확인해요.' },
-    { id:'ellipse',  href:'ellipse.html',  icon:'🧵', short:'타원그리기',
-      title:'타원 그리기 — 실과 자취',
-      desc:'못 2개에 건 실로 직접 타원을 그리고, 공학 도구 자취 활동으로 왜 타원이 되는지 확인해요.' },
-    { id:'econcept', href:'ellipse-concept.html', icon:'📙', short:'타원개념',
-      title:'타원 개념 정리',
-      desc:'a, b 값을 움직이며 타원의 방정식과 초점·꼭짓점·장축·단축이 어떻게 변하는지 확인해요.' },
-    { id:'eapply',   href:'ellipse-apply.html', icon:'🪐', short:'타원활용',
-      title:'타원의 활용 — 케플러 궤도',
-      desc:'소행성 1566 이카루스의 타원 궤도 — 우주에서 케플러 법칙을 눈으로 확인해요. (인터넷 연결 필요)' },
-    { id:'hdraw',    href:'hyperbola.html', icon:'📄', short:'쌍곡선그리기',
-      title:'쌍곡선 그리기 — 종이접기',
-      desc:'원 위의 점이 F′에 닿도록 접고 또 접으면 — F′이 원 안이면 타원, 원 밖이면 쌍곡선이 나타나요!' },
-    { id:'hconcept', href:'hyperbola-concept.html', icon:'📕', short:'쌍곡선개념',
-      title:'쌍곡선 개념 정리',
-      desc:'a, b 값을 움직이며 쌍곡선의 방정식과 초점·꼭짓점·주축·점근선이 어떻게 변하는지 확인해요.' },
-    { id:'happly',   href:'hyperbola-apply.html', icon:'🚢', short:'쌍곡선활용',
-      title:'쌍곡선의 활용 — 전파로 배를 찾아라',
-      desc:'두 기지국 전파의 시간차로 배의 위치를 찾는 교과서 문제를 3D 바다와 냉각탑까지 — 위치 찾기 Step 1~4!' },
-    { id:'geogebra', href:'geogebra.html', icon:'📐', short:'지오지브라',
-      title:'지오지브라',
-      desc:'앱 안에서 바로 열리는 지오지브라 — 클래식·그래핑·기하·3D 계산기. (인터넷 연결 필요)' }
+    { id:'conic',    href:'conic.html',    icon:'⚾', short:'원뿔곡선',   grp:'conic',
+      title:'원뿔곡선 탐구' },
+    { id:'folding',  href:'folding.html',  icon:'📄', short:'포물선그리기', grp:'draw', curve:'포물선',
+      title:'포물선 그리기' },
+    { id:'ellipse',  href:'ellipse.html',  icon:'🧵', short:'타원그리기',  grp:'draw', curve:'타원',
+      title:'타원 그리기' },
+    { id:'hdraw',    href:'hyperbola.html', icon:'🥂', short:'쌍곡선그리기', grp:'draw', curve:'쌍곡선',
+      title:'쌍곡선 그리기' },
+    { id:'concept',  href:'concept.html',  icon:'📘', short:'포물선개념',  grp:'concept', curve:'포물선',
+      title:'포물선 개념 정리' },
+    { id:'econcept', href:'ellipse-concept.html', icon:'📙', short:'타원개념', grp:'concept', curve:'타원',
+      title:'타원 개념 정리' },
+    { id:'hconcept', href:'hyperbola-concept.html', icon:'📕', short:'쌍곡선개념', grp:'concept', curve:'쌍곡선',
+      title:'쌍곡선 개념 정리' },
+    { id:'apply',    href:'apply.html',    icon:'🔦', short:'포물선활용',  grp:'apply', curve:'포물선',
+      title:'포물선의 활용' },
+    { id:'eapply',   href:'ellipse-apply.html', icon:'🪐', short:'타원활용', grp:'apply', curve:'타원',
+      title:'타원의 활용' },
+    { id:'happly',   href:'hyperbola-apply.html', icon:'🚢', short:'쌍곡선활용', grp:'apply', curve:'쌍곡선',
+      title:'쌍곡선의 활용' },
+    { id:'geogebra', href:'geogebra.html', icon:'📐', short:'지오지브라',  grp:'tool',
+      title:'지오지브라' }
+  ],
+  /* 홈 화면 묶음 — 큰 제목 4개 (하위 메뉴는 grp로 자동 수집) */
+  HOME_GROUPS: [
+    { key:'conic',   icon:'⚾', title:'원뿔곡선 탐구' },
+    { key:'draw',    icon:'✏️', title:'이차곡선 그리기' },
+    { key:'concept', icon:'📘', title:'이차곡선 개념 정리' },
+    { key:'apply',   icon:'🔭', title:'이차곡선 활용' }
   ]
 };
 
@@ -97,10 +93,10 @@ window.GEO_TASKS = {
   folding:  ['autoBtn','curveBtn','whyBtn','clearBtn'],// 활동 버튼 4개 모두 눌러보기
   concept:  ['slider','answer'],                       // p 슬라이더 + 질문 답 채우기
   apply:    ['solar','head'],                          // 태양열 끓이기 성공 + 평행광 만들기 성공
-  ellipse:  ['make','trace'],                          // 두 탭에서 각각 '타원 확인' 눌러보기
+  ellipse:  ['make','trace','fold'],                   // 실·자취·종이접기 세 탭에서 '타원 확인'
   econcept: ['slider'],                                // a·b 슬라이더 움직이기
   eapply:   ['play'],                                  // 케플러 궤도 재생 버튼
-  hdraw:    ['ell','hyp'],                             // 두 탭에서 각각 '곡선 확인' 눌러보기
+  hdraw:    ['hyp'],                                   // '쌍곡선 확인' 눌러보기
   hconcept: ['slider'],                                // a·b 슬라이더 움직이기
   happly:   ['steps'],                                 // 위치 찾기 Step 4까지 완주
   geogebra: ['open']                                   // 지오지브라 실행
