@@ -19,7 +19,7 @@
   }
   .wrap { width:100%; max-width:460px; }
   .logo { text-align:center; margin-bottom:18px; }
-  .logo .big { font-size:44px; }
+  .logo .big img { width:64px; height:64px; border-radius:15px; box-shadow:0 4px 14px rgba(146,20,12,.28); }
   .logo h1 { font-size:24px; color:#0f172a; margin-top:6px; }
   .logo p { font-size:13px; color:#64748b; margin-top:5px; }
   .card {
@@ -57,6 +57,8 @@
   }
   .mat:hover { border-color:#0284c7; background:#f0f9ff; transform:translateY(-1px); }
   .mat .t { font-size:16.5px; font-weight:800; color:#0f172a; display:flex; align-items:center; gap:8px; }
+  .icoImg { width:22px; height:22px; vertical-align:-4px; object-fit:contain; }
+  .subItem .icoImg { width:19px; height:19px; }
   .mat .t .arw { margin-left:auto; font-size:13px; color:#94a3b8; transition:transform .18s; }
   .mat.open .arw { transform:rotate(180deg); }
   .subList { display:none; margin:8px 0 2px; padding-left:4px; }
@@ -139,10 +141,16 @@
     margin-top:15px; color:rgba(255,255,255,.85); font-size:13.5px; font-weight:500;
     letter-spacing:.06em;
   }
+  .sign {
+    display:flex; align-items:center; justify-content:center; gap:8px;
+    margin-top:20px; font-size:12.5px; color:#94a3b8; font-weight:600;
+  }
+  .sign img { width:26px; height:26px; }
+  .sign b { color:#64748b; }
 </style>
 <div class="wrap">
   <div class="logo">
-    <div class="big">📐</div>
+    <div class="big"><img src="icon-512.png" alt="기하 탐구실"></div>
     <h1>기하 탐구실</h1>
     <p>2022 개정교육과정 · 기하 수업 자료</p>
   </div>
@@ -195,6 +203,7 @@
     <button id="logout">다른 학생으로 입장하기</button>
   </div>
 
+  <div class="sign"><img src="splash-emblem.png" alt=""><span>단국대학교사범대학부속고등학교 <b>차지영선생님</b></span></div>
   <div class="foot">승인된 학생만 입장할 수 있어요.<br>입장이 안 되면 선생님께 승인을 요청하세요 🙂<br><span id="verBadge" style="color:#cbd5e1"></span></div>
 </div>
 
@@ -220,6 +229,7 @@ function hideMsg(){ msg.className='msg'; }
 function doneList(){
   try{ return JSON.parse(localStorage.getItem('geoDone')||'[]'); }catch(e){ return []; }
 }
+const ico = o => o.img ? `<img class="icoImg" src="${o.img}" alt="">` : o.icon;
 function renderActs(){
   const done = doneList();
   const acts = GEO_CONFIG.ACTIVITIES;
@@ -229,21 +239,21 @@ function renderActs(){
     if(kids.length===1 && g.key==='conic'){                       // 단일 활동 → 바로 이동
       const k = kids[0], d = done.includes(k.id);
       return `<a class="mat${d?' done':''}" href="${k.href}">
-         <div class="t">${g.icon} ${g.title}</div>
+         <div class="t">${ico(g)} ${g.title}</div>
          ${d? '<div class="stamp">완료</div>':''}
        </a>`;
     }
     const allDone = kids.length>0 && kids.every(k=>done.includes(k.id));
     const isOpen = open.includes(g.key);
     return `<div class="mat grpHead${allDone?' done':''}${isOpen?' open':''}" data-grp="${g.key}">
-         <div class="t">${g.icon} ${g.title}<span class="arw">▼</span></div>
+         <div class="t">${ico(g)} ${g.title}<span class="arw">▼</span></div>
          ${allDone? '<div class="stamp">완료</div>':''}
        </div>
        <div class="subList${isOpen?' open':''}" data-sub="${g.key}">
          ${kids.map(k=>{
             const d = done.includes(k.id);
             return `<a class="subItem${d?' done':''}" href="${k.href}">
-              <span class="ic">${k.icon}</span>${k.curve || k.title}
+              <span class="ic">${ico(k)}</span>${k.curve || k.title}
               ${d? '<span class="chk">완료 ✓</span>':''}</a>`;
          }).join('')}
        </div>`;

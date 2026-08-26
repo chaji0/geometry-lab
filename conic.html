@@ -24,6 +24,7 @@ if (localStorage.getItem('geoAppOk') !== '1') location.replace('index.html');
     padding:10px 20px; background:#ffffff; border-bottom:1px solid #e2e8f0;
     display:flex; align-items:baseline; gap:14px; flex-wrap:wrap;
   }
+  .h1ico { width:22px; height:22px; vertical-align:-4px; object-fit:contain; }
   header h1 { font-size:19px; color:#0f172a; }
   header p  { font-size:12.5px; color:#64748b; }
   #main { flex:1; display:flex; min-height:0; }
@@ -181,7 +182,7 @@ if (localStorage.getItem('geoAppOk') !== '1') location.replace('index.html');
 </head>
 <body>
 <header>
-  <h1>⚾ 원뿔곡선 탐구 — 이중원뿔의 단면 자르기</h1>
+  <h1><img class="h1ico" src="icon-conic.png" alt=""> 원뿔곡선 탐구 — 이중원뿔의 단면 자르기</h1>
   <p>평면의 기울기를 조절해 단면을 자르고, 어떤 곡선인지 맞혀 보세요!</p>
 </header>
 

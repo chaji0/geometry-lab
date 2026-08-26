@@ -6,10 +6,10 @@
      먼저 선언한 뒤 이 파일을 불러오면 하단 바가 자동으로 생깁니다.
    ════════════════════════════════════════════════════════════ */
 window.GEO_CONFIG = {
-  VERSION: "v1.19",                 // ★ 1단원=v1.x, 2단원=v2.x, 3단원=v3.x — 업로드마다 뒷자리 +1 (v1.11, v1.12, …)
+  VERSION: "v1.20",                 // ★ 1단원=v1.x, 2단원=v2.x, 3단원=v3.x — 업로드마다 뒷자리 +1 (v1.11, v1.12, …)
   APPS_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbx3Ay-gudjjSoRlngyu54umJ9uYRAKhINuwcv229UZUN9_oIQfm9vwAxM32FOPR9wV1/exec",
   ACTIVITIES: [
-    { id:'conic',    href:'conic.html',    icon:'⚾', short:'원뿔곡선',   grp:'conic',
+    { id:'conic',    href:'conic.html',    icon:'⚾', img:'icon-conic.png', short:'원뿔곡선', grp:'conic',
       title:'원뿔곡선 탐구' },
     { id:'folding',  href:'folding.html',  icon:'📄', short:'포물선그리기', grp:'draw', curve:'포물선',
       title:'포물선 그리기' },
@@ -34,54 +34,103 @@ window.GEO_CONFIG = {
   ],
   /* 홈 화면 묶음 — 큰 제목 4개 (하위 메뉴는 grp로 자동 수집) */
   HOME_GROUPS: [
-    { key:'conic',   icon:'⚾', title:'원뿔곡선 탐구' },
+    { key:'conic',   icon:'⚾', img:'icon-conic.png', title:'원뿔곡선 탐구' },
     { key:'draw',    icon:'✏️', title:'이차곡선 그리기' },
     { key:'concept', icon:'📘', title:'이차곡선 개념 정리' },
     { key:'apply',   icon:'🔭', title:'이차곡선 활용' }
   ]
 };
 
-/* 지오지브라 바로가기 (우측 상단 G 버튼) — 모든 페이지 공용 */
+/* ════════════════════════════════════════════════════════════
+   활동 페이지 상단 바 — 왼쪽: 학교 서명 / 오른쪽: 질문·과제방·지오지브라
+   (홈·목차에서는 만들지 않고, 기존처럼 우측 상단에 떠 있는 원형 버튼)
+   ════════════════════════════════════════════════════════════ */
+window.GEO_addTopBar = function(){
+  if(document.getElementById('gtop')) return;
+  const css = document.createElement('style');
+  css.textContent = `
+  #gtop {
+    flex:none; display:flex; align-items:center; justify-content:space-between; gap:10px;
+    padding:5px 12px; background:#fff; border-bottom:1px solid #eef2f7; position:relative; z-index:60;
+  }
+  #gtop .gtLeft { display:flex; align-items:center; gap:7px; min-width:0; }
+  #gtop .gtLeft img { width:24px; height:24px; flex:none; }
+  #gtop .gtLeft span {
+    font-size:12px; color:#94a3b8; font-weight:600; white-space:nowrap;
+    overflow:hidden; text-overflow:ellipsis;
+  }
+  #gtop .gtLeft b { color:#64748b; }
+  #gtBtns { display:flex; gap:8px; flex:none; }
+  #gtBtns .gtBtn {
+    width:38px; height:38px; border-radius:50%; background:#fff; border:2.5px solid #cbd5e1;
+    font-size:17px; display:flex; align-items:center; justify-content:center; cursor:pointer;
+    padding:0; text-decoration:none; transition:transform .12s; font-family:inherit;
+  }
+  #gtBtns .gtBtn:hover { transform:scale(1.1); }
+  #gtBtns .gtBtn.imgBtn {
+    width:40px; height:40px; border:none; background:transparent; border-radius:10px;
+  }
+  #gtBtns .gtBtn.imgBtn img { width:40px; height:40px; object-fit:contain; display:block; }
+  @media (max-width:520px){ #gtop .gtLeft span { font-size:11px; } }
+  `;
+  document.head.appendChild(css);
+  const bar = document.createElement('div');
+  bar.id = 'gtop';
+  bar.innerHTML =
+    '<div class="gtLeft"><img src="splash-emblem.png" alt="">' +
+    '<span>단국대학교사범대학부속고등학교 <b>차지영 선생님</b></span></div>' +
+    '<div id="gtBtns"></div>';
+  document.body.insertBefore(bar, document.body.firstChild);
+};
+
+/* 버튼 하나 만들기 — 상단 바가 있으면 그 안에, 없으면 화면 우측 상단에 고정 */
+function gxMakeBtn(o){
+  const host = document.getElementById('gtBtns');
+  const el = document.createElement(o.href ? 'a' : 'button');
+  el.id = o.id; el.title = o.title;
+  if(o.href) el.href = o.href;
+  el.innerHTML = (host && o.img) ? '<img src="'+o.img+'" alt="'+o.title+'">' : o.emoji;
+  if(host){
+    el.className = 'gtBtn' + (o.img ? ' imgBtn' : '');
+    if(!o.img) el.style.borderColor = o.color;
+    if(o.text){ el.style.color = o.color; el.style.fontWeight='900'; el.style.fontSize='19px';
+                el.style.fontFamily = "Georgia,'Times New Roman',serif"; }
+    host.appendChild(el);
+  } else {
+    el.style.cssText =
+      'position:fixed;top:7px;right:'+o.right+'px;z-index:400;width:38px;height:38px;'+
+      'border-radius:50%;background:#fff;border:2.5px solid '+o.color+';'+
+      'font-size:17px;display:flex;align-items:center;justify-content:center;'+
+      'cursor:pointer;box-shadow:0 2px 8px '+o.shadow+';padding:0;text-decoration:none;'+
+      'transition:transform .12s;'+(o.text? 'color:'+o.color+';font-weight:900;font-size:19px;font-family:Georgia,serif;':'');
+    el.addEventListener('mouseenter',()=>el.style.transform='scale(1.1)');
+    el.addEventListener('mouseleave',()=>el.style.transform='scale(1)');
+    document.body.appendChild(el);
+  }
+  if(o.onClick) el.addEventListener('click', o.onClick);
+  return el;
+}
+
+/* 지오지브라 바로가기 (G 버튼) — 모든 페이지 공용 */
 window.GEO_addGButton = function(){
   if(document.getElementById('gBtnFloat')) return;
-  const b = document.createElement('a');
-  b.id = 'gBtnFloat';
-  b.href = 'geogebra.html';
-  b.title = '지오지브라 바로가기';
-  b.textContent = 'G';
-  b.style.cssText =
-    'position:fixed;top:7px;right:12px;z-index:400;width:38px;height:38px;'+
-    'border-radius:50%;background:#fff;border:2.5px solid #8b5cf6;color:#7c3aed;'+
-    'font-weight:900;font-size:19px;display:flex;align-items:center;justify-content:center;'+
-    'text-decoration:none;box-shadow:0 2px 8px rgba(124,58,237,.28);'+
-    'font-family:Georgia,\'Times New Roman\',serif;transition:transform .12s;';
-  b.addEventListener('mouseenter',()=>b.style.transform='scale(1.1)');
-  b.addEventListener('mouseleave',()=>b.style.transform='scale(1)');
-  document.body.appendChild(b);
+  gxMakeBtn({ id:'gBtnFloat', title:'지오지브라 바로가기', href:'geogebra.html',
+    emoji:'G', text:true, img:'icon-ggb.png',
+    color:'#8b5cf6', shadow:'rgba(124,58,237,.28)', right:12 });
 };
 
 /* ════════════════════════════════════════════════════════════
-   홈 화면 전용: 💬 질문 · 📸 나의 과제방 (G 버튼 왼쪽 동그라미들)
+   💬 질문 · 📸 나의 과제방
    ════════════════════════════════════════════════════════════ */
 window.GEO_addExtraButtons = function(){
   if(document.getElementById('qnaBtnFloat')) return;
-  // G 버튼이 있으면 그 왼쪽부터, 없으면(지오지브라 페이지) 맨 오른쪽부터
   const base = document.getElementById('gBtnFloat') ? 60 : 12;
-  const mk = (id, right, emoji, border, shadow, title, onClick)=>{
-    const b = document.createElement('button');
-    b.id = id; b.title = title; b.textContent = emoji;
-    b.style.cssText =
-      'position:fixed;top:7px;right:'+right+'px;z-index:400;width:38px;height:38px;'+
-      'border-radius:50%;background:#fff;border:2.5px solid '+border+';'+
-      'font-size:17px;display:flex;align-items:center;justify-content:center;'+
-      'cursor:pointer;box-shadow:0 2px 8px '+shadow+';padding:0;transition:transform .12s;';
-    b.addEventListener('mouseenter',()=>b.style.transform='scale(1.1)');
-    b.addEventListener('mouseleave',()=>b.style.transform='scale(1)');
-    b.addEventListener('click', onClick);
-    document.body.appendChild(b);
-  };
-  mk('galBtnFloat', base,    '📸', '#0d9488', 'rgba(13,148,136,.28)',  '나의 과제방', ()=>window.GEO_openGallery());
-  mk('qnaBtnFloat', base+48, '💬', '#f59e0b', 'rgba(245,158,11,.30)', '질문',        ()=>window.GEO_openQnA());
+  gxMakeBtn({ id:'qnaBtnFloat', title:'질문방', emoji:'💬', img:'icon-qna.png',
+    color:'#f59e0b', shadow:'rgba(245,158,11,.30)', right:base+48,
+    onClick:()=>window.GEO_openQnA() });
+  gxMakeBtn({ id:'galBtnFloat', title:'나의 과제방', emoji:'📸', img:'icon-task.png',
+    color:'#0d9488', shadow:'rgba(13,148,136,.28)', right:base,
+    onClick:()=>window.GEO_openGallery() });
 };
 
 /* ════════════════════════════════════════════════════════════
@@ -351,8 +400,9 @@ window.GEO_openQnA = async function(){
 
 (function(){
   if(!window.PAGE_ID) return;                       // index.html 에서는 설정만 사용
-  if(window.PAGE_ID !== 'geogebra') window.GEO_addGButton();   // G 바로가기 (지오지브라 페이지 제외)
-  window.GEO_addExtraButtons();                     // 💬 질문 · 📸 나의 과제방 (모든 페이지)
+  window.GEO_addTopBar();                           // 상단 바 (학교 서명 + 버튼)
+  window.GEO_addExtraButtons();                     // 💬 질문 · 📸 나의 과제방
+  if(window.PAGE_ID !== 'geogebra') window.GEO_addGButton();   // G 바로가기 (지오지브라 페이지 제외) (모든 페이지)
   const acts = window.GEO_CONFIG.ACTIVITIES;
   const idx = acts.findIndex(a => a.id === window.PAGE_ID);
   if(idx < 0) return;
@@ -671,8 +721,10 @@ function resize(){
   DPR = Math.min(window.devicePixelRatio || 1, 2);
   var nav = document.getElementById('gnav');
   var head = document.querySelector('header');
+  var gtop = document.getElementById('gtop');
   navH  = nav  ? nav.offsetHeight  : 0;            // 하단 바는 필기 영역에서 제외
-  headH = head ? head.offsetHeight : 0;            // 위쪽 제목줄도 필기 영역에서 제외
+  headH = (gtop ? gtop.offsetHeight : 0)           // 학교 서명 바 + 제목줄은 필기 영역에서 제외
+        + (head ? head.offsetHeight : 0);
   var H = Math.max(120, window.innerHeight - navH - headH);
   cv.width  = off.width  = Math.round(window.innerWidth * DPR);
   cv.height = off.height = Math.round(H * DPR);
