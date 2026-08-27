@@ -6,7 +6,7 @@
      먼저 선언한 뒤 이 파일을 불러오면 하단 바가 자동으로 생깁니다.
    ════════════════════════════════════════════════════════════ */
 window.GEO_CONFIG = {
-  VERSION: "v1.20",                 // ★ 1단원=v1.x, 2단원=v2.x, 3단원=v3.x — 업로드마다 뒷자리 +1 (v1.11, v1.12, …)
+  VERSION: "v1.21",                 // ★ 1단원=v1.x, 2단원=v2.x, 3단원=v3.x — 업로드마다 뒷자리 +1 (v1.11, v1.12, …)
   APPS_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbx3Ay-gudjjSoRlngyu54umJ9uYRAKhINuwcv229UZUN9_oIQfm9vwAxM32FOPR9wV1/exec",
   ACTIVITIES: [
     { id:'conic',    href:'conic.html',    icon:'⚾', img:'icon-conic.png', short:'원뿔곡선', grp:'conic',
@@ -33,11 +33,12 @@ window.GEO_CONFIG = {
       title:'지오지브라' }
   ],
   /* 홈 화면 묶음 — 큰 제목 4개 (하위 메뉴는 grp로 자동 수집) */
+  /* 홈 화면 큰 제목 — 원뿔곡선 탐구만 아이콘, 나머지는 글자만 */
   HOME_GROUPS: [
-    { key:'conic',   icon:'⚾', img:'icon-conic.png', title:'원뿔곡선 탐구' },
-    { key:'draw',    icon:'✏️', title:'이차곡선 그리기' },
-    { key:'concept', icon:'📘', title:'이차곡선 개념 정리' },
-    { key:'apply',   icon:'🔭', title:'이차곡선 활용' }
+    { key:'conic',   img:'icon-conic.png', title:'원뿔곡선 탐구' },
+    { key:'draw',    title:'이차곡선 그리기' },
+    { key:'concept', title:'이차곡선 개념 정리' },
+    { key:'apply',   title:'이차곡선 활용' }
   ]
 };
 
@@ -71,6 +72,8 @@ window.GEO_addTopBar = function(){
     width:40px; height:40px; border:none; background:transparent; border-radius:10px;
   }
   #gtBtns .gtBtn.imgBtn img { width:40px; height:40px; object-fit:contain; display:block; }
+  #gtBtns .gtBtn.wideBtn { width:auto; height:40px; }
+  #gtBtns .gtBtn.wideBtn img { width:auto; height:40px; }
   @media (max-width:520px){ #gtop .gtLeft span { font-size:11px; } }
   `;
   document.head.appendChild(css);
@@ -83,19 +86,42 @@ window.GEO_addTopBar = function(){
   document.body.insertBefore(bar, document.body.firstChild);
 };
 
+/* 플로팅 버튼(홈·목차) 공용 스타일 — 상단 바가 없는 화면에서 쓰임 */
+function gxFloatCss(){
+  if(document.getElementById('gxFloatCss')) return;
+  const st = document.createElement('style');
+  st.id = 'gxFloatCss';
+  st.textContent = `
+  .gxFloat {
+    position:fixed; top:7px; z-index:400; height:40px; padding:0; border:none;
+    background:transparent; cursor:pointer; text-decoration:none;
+    display:flex; align-items:center; transition:transform .12s;
+  }
+  .gxFloat:hover { transform:scale(1.08); }
+  .gxFloat img { height:40px; width:auto; object-fit:contain; display:block; }
+  `;
+  document.head.appendChild(st);
+}
+
 /* 버튼 하나 만들기 — 상단 바가 있으면 그 안에, 없으면 화면 우측 상단에 고정 */
 function gxMakeBtn(o){
   const host = document.getElementById('gtBtns');
   const el = document.createElement(o.href ? 'a' : 'button');
   el.id = o.id; el.title = o.title;
   if(o.href) el.href = o.href;
-  el.innerHTML = (host && o.img) ? '<img src="'+o.img+'" alt="'+o.title+'">' : o.emoji;
+  el.innerHTML = o.img ? '<img src="'+o.img+'" alt="'+o.title+'">' : o.emoji;
   if(host){
-    el.className = 'gtBtn' + (o.img ? ' imgBtn' : '');
+    el.className = 'gtBtn' + (o.img ? ' imgBtn' : '') + (o.wide ? ' wideBtn' : '');
     if(!o.img) el.style.borderColor = o.color;
-    if(o.text){ el.style.color = o.color; el.style.fontWeight='900'; el.style.fontSize='19px';
+    if(o.text && !o.img){ el.style.color = o.color; el.style.fontWeight='900'; el.style.fontSize='19px';
                 el.style.fontFamily = "Georgia,'Times New Roman',serif"; }
     host.appendChild(el);
+  } else if(o.img){
+    /* 홈·목차 — 상단 바가 없어도 같은 그림 버튼을 쓴다 */
+    gxFloatCss();
+    el.className = 'gxFloat';
+    el.style.right = o.right + 'px';
+    document.body.appendChild(el);
   } else {
     el.style.cssText =
       'position:fixed;top:7px;right:'+o.right+'px;z-index:400;width:38px;height:38px;'+
@@ -131,6 +157,20 @@ window.GEO_addExtraButtons = function(){
   gxMakeBtn({ id:'galBtnFloat', title:'나의 과제방', emoji:'📸', img:'icon-task.png',
     color:'#0d9488', shadow:'rgba(13,148,136,.28)', right:base,
     onClick:()=>window.GEO_openGallery() });
+  window.GEO_addSubmitButton(base + 96);        // 질문방 왼쪽
+};
+
+/* 오늘과제제출 버튼 — 상단 바에서는 맨 앞(질문방 왼쪽)으로 옮긴다 */
+window.GEO_addSubmitButton = function(right){
+  if(document.getElementById('subBtnFloat')) return null;
+  const el = gxMakeBtn({ id:'subBtnFloat', title:'오늘과제제출', wide:true,
+    emoji:'📮', img:'icon-submit.png',
+    color:'#2f83bd', shadow:'rgba(47,131,189,.28)', right:right,
+    onClick:()=>window.GEO_openSubmit() });
+  const host = document.getElementById('gtBtns');
+  if(host && host.firstChild !== el) host.insertBefore(el, host.firstChild);
+  window.GEO_syncSubmitBtn();
+  return el;
 };
 
 /* ════════════════════════════════════════════════════════════
@@ -398,6 +438,216 @@ window.GEO_openQnA = async function(){
   });
 };
 
+
+/* ════════════════════════════════════════════════════════════
+   오늘과제제출 — 한 줄 소감 + 연습장 사진 보내기
+   (예전에는 책갈피 모달 안에 있던 기능. 이제 상단 버튼에서 연다)
+   · 보낸 날은 버튼 그림이 '제출완료!'로 바뀌고, 날짜가 바뀌면 원래대로
+   ════════════════════════════════════════════════════════════ */
+window.GEO_SUBMIT_ICON      = 'icon-submit.png';
+window.GEO_SUBMIT_ICON_DONE = 'icon-submit-done.png';
+
+function gxToday(){
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0')
+                         + '-' + String(d.getDate()).padStart(2,'0');
+}
+function gxSubmitKey(){ return 'geoSubmit.' + (localStorage.getItem('geoSid') || 'guest'); }
+
+window.GEO_submittedToday = function(){
+  try{ return localStorage.getItem(gxSubmitKey()) === gxToday(); }catch(e){ return false; }
+};
+window.GEO_markSubmitted = function(){
+  try{ localStorage.setItem(gxSubmitKey(), gxToday()); }catch(e){}
+  window.GEO_syncSubmitBtn();
+};
+window.GEO_syncSubmitBtn = function(){
+  const b = document.getElementById('subBtnFloat');
+  if(!b) return;
+  const done = window.GEO_submittedToday();
+  const img = b.querySelector('img');
+  if(img) img.src = done ? window.GEO_SUBMIT_ICON_DONE : window.GEO_SUBMIT_ICON;
+  b.title = done ? '오늘 과제 제출 완료! (다시 보내려면 누르세요)' : '오늘과제제출';
+};
+
+function gxPageLabel(){
+  const p = window.PAGE_ID;
+  if(!p) return '홈';
+  const a = (window.GEO_CONFIG.ACTIVITIES || []).find(x => x.id === p);
+  return a ? a.short : p;
+}
+
+let gxSubBuilt = false;
+function gxBuildSubmit(){
+  if(gxSubBuilt) return;
+  gxSubBuilt = true;
+
+  const css = document.createElement('style');
+  css.textContent = `
+  #gsubBg {
+    position:fixed; inset:0; background:rgba(15,23,42,.45); z-index:2200;
+    display:none; align-items:center; justify-content:center; padding:20px;
+  }
+  #gsubBg.show { display:flex; }
+  #gsub {
+    background:#fff; border-radius:18px; padding:22px; width:100%; max-width:430px;
+    box-shadow:0 18px 50px rgba(15,23,42,.3); font-family:inherit;
+  }
+  #gsub h2 { font-size:19px; color:#0f172a; margin-bottom:8px; }
+  #gsub p { font-size:13.5px; color:#475569; line-height:1.65; margin-bottom:12px; }
+  #gsub textarea {
+    width:100%; height:96px; padding:11px 12px; font-size:15px; font-family:inherit;
+    border:1.5px solid #cbd5e1; border-radius:11px; outline:none; resize:vertical; background:#fbfdff;
+  }
+  #gsub textarea:focus { border-color:#0284c7; }
+  #gsubDone {
+    display:none; margin-bottom:12px; padding:10px 13px; border-radius:11px;
+    background:#fdf2f6; color:#9f1239; border:1.5px solid #fbcfe0;
+    font-size:13px; font-weight:700; line-height:1.6;
+  }
+  #gsubDone.show { display:block; }
+  .gsubBtns { display:flex; gap:9px; margin-top:14px; }
+  .gsubBtns button {
+    flex:1; padding:12px 0; font-size:15px; font-weight:800; border-radius:11px; cursor:pointer;
+    border:1.5px solid #cbd5e1; background:#f8fafc; color:#475569; font-family:inherit;
+  }
+  .gsubBtns #gsubSend { background:#2f83bd; border:none; color:#fff; }
+  .gsubBtns button:disabled { opacity:.55; cursor:wait; }
+  .gsubPhotoRow { display:flex; align-items:center; gap:10px; margin-top:10px; flex-wrap:wrap; }
+  #gsubPhotoBtn, #gsubAlbumBtn {
+    display:inline-flex; align-items:center; gap:6px; cursor:pointer;
+    padding:9px 13px; font-size:13.5px; font-weight:700; border-radius:10px;
+    border:1.5px dashed #94a3b8; color:#475569; background:#f8fafc;
+  }
+  #gsubPhotoBtn:hover, #gsubAlbumBtn:hover { border-color:#0284c7; color:#0369a1; }
+  #gsubThumbWrap { display:none; gap:10px; flex-wrap:wrap; }
+  .gsubThumbOne { position:relative; display:inline-block; }
+  .gsubThumbOne img { height:56px; border-radius:9px; border:1.5px solid #cbd5e1; display:block; }
+  .gsubDel {
+    position:absolute; top:-8px; right:-8px; width:22px; height:22px; border-radius:50%;
+    border:none; background:#ef4444; color:#fff; font-size:12px; font-weight:900; cursor:pointer;
+    line-height:1;
+  }
+  `;
+  document.head.appendChild(css);
+
+  const bg = document.createElement('div');
+  bg.id = 'gsubBg';
+  bg.innerHTML = `
+    <div id="gsub">
+      <h2>오늘과제제출</h2>
+      <div id="gsubDone">오늘은 이미 제출했어요. 다시 보내면 새로 기록됩니다.</div>
+      <p>오늘 배운 내용 한 줄 소감과 연습장 사진을 선생님께 보내요.<br>
+         <span style="color:#94a3b8" id="gsubWho"></span></p>
+      <textarea id="gsubText" placeholder="예: 포물선의 활용 용도가 궁금해요!"></textarea>
+      <div class="gsubPhotoRow">
+        <label id="gsubPhotoBtn">사진 찍기
+          <input type="file" id="gsubPhotoIn" accept="image/*" capture="environment" hidden>
+        </label>
+        <label id="gsubAlbumBtn">앨범에서
+          <input type="file" id="gsubAlbumIn" accept="image/*" multiple hidden>
+        </label>
+        <div id="gsubThumbWrap"></div>
+      </div>
+      <div class="gsubBtns">
+        <button id="gsubClose">닫기</button>
+        <button id="gsubSend">보내기</button>
+      </div>
+    </div>`;
+  document.body.appendChild(bg);
+  bg.addEventListener('click', e=>{ if(e.target===bg) bg.classList.remove('show'); });
+  document.getElementById('gsubClose').addEventListener('click', ()=>bg.classList.remove('show'));
+
+  /* 사진 선택 → 자동 압축 (긴 변 1600px, 최대 3장) */
+  const photos = [];
+  const MAXPHOTOS = 3;
+  const photoIn = document.getElementById('gsubPhotoIn');
+  const albumIn = document.getElementById('gsubAlbumIn');
+  const thumbWrap = document.getElementById('gsubThumbWrap');
+  const photoBtn = document.getElementById('gsubPhotoBtn');
+  const albumBtn = document.getElementById('gsubAlbumBtn');
+  function renderThumbs(){
+    thumbWrap.style.display = photos.length ? 'flex' : 'none';
+    thumbWrap.innerHTML = photos.map((d,i)=>
+      `<span class="gsubThumbOne"><img src="${d}" alt="사진${i+1}">`+
+      `<button data-i="${i}" class="gsubDel" title="사진 빼기">✕</button></span>`).join('');
+    const full = photos.length >= MAXPHOTOS;
+    photoBtn.style.display = full ? 'none' : 'inline-flex';
+    albumBtn.style.display = full ? 'none' : 'inline-flex';
+    photoBtn.childNodes[0].textContent = photos.length ? `더 찍기 (${photos.length}/${MAXPHOTOS})` : '사진 찍기';
+    thumbWrap.querySelectorAll('.gsubDel').forEach(b=>
+      b.addEventListener('click', ()=>{ photos.splice(+b.dataset.i,1); renderThumbs(); }));
+  }
+  function addPhotoFile(f){
+    if(!f || photos.length >= MAXPHOTOS) return;
+    const img = new Image();
+    img.onload = ()=>{
+      const MAX = 1600;
+      const k = Math.min(1, MAX/Math.max(img.width, img.height));
+      const c = document.createElement('canvas');
+      c.width = Math.round(img.width*k); c.height = Math.round(img.height*k);
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+      photos.push(c.toDataURL('image/jpeg', 0.75));
+      renderThumbs();
+      URL.revokeObjectURL(img.src);
+    };
+    img.src = URL.createObjectURL(f);
+  }
+  photoIn.addEventListener('change', ()=>{ addPhotoFile(photoIn.files && photoIn.files[0]); photoIn.value=''; });
+  albumIn.addEventListener('change', ()=>{
+    Array.from(albumIn.files || []).slice(0, MAXPHOTOS - photos.length).forEach(addPhotoFile);
+    albumIn.value = '';
+  });
+
+  document.getElementById('gsubSend').addEventListener('click', async ()=>{
+    const text = document.getElementById('gsubText').value.trim();
+    if(!text && !photos.length){ gxToast('소감 한 줄이나 사진을 담아 주세요'); return; }
+    const btn = document.getElementById('gsubSend');
+    const sid  = localStorage.getItem('geoSid')  || '';
+    const name = localStorage.getItem('geoName') || '';
+    const page = gxPageLabel();
+    btn.disabled = true; btn.textContent = photos.length ? '사진 보내는 중…' : '보내는 중…';
+    try{
+      let r;
+      if(photos.length){
+        const res = await fetch(window.GEO_CONFIG.APPS_SCRIPT_URL, {
+          method:'POST',
+          body: JSON.stringify({ action:'feedback', sid, name, page,
+                                 text:text.slice(0,500), photos })
+        });
+        r = await res.json();
+      } else {
+        const url = window.GEO_CONFIG.APPS_SCRIPT_URL
+          + '?action=feedback&sid=' + encodeURIComponent(sid)
+          + '&name=' + encodeURIComponent(name)
+          + '&page=' + encodeURIComponent(page)
+          + '&text=' + encodeURIComponent(text.slice(0,500));
+        const res = await fetch(url);
+        r = await res.json();
+      }
+      if(!r.ok) throw new Error('server');
+      window.GEO_markSubmitted();
+      if(window.GEO_setBookmark) window.GEO_setBookmark();
+      bg.classList.remove('show');
+      document.getElementById('gsubText').value = '';
+      photos.length = 0; renderThumbs();
+      gxToast('오늘 과제를 제출했어요! 제출완료 ✅');
+    }catch(e){
+      gxToast('전송에 실패했어요. 인터넷 연결을 확인하고 다시 시도해 주세요.');
+    }
+    btn.disabled = false; btn.textContent = '보내기';
+  });
+}
+
+window.GEO_openSubmit = function(){
+  gxBuildSubmit();
+  const name = localStorage.getItem('geoName') || '학생';
+  document.getElementById('gsubWho').textContent = name + ' · ' + gxPageLabel();
+  document.getElementById('gsubDone').classList.toggle('show', window.GEO_submittedToday());
+  document.getElementById('gsubBg').classList.add('show');
+  document.getElementById('gsubText').focus();
+};
+
 (function(){
   if(!window.PAGE_ID) return;                       // index.html 에서는 설정만 사용
   window.GEO_addTopBar();                           // 상단 바 (학교 서명 + 버튼)
@@ -436,46 +686,6 @@ window.GEO_openQnA = async function(){
     border-color:transparent !important; color:#fff !important;
   }
 
-  #gmodalBg {
-    position:fixed; inset:0; background:rgba(15,23,42,.45); z-index:200;
-    display:none; align-items:center; justify-content:center; padding:20px;
-  }
-  #gmodalBg.show { display:flex; }
-  #gmodal {
-    background:#fff; border-radius:18px; padding:22px; width:100%; max-width:430px;
-    box-shadow:0 18px 50px rgba(15,23,42,.3);
-    font-family:inherit;
-  }
-  #gmodal h2 { font-size:19px; color:#0f172a; margin-bottom:8px; }
-  #gmodal p { font-size:13.5px; color:#475569; line-height:1.65; margin-bottom:12px; }
-  #gmodal textarea {
-    width:100%; height:96px; padding:11px 12px; font-size:15px; font-family:inherit;
-    border:1.5px solid #cbd5e1; border-radius:11px; outline:none; resize:vertical; background:#fbfdff;
-  }
-  #gmodal textarea:focus { border-color:#0284c7; }
-  .gmBtns { display:flex; gap:9px; margin-top:14px; }
-  .gmBtns button {
-    flex:1; padding:12px 0; font-size:15px; font-weight:800; border-radius:11px; cursor:pointer;
-    border:1.5px solid #cbd5e1; background:#f8fafc; color:#475569; font-family:inherit;
-  }
-  .gmBtns #gmSend { background:#1d4ed8; border:none; color:#fff; }
-  .gmBtns button:disabled { opacity:.55; cursor:wait; }
-
-  .gmPhotoRow { display:flex; align-items:center; gap:10px; margin-top:10px; }
-  #gmPhotoBtn, #gmAlbumBtn {
-    display:inline-flex; align-items:center; gap:6px; cursor:pointer;
-    padding:9px 13px; font-size:13.5px; font-weight:700; border-radius:10px;
-    border:1.5px dashed #94a3b8; color:#475569; background:#f8fafc;
-  }
-  #gmPhotoBtn:hover, #gmAlbumBtn:hover { border-color:#0284c7; color:#0369a1; }
-  #gmThumbWrap { display:none; gap:10px; flex-wrap:wrap; }
-  .gmThumbOne { position:relative; display:inline-block; }
-  .gmThumbOne img { height:56px; border-radius:9px; border:1.5px solid #cbd5e1; display:block; }
-  .gmDel {
-    position:absolute; top:-8px; right:-8px; width:22px; height:22px; border-radius:50%;
-    border:none; background:#ef4444; color:#fff; font-size:12px; font-weight:900; cursor:pointer;
-    line-height:1;
-  }
   #gtoast {
     position:fixed; left:50%; bottom:74px; transform:translateX(-50%);
     background:#111827; color:#fff; font-size:13.5px; padding:10px 18px;
@@ -502,33 +712,7 @@ window.GEO_openQnA = async function(){
     </div>`;
   document.body.appendChild(bar);
 
-  /* ── 책갈피 모달 ── */
-  const sid  = localStorage.getItem('geoSid')  || '';
-  const name = localStorage.getItem('geoName') || '';
-  const bg = document.createElement('div');
-  bg.id = 'gmodalBg';
-  bg.innerHTML = `
-    <div id="gmodal">
-      <h2>📌 오늘 여기까지!</h2>
-      <p>오늘 배운 내용, 한 줄 소감을 선생님께 보낼까요?<br>
-         <span style="color:#94a3b8">(${name || '학생'} · ${me.short})</span></p>
-      <textarea id="gmText" placeholder="예: 포물선의 활용 용도가 궁금해요!"></textarea>
-      <div class="gmPhotoRow">
-        <label id="gmPhotoBtn">📷 사진 찍기
-          <input type="file" id="gmPhotoIn" accept="image/*" capture="environment" hidden>
-        </label>
-        <label id="gmAlbumBtn">🖼️ 앨범에서
-          <input type="file" id="gmAlbumIn" accept="image/*" multiple hidden>
-        </label>
-        <div id="gmThumbWrap"></div>
-      </div>
-      <div class="gmBtns">
-        <button id="gmSkip">건너뛰기</button>
-        <button id="gmSend">보내기</button>
-      </div>
-    </div>`;
-  document.body.appendChild(bg);
-
+  /* ── 책갈피 — '오늘 여기까지' 꽂기만 (소감·과제 제출은 상단 오늘과제제출 버튼으로 이동) ── */
   const toast = document.createElement('div');
   toast.id = 'gtoast';
   document.body.appendChild(toast);
@@ -539,102 +723,11 @@ window.GEO_openQnA = async function(){
     clearTimeout(toastTimer);
     toastTimer = setTimeout(()=>toast.classList.remove('show'), 3000);
   }
-
-  function setBookmark(){
-    localStorage.setItem('geoBookmark', me.id);
-  }
+  window.GEO_setBookmark = function(){ localStorage.setItem('geoBookmark', me.id); };
 
   document.getElementById('gnavMark').addEventListener('click', ()=>{
-    bg.classList.add('show');
-    document.getElementById('gmText').focus();
-  });
-  bg.addEventListener('click', e=>{ if(e.target===bg) bg.classList.remove('show'); });
-
-  document.getElementById('gmSkip').addEventListener('click', ()=>{
-    setBookmark();
-    bg.classList.remove('show');
+    window.GEO_setBookmark();
     showToast(`'오늘 여기까지' 책갈피를 꽂았습니다. 다음에 [${me.short}]부터 열립니다.`);
-  });
-
-  /* 사진 선택 → 자동 압축 (긴 변 1600px — 연습장 손글씨가 잘 보이게, 최대 3장) */
-  const photos = [];
-  const MAXPHOTOS = 3;
-  const photoIn = document.getElementById('gmPhotoIn');
-  const albumIn = document.getElementById('gmAlbumIn');
-  const thumbWrap = document.getElementById('gmThumbWrap');
-  const photoBtn = document.getElementById('gmPhotoBtn');
-  const albumBtn = document.getElementById('gmAlbumBtn');
-  function renderThumbs(){
-    thumbWrap.style.display = photos.length ? 'flex' : 'none';
-    thumbWrap.innerHTML = photos.map((d,i)=>
-      `<span class="gmThumbOne"><img src="${d}" alt="사진${i+1}">`+
-      `<button data-i="${i}" class="gmDel" title="사진 빼기">✕</button></span>`).join('');
-    const full = photos.length >= MAXPHOTOS;
-    photoBtn.style.display = full ? 'none' : 'inline-flex';
-    albumBtn.style.display = full ? 'none' : 'inline-flex';
-    photoBtn.childNodes[0].textContent = photos.length ? `📷 더 찍기 (${photos.length}/${MAXPHOTOS})` : '📷 사진 찍기 ';
-    thumbWrap.querySelectorAll('.gmDel').forEach(b=>
-      b.addEventListener('click', ()=>{ photos.splice(+b.dataset.i,1); renderThumbs(); }));
-  }
-  function addPhotoFile(f){
-    if(!f || photos.length >= MAXPHOTOS) return;
-    const img = new Image();
-    img.onload = ()=>{
-      const MAX = 1600;
-      const k = Math.min(1, MAX/Math.max(img.width, img.height));
-      const c = document.createElement('canvas');
-      c.width = Math.round(img.width*k); c.height = Math.round(img.height*k);
-      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
-      photos.push(c.toDataURL('image/jpeg', 0.75));
-      renderThumbs();
-      URL.revokeObjectURL(img.src);
-    };
-    img.src = URL.createObjectURL(f);
-  }
-  photoIn.addEventListener('change', ()=>{
-    addPhotoFile(photoIn.files && photoIn.files[0]);
-    photoIn.value = '';
-  });
-  albumIn.addEventListener('change', ()=>{          // 앨범에서는 여러 장 한 번에
-    const fs = Array.from(albumIn.files || []).slice(0, MAXPHOTOS - photos.length);
-    fs.forEach(addPhotoFile);
-    albumIn.value = '';
-  });
-
-  document.getElementById('gmSend').addEventListener('click', async ()=>{
-    const text = document.getElementById('gmText').value.trim();
-    if(!text && !photos.length){ showToast('소감 한 줄이나 사진을 담아 주세요 🙂'); return; }
-    const btn = document.getElementById('gmSend');
-    btn.disabled = true; btn.textContent = photos.length ? '사진 보내는 중…' : '보내는 중…';
-    try{
-      let r;
-      if(photos.length){
-        // 사진은 POST (본문에 담아 전송)
-        const res = await fetch(window.GEO_CONFIG.APPS_SCRIPT_URL, {
-          method: 'POST',
-          body: JSON.stringify({ action:'feedback', sid, name, page:me.short,
-                                 text:text.slice(0,500), photos })
-        });
-        r = await res.json();
-      } else {
-        const url = window.GEO_CONFIG.APPS_SCRIPT_URL
-          + '?action=feedback&sid=' + encodeURIComponent(sid)
-          + '&name=' + encodeURIComponent(name)
-          + '&page=' + encodeURIComponent(me.short)
-          + '&text=' + encodeURIComponent(text.slice(0,500));
-        const res = await fetch(url);
-        r = await res.json();
-      }
-      if(!r.ok) throw new Error('server');
-      setBookmark();
-      bg.classList.remove('show');
-      document.getElementById('gmText').value = '';
-      photos.length = 0; renderThumbs();
-      showToast('소감을 보냈어요! 책갈피도 꽂았습니다 ✅');
-    }catch(e){
-      showToast('전송에 실패했어요. 인터넷 연결을 확인하고 다시 시도해 주세요.');
-    }
-    btn.disabled = false; btn.textContent = '보내기';
   });
 })();
 

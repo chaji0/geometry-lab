@@ -173,7 +173,7 @@
   <!-- ── 승인 후: 목차 / 홈 ── -->
   <div class="card" id="menu">
     <div id="tocView">
-      <div class="hello">👋 <b id="helloName"></b>님, 환영해요! 공부할 단원을 골라 보세요.</div>
+      <div class="hello"><b id="helloName"></b>님, 환영해요! 공부할 단원을 골라 보세요.</div>
       <button class="unit" id="unit1">
         <span class="no" style="background:#3b82f6">1</span>
         <span><span class="tt">이차곡선</span><br>
@@ -229,7 +229,8 @@ function hideMsg(){ msg.className='msg'; }
 function doneList(){
   try{ return JSON.parse(localStorage.getItem('geoDone')||'[]'); }catch(e){ return []; }
 }
-const ico = o => o.img ? `<img class="icoImg" src="${o.img}" alt="">` : o.icon;
+/* 아이콘은 그림이 지정된 항목(원뿔곡선 탐구)에만 — 나머지는 글자만 */
+const ico = o => o.img ? `<img class="icoImg" src="${o.img}" alt=""> ` : '';
 function renderActs(){
   const done = doneList();
   const acts = GEO_CONFIG.ACTIVITIES;
@@ -239,21 +240,21 @@ function renderActs(){
     if(kids.length===1 && g.key==='conic'){                       // 단일 활동 → 바로 이동
       const k = kids[0], d = done.includes(k.id);
       return `<a class="mat${d?' done':''}" href="${k.href}">
-         <div class="t">${ico(g)} ${g.title}</div>
+         <div class="t">${ico(g)}${g.title}</div>
          ${d? '<div class="stamp">완료</div>':''}
        </a>`;
     }
     const allDone = kids.length>0 && kids.every(k=>done.includes(k.id));
     const isOpen = open.includes(g.key);
     return `<div class="mat grpHead${allDone?' done':''}${isOpen?' open':''}" data-grp="${g.key}">
-         <div class="t">${ico(g)} ${g.title}<span class="arw">▼</span></div>
+         <div class="t">${ico(g)}${g.title}<span class="arw">▼</span></div>
          ${allDone? '<div class="stamp">완료</div>':''}
        </div>
        <div class="subList${isOpen?' open':''}" data-sub="${g.key}">
          ${kids.map(k=>{
             const d = done.includes(k.id);
             return `<a class="subItem${d?' done':''}" href="${k.href}">
-              <span class="ic">${ico(k)}</span>${k.curve || k.title}
+              ${k.curve || k.title}
               ${d? '<span class="chk">완료 ✓</span>':''}</a>`;
          }).join('')}
        </div>`;
