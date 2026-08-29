@@ -11,7 +11,10 @@
 <title>기하 탐구실 — 입장</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" media="print" onload="this.media='all'"
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap">
+<noscript><link rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap"></noscript>
 <script src="nav.js"></script>
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
@@ -146,6 +149,12 @@
     border:1.5px solid var(--lnw); background:transparent; color:var(--mute); font-family:inherit;
   }
   #tlFoot button:hover { color:#7C7B6F; border-color:var(--lnd); }
+  #tlFoot .go {
+    padding:7px 15px; font-size:11.5px; font-weight:700; border-radius:999px; cursor:pointer;
+    border:1.5px solid var(--acc); background:var(--acc); color:#fff; font-family:inherit;
+    text-decoration:none; display:inline-flex; align-items:center; letter-spacing:.02em;
+  }
+  #tlFoot .go:hover { background:#1B2FC4; border-color:#1B2FC4; }
 
   /* 좁은 화면(기본) — 세로 레일 */
   #tlRow1, #tlRow2 { display:flex; flex-direction:column; }
@@ -316,6 +325,7 @@
           <span style="display:flex; gap:8px;">
             <button id="backToc">목차</button>
             <button id="logout2">다른 학생으로</button>
+            <a id="tlNext" class="go">다음 ›</a>
           </span>
         </div>
       </div>
@@ -408,6 +418,7 @@ function renderActs(){
   const nowId = (listed.find(a => !done.includes(a.id)) || {}).id;
 
   $('tlWho').textContent = (localStorage.getItem('geoName') || '') + '님, 순서대로 따라가 보세요.';
+  $('tlNext').href = acts.length ? acts[0].href : 'index.html#home';   // 첫 활동으로
   $('tlNum').textContent = nDone + ' / ' + total + ' 완료';
   $('tlBar').style.width = Math.round(nDone / total * 100) + '%';
 
@@ -583,12 +594,20 @@ $('logout2').addEventListener('click', hardLogout);
 
 document.getElementById('verBadge').textContent = GEO_CONFIG.VERSION;
 
-/* 스플래시: 잠깐 보여주고 부드럽게 사라짐 (버전 글자는 index.html에 고정 표기) */
-setTimeout(()=>{
+/* 스플래시 — 앱을 '처음 열 때' 한 번만.
+   활동 페이지에서 홈으로 돌아올 때마다 2초씩 기다리던 문제를 없앰 */
+(function(){
   const sp = document.getElementById('splash');
-  sp.classList.add('hide');
-  setTimeout(()=>sp.remove(), 650);
-}, 1400);
+  if(!sp) return;
+  let seen = false;
+  try{ seen = sessionStorage.getItem('geoSplash') === '1'; }catch(e){}
+  if(seen || location.hash){ sp.remove(); return; }     // 되돌아온 것이면 즉시 치움
+  try{ sessionStorage.setItem('geoSplash','1'); }catch(e){}
+  setTimeout(()=>{
+    sp.classList.add('hide');
+    setTimeout(()=>sp.remove(), 650);
+  }, 1400);
+})();
 
 /* 로그인 유지: 승인받았던 학생은 즉시 입장 (백그라운드로 재확인만) */
 window.addEventListener('load', ()=>{
