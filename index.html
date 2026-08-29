@@ -32,6 +32,17 @@
     border-radius:11px; outline:none; transition:border .15s; background:#fbfdff;
   }
   input[type=text]:focus { border-color:#0284c7; }
+  select#teacher {
+    width:100%; padding:12px 13px; font-size:16px; border:1.5px solid #cbd5e1;
+    border-radius:11px; outline:none; background:#fbfdff; font-family:inherit; color:#1e293b;
+    appearance:none; cursor:pointer;
+    background-image:linear-gradient(45deg,transparent 50%,#94a3b8 50%),linear-gradient(135deg,#94a3b8 50%,transparent 50%);
+    background-position:calc(100% - 19px) calc(50% + 1px), calc(100% - 13px) calc(50% + 1px);
+    background-size:6px 6px, 6px 6px; background-repeat:no-repeat;
+  }
+  select#teacher:focus { border-color:#0284c7; }
+  #teacherRow { display:none; }
+  #teacherRow.show { display:block; }
   #enterBtn {
     width:100%; margin-top:16px; padding:13px 0; font-size:16px; font-weight:800; color:#fff;
     background:linear-gradient(135deg,#0ea5e9,#6366f1); border:none; border-radius:12px;
@@ -157,6 +168,10 @@
 
   <!-- ── 입장 게이트 ── -->
   <div class="card" id="gate">
+    <div id="teacherRow">
+      <label for="teacher">담당 선생님</label>
+      <select id="teacher"><option value="">— 수업 선생님을 골라 주세요 —</option></select>
+    </div>
     <label for="sid">학번</label>
     <input type="text" id="sid" placeholder="예) 20301" autocomplete="off">
     <label for="name">이름</label>
@@ -222,6 +237,30 @@ const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx3Ay-gudjjSoRl
 
 const $ = id => document.getElementById(id);
 const gate=$('gate'), menu=$('menu'), msg=$('msg'), btn=$('enterBtn');
+
+/* ── 담당 선생님 목록 ──────────────────────────────────────
+   선생님 명단은 Apps Script(apps-script-v6.gs)의 TEACHERS 에서 관리합니다.
+   여기서 불러오지 못하면 nav.js 의 GEO_CONFIG.TEACHERS 를 대신 씁니다.  */
+let TEACHERS = [];
+function fillTeachers(list){
+  TEACHERS = Array.isArray(list) && list.length ? list : (GEO_CONFIG.TEACHERS || []);
+  const sel = $('teacher'), saved = localStorage.getItem('geoTeacher') || '';
+  sel.innerHTML = (TEACHERS.length > 1 ? '<option value="">— 수업 선생님을 골라 주세요 —</option>' : '')
+    + TEACHERS.map(t=>`<option value="${t.id}">${t.name}</option>`).join('');
+  if(saved && TEACHERS.some(t=>t.id===saved)) sel.value = saved;
+  else if(TEACHERS.length === 1) sel.value = TEACHERS[0].id;
+  // 선생님이 한 분뿐이면 고를 필요가 없으니 숨긴다
+  $('teacherRow').classList.toggle('show', TEACHERS.length > 1);
+}
+async function loadTeachers(){
+  fillTeachers(null);                                   // 우선 기본값으로
+  if(!APPS_SCRIPT_URL) return;
+  try{
+    const res = await fetch(APPS_SCRIPT_URL + '?action=teachers');
+    const r = await res.json();
+    if(r && r.ok && Array.isArray(r.items) && r.items.length) fillTeachers(r.items);
+  }catch(e){}
+}
 
 function showMsg(cls, html){ msg.className='msg show '+cls; msg.innerHTML=html; }
 function hideMsg(){ msg.className='msg'; }
@@ -301,13 +340,16 @@ function hardLogout(){
   localStorage.removeItem('geoAppOk');
   localStorage.removeItem('geoSid'); localStorage.removeItem('geoName');
   localStorage.removeItem('geoBookmark'); localStorage.removeItem('geoDone');
+  localStorage.removeItem('geoTeacher');
   sessionStorage.removeItem('geoResumed');
   location.hash=''; location.reload();
 }
 window.addEventListener('hashchange', ()=>{ if(menu.classList.contains('show')) showView(); });
 
 async function checkApproval(sid, name){
-  const url = APPS_SCRIPT_URL + '?sid=' + encodeURIComponent(sid) + '&name=' + encodeURIComponent(name);
+  const t = (localStorage.getItem('geoTeacher') || '');
+  const url = APPS_SCRIPT_URL + '?sid=' + encodeURIComponent(sid) + '&name=' + encodeURIComponent(name)
+            + '&teacher=' + encodeURIComponent(t);
   const ctrl = new AbortController();
   const timer = setTimeout(()=>ctrl.abort(), 12000);
   try{
@@ -319,6 +361,11 @@ async function checkApproval(sid, name){
 async function tryEnter(silent){
   const sid = $('sid').value.trim(), name = $('name').value.trim();
   if(!sid || !name){ if(!silent) showMsg('err','학번과 이름을 모두 입력해 주세요.'); return; }
+  if(TEACHERS.length > 1 && !$('teacher').value){
+    if(!silent) showMsg('err','수업을 듣는 담당 선생님을 골라 주세요.');
+    return;
+  }
+  if($('teacher').value) localStorage.setItem('geoTeacher', $('teacher').value);
 
   if(!APPS_SCRIPT_URL){               // 설정 전 테스트 모드
     localStorage.setItem('geoSid',sid); localStorage.setItem('geoName',name);
@@ -361,6 +408,7 @@ setTimeout(()=>{
 /* 로그인 유지: 승인받았던 학생은 즉시 입장 (백그라운드로 재확인만) */
 window.addEventListener('load', ()=>{
   if(!APPS_SCRIPT_URL) $('setupWarn').style.display='block';
+  loadTeachers();
   const sid=localStorage.getItem('geoSid'), name=localStorage.getItem('geoName');
   if(sid && name){ $('sid').value=sid; $('name').value=name; }
   if(localStorage.getItem('geoAppOk')==='1' && sid && name){

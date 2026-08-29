@@ -6,8 +6,13 @@
      먼저 선언한 뒤 이 파일을 불러오면 하단 바가 자동으로 생깁니다.
    ════════════════════════════════════════════════════════════ */
 window.GEO_CONFIG = {
-  VERSION: "v1.21",                 // ★ 1단원=v1.x, 2단원=v2.x, 3단원=v3.x — 업로드마다 뒷자리 +1 (v1.11, v1.12, …)
+  VERSION: "v1.24",                 // ★ 1단원=v1.x, 2단원=v2.x, 3단원=v3.x — 업로드마다 뒷자리 +1 (v1.11, v1.12, …)
   APPS_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbx3Ay-gudjjSoRlngyu54umJ9uYRAKhINuwcv229UZUN9_oIQfm9vwAxM32FOPR9wV1/exec",
+  /* 담당 선생님 — 실제 명단은 Apps Script(TEACHERS)에서 불러옵니다.
+     아래는 인터넷이 안 될 때 쓰는 기본값입니다. */
+  TEACHERS: [
+    { id: 'cha', name: '차지영 선생님' }
+  ],
   ACTIVITIES: [
     { id:'conic',    href:'conic.html',    icon:'⚾', img:'icon-conic.png', short:'원뿔곡선', grp:'conic',
       title:'원뿔곡선 탐구' },
@@ -23,6 +28,8 @@ window.GEO_CONFIG = {
       title:'타원 개념 정리' },
     { id:'hconcept', href:'hyperbola-concept.html', icon:'📕', short:'쌍곡선개념', grp:'concept', curve:'쌍곡선',
       title:'쌍곡선 개념 정리' },
+    { id:'general',  href:'general-form.html', short:'일반형', grp:'concept', curve:'일반형',
+      title:'이차곡선의 일반형' },
     { id:'apply',    href:'apply.html',    icon:'🔦', short:'포물선활용',  grp:'apply', curve:'포물선',
       title:'포물선의 활용' },
     { id:'eapply',   href:'ellipse-apply.html', icon:'🪐', short:'타원활용', grp:'apply', curve:'타원',
@@ -187,6 +194,7 @@ window.GEO_TASKS = {
   eapply:   ['play'],                                  // 케플러 궤도 재생 버튼
   hdraw:    ['hyp'],                                   // '쌍곡선 확인' 눌러보기
   hconcept: ['slider'],                                // a·b 슬라이더 움직이기
+  general:  ['quiz','proj'],                           // 판정 연습 6문제 + 교과서 33p 표 완성
   happly:   ['steps'],                                 // 위치 찾기 Step 4까지 완주
   geogebra: ['open']                                   // 지오지브라 실행
 };

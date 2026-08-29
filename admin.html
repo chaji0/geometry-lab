@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="apple-touch-icon" href="icon-180.png">
+<meta name="apple-mobile-web-app-title" content="기하 승인">
+<title>기하 탐구실 — 입장 승인</title>
+<script src="nav.js"></script>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family:'Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif;
+    min-height:100vh; background:linear-gradient(160deg,#eef4ff 0%,#f8fafc 55%,#fdf6ec 100%);
+    color:#1e293b; padding:22px 18px 40px;
+  }
+  .wrap { width:100%; max-width:640px; margin:0 auto; }
+  .logo { text-align:center; margin-bottom:16px; }
+  .logo img { width:56px; height:56px; border-radius:14px; box-shadow:0 4px 14px rgba(146,20,12,.26); }
+  .logo h1 { font-size:21px; color:#0f172a; margin-top:7px; }
+  .logo p { font-size:12.5px; color:#64748b; margin-top:4px; }
+  .card {
+    background:#fff; border:1px solid #e2e8f0; border-radius:18px;
+    padding:20px; box-shadow:0 8px 28px rgba(15,23,42,.07);
+  }
+  label { display:block; font-size:12.5px; font-weight:700; color:#475569; margin:10px 0 5px; }
+  input[type=password], input[type=text] {
+    width:100%; padding:12px 13px; font-size:16px; border:1.5px solid #cbd5e1;
+    border-radius:11px; outline:none; background:#fbfdff;
+  }
+  input:focus { border-color:#0284c7; }
+  #loginBtn {
+    width:100%; margin-top:15px; padding:13px 0; font-size:16px; font-weight:800; color:#fff;
+    background:linear-gradient(135deg,#0ea5e9,#6366f1); border:none; border-radius:12px;
+    cursor:pointer; box-shadow:0 4px 12px rgba(59,130,246,.32);
+  }
+  #loginBtn:disabled { opacity:.6; cursor:wait; }
+  .msg { margin-top:12px; padding:11px 13px; border-radius:10px; font-size:13.5px; line-height:1.65; display:none; }
+  .msg.show { display:block; }
+  .msg.err  { background:#fee2e2; color:#b91c1c; }
+  .msg.ok   { background:#dcfce7; color:#166534; }
+  .msg.wait { background:#fef3c7; color:#92400e; }
+  .hint { margin-top:12px; font-size:12px; color:#94a3b8; line-height:1.7; }
+
+  /* ── 명단 ── */
+  #panel { display:none; }
+  #panel.show { display:block; }
+  .who {
+    display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+    padding-bottom:12px; margin-bottom:12px; border-bottom:1px solid #eef2f7;
+  }
+  .who b { font-size:16.5px; color:#0f172a; }
+  .who .tagM {
+    font-size:11px; font-weight:800; color:#7c3aed; background:#f3e8ff;
+    padding:3px 9px; border-radius:999px;
+  }
+  .who .sp { flex:1; }
+  .who button {
+    padding:8px 13px; font-size:12.5px; font-weight:700; border-radius:9px; cursor:pointer;
+    border:1.5px solid #cbd5e1; background:#fff; color:#475569; font-family:inherit;
+  }
+  .who button:hover { border-color:#0284c7; color:#0369a1; }
+  #counts { display:flex; gap:9px; margin-bottom:12px; }
+  .cnt {
+    flex:1; border:1.5px solid #e2e8f0; border-radius:12px; padding:9px 6px; text-align:center;
+    background:#fbfdff;
+  }
+  .cnt .n { font-size:20px; font-weight:800; color:#0f172a; font-family:Georgia,serif; }
+  .cnt .l { font-size:11.5px; color:#94a3b8; font-weight:700; margin-top:2px; }
+  .cnt.wait .n { color:#c2410c; }
+  .cnt.wait { border-color:#fed7aa; background:#fff7ed; }
+
+  .secTitle { font-size:13px; font-weight:800; color:#475569; margin:16px 0 8px; }
+  .secTitle span { color:#94a3b8; font-weight:700; }
+  .row {
+    display:flex; align-items:center; gap:10px; padding:11px 13px; margin-bottom:8px;
+    border:1.5px solid #e2e8f0; border-radius:12px; background:#fbfdff; flex-wrap:wrap;
+  }
+  .row.pending { border-color:#fed7aa; background:#fffaf5; }
+  .row .sid { font-family:Georgia,serif; font-size:15px; font-weight:700; color:#334155; min-width:62px; }
+  .row .nm  { font-size:15px; font-weight:800; color:#0f172a; }
+  .row .at  { font-size:11.5px; color:#94a3b8; }
+  .row .tn  { font-size:11.5px; color:#7c3aed; background:#f5f3ff; padding:2px 8px; border-radius:999px; font-weight:700; }
+  .row .sp { flex:1; }
+  .row button, .row select {
+    padding:8px 13px; font-size:13px; font-weight:800; border-radius:9px; cursor:pointer;
+    border:1.5px solid #cbd5e1; background:#fff; color:#475569; font-family:inherit;
+  }
+  .row button.ok { background:#16a34a; border-color:#16a34a; color:#fff; }
+  .row button.ok:hover { background:#15803d; }
+  .row button.un:hover { border-color:#ea580c; color:#c2410c; }
+  .row button.del:hover { border-color:#dc2626; color:#b91c1c; }
+  .row button:disabled { opacity:.5; cursor:wait; }
+  .empty { font-size:13px; color:#94a3b8; padding:14px 4px; }
+  .sign {
+    display:flex; align-items:center; justify-content:center; gap:8px;
+    margin-top:20px; font-size:12.5px; color:#94a3b8; font-weight:600;
+  }
+  .sign img { width:24px; height:24px; }
+  .sign b { color:#64748b; }
+  .foot { text-align:center; font-size:11.5px; color:#cbd5e1; margin-top:8px; line-height:1.7; }
+  #toast {
+    position:fixed; left:50%; bottom:26px; transform:translateX(-50%);
+    background:#111827; color:#fff; font-size:13.5px; padding:10px 18px; border-radius:999px;
+    opacity:0; pointer-events:none; transition:opacity .3s; z-index:50; max-width:88vw; text-align:center;
+  }
+  #toast.show { opacity:1; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="logo">
+    <img src="icon-512.png" alt="">
+    <h1>기하 탐구실 — 입장 승인</h1>
+    <p>선생님용 페이지입니다. 학생에게는 알려주지 마세요.</p>
+  </div>
+
+  <!-- ── 로그인 ── -->
+  <div class="card" id="gate">
+    <label for="key">선생님 비밀번호</label>
+    <input type="password" id="key" placeholder="선생님께 받은 비밀번호" autocomplete="current-password">
+    <button id="loginBtn">들어가기</button>
+    <div class="msg" id="msg"></div>
+    <div class="hint">
+      비밀번호는 차지영 선생님이 알려 드립니다.<br>
+      승인해 주면 학생 앱의 <b>입장하기</b>가 바로 통과됩니다.
+    </div>
+  </div>
+
+  <!-- ── 명단 ── -->
+  <div class="card" id="panel">
+    <div class="who">
+      <b id="meName"></b>
+      <span class="tagM" id="meMaster" style="display:none">전체 관리자</span>
+      <span class="sp"></span>
+      <button id="reloadBtn">새로고침</button>
+      <button id="outBtn">나가기</button>
+    </div>
+    <div id="counts">
+      <div class="cnt wait"><div class="n" id="cWait">0</div><div class="l">승인 대기</div></div>
+      <div class="cnt"><div class="n" id="cOk">0</div><div class="l">승인 완료</div></div>
+    </div>
+    <div id="list"></div>
+  </div>
+
+  <div class="sign"><img src="splash-emblem.png" alt=""><span>단국대학교사범대학부속고등학교 <b>차지영선생님</b></span></div>
+  <div class="foot">기하 탐구실 · 제작 차지영선생님<br><span id="ver"></span></div>
+</div>
+<div id="toast"></div>
+
+<script>
+'use strict';
+const URL_ = GEO_CONFIG.APPS_SCRIPT_URL;
+const $ = id => document.getElementById(id);
+let KEY = '', ME = null, TEACHERS = [];
+
+function toast(m){
+  const t = $('toast'); t.textContent = m; t.classList.add('show');
+  clearTimeout(t._x); t._x = setTimeout(()=>t.classList.remove('show'), 2600);
+}
+function showMsg(cls, html){ $('msg').className = 'msg show ' + cls; $('msg').innerHTML = html; }
+function hideMsg(){ $('msg').className = 'msg'; }
+
+async function call(params){
+  const res = await fetch(URL_, { method:'POST', body: JSON.stringify(params) });
+  return await res.json();
+}
+
+async function load(key, silent){
+  const btn = $('loginBtn');
+  btn.disabled = true;
+  if(!silent) showMsg('wait', '명단을 불러오는 중이에요…');
+  try{
+    const r = await call({ action:'adminList', key: key });
+    if(!r.ok){
+      if(r.err === 'key') showMsg('err', '비밀번호가 맞지 않아요. 다시 확인해 주세요.');
+      else showMsg('err', '명단을 불러오지 못했어요.');
+      btn.disabled = false; return false;
+    }
+    KEY = key; ME = r.me; TEACHERS = r.teachers || [];
+    try{ localStorage.setItem('geoAdminKey', key); }catch(e){}
+    hideMsg();
+    $('gate').style.display = 'none';
+    $('panel').classList.add('show');
+    $('meName').textContent = ME.name;
+    $('meMaster').style.display = ME.master ? 'inline-block' : 'none';
+    render(r.items || []);
+    btn.disabled = false; return true;
+  }catch(e){
+    showMsg('err', '서버에 연결하지 못했어요. 인터넷 연결을 확인해 주세요.');
+    btn.disabled = false; return false;
+  }
+}
+
+function esc(s){ return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+
+function rowHtml(it){
+  const tsel = (ME && ME.master)
+    ? `<select class="tsel" data-sid="${esc(it.sid)}" data-name="${esc(it.name)}" title="담당 선생님 바꾸기">
+         <option value=""${it.teacher?'':' selected'}>미지정</option>
+         ${TEACHERS.map(t=>`<option value="${esc(t.id)}"${t.id===it.teacher?' selected':''}>${esc(t.name)}</option>`).join('')}
+       </select>`
+    : '';
+  const act = it.status === 'pending'
+    ? `<button class="ok"  data-op="approve" data-sid="${esc(it.sid)}" data-name="${esc(it.name)}">승인</button>`
+    : `<button class="un"  data-op="pending" data-sid="${esc(it.sid)}" data-name="${esc(it.name)}">승인 취소</button>`;
+  return `<div class="row ${it.status}">
+      <span class="sid">${esc(it.sid)}</span>
+      <span class="nm">${esc(it.name)}</span>
+      <span class="at">${esc(it.at)}</span>
+      <span class="sp"></span>
+      ${tsel}
+      ${act}
+      <button class="del" data-op="delete" data-sid="${esc(it.sid)}" data-name="${esc(it.name)}">삭제</button>
+    </div>`;
+}
+
+function render(items){
+  const wait = items.filter(i=>i.status==='pending');
+  const ok   = items.filter(i=>i.status==='approved');
+  $('cWait').textContent = wait.length;
+  $('cOk').textContent = ok.length;
+  $('list').innerHTML =
+    `<div class="secTitle">승인 대기 <span>${wait.length}명</span></div>` +
+    (wait.length ? wait.map(rowHtml).join('') : '<div class="empty">승인을 기다리는 학생이 없어요.</div>') +
+    `<div class="secTitle">승인 완료 <span>${ok.length}명</span></div>` +
+    (ok.length ? ok.map(rowHtml).join('') : '<div class="empty">아직 승인한 학생이 없어요.</div>');
+
+  $('list').querySelectorAll('button[data-op]').forEach(b=>{
+    b.addEventListener('click', async ()=>{
+      const op = b.dataset.op;
+      if(op === 'delete' && !confirm(`${b.dataset.name}(${b.dataset.sid}) 학생을 명단에서 지울까요?\n다시 입장하면 새로 신청됩니다.`)) return;
+      b.disabled = true;
+      try{
+        const r = await call({ action:'adminSet', key:KEY, op:op, sid:b.dataset.sid, name:b.dataset.name });
+        if(!r.ok){ toast('처리하지 못했어요.'); b.disabled = false; return; }
+        toast(op==='approve' ? '승인했어요' : op==='pending' ? '승인을 취소했어요' : '명단에서 지웠어요');
+        await load(KEY, true);
+      }catch(e){ toast('서버에 연결하지 못했어요.'); b.disabled = false; }
+    });
+  });
+  $('list').querySelectorAll('select.tsel').forEach(s=>{
+    s.addEventListener('change', async ()=>{
+      s.disabled = true;
+      try{
+        const r = await call({ action:'adminAssign', key:KEY, sid:s.dataset.sid, name:s.dataset.name, teacher:s.value });
+        if(!r.ok) toast('바꾸지 못했어요.');
+        else { toast('담당 선생님을 바꿨어요'); await load(KEY, true); }
+      }catch(e){ toast('서버에 연결하지 못했어요.'); }
+      s.disabled = false;
+    });
+  });
+}
+
+$('loginBtn').addEventListener('click', ()=>{
+  const k = $('key').value.trim();
+  if(!k){ showMsg('err','비밀번호를 입력해 주세요.'); return; }
+  load(k, false);
+});
+$('key').addEventListener('keydown', e=>{ if(e.key==='Enter') $('loginBtn').click(); });
+$('reloadBtn').addEventListener('click', ()=>load(KEY, true).then(()=>toast('새로고침했어요')));
+$('outBtn').addEventListener('click', ()=>{
+  try{ localStorage.removeItem('geoAdminKey'); }catch(e){}
+  location.reload();
+});
+
+$('ver').textContent = GEO_CONFIG.VERSION;
+window.addEventListener('load', ()=>{
+  let k = '';
+  try{ k = localStorage.getItem('geoAdminKey') || ''; }catch(e){}
+  if(k){ $('key').value = k; load(k, true); }
+});
+</script>
+</body>
+</html>

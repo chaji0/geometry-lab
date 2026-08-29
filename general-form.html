@@ -1,0 +1,1585 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<script>
+/* 입장 가드 */
+if (localStorage.getItem('geoAppOk') !== '1') location.replace('index.html');
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="icon" type="image/svg+xml" href="icon.svg">
+<link rel="apple-touch-icon" href="icon-180.png">
+<meta name="apple-mobile-web-app-title" content="기하">
+<title>이차곡선의 일반형</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html, body { width:100%; height:100%; overflow:hidden; }
+  body {
+    font-family:'Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif;
+    background:#f1f5fb; color:#1e293b; display:flex; flex-direction:column;
+  }
+  /* 수학 문자는 이탤릭 세리프, 좌표 위의 점은 로마자(정체) */
+  i, .m  { font-family:Georgia,'Times New Roman',serif; font-style:italic; }
+  .rm    { font-family:Georgia,'Times New Roman',serif; font-style:normal; }
+
+  header {
+    padding:9px 16px 7px; background:#fff; border-bottom:1px solid #e2e8f0;
+    display:flex; align-items:baseline; gap:11px; flex-wrap:wrap;
+  }
+  header h1 { font-size:17.5px; color:#0f172a; letter-spacing:-.01em; }
+  header .sub { font-size:12.5px; color:#64748b; }
+
+  #tabs { display:flex; gap:9px; padding:9px 16px; background:#fff; border-bottom:1px solid #e2e8f0; }
+  #tabs button {
+    display:flex; align-items:center; gap:8px;
+    padding:8px 20px 8px 16px; font-size:14.5px; font-weight:800; border-radius:999px; cursor:pointer;
+    border:none; background:#f1f5f9; color:#475569; font-family:inherit; transition:all .13s;
+  }
+  #tabs button:hover { background:#e2e8f0; }
+  #tabs button .dt { width:9px; height:9px; border-radius:50%; flex:none; }
+  #tabs button[data-t="cond"] .dt { background:#1d6fa5; }
+  #tabs button[data-t="rot"]  .dt { background:#a78bfa; }
+  #tabs button[data-t="quiz"] .dt { background:#f59e0b; }
+  #tabs button[data-t="proj"] .dt { background:#16a34a; }
+  #tabs button.on { background:#12608f; color:#fff; }
+  #tabs button.on .dt { background:#fff !important; }
+
+  #main { flex:1; min-height:0; display:flex; }
+  .pane { flex:1; min-height:0; display:none; }
+  .pane.on { display:flex; }
+
+  /* ── 왼쪽 조작판 ── */
+  .side {
+    width:410px; flex:none; background:#fff; border-right:1px solid #e2e8f0;
+    padding:13px 15px 18px; overflow-y:auto;
+  }
+  .box {
+    border:1.5px solid #e2e8f0; border-radius:13px; padding:12px 13px; margin-bottom:11px; background:#fbfdff;
+  }
+  .box.eq { border-color:#bae6fd; background:#f0f9ff; }
+  .cap { font-size:11.5px; font-weight:800; color:#94a3b8; letter-spacing:.05em; margin-bottom:7px; }
+  .eqLine {
+    font-family:Georgia,'Times New Roman',serif; font-size:19px; color:#0c4a6e;
+    line-height:1.55; word-break:break-word;
+  }
+  .eqLine .op { font-style:normal; color:#0369a1; margin:0 2px; }
+  .eqSmall { font-size:15.5px; color:#334155; margin-top:6px; }
+  .eqTmpl {
+    font-family:Georgia,'Times New Roman',serif; font-size:15px; color:#7ba8c4;
+    padding-bottom:6px; margin-bottom:7px; border-bottom:1px dashed #cfe3ef; line-height:1.5;
+  }
+  .eqTmpl .op { font-style:normal; }
+  .stdLine {
+    font-family:Georgia,'Times New Roman',serif; font-size:17px; color:#15803d;
+    margin-top:8px; padding-top:7px; border-top:1px dashed #cfe3ef; line-height:2.1;
+  }
+  .stdLine .lb { font-family:inherit; font-style:normal; font-size:11.5px; font-weight:800;
+    color:#94a3b8; letter-spacing:.05em; display:block; margin-bottom:2px; }
+  .stdLine.no { color:#94a3b8; font-size:13.5px; font-family:inherit; line-height:1.6; }
+  /* 분수 */
+  .fr { display:inline-flex; flex-direction:column; vertical-align:middle; text-align:center;
+        margin:0 2px; line-height:1.25; }
+  .fr .nu { border-bottom:1.6px solid currentColor; padding:0 6px 1px; }
+  .fr .de { padding:1px 6px 0; }
+  /* 판정 규칙 = 스스로 맞혀 보기 */
+  table.rule select {
+    font-family:inherit; font-size:12.5px; font-weight:700; color:#475569;
+    border:1.5px solid #cbd5e1; border-radius:8px; padding:4px 6px; background:#fff; cursor:pointer;
+  }
+  table.rule select:focus { outline:none; border-color:#0284c7; }
+  table.rule td.pick { display:flex; align-items:center; gap:7px; }
+  table.rule .mk { font-size:16px; font-weight:900; line-height:1; }
+  table.rule .mk.o { color:#16a34a; }
+  table.rule .mk.x { color:#dc2626; }
+  table.rule tr.solved td.pick { color:#15803d; font-weight:800; }
+  table.rule .ansTxt { font-size:13px; font-weight:800; color:#15803d; }
+  .ruleCap { display:flex; align-items:center; gap:8px; }
+  .ruleCap .sp { flex:1; }
+  .ruleCap button {
+    font-family:inherit; font-size:11px; font-weight:700; color:#94a3b8; background:none;
+    border:none; cursor:pointer; padding:0; text-decoration:underline;
+  }
+  .ruleCap button:hover { color:#64748b; }
+
+  /* 심화 학습 — 접었다 펴기 */
+  .adv {
+    border:1.5px solid #ddd6fe; background:#faf8ff; border-radius:13px;
+    margin-bottom:11px; overflow:hidden;
+  }
+  .advHead {
+    display:flex; align-items:center; gap:9px; padding:11px 13px; cursor:pointer;
+    user-select:none; -webkit-tap-highlight-color:transparent;
+  }
+  .advHead:hover { background:#f5f1ff; }
+  .advHead .t { font-size:13.5px; font-weight:800; color:#6d28d9; }
+  .advHead .s { font-size:11.5px; color:#a78bfa; font-weight:600; }
+  .advHead .arw { margin-left:auto; color:#a78bfa; font-size:11px; transition:transform .22s; }
+  .adv.open .advHead { border-bottom:1px dashed #ddd6fe; }
+  .adv.open .advHead .arw { transform:rotate(180deg); }
+  .advBody { display:none; padding:12px 13px 13px; }
+  .adv.open .advBody { display:block; }
+  .advBody .sect { font-size:11.5px; font-weight:800; color:#a78bfa; letter-spacing:.05em; margin-bottom:6px; }
+  .advBody .hr { height:1px; background:#ede9fe; margin:13px 0 11px; }
+  #rotBtn {
+    width:100%; margin-top:10px; padding:10px 0; font-size:13.5px; font-weight:800;
+    border-radius:10px; cursor:pointer; border:1.5px solid #c4b5fd; background:#fff;
+    color:#6d28d9; font-family:inherit; transition:all .12s;
+  }
+  #rotBtn:hover:not(:disabled) { background:#f5f3ff; }
+  #rotBtn.on, #rotBtn.on:hover:not(:disabled) {
+    background:#7c3aed; border-color:#7c3aed; color:#fff;
+  }
+  #rotBtn:disabled { opacity:.45; cursor:default; }
+  .zoomHint {
+    position:absolute; right:12px; bottom:12px; background:rgba(255,255,255,.92);
+    border:1px solid #e2e8f0; border-radius:999px; padding:6px 13px; font-size:12px;
+    color:#94a3b8; pointer-events:none; font-weight:600;
+  }
+
+  .sl { display:flex; align-items:center; gap:10px; margin-bottom:7px; }
+  .sl label {
+    width:52px; flex:none; font-family:Georgia,serif; font-style:italic; font-size:16px;
+    color:#334155; font-weight:700;
+  }
+  .sl input[type=range] { flex:1; min-width:0; accent-color:#0284c7; height:22px; }
+  .sl .v {
+    width:46px; flex:none; text-align:right; font-family:Georgia,serif; font-size:14.5px;
+    color:#0369a1; font-weight:700; font-variant-numeric:tabular-nums;
+  }
+  .sl.hi label, .sl.hi .v { color:#b91c1c; }
+  .sl.hi input[type=range] { accent-color:#dc2626; }
+
+  .presets { display:flex; gap:6px; flex-wrap:wrap; }
+  .presets button {
+    padding:7px 12px; font-size:12.5px; font-weight:700; border-radius:9px; cursor:pointer;
+    border:1.5px solid #cbd5e1; background:#fff; color:#475569; font-family:inherit; transition:all .12s;
+  }
+  .presets button:hover { border-color:#0284c7; color:#0369a1; }
+
+  .verdict {
+    display:flex; align-items:center; gap:10px; padding:11px 13px; border-radius:13px;
+    border:2px solid #cbd5e1; background:#fff; margin-bottom:11px;
+  }
+  .verdict .nm { font-size:21px; font-weight:900; letter-spacing:-.01em; }
+  .verdict .sub2 { font-size:12.5px; color:#64748b; line-height:1.5; }
+  .verdict.deg { border-style:dashed; }
+
+  table.rule { width:100%; border-collapse:collapse; font-size:13px; }
+  table.rule th, table.rule td { padding:7px 8px; border-bottom:1px solid #eef2f7; text-align:left; }
+  table.rule th { font-size:11.5px; color:#94a3b8; font-weight:800; }
+  table.rule td.c1 { font-family:Georgia,serif; color:#334155; white-space:nowrap; }
+  table.rule tr.on td { background:#eff8ff; font-weight:800; color:#0369a1; }
+  table.rule tr.on td.c1 { color:#0369a1; }
+
+  .note { font-size:12.8px; color:#64748b; line-height:1.7; }
+  .note b { color:#334155; }
+  .warn {
+    border:1.5px solid #fecaca; background:#fef2f2; border-radius:13px; padding:11px 13px;
+    font-size:13px; color:#7f1d1d; line-height:1.7;
+  }
+  .warn b { color:#991b1b; }
+
+  /* ── 오른쪽 그림 ── */
+  .view { flex:1; min-width:0; display:flex; flex-direction:column; background:#fff; }
+  .cvWrap { flex:1; min-height:0; position:relative; }
+  canvas { width:100%; height:100%; display:block; touch-action:none; }
+  .badge {
+    position:absolute; left:12px; top:12px; background:rgba(255,255,255,.95);
+    border:1px solid #e2e8f0; border-radius:12px; padding:9px 14px; font-size:13.5px;
+    color:#334155; line-height:1.6; box-shadow:0 4px 16px rgba(16,24,40,.10); pointer-events:none;
+    max-width:340px;
+  }
+  .badge b { color:#0f172a; }
+  .bar {
+    flex:none; padding:9px 14px; background:#fff; border-top:1px solid #e2e8f0;
+    display:flex; gap:8px; align-items:center; justify-content:center; flex-wrap:wrap;
+  }
+  .bar button {
+    padding:9px 16px; font-size:13.5px; font-weight:700; border-radius:10px; cursor:pointer;
+    border:1.5px solid #cbd5e1; background:#fff; color:#334155; font-family:inherit; transition:all .12s;
+  }
+  .bar button:hover { border-color:#0284c7; color:#0369a1; }
+  .bar button.on { background:#12608f; border-color:#12608f; color:#fff; }
+  .bar .zo { font-size:12px; color:#94a3b8; font-weight:800; letter-spacing:.03em; }
+  .bar .sep { width:1px; height:22px; background:#e2e8f0; margin:0 4px; }
+  .bar .zoomGrp { display:flex; gap:7px; align-items:center; flex:none; }
+  .bar .presets { display:flex; gap:6px; flex-wrap:wrap; justify-content:center; }
+  .bar .presets button { padding:7px 11px; font-size:12.5px; }
+
+  /* ── 판정 연습 ── */
+  .quizWrap { flex:1; min-height:0; overflow-y:auto; padding:20px 22px 40px; }
+  .quizInner { max-width:720px; margin:0 auto; }
+  .qHead { font-size:13.5px; color:#64748b; line-height:1.7; margin-bottom:16px; }
+  .qHead b { color:#334155; }
+  .q {
+    border:1.5px solid #e2e8f0; border-radius:15px; padding:15px 17px; margin-bottom:13px; background:#fff;
+  }
+  .q.right { border-color:#86efac; background:#f0fdf4; }
+  .q.wrong { border-color:#fca5a5; background:#fef2f2; }
+  .q .qn { font-size:11.5px; font-weight:800; color:#94a3b8; letter-spacing:.05em; }
+  .q .qe {
+    font-family:Georgia,'Times New Roman',serif; font-size:21px; color:#0f172a; margin:6px 0 12px;
+  }
+  .q .qe .op { font-style:normal; }
+  .opts { display:flex; gap:7px; flex-wrap:wrap; }
+  .opts button {
+    padding:9px 15px; font-size:13.5px; font-weight:700; border-radius:10px; cursor:pointer;
+    border:1.5px solid #cbd5e1; background:#fff; color:#334155; font-family:inherit; transition:all .12s;
+  }
+  .opts button:hover:not(:disabled) { border-color:#0284c7; color:#0369a1; }
+  .opts button:disabled { cursor:default; }
+  .opts button.pick { border-width:2.5px; }
+  .opts button.ans { background:#16a34a; border-color:#16a34a; color:#fff; }
+  .opts button.bad { background:#fee2e2; border-color:#fca5a5; color:#b91c1c; }
+  .why {
+    display:none; margin-top:11px; padding:11px 13px; border-radius:11px;
+    background:#f8fafc; border:1px solid #e2e8f0; font-size:13.2px; color:#475569; line-height:1.75;
+  }
+  .why.show { display:block; }
+  .why .m2 { font-family:Georgia,serif; color:#0f172a; font-weight:700; }
+  .score {
+    display:flex; align-items:center; gap:12px; padding:14px 17px; border-radius:15px;
+    border:2px solid #e2e8f0; background:#fff; margin-bottom:16px;
+  }
+  .score .n { font-family:Georgia,serif; font-size:26px; font-weight:800; color:#0369a1; }
+  .score .l { font-size:13px; color:#64748b; }
+  .score .sp { flex:1; }
+  .score button {
+    padding:9px 15px; font-size:13px; font-weight:700; border-radius:10px; cursor:pointer;
+    border:1.5px solid #cbd5e1; background:#fff; color:#475569; font-family:inherit;
+  }
+  .score.done { border-color:#2563eb; background:#eff6ff; }
+  .stamp {
+    font-size:14px; font-weight:900; color:#2563eb; border:2.5px solid #2563eb;
+    border-radius:9px; padding:3px 11px; transform:rotate(-7deg); background:rgba(255,255,255,.8);
+  }
+  /* ── 탐구 프로젝트 (교과서 활동) ── */
+  .projWrap { flex:1; min-height:0; overflow-y:auto; padding:0 22px 44px; }
+  .pScoreWrap { position:sticky; top:0; z-index:6; background:#f1f5fb; padding:16px 0 12px; }
+  .projInner { max-width:840px; margin:0 auto; }
+  .projHead {
+    border:1.5px solid #d7e6d5; background:linear-gradient(180deg,#f2f8f0,#fff);
+    border-radius:16px; padding:15px 18px 16px; margin-bottom:16px;
+  }
+  .projTags { display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:9px; }
+  .projTags .t1 {
+    font-size:13px; font-weight:900; letter-spacing:.02em; color:#fff; background:#2f6b45;
+    padding:4px 13px; border-radius:999px;
+  }
+  .projTags .t2 { font-size:12px; font-weight:800; color:#5f8c3a; }
+  .projTags .t3 {
+    font-size:11.5px; font-weight:800; color:#2f6b45; background:#dff0dc;
+    padding:3px 10px; border-radius:999px;
+  }
+  .projHead h2 { font-size:21px; color:#14361f; letter-spacing:-.01em; margin-bottom:8px; }
+  .goal {
+    display:flex; gap:9px; align-items:flex-start;
+    font-size:12.8px; color:#4b6b52; line-height:1.65;
+  }
+  .goal b {
+    flex:none; font-size:11px; font-weight:900; color:#fff; background:#8ba888;
+    padding:3px 7px; border-radius:6px; line-height:1.5;
+  }
+  .projLead {
+    display:flex; gap:9px; font-size:14.5px; color:#334155; line-height:1.75; margin-bottom:18px;
+  }
+  .projLead .ar { color:#2f6b45; font-weight:900; flex:none; }
+  .projLead .cond { display:block; color:#64748b; font-size:13px; margin-top:3px; }
+  .qBlock { margin-bottom:22px; }
+  .qTitle { display:flex; gap:10px; align-items:flex-start; margin-bottom:11px; }
+  .qTitle .no {
+    flex:none; width:24px; height:24px; border-radius:7px; background:#2f6b45; color:#fff;
+    font-size:14px; font-weight:900; display:flex; align-items:center; justify-content:center;
+  }
+  .qTitle .tx { font-size:14.8px; color:#1e293b; line-height:1.7; }
+  .howBox {
+    border:1.5px solid #dbeafe; background:#f4f9ff; border-radius:12px;
+    padding:12px 15px; margin:0 0 13px 34px; font-size:13.5px; color:#334155; line-height:1.9;
+  }
+  .howBox .n { color:#1d6fa5; font-weight:900; margin-right:5px; }
+  .howBox code {
+    font-family:'IBM Plex Mono',Consolas,monospace; font-size:12.8px; background:#fff;
+    border:1px solid #cfe3f5; border-radius:6px; padding:2px 7px; color:#0f172a;
+  }
+  .tool { display:flex; gap:14px; margin:0 0 15px 34px; flex-wrap:wrap; }
+  .toolL { width:250px; flex:none; }
+  .toolR { flex:1; min-width:280px; height:270px; position:relative;
+    border:1.5px solid #e2e8f0; border-radius:12px; overflow:hidden; background:#fff; }
+  .toolR canvas { width:100%; height:100%; display:block; touch-action:none; }
+  .toolEq {
+    font-family:Georgia,serif; font-size:17px; color:#0c4a6e; background:#f0f9ff;
+    border:1.5px solid #bae6fd; border-radius:11px; padding:9px 12px; margin-bottom:9px;
+  }
+  .toolNow {
+    font-size:13px; color:#64748b; margin-top:8px; line-height:1.6;
+  }
+  .toolNow b { font-size:16px; }
+  .jump { display:flex; gap:5px; flex-wrap:wrap; margin-top:9px; }
+  .jump button {
+    padding:5px 9px; font-size:11.5px; font-weight:700; border-radius:8px; cursor:pointer;
+    border:1.5px solid #cbd5e1; background:#fff; color:#475569; font-family:Georgia,serif;
+  }
+  .jump button:hover { border-color:#0284c7; color:#0369a1; }
+  .subQ { font-size:14px; color:#334155; margin:0 0 8px 34px; line-height:1.7; }
+  .tbl { margin:0 0 8px 34px; overflow-x:auto; }
+  table.wk { border-collapse:collapse; width:100%; min-width:520px; }
+  table.wk th, table.wk td {
+    border:1px solid #cbd5e1; padding:9px 10px; text-align:center; font-size:13.5px;
+  }
+  table.wk th {
+    background:#eef4f0; color:#33503c; font-weight:800; font-family:Georgia,serif; font-size:14px;
+  }
+  table.wk th.rowh { background:#f1f5f9; color:#475569; font-family:inherit; font-size:13px; width:118px; }
+  table.wk td.given { background:#f8fafc; color:#334155; font-family:Georgia,serif; }
+  table.wk td.blank { padding:6px; }
+  table.wk select {
+    width:100%; font-family:inherit; font-size:13px; font-weight:700; color:#475569;
+    border:1.5px solid #cbd5e1; border-radius:8px; padding:6px 4px; background:#fff; cursor:pointer;
+  }
+  table.wk select:focus { outline:none; border-color:#0284c7; }
+  table.wk td.ok   { background:#f0fdf4; }
+  table.wk td.bad  { background:#fef2f2; }
+  table.wk td .done { display:flex; align-items:center; justify-content:center; gap:6px;
+    font-weight:800; color:#15803d; font-size:13.5px; }
+  table.wk td .mk2 { font-size:15px; font-weight:900; }
+  table.wk td .mk2.o { color:#16a34a; }
+  table.wk td .mk2.x { color:#dc2626; }
+  .sol {
+    display:none; margin:0 0 14px 34px; padding:11px 14px; border-radius:11px;
+    background:#f0fdf4; border:1.5px solid #bbf7d0; font-size:13px; color:#166534; line-height:1.85;
+  }
+  .sol.show { display:block; }
+  .sol .m3 { font-family:Georgia,serif; font-weight:700; }
+  .expandTag {
+    display:inline-block; font-size:11.5px; font-weight:900; color:#b45309; background:#fef3c7;
+    padding:3px 9px; border-radius:6px; margin-bottom:9px;
+  }
+  .projScore {
+    display:flex; align-items:center; gap:12px; padding:13px 17px; border-radius:14px;
+    border:2px solid #e2e8f0; background:#fff;
+  }
+  .projScore .n { font-family:Georgia,serif; font-size:22px; font-weight:800; color:#15803d; }
+  .projScore .l { font-size:13px; color:#64748b; }
+  .projScore .sp { flex:1; }
+  .projScore button {
+    padding:8px 14px; font-size:12.5px; font-weight:700; border-radius:9px; cursor:pointer;
+    border:1.5px solid #cbd5e1; background:#fff; color:#475569; font-family:inherit;
+  }
+  .projScore.done { border-color:#16a34a; background:#f0fdf4; }
+  @media (max-width:720px){
+    .howBox, .tool, .subQ, .tbl, .sol { margin-left:0; }
+  }
+
+  @media (max-height:900px){
+    .side { width:392px; padding:10px 12px 14px; }
+    .box { padding:9px 11px; margin-bottom:8px; }
+    .cap { margin-bottom:5px; }
+    .eqLine { font-size:17px; }
+    .verdict { padding:9px 12px; margin-bottom:8px; }
+    .verdict .nm { font-size:19px; }
+    .sl { margin-bottom:4px; }
+    .sl label { font-size:15px; }
+    .sl input[type=range] { height:19px; }
+    .presets button { padding:5px 10px; font-size:12px; }
+    .presets { gap:5px; }
+    table.rule th, table.rule td { padding:5px 7px; font-size:12.5px; }
+    .note { font-size:12.2px; line-height:1.6; }
+    .warn { padding:9px 12px; font-size:12.4px; line-height:1.6; }
+    .eqTmpl { font-size:14px; padding-bottom:5px; margin-bottom:5px; }
+    .stdLine { font-size:15.5px; margin-top:6px; padding-top:6px; line-height:2; }
+    .stdLine.no { font-size:12.4px; }
+    .eqSmall { font-size:14.5px; margin-top:4px; }
+    table.rule select { font-size:12px; padding:3px 5px; }
+    .bar { padding:7px 12px; }
+  }
+  /* 앱 상·하단 바까지 있는 좁은 화면 */
+  @media (max-height:860px){
+    .side { padding:8px 11px 12px; }
+    .box { padding:8px 10px; margin-bottom:6px; }
+    .cap { font-size:11px; margin-bottom:4px; }
+    .eqLine { font-size:16px; }
+    .eqTmpl { font-size:13.5px; padding-bottom:4px; margin-bottom:4px; }
+    .eqSmall { font-size:14px; margin-top:3px; }
+    .stdLine { font-size:15px; margin-top:5px; padding-top:5px; line-height:1.9; }
+    .verdict { padding:8px 11px; margin-bottom:6px; }
+    .verdict .nm { font-size:18px; }
+    .verdict .sub2 { font-size:12px; }
+    .sl { margin-bottom:3px; }
+    .sl input[type=range] { height:17px; }
+    table.rule th, table.rule td { padding:4px 6px; font-size:12px; }
+    table.rule select { font-size:11.5px; padding:2px 4px; }
+    .advHead { padding:9px 11px; }
+    .note { font-size:11.8px; }
+    .warn { padding:8px 11px; font-size:12px; }
+    .box { margin-bottom:5px; }
+    table.rule th { font-size:10.5px; }
+    table.rule th, table.rule td { padding:3px 6px; }
+    .ruleCap { font-size:10.5px; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>이차곡선의 일반형</h1>
+  <span class="sub">계수를 움직이며 곡선이 어떻게 변하는지 확인해 보세요</span>
+</header>
+
+<div id="tabs">
+  <button data-t="cond" class="on"><span class="dt"></span>이차곡선 (교과서)</button>
+  <button data-t="rot"><span class="dt"></span><span class="m">xy</span>항이 있으면</button>
+  <button data-t="quiz"><span class="dt"></span>판정 연습</button>
+  <button data-t="proj"><span class="dt"></span>교과서 33p</button>
+</div>
+
+<div id="main">
+  <!-- ════ 탭 1 : xy 항 ════ -->
+  <div class="pane" data-p="rot">
+    <div class="side">
+      <div class="box eq">
+        <div class="cap">일반형</div>
+        <div class="eqTmpl"><i>A</i><i>x</i>² <span class="op">+</span> <i>B</i><i>y</i>²
+          <span class="op">+</span> <i>C</i><i>xy</i> <span class="op">+</span> <i>D</i><i>x</i>
+          <span class="op">+</span> <i>E</i><i>y</i> <span class="op">+</span> <i>F</i>
+          <span class="op">=</span> 0</div>
+        <div class="eqLine" id="eqR"></div>
+        <div class="stdLine" id="stdR"></div>
+      </div>
+      <div class="verdict" id="vdR">
+        <div>
+          <div class="nm" id="vdRName"></div>
+          <div class="sub2" id="vdRSub"></div>
+        </div>
+      </div>
+      <div class="box">
+        <div class="cap">계수 움직이기</div>
+        <div id="slR"></div>
+      </div>
+      <div class="adv" id="adv">
+        <div class="advHead" id="advHead" role="button" tabindex="0" aria-expanded="false">
+          <span class="t">심화 학습</span>
+          <span class="s">판별식 · 회전각</span>
+          <span class="arw">▼</span>
+        </div>
+        <div class="advBody">
+          <div class="sect">판별식으로 가려내기</div>
+          <div class="eqLine" style="font-size:16.5px" id="discR"></div>
+          <div class="cap ruleCap" style="margin:10px 0 3px"><span>어떤 곡선일까요?</span>
+            <span class="sp"></span><button id="ruleRReset">다시</button></div>
+          <table class="rule" id="ruleR"></table>
+          <div class="note" style="margin-top:7px">
+            판별식은 <b>종류</b>만 알려 줍니다. 우변이 0 이하가 되면 같은 판별식이어도 <b>퇴화</b>돼요.
+          </div>
+
+          <div class="hr"></div>
+
+          <div class="sect">축을 얼마나 돌리면 될까</div>
+          <div class="eqLine" style="font-size:15.5px" id="thR"></div>
+          <div class="eqLine eqSmall" id="eqRot" style="margin-top:6px"></div>
+          <div class="note" style="margin-top:6px">
+            축을 <span class="m">θ</span>만큼 돌린 <span class="m">x</span>′<span class="m">y</span>′
+            좌표계에서는 <span class="m">xy</span>항이 사라져 표준형이 됩니다.
+          </div>
+          <button id="rotBtn">회전한 좌표계에서 보기</button>
+        </div>
+      </div>
+      <div class="warn">
+        고등학교에서는 <span class="m">xy</span>항이 <b>없는</b>(<span class="m">C</span> = 0)
+        경우, 즉 축이 <span class="m">x</span>축·<span class="m">y</span>축에 나란한 이차곡선만 다룹니다.
+      </div>
+    </div>
+    <div class="view">
+      <div class="cvWrap">
+        <canvas id="cvR"></canvas>
+        <div class="badge" id="bdR"></div>
+        <div class="zoomHint">두 손가락(또는 마우스 휠)으로 확대 · 끌어서 이동</div>
+      </div>
+      <div class="bar" id="barR">
+        <span class="zo">눌러 보기</span>
+        <div class="presets" id="preR"></div>
+        <span class="sep"></span>
+        <div class="zoomGrp">
+          <span class="zo">보기</span>
+          <button data-z="out">−</button>
+          <button data-z="in">+</button>
+          <button data-z="reset">처음</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ 탭 2 : 조건 ════ -->
+  <div class="pane on" data-p="cond">
+    <div class="side">
+      <div class="box eq">
+        <div class="cap">일반형 (<span class="m">xy</span>항 없음)</div>
+        <div class="eqTmpl"><i>A</i><i>x</i>² <span class="op">+</span> <i>B</i><i>y</i>²
+          <span class="op">+</span> <i>C</i><i>x</i> <span class="op">+</span> <i>D</i><i>y</i>
+          <span class="op">+</span> <i>E</i> <span class="op">=</span> 0</div>
+        <div class="eqLine" id="eqC"></div>
+        <div class="eqLine eqSmall" id="eqCsq"></div>
+        <div class="stdLine" id="stdC"></div>
+      </div>
+      <div class="verdict" id="vdC">
+        <div>
+          <div class="nm" id="vdCName"></div>
+          <div class="sub2" id="vdCSub"></div>
+        </div>
+      </div>
+      <div class="box">
+        <div class="cap">계수 움직이기</div>
+        <div id="slC"></div>
+      </div>
+      <div class="box">
+        <div class="cap ruleCap"><span>판정 규칙 — 어떤 곡선일까요?</span>
+          <span class="sp"></span><button id="ruleCReset">다시</button></div>
+        <table class="rule" id="ruleC"></table>
+      </div>
+    </div>
+    <div class="view">
+      <div class="cvWrap">
+        <canvas id="cvC"></canvas>
+        <div class="badge" id="bdC"></div>
+        <div class="zoomHint">두 손가락(또는 마우스 휠)으로 확대 · 끌어서 이동</div>
+      </div>
+      <div class="bar" id="barC">
+        <span class="zo">눌러 보기</span>
+        <div class="presets" id="preC"></div>
+        <span class="sep"></span>
+        <div class="zoomGrp">
+          <span class="zo">보기</span>
+          <button data-z="out">−</button>
+          <button data-z="in">+</button>
+          <button data-z="reset">처음</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ 탭 4 : 탐구 프로젝트 (교과서) ════ -->
+  <div class="pane" data-p="proj">
+    <div class="projWrap">
+      <div class="projInner">
+
+        <div class="pScoreWrap">
+        <div class="projScore" id="pScore">
+          <span class="n" id="pScoreN">0 / 11</span>
+          <span class="l" id="pScoreL">표의 빈칸을 채워 보세요.</span>
+          <span class="sp"></span>
+          <span class="stamp" id="pStamp" style="display:none">완료</span>
+          <button id="pReset">다시 하기</button>
+        </div>
+        </div>
+
+        <div class="projHead">
+          <div class="projTags">
+            <span class="t1">탐구 프로젝트</span>
+            <span class="t2">창의적 사고 과정 중심</span>
+            <span class="t3">협력 활동</span>
+          </div>
+          <h2>이차곡선과 방정식의 관계</h2>
+          <div class="goal"><b>성취 목표</b>
+            <span>공학 도구를 이용하여 이차곡선과 방정식의 연결성을 인식한다.</span></div>
+        </div>
+
+        <div class="projLead">
+          <span class="ar">»</span>
+          <span>공학 도구를 이용하여 이차곡선과 방정식
+            <span class="m">ax</span>² + <span class="m">by</span>² + <span class="m">cx</span>
+            + <span class="m">dy</span> + <span class="m">e</span> = 0 의 관계를 알아보자.
+            <span class="cond">(단, 이차곡선이 그려지지 않는 경우는 제외한다.)</span></span>
+        </div>
+
+        <!-- ── 1 ── -->
+        <div class="qBlock">
+          <div class="qTitle">
+            <span class="no">1</span>
+            <span class="tx">방정식 <span class="m">ax</span>² + <span class="m">by</span>²
+              − 8<span class="m">x</span> + 8<span class="m">y</span> + 10 = 0 에 대하여
+              공학 도구를 이용하여 다음 물음에 답하시오.</span>
+          </div>
+          <div class="howBox">
+            <div><span class="n">①</span> 입력창에 <code>ax^2+by^2-8x+8y+10=0</code> 을 입력하여 그래프를 그린다.</div>
+            <div><span class="n">②</span> <span class="m">a</span>, <span class="m">b</span>에 대한 슬라이더를 움직인다.</div>
+          </div>
+
+          <div class="tool">
+            <div class="toolL">
+              <div class="toolEq" id="pEq"></div>
+              <div id="slP"></div>
+              <div class="toolNow" id="pNow"></div>
+              <div class="jump" id="pJump"></div>
+            </div>
+            <div class="toolR"><canvas id="cvP"></canvas></div>
+          </div>
+
+          <div class="subQ">(1) <span class="m">a</span> = 2 일 때, <span class="m">b</span>의 값의 범위에
+            따라 방정식이 어떤 도형을 나타내는지 확인하시오.</div>
+          <div class="tbl"><table class="wk" id="wk1"></table></div>
+          <div class="sol" id="sol1"></div>
+
+          <div class="subQ">(2) <span class="m">b</span> = −2 일 때, <span class="m">a</span>의 값의 범위에
+            따라 방정식이 어떤 도형을 나타내는지 확인하시오.</div>
+          <div class="tbl"><table class="wk" id="wk2"></table></div>
+          <div class="sol" id="sol2"></div>
+        </div>
+
+        <!-- ── 2 ── -->
+        <div class="qBlock">
+          <div class="expandTag">사고 확장하기</div>
+          <div class="qTitle">
+            <span class="no">2</span>
+            <span class="tx">다음 표에서 방정식 <span class="m">ax</span>² + <span class="m">by</span>²
+              + <span class="m">cx</span> + <span class="m">dy</span> + <span class="m">e</span> = 0 이
+              원, 포물선, 타원, 쌍곡선이 되기 위한 <span class="m">a</span>, <span class="m">b</span>의 조건을
+              모둠별로 완성하고, 이차곡선의 방정식과 그래프의 관계를 발표하시오.</span>
+          </div>
+          <div class="tbl"><table class="wk" id="wk3"></table></div>
+          <div class="sol" id="sol3"></div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ 탭 3 : 판정 연습 ════ -->
+  <div class="pane" data-p="quiz">
+    <div class="quizWrap">
+      <div class="quizInner">
+        <div class="score" id="score">
+          <span class="n" id="scoreN">0 / 6</span>
+          <span class="l" id="scoreL">식을 보고 어떤 곡선인지 골라 보세요.</span>
+          <span class="sp"></span>
+          <span class="stamp" id="scoreStamp" style="display:none">완료</span>
+          <button id="qReset">다시 풀기</button>
+        </div>
+        <div class="qHead">
+          완전제곱식으로 고쳐서 <b>이차항의 계수</b>를 먼저 보세요.
+          <span class="m">xy</span>항이 있으면 축이 기울어진 것이고, 우변이 0 이하가 되면 <b>퇴화</b>됩니다.
+        </div>
+        <div id="qList"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+/* ══════════════════════════════════════════════════════════════
+   이차곡선의 일반형 탐구
+     Ax² + By² + Cxy + Dx + Ey + F = 0   (탭 1)
+     Ax² + By² + Cx  + Dy + E     = 0   (탭 2)
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── 수 다듬기 ── */
+const EPS = 1e-9;
+function nz(v, t){ return Math.abs(v) < (t || 1e-9) ? 0 : v; }
+function fmt(v, d){
+  v = nz(v, 5e-7);
+  let s = v.toFixed(d === undefined ? 2 : d);
+  if(s.indexOf('.') >= 0) s = s.replace(/0+$/, '').replace(/\.$/, '');
+  return (s === '-0' ? '0' : s).replace('-', '\u2212') || '0';
+}
+/* 계수 c 와 문자열 t 로 항 만들기 (부호 자동) */
+function terms(list){
+  let out = '', first = true;
+  for(const [c, t] of list){
+    if(Math.abs(c) < 1e-12) continue;
+    const neg = c < 0, a = Math.abs(c);
+    const co = (Math.abs(a-1) < 1e-12 && t) ? '' : fmt(a);
+    if(first){ out += (neg ? '<span class="op">−</span>' : '') + co + t; first = false; }
+    else out += '<span class="op"> ' + (neg ? '−' : '+') + ' </span>' + co + t;
+  }
+  return out || '0';
+}
+
+/* ══ 판정 ══════════════════════════════════════════════════════
+   Ax² + Cxy + By² + Dx + Ey + F = 0  을 분류한다.
+   판별식  C² − 4AB  와  행렬식 Δ 로 퇴화까지 가려낸다.            */
+const TYPE = {
+  circle:    { name:'원',              color:'#0d9488' },
+  ellipse:   { name:'타원',            color:'#7c3aed' },
+  parabola:  { name:'포물선',          color:'#dc2626' },
+  hyperbola: { name:'쌍곡선',          color:'#ea580c' },
+  point:     { name:'한 점',           color:'#64748b', deg:true },
+  cross:     { name:'만나는 두 직선',  color:'#64748b', deg:true },
+  parallel:  { name:'평행한 두 직선',  color:'#64748b', deg:true },
+  oneline:   { name:'한 직선',         color:'#64748b', deg:true },
+  line:      { name:'직선 (이차곡선 아님)', color:'#94a3b8', deg:true },
+  none:      { name:'그래프 없음',     color:'#94a3b8', deg:true },
+  all:       { name:'평면 전체',       color:'#94a3b8', deg:true }
+};
+function classify(A, B, C, D, E, F){
+  const s = Math.max(1, Math.abs(A),Math.abs(B),Math.abs(C),Math.abs(D),Math.abs(E),Math.abs(F));
+  const t2 = 1e-9 * s * s, t3 = 1e-9 * s * s * s;
+  const disc = C*C - 4*A*B;                                  // 판별식
+  const det =                                                // |A   C/2 D/2|
+      A*(B*F - E*E/4)                                        // |C/2 B   E/2|
+    - (C/2)*((C/2)*F - (E/2)*(D/2))                          // |D/2 E/2 F  |
+    + (D/2)*((C/2)*(E/2) - B*(D/2));
+
+  const quadZero = Math.abs(A) < 1e-12 && Math.abs(B) < 1e-12 && Math.abs(C) < 1e-12;
+  if(quadZero){
+    if(Math.abs(D) < 1e-12 && Math.abs(E) < 1e-12) return { k: Math.abs(F)<1e-12 ? 'all':'none', disc, det };
+    return { k:'line', disc, det };
+  }
+  if(disc < -t2){                                            // 타원형
+    if(Math.abs(det) <= t3) return { k:'point', disc, det };
+    return { k: (det/(A+B) < 0)
+      ? ((Math.abs(A-B) < 1e-12 && Math.abs(C) < 1e-12) ? 'circle' : 'ellipse')
+      : 'none', disc, det };
+  }
+  if(disc > t2){                                             // 쌍곡선형
+    return { k: Math.abs(det) <= t3 ? 'cross' : 'hyperbola', disc, det };
+  }
+  /* 판별식 = 0 — 포물선형 */
+  if(Math.abs(det) > t3) return { k:'parabola', disc, det };
+  /* 퇴화: 이차항이 완전제곱 → s(ax+by)² + m(ax+by) + F */
+  let a, b, sc;
+  if(Math.abs(A) > 1e-12){ sc = A; a = 1; b = C/(2*A); }
+  else { sc = B; a = C/(2*B); b = 1; }
+  const den = a*a + b*b;
+  const m = (D*a + E*b) / den;                               // 선형항 중 (ax+by) 성분
+  const k = F - m*m/(4*sc);
+  const r = k / sc;
+  if(Math.abs(r) < 1e-9) return { k:'oneline', disc, det };
+  return { k: r < 0 ? 'parallel' : 'none', disc, det };
+}
+
+/* ══ 표준형(완전제곱식 꼴) 만들기 ═══════════════════════════════
+   Ax² + By² + Dx + Ey + F = 0   (xy항 없음)                      */
+function frac(nu, de){
+  if(de === '1') return nu;                    // 분모가 1이면 분수로 쓰지 않는다
+  return '<span class="fr"><span class="nu">' + nu + '</span><span class="de">' + de + '</span></span>';
+}
+function shift(v, name){                       // x, (x − 1), (x + 2)
+  if(Math.abs(v) < 1e-9) return '<i>' + name + '</i>';
+  return '(<i>' + name + '</i> ' + (v > 0 ? '−' : '+') + ' ' + fmt(Math.abs(v)) + ')';
+}
+function standardForm(A, B, D, E, F, xn, yn){
+  xn = xn || 'x'; yn = yn || 'y';
+  const e = 1e-9;
+  if(Math.abs(A) > e && Math.abs(B) > e){
+    const p = -D/(2*A), q = -E/(2*B);
+    const R = -F + D*D/(4*A) + E*E/(4*B);
+    if(Math.abs(R) < 1e-7) return null;                      // 퇴화
+    const a2 = R/A, b2 = R/B;
+    if(a2 > 0 && b2 > 0){
+      if(Math.abs(A-B) < e)                                   // 원
+        return shift(p,xn) + '² <span class="op">+</span> ' + shift(q,yn) + '²'
+             + ' <span class="op">=</span> ' + fmt(a2);
+      return frac(shift(p,xn)+'²', fmt(a2)) + ' <span class="op">+</span> '
+           + frac(shift(q,yn)+'²', fmt(b2)) + ' <span class="op">=</span> 1';
+    }
+    if(a2 > 0 && b2 < 0)
+      return frac(shift(p,xn)+'²', fmt(a2)) + ' <span class="op">−</span> '
+           + frac(shift(q,yn)+'²', fmt(-b2)) + ' <span class="op">=</span> 1';
+    if(a2 < 0 && b2 > 0)
+      return frac(shift(q,yn)+'²', fmt(b2)) + ' <span class="op">−</span> '
+           + frac(shift(p,xn)+'²', fmt(-a2)) + ' <span class="op">=</span> 1';
+    return null;                                              // 그래프 없음
+  }
+  if(Math.abs(A) > e && Math.abs(B) <= e && Math.abs(E) > e){  // 포물선 (x²꼴)
+    const p = -D/(2*A), q = (D*D/(4*A) - F)/E;
+    const c = -E/A;
+    return shift(p,xn) + '² <span class="op">=</span> ' + (Math.abs(c-1)<e?'':fmt(c)) + shift(q,yn);
+  }
+  if(Math.abs(B) > e && Math.abs(A) <= e && Math.abs(D) > e){  // 포물선 (y²꼴)
+    const q = -E/(2*B), p = (E*E/(4*B) - F)/D;
+    const c = -D/B;
+    return shift(q,yn) + '² <span class="op">=</span> ' + (Math.abs(c-1)<e?'':fmt(c)) + shift(p,xn);
+  }
+  return null;
+}
+
+/* ══ 판정 규칙표 — 곡선 이름을 스스로 고르기 ═══════════════════ */
+const PICKS = ['원','타원','포물선','쌍곡선','퇴화'];
+function makeRuleQuiz(table, rows){
+  table.innerHTML = '<tr><th>조건</th><th>어떤 곡선일까요?</th></tr>' + rows.map((r,i)=>
+    `<tr data-k="${r.k}" data-i="${i}">
+       <td class="c1">${r.cond}</td>
+       <td class="pick">
+         <select aria-label="곡선 고르기">
+           <option value="">고르기</option>
+           ${PICKS.map(o=>`<option>${o}</option>`).join('')}
+         </select>
+         <span class="mk"></span>
+       </td>
+     </tr>`).join('');
+  table.querySelectorAll('tr[data-i]').forEach(tr=>{
+    const r = rows[+tr.dataset.i];
+    const sel = tr.querySelector('select'), mk = tr.querySelector('.mk');
+    sel.addEventListener('change', ()=>{
+      if(!sel.value){ mk.className = 'mk'; mk.textContent = ''; return; }
+      if(r.ans.indexOf(sel.value) >= 0){
+        mk.className = 'mk o'; mk.textContent = '○';
+        tr.classList.add('solved');
+        sel.remove();
+        mk.insertAdjacentHTML('afterend', '<span class="ansTxt">' + r.show + '</span>');
+      } else {
+        mk.className = 'mk x'; mk.textContent = '✕';
+      }
+    });
+  });
+}
+const COND_ROWS = [
+  { k:'circle',    cond:'<i>A</i> = <i>B</i> (≠ 0)',             ans:['원'],     show:'원' },
+  { k:'ellipse',   cond:'<i>AB</i> &gt; 0, <i>A</i> ≠ <i>B</i>', ans:['타원'],   show:'타원' },
+  { k:'parabola',  cond:'<i>A</i>, <i>B</i> 중 하나만 0',          ans:['포물선'], show:'포물선' },
+  { k:'hyperbola', cond:'<i>AB</i> &lt; 0',                      ans:['쌍곡선'], show:'쌍곡선' },
+  { k:'deg',       cond:'우변이 0 이하가 될 때',                     ans:['퇴화'],   show:'퇴화 (점·직선·없음)' }
+];
+const DISC_ROWS = [
+  { k:'ell', cond:'<i>C</i>² − 4<i>AB</i> &lt; 0', ans:['원','타원'], show:'원 · 타원' },
+  { k:'par', cond:'<i>C</i>² − 4<i>AB</i> = 0',    ans:['포물선'],    show:'포물선' },
+  { k:'hyp', cond:'<i>C</i>² − 4<i>AB</i> &gt; 0', ans:['쌍곡선'],    show:'쌍곡선' }
+];
+
+/* ══ 그리기 공용 ══════════════════════════════════════════════ */
+function makePlot(canvas, badge){
+  const ctx = canvas.getContext('2d');
+  const P = { half: 5, cx: 0, cy: 0, fn: null, extra: null, dirty: true, ax: ['x','y'] };
+
+  function layout(){ P.dirty = true; }
+  function w2s(x, y, w, h, S, ox, oy){ return { x: ox + x*S, y: oy - y*S }; }
+
+  function draw(){
+    const w = canvas.clientWidth, h = canvas.clientHeight;
+    if(!w || !h) return;
+    const dpr = Math.min(devicePixelRatio || 1, 2);
+    if(canvas.width !== Math.round(w*dpr) || canvas.height !== Math.round(h*dpr)){
+      canvas.width = Math.round(w*dpr); canvas.height = Math.round(h*dpr);
+    }
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    ctx.fillStyle = '#fff'; ctx.fillRect(0,0,w,h);
+
+    const S = Math.min(w, h) / (2*P.half);
+    const ox = w/2 - P.cx*S, oy = h/2 + P.cy*S;      // 화면에서의 원점 자리
+    const xMin = -ox/S, xMax = (w-ox)/S, yMin = -(h-oy)/S, yMax = oy/S;
+    const T = (x,y)=>({ x: ox + x*S, y: oy - y*S });
+
+    /* 모눈 */
+    let step = 1;
+    while(step*S < 34) step *= 2;
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = '#eef2f7';
+    for(let gx = Math.ceil(xMin/step)*step; gx <= xMax; gx += step){
+      const p = T(gx,0); ctx.beginPath(); ctx.moveTo(p.x,0); ctx.lineTo(p.x,h); ctx.stroke();
+    }
+    for(let gy = Math.ceil(yMin/step)*step; gy <= yMax; gy += step){
+      const p = T(0,gy); ctx.beginPath(); ctx.moveTo(0,p.y); ctx.lineTo(w,p.y); ctx.stroke();
+    }
+    /* 축 */
+    ctx.strokeStyle = '#94a3b8'; ctx.lineWidth = 1.6;
+    ctx.beginPath(); ctx.moveTo(0,oy); ctx.lineTo(w,oy); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(ox,0); ctx.lineTo(ox,h); ctx.stroke();
+    const ly = Math.max(14, Math.min(h-6, oy+13));    // 눈금 글씨가 화면 안에 남도록
+    const lx = Math.max(6, Math.min(w-26, ox+5));
+    ctx.fillStyle = '#94a3b8'; ctx.font = 'italic 13px Georgia,serif';
+    ctx.fillText(P.ax[0], w-18, Math.max(16, Math.min(h-6, oy-8)));
+    ctx.fillText(P.ax[1], Math.max(6, Math.min(w-16, ox+8)), 16);
+    ctx.font = '11px Georgia,serif'; ctx.fillStyle = '#b6c0cd';
+    for(let gx = Math.ceil(xMin/step)*step; gx <= xMax; gx += step){
+      if(Math.abs(gx) < 1e-9) continue;
+      const p = T(gx,0); ctx.fillText(String(+gx.toFixed(6)).replace('-','\u2212'), p.x+3, ly);
+    }
+    for(let gy = Math.ceil(yMin/step)*step; gy <= yMax; gy += step){
+      if(Math.abs(gy) < 1e-9) continue;
+      const p = T(0,gy); ctx.fillText(String(+gy.toFixed(6)).replace('-','\u2212'), lx, p.y-3);
+    }
+
+    if(P.extra) P.extra(ctx, T, S, {w,h,xMin,xMax,yMin,yMax});
+
+    /* 곡선 — 마칭 스퀘어로 f(x,y)=0 그리기 */
+    if(P.fn){
+      const N = 260;
+      const dx = (xMax-xMin)/N, dy = (yMax-yMin)/N;
+      const v = new Float64Array((N+1)*(N+1));
+      for(let j=0;j<=N;j++){
+        const y = yMin + j*dy;
+        for(let i=0;i<=N;i++) v[j*(N+1)+i] = P.fn(xMin + i*dx, y);
+      }
+      ctx.beginPath();
+      const ip = (v0,v1)=> v0/(v0-v1);
+      for(let j=0;j<N;j++){
+        for(let i=0;i<N;i++){
+          const v00=v[j*(N+1)+i],     v10=v[j*(N+1)+i+1],
+                v01=v[(j+1)*(N+1)+i], v11=v[(j+1)*(N+1)+i+1];
+          let c = 0;
+          if(v00>0) c|=1; if(v10>0) c|=2; if(v11>0) c|=4; if(v01>0) c|=8;
+          if(c===0 || c===15) continue;
+          const x0 = xMin+i*dx, y0 = yMin+j*dy, x1 = x0+dx, y1 = y0+dy;
+          const eB = ()=>({x:x0+dx*ip(v00,v10), y:y0});
+          const eR = ()=>({x:x1, y:y0+dy*ip(v10,v11)});
+          const eT = ()=>({x:x0+dx*ip(v01,v11), y:y1});
+          const eL = ()=>({x:x0, y:y0+dy*ip(v00,v01)});
+          const seg = (p,q)=>{ const a=T(p.x,p.y), b=T(q.x,q.y);
+                               ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); };
+          switch(c){
+            case 1: case 14: seg(eL(),eB()); break;
+            case 2: case 13: seg(eB(),eR()); break;
+            case 3: case 12: seg(eL(),eR()); break;
+            case 4: case 11: seg(eR(),eT()); break;
+            case 6: case  9: seg(eB(),eT()); break;
+            case 7: case  8: seg(eL(),eT()); break;
+            case 5: seg(eL(),eB()); seg(eR(),eT()); break;
+            case 10: seg(eL(),eT()); seg(eB(),eR()); break;
+          }
+        }
+      }
+      ctx.strokeStyle = '#dc2626'; ctx.lineWidth = 3; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+      ctx.stroke();
+    }
+  }
+  function loop(){
+    requestAnimationFrame(loop);
+    if(canvas.clientWidth !== loop._w || canvas.clientHeight !== loop._h){
+      loop._w = canvas.clientWidth; loop._h = canvas.clientHeight; P.dirty = true;
+    }
+    if(P.dirty){ P.dirty = false; draw(); }
+  }
+  loop();
+
+  /* ── 확대 · 이동 ────────────────────────────────────────────
+     노트북: 마우스 휠로 확대·축소, 끌어서 이동
+     아이패드: 두 손가락으로 확대·축소, 한 손가락으로 이동      */
+  function scale(){ return Math.min(canvas.clientWidth, canvas.clientHeight) / (2*P.half); }
+  function toWorld(sx, sy){
+    const S = scale();
+    return { x: P.cx + (sx - canvas.clientWidth/2)/S,
+             y: P.cy - (sy - canvas.clientHeight/2)/S };
+  }
+  function zoomAt(sx, sy, k){
+    const before = toWorld(sx, sy);
+    P.half = Math.max(0.6, Math.min(60, P.half * k));
+    const after = toWorld(sx, sy);
+    P.cx += before.x - after.x;
+    P.cy += before.y - after.y;
+    P.dirty = true;
+  }
+  P.zoomAt = zoomAt;
+  function local(e){
+    const r = canvas.getBoundingClientRect();
+    return { x: e.clientX - r.left, y: e.clientY - r.top };
+  }
+  canvas.addEventListener('wheel', e=>{
+    e.preventDefault();
+    const p = local(e);
+    zoomAt(p.x, p.y, Math.exp((e.deltaMode === 1 ? e.deltaY*16 : e.deltaY) * 0.0016));
+  }, { passive:false });
+
+  let drag = null;
+  canvas.addEventListener('mousedown', e=>{ drag = local(e); canvas.style.cursor = 'grabbing'; });
+  window.addEventListener('mousemove', e=>{
+    if(!drag) return;
+    const p = local(e), S = scale();
+    P.cx -= (p.x - drag.x)/S; P.cy += (p.y - drag.y)/S;
+    drag = p; P.dirty = true;
+  });
+  window.addEventListener('mouseup', ()=>{ drag = null; canvas.style.cursor = ''; });
+
+  let t0 = null;                                   // 터치 상태
+  const tPos = t => { const r = canvas.getBoundingClientRect();
+                      return { x: t.clientX - r.left, y: t.clientY - r.top }; };
+  function tState(ts){
+    if(ts.length === 1){ const a = tPos(ts[0]); return { n:1, x:a.x, y:a.y, d:0 }; }
+    const a = tPos(ts[0]), b = tPos(ts[1]);
+    return { n:2, x:(a.x+b.x)/2, y:(a.y+b.y)/2, d:Math.hypot(a.x-b.x, a.y-b.y) };
+  }
+  canvas.addEventListener('touchstart', e=>{ t0 = tState(e.touches); }, { passive:true });
+  canvas.addEventListener('touchmove', e=>{
+    if(!t0) return;
+    e.preventDefault();
+    const t1 = tState(e.touches);
+    if(t1.n !== t0.n){ t0 = t1; return; }          // 손가락 수가 바뀌면 기준 다시 잡기
+    if(t1.n === 2 && t0.d > 8 && t1.d > 8) zoomAt(t1.x, t1.y, t0.d / t1.d);
+    const S = scale();
+    P.cx -= (t1.x - t0.x)/S; P.cy += (t1.y - t0.y)/S;
+    P.dirty = true;
+    t0 = t1;
+  }, { passive:false });
+  const tEnd = e=>{ t0 = e.touches.length ? tState(e.touches) : null; };
+  canvas.addEventListener('touchend', tEnd);
+  canvas.addEventListener('touchcancel', tEnd);
+
+  return P;
+}
+/* 한 점만 있는 경우 등은 따로 찍어 준다 */
+function markPoint(ctx, T, x, y){
+  const p = T(x,y);
+  ctx.beginPath(); ctx.arc(p.x, p.y, 6, 0, 7);
+  ctx.fillStyle = '#dc2626'; ctx.fill();
+  ctx.strokeStyle = '#fff'; ctx.lineWidth = 2.5; ctx.stroke();
+}
+
+/* ══ 슬라이더 만들기 ══════════════════════════════════════════ */
+function sliders(host, defs, onChange){
+  const st = {};
+  host.innerHTML = defs.map(d=>
+    `<div class="sl${d.hi?' hi':''}" data-k="${d.k}">
+       <label>${d.label}</label>
+       <input type="range" min="${d.min}" max="${d.max}" step="${d.step}" value="${d.val}">
+       <span class="v"></span>
+     </div>`).join('');
+  defs.forEach(d=>{
+    st[d.k] = d.val;
+    const row = host.querySelector('.sl[data-k="'+d.k+'"]');
+    const inp = row.querySelector('input'), out = row.querySelector('.v');
+    const sync = ()=>{ st[d.k] = +inp.value; out.textContent = fmt(+inp.value); };
+    inp.addEventListener('input', ()=>{
+      sync(); onChange();
+      if(typeof GEO_task === 'function') GEO_task('slider');
+    });
+    sync();
+  });
+  st.__set = obj => {
+    Object.keys(obj).forEach(k=>{
+      const row = host.querySelector('.sl[data-k="'+k+'"]');
+      if(!row) return;
+      row.querySelector('input').value = obj[k];
+      row.querySelector('.v').textContent = fmt(obj[k]);
+      st[k] = obj[k];
+    });
+    onChange();
+  };
+  return st;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   탭 1 — xy 항이 있으면
+   ══════════════════════════════════════════════════════════════ */
+const plotR = makePlot(document.getElementById('cvR'), document.getElementById('bdR'));
+const R = sliders(document.getElementById('slR'), [
+  { k:'A', label:'A', min:-4, max:4, step:0.5, val:1 },
+  { k:'B', label:'B', min:-4, max:4, step:0.5, val:1 },
+  { k:'C', label:'C', min:-4, max:4, step:0.5, val:0, hi:true },
+  { k:'D', label:'D', min:-6, max:6, step:0.5, val:0 },
+  { k:'E', label:'E', min:-6, max:6, step:0.5, val:0 },
+  { k:'F', label:'F', min:-9, max:9, step:0.5, val:-4 }
+], ()=>syncR());
+
+document.getElementById('preR').innerHTML = [
+  ['원',            {A:1,B:1,C:0,D:0,E:0,F:-4}],
+  ['타원',          {A:1,B:2,C:0,D:0,E:0,F:-4}],
+  ['기울어진 타원', {A:2,B:2,C:2,D:0,E:0,F:-4}],
+  ['기울어진 포물선',{A:1,B:1,C:2,D:-2,E:2,F:0}],
+  ['기울어진 쌍곡선',{A:0,B:0,C:1,D:0,E:0,F:-2}],
+  ['두 직선',       {A:1,B:-1,C:0,D:0,E:0,F:0}],
+  ['한 점',         {A:1,B:1,C:0,D:0,E:0,F:0}],
+  ['없음',          {A:1,B:1,C:0,D:0,E:0,F:4}]
+].map((p,i)=>`<button data-i="${i}">${p[0]}</button>`).join('');
+const PRE_R = [
+  {A:1,B:1,C:0,D:0,E:0,F:-4},{A:1,B:2,C:0,D:0,E:0,F:-4},
+  {A:2,B:2,C:2,D:0,E:0,F:-4},{A:1,B:1,C:2,D:-2,E:2,F:0},
+  {A:0,B:0,C:1,D:0,E:0,F:-2},{A:1,B:-1,C:0,D:0,E:0,F:0},
+  {A:1,B:1,C:0,D:0,E:0,F:0},{A:1,B:1,C:0,D:0,E:0,F:4}
+];
+document.querySelectorAll('#preR button').forEach(b=>
+  b.addEventListener('click', ()=>R.__set(PRE_R[+b.dataset.i])));
+
+let showRot = false;                                   // 심화 — 회전한 좌표계에서 보기
+
+function rotAngle(A,B,C){
+  if(Math.abs(C) < 1e-12) return 0;
+  return 0.5 * Math.atan2(C, A - B);
+}
+function rotated(A,B,C,D,E,F,th){
+  const c = Math.cos(th), s = Math.sin(th);
+  return {
+    A: A*c*c + B*s*s + C*c*s,
+    B: A*s*s + B*c*c - C*c*s,
+    C: (B-A)*Math.sin(2*th) + C*Math.cos(2*th),
+    D: D*c + E*s,
+    E: -D*s + E*c,
+    F: F
+  };
+}
+
+function syncR(){
+  const {A,B,C,D,E,F} = R;
+  document.getElementById('eqR').innerHTML =
+    terms([[A,'<i>x</i>²'],[B,'<i>y</i>²'],[C,'<i>xy</i>'],[D,'<i>x</i>'],[E,'<i>y</i>'],[F,'']])
+    + '<span class="op"> = </span>0';
+
+  const cl = classify(A,B,C,D,E,F);
+  const ty = TYPE[cl.k];
+  const vd = document.getElementById('vdR');
+  vd.style.borderColor = ty.color;
+  vd.classList.toggle('deg', !!ty.deg);
+  document.getElementById('vdRName').textContent = ty.name;
+  document.getElementById('vdRName').style.color = ty.color;
+  const tilted = Math.abs(C) > 1e-12;
+  document.getElementById('vdRSub').innerHTML = ty.deg
+    ? '이차곡선이 찌그러진 <b>퇴화된</b> 경우예요.'
+    : (tilted ? '축이 <b>기울어져</b> 있어요 — 고등학교 범위 밖!'
+              : '축이 <span class="m">x</span>축·<span class="m">y</span>축에 나란해요.');
+
+  const th = rotAngle(A,B,C);
+  const badge = document.getElementById('bdR');
+  let PC = { A:A, B:B, C:C, D:D, E:E, F:F };
+  let viewRot = false;
+  badge.innerHTML = '<b>' + ty.name + '</b>'
+    + (ty.deg ? ' · 퇴화' : (tilted ? ' · 축이 기울어짐' : ' · 축이 나란함'));
+
+  /* ── 심화: 판별식 ── */
+  document.getElementById('discR').innerHTML =
+    '<i>C</i>² <span class="op">−</span> 4<i>AB</i> <span class="op">=</span> '
+    + fmt(C) + '² <span class="op">−</span> 4·' + fmt(A) + '·' + fmt(B)
+    + ' <span class="op">=</span> <b>' + fmt(nz(cl.disc, 1e-9)) + '</b>';
+  const dk = cl.disc < -1e-9 ? 'ell' : (cl.disc > 1e-9 ? 'hyp' : 'par');
+  document.querySelectorAll('#ruleR tr[data-k]').forEach(tr=>
+    tr.classList.toggle('on', tr.dataset.k === dk));
+
+  /* ── 심화: 회전각 ── */
+  if(showRot && tilted && !ty.deg){
+    PC = rotated(A,B,C,D,E,F,th);
+    PC.C = 0;
+    viewRot = true;
+  }
+  const rb = document.getElementById('rotBtn');
+  rb.disabled = !tilted || !!ty.deg;
+  rb.classList.toggle('on', viewRot);
+  rb.textContent = viewRot ? '원래 좌표계로' : '회전한 좌표계에서 보기';
+  const degv = th*180/Math.PI;
+  document.getElementById('thR').innerHTML = tilted
+    ? 'tan 2<i>θ</i> <span class="op">=</span> <i>C</i> / (<i>A</i> − <i>B</i>)'
+      + ' <span class="op">→</span> <i>θ</i> <span class="op">=</span> <b>' + fmt(degv,1) + '°</b>'
+    : '<span style="color:#94a3b8"><i>xy</i>항이 없어 돌릴 필요가 없어요 (<i>θ</i> = 0°)</span>';
+  const RT = rotated(A,B,C,D,E,F,th);
+  document.getElementById('eqRot').innerHTML = tilted
+    ? terms([[nz(RT.A,1e-7),'<i>x</i>′²'],[nz(RT.B,1e-7),'<i>y</i>′²'],
+             [nz(RT.D,1e-7),'<i>x</i>′'],[nz(RT.E,1e-7),'<i>y</i>′'],[nz(RT.F,1e-7),'']])
+      + '<span class="op"> = </span>0'
+    : '';
+  if(viewRot) badge.innerHTML = '<b>' + ty.name + '</b> · <b style="color:#7c3aed">x′y′ 좌표계에서 본 모습</b>'
+    + '<br>축을 ' + fmt(degv,1) + '° 돌렸더니 <span class="m">xy</span>항이 사라졌어요';
+
+  /* 표준형 — xy항이 없어야 쓸 수 있다 */
+  const stdEl = document.getElementById('stdR');
+  const sf = tilted ? null : standardForm(A, B, D, E, F);
+  if(viewRot){
+    const R2 = rotated(A,B,C,D,E,F,th);
+    const sf2 = standardForm(R2.A, R2.B, R2.D, R2.E, R2.F, 'x′', 'y′');
+    stdEl.className = sf2 ? 'stdLine' : 'stdLine no';
+    stdEl.innerHTML = '<span class="lb">표준형 (x′y′ 좌표계)</span>'
+      + (sf2 || '퇴화된 경우라 표준형이 없어요.');
+  } else if(tilted){
+    stdEl.className = 'stdLine no';
+    stdEl.innerHTML = '<span class="lb">표준형</span>'
+      + '축이 기울어져 있어서 <b>표준형으로 나타낼 수 없어요.</b> '
+      + '<span class="m">C</span>를 0으로 되돌려 보세요.';
+  } else if(sf){
+    stdEl.className = 'stdLine';
+    stdEl.innerHTML = '<span class="lb">표준형</span>' + sf;
+  } else {
+    stdEl.className = 'stdLine no';
+    stdEl.innerHTML = '<span class="lb">표준형</span>퇴화된 경우라 표준형이 없어요.';
+  }
+  plotR.ax = viewRot ? ['x\u2032','y\u2032'] : ['x','y'];
+  plotR.fn = (x,y)=> PC.A*x*x + PC.B*y*y + PC.C*x*y + PC.D*x + PC.E*y + PC.F;
+  plotR.extra = (ctx, T, S, box)=>{
+    /* 기울어진 축을 점선으로 */
+    if(tilted && !ty.deg && !viewRot){
+      const L = 40;
+      const c = Math.cos(th), s = Math.sin(th);
+      ctx.setLineDash([6,5]); ctx.lineWidth = 1.8;
+      ctx.strokeStyle = 'rgba(139,92,246,.9)';
+      let p1 = T(-L*c, -L*s), p2 = T(L*c, L*s);
+      ctx.beginPath(); ctx.moveTo(p1.x,p1.y); ctx.lineTo(p2.x,p2.y); ctx.stroke();
+      p1 = T(L*s, -L*c); p2 = T(-L*s, L*c);
+      ctx.beginPath(); ctx.moveTo(p1.x,p1.y); ctx.lineTo(p2.x,p2.y); ctx.stroke();
+      ctx.setLineDash([]);
+      const q = T(4.6*c, 4.6*s);
+      ctx.font = 'italic 14px Georgia,serif'; ctx.fillStyle = '#7c3aed';
+      ctx.fillText("x′", q.x+5, q.y-5);
+      const q2 = T(-4.6*s, 4.6*c);
+      ctx.fillText("y′", q2.x+5, q2.y-5);
+    }
+    if(cl.k === 'point'){
+      const den = 4*A*B - C*C;
+      markPoint(ctx, T, (C*E - 2*B*D)/den, (C*D - 2*A*E)/den);
+    }
+    if(cl.k === 'oneline'){
+      ctx.setLineDash([]); ctx.strokeStyle = '#dc2626'; ctx.lineWidth = 3;
+      let a, b, sc;
+      if(Math.abs(A) > 1e-12){ sc = A; a = 1; b = C/(2*A); }
+      else { sc = B; a = C/(2*B); b = 1; }
+      const den = a*a + b*b, m = (D*a + E*b)/den, u0 = -m/(2*sc);
+      const dx = -b, dy = a, L = 40;
+      const cx = a*u0/den, cy = b*u0/den;
+      const p1 = T(cx - dx*L, cy - dy*L), p2 = T(cx + dx*L, cy + dy*L);
+      ctx.beginPath(); ctx.moveTo(p1.x,p1.y); ctx.lineTo(p2.x,p2.y); ctx.stroke();
+    }
+  };
+  plotR.dirty = true;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   탭 2 — 곡선이 될 조건  (Ax² + By² + Cx + Dy + E = 0)
+   ══════════════════════════════════════════════════════════════ */
+const plotC = makePlot(document.getElementById('cvC'), document.getElementById('bdC'));
+const Q = sliders(document.getElementById('slC'), [
+  { k:'A', label:'A', min:-4, max:4, step:0.5, val:1, hi:true },
+  { k:'B', label:'B', min:-4, max:4, step:0.5, val:1, hi:true },
+  { k:'C', label:'C', min:-8, max:8, step:0.5, val:-2 },
+  { k:'D', label:'D', min:-8, max:8, step:0.5, val:4 },
+  { k:'E', label:'E', min:-12, max:12, step:0.5, val:1 }
+], ()=>syncC());
+
+const PRE_C = [
+  ['원',      {A:1,B:1,C:-2,D:4,E:1}],
+  ['타원',    {A:1,B:4,C:0,D:0,E:-4}],
+  ['포물선',  {A:1,B:0,C:0,D:-2,E:0}],
+  ['쌍곡선',  {A:1,B:-1,C:0,D:0,E:-4}],
+  ['한 점',   {A:1,B:1,C:0,D:0,E:0}],
+  ['없음',    {A:1,B:1,C:0,D:0,E:4}],
+  ['두 직선', {A:1,B:0,C:0,D:0,E:-4}]
+];
+document.getElementById('preC').innerHTML =
+  PRE_C.map((p,i)=>`<button data-i="${i}">${p[0]}</button>`).join('');
+document.querySelectorAll('#preC button').forEach(b=>
+  b.addEventListener('click', ()=>Q.__set(PRE_C[+b.dataset.i][1])));
+
+function syncC(){
+  const {A,B,C,D,E} = Q;
+  document.getElementById('eqC').innerHTML =
+    terms([[A,'<i>x</i>²'],[B,'<i>y</i>²'],[C,'<i>x</i>'],[D,'<i>y</i>'],[E,'']])
+    + '<span class="op"> = </span>0';
+
+  /* 완전제곱식으로 고치기 */
+  const parts = [];
+  let rhs = -E;
+  if(Math.abs(A) > 1e-12){
+    const h = C/(2*A);
+    parts.push([A, Math.abs(h) < 1e-12 ? '<i>x</i>²'
+      : '(<i>x</i> ' + (h<0?'−':'+') + ' ' + fmt(Math.abs(h)) + ')²']);
+    rhs += C*C/(4*A);
+  } else if(Math.abs(C) > 1e-12) parts.push([C, '<i>x</i>']);
+  if(Math.abs(B) > 1e-12){
+    const k = D/(2*B);
+    parts.push([B, Math.abs(k) < 1e-12 ? '<i>y</i>²'
+      : '(<i>y</i> ' + (k<0?'−':'+') + ' ' + fmt(Math.abs(k)) + ')²']);
+    rhs += D*D/(4*B);
+  } else if(Math.abs(D) > 1e-12) parts.push([D, '<i>y</i>']);
+  const sq = terms(parts);
+  document.getElementById('eqCsq').innerHTML =
+    (sq || '0') + '<span class="op"> = </span>' + fmt(nz(rhs, 1e-9));
+
+  const stdC = document.getElementById('stdC');
+  const sfC = standardForm(A, B, C, D, E);
+  if(sfC){ stdC.className = 'stdLine'; stdC.innerHTML = '<span class="lb">표준형</span>' + sfC; }
+  else   { stdC.className = 'stdLine no';
+           stdC.innerHTML = '<span class="lb">표준형</span>퇴화된 경우라 표준형이 없어요.'; }
+
+  const cl = classify(A, B, 0, C, D, E);
+  const ty = TYPE[cl.k];
+  const vd = document.getElementById('vdC');
+  vd.style.borderColor = ty.color;
+  vd.classList.toggle('deg', !!ty.deg);
+  document.getElementById('vdCName').textContent = ty.name;
+  document.getElementById('vdCName').style.color = ty.color;
+
+  let why = '';
+  const AB = A*B;
+  if(cl.k==='circle')         why = '<span class="m">A</span> = <span class="m">B</span> 이고 우변이 양수 → 원';
+  else if(cl.k==='ellipse')   why = '<span class="m">AB</span> &gt; 0 이고 <span class="m">A</span> ≠ <span class="m">B</span> → 타원';
+  else if(cl.k==='hyperbola') why = '<span class="m">AB</span> &lt; 0 → 쌍곡선';
+  else if(cl.k==='parabola')  why = '<span class="m">A</span>, <span class="m">B</span> 중 하나만 0 → 포물선';
+  else if(cl.k==='point')     why = '우변이 0 이 되어 <b>한 점</b>으로 줄었어요.';
+  else if(cl.k==='none')      why = '우변의 부호가 맞지 않아 <b>실수 해가 없어요.</b>';
+  else                        why = '이차항이 모자라 <b>퇴화</b>됐어요.';
+  document.getElementById('vdCSub').innerHTML = why
+    + '<br><span style="color:#94a3b8"><span class="m">AB</span> = <b>' + fmt(AB)
+    + '</b> · 우변 = <b>' + fmt(nz(rhs,1e-9)) + '</b></span>';
+
+  let key = cl.k;
+  if(['point','none','parallel','oneline','cross','line','all'].indexOf(key) >= 0) key = 'deg';
+  document.querySelectorAll('#ruleC tr[data-k]').forEach(tr=>
+    tr.classList.toggle('on', tr.dataset.k === key));
+
+
+  document.getElementById('bdC').innerHTML =
+    '<b>' + ty.name + '</b>' + (ty.deg ? ' · 퇴화' : '');
+
+  plotC.fn = (x,y)=> A*x*x + B*y*y + C*x + D*y + E;
+  plotC.extra = (ctx, T)=>{
+    if(cl.k === 'point') markPoint(ctx, T, -C/(2*A), -D/(2*B));
+    if(cl.k === 'circle' || cl.k === 'ellipse' || cl.k === 'hyperbola'){
+      const p = T(-C/(2*A), -D/(2*B));
+      ctx.beginPath(); ctx.arc(p.x, p.y, 3.5, 0, 7);
+      ctx.fillStyle = '#0f172a'; ctx.fill();
+      ctx.font = '12px Georgia,serif'; ctx.fillStyle = '#64748b';
+      ctx.fillText('중심', p.x + 7, p.y - 6);
+    }
+  };
+  plotC.dirty = true;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   탭 3 — 판정 연습
+   ══════════════════════════════════════════════════════════════ */
+const OPTS = ['원','타원','포물선','쌍곡선','퇴화'];
+const QUIZ = [
+  { e:'<i>x</i>² <span class="op">+</span> <i>y</i>² <span class="op">−</span> 4<i>x</i> <span class="op">+</span> 6<i>y</i> <span class="op">+</span> 4 <span class="op">=</span> 0',
+    a:'원',
+    why:'<span class="m2">(x − 2)² + (y + 3)² = 9</span> — <span class="m">x</span>²과 <span class="m">y</span>²의 계수가 같고(1 = 1) 우변이 양수이므로 반지름 3인 원입니다.' },
+  { e:'4<i>x</i>² <span class="op">+</span> 9<i>y</i>² <span class="op">−</span> 36 <span class="op">=</span> 0',
+    a:'타원',
+    why:'<span class="m2">x²/9 + y²/4 = 1</span> — 두 계수의 부호가 같고(<span class="m">AB</span> = 36 &gt; 0) 값이 다르므로 타원입니다.' },
+  { e:'<i>y</i>² <span class="op">−</span> 8<i>x</i> <span class="op">+</span> 2<i>y</i> <span class="op">+</span> 17 <span class="op">=</span> 0',
+    a:'포물선',
+    why:'<span class="m2">(y + 1)² = 8(x − 2)</span> — <span class="m">x</span>²이 없고 <span class="m">x</span>의 일차항이 남아 있으므로 포물선입니다.' },
+  { e:'9<i>x</i>² <span class="op">−</span> 4<i>y</i>² <span class="op">+</span> 18<i>x</i> <span class="op">+</span> 16<i>y</i> <span class="op">−</span> 43 <span class="op">=</span> 0',
+    a:'쌍곡선',
+    why:'<span class="m2">(x + 1)²/4 − (y − 2)²/9 = 1</span> — 두 계수의 부호가 다르므로(<span class="m">AB</span> = −36 &lt; 0) 쌍곡선입니다.' },
+  { e:'<i>x</i>² <span class="op">+</span> 4<i>y</i>² <span class="op">−</span> 2<i>x</i> <span class="op">+</span> 8<i>y</i> <span class="op">+</span> 5 <span class="op">=</span> 0',
+    a:'퇴화',
+    why:'<span class="m2">(x − 1)² + 4(y + 1)² = 0</span> — 계수만 보면 타원이지만 <b>우변이 0</b>이라 점 <span class="rm">(1, −1)</span> 하나뿐입니다.' },
+  { e:'<i>x</i>² <span class="op">+</span> 2<i>xy</i> <span class="op">+</span> <i>y</i>² <span class="op">−</span> 2<i>x</i> <span class="op">+</span> 2<i>y</i> <span class="op">=</span> 0',
+    a:'포물선',
+    why:'이차항이 <span class="m2">(x + y)²</span>인 완전제곱이라 포물선입니다. 다만 <span class="m">xy</span>항 때문에 <b>축이 45° 기울어져</b> 있어 고등학교에서 다루는 표준형으로는 쓸 수 없습니다.' }
+];
+function renderQuiz(){
+  document.getElementById('qList').innerHTML = QUIZ.map((q,i)=>
+    `<div class="q" data-i="${i}">
+       <div class="qn">문제 ${i+1}</div>
+       <div class="qe">${q.e}</div>
+       <div class="opts">${OPTS.map(o=>`<button data-o="${o}">${o}</button>`).join('')}</div>
+       <div class="why"></div>
+     </div>`).join('');
+  let solved = 0, done = new Array(QUIZ.length).fill(false);
+  document.querySelectorAll('.q').forEach(qEl=>{
+    const i = +qEl.dataset.i, q = QUIZ[i];
+    qEl.querySelectorAll('.opts button').forEach(b=>{
+      b.addEventListener('click', ()=>{
+        if(done[i]) return;
+        done[i] = true;
+        const ok = b.dataset.o === q.a;
+        qEl.classList.add(ok ? 'right' : 'wrong');
+        qEl.querySelectorAll('.opts button').forEach(x=>{
+          x.disabled = true;
+          if(x.dataset.o === q.a) x.classList.add('ans');
+          else if(x === b) x.classList.add('bad');
+        });
+        const w = qEl.querySelector('.why');
+        w.innerHTML = (ok ? '<b>맞았어요!</b> ' : '<b>정답은 ' + q.a + '</b> — ') + q.why;
+        w.classList.add('show');
+        if(ok) solved++;
+        const all = done.every(Boolean);
+        document.getElementById('scoreN').textContent = solved + ' / ' + QUIZ.length;
+        document.getElementById('scoreL').textContent = all
+          ? (solved === QUIZ.length ? '전부 맞혔어요!' : '풀이를 다시 읽어 보세요.')
+          : '식을 보고 어떤 곡선인지 골라 보세요.';
+        if(all){
+          document.getElementById('score').classList.add('done');
+          document.getElementById('scoreStamp').style.display = 'inline-block';
+          if(typeof GEO_task === 'function') GEO_task('quiz');
+        }
+      });
+    });
+  });
+  document.getElementById('scoreN').textContent = '0 / ' + QUIZ.length;
+  document.getElementById('score').classList.remove('done');
+  document.getElementById('scoreStamp').style.display = 'none';
+  document.getElementById('scoreL').textContent = '식을 보고 어떤 곡선인지 골라 보세요.';
+}
+document.getElementById('qReset').addEventListener('click', renderQuiz);
+renderQuiz();
+
+/* ══ 탭 · 확대축소 ══════════════════════════════════════════ */
+document.querySelectorAll('#tabs button').forEach(b=>b.addEventListener('click', ()=>{
+  document.querySelectorAll('#tabs button').forEach(x=>x.classList.toggle('on', x===b));
+  document.querySelectorAll('.pane').forEach(p=>p.classList.toggle('on', p.dataset.p===b.dataset.t));
+  plotR.dirty = plotC.dirty = plotP.dirty = true;
+}));
+function zoomBar(barId, P, canvas){
+  document.getElementById(barId).querySelectorAll('button[data-z]').forEach(b=>
+    b.addEventListener('click', ()=>{
+      const cx = canvas.clientWidth/2, cy = canvas.clientHeight/2;
+      if(b.dataset.z === 'in')  P.zoomAt(cx, cy, 1/1.4);
+      if(b.dataset.z === 'out') P.zoomAt(cx, cy, 1.4);
+      if(b.dataset.z === 'reset'){ P.half = 5; P.cx = 0; P.cy = 0; }
+      P.dirty = true;
+    }));
+}
+zoomBar('barR', plotR, document.getElementById('cvR'));
+zoomBar('barC', plotC, document.getElementById('cvC'));
+
+/* 심화 학습 펼치기 */
+const advBox = document.getElementById('adv'), advHead = document.getElementById('advHead');
+function toggleAdv(){
+  const open = !advBox.classList.contains('open');
+  advBox.classList.toggle('open', open);
+  advHead.setAttribute('aria-expanded', open ? 'true' : 'false');
+}
+advHead.addEventListener('click', toggleAdv);
+advHead.addEventListener('keydown', e=>{
+  if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); toggleAdv(); }
+});
+
+makeRuleQuiz(document.getElementById('ruleR'), DISC_ROWS);
+document.getElementById('ruleRReset').addEventListener('click', ()=>{
+  makeRuleQuiz(document.getElementById('ruleR'), DISC_ROWS); syncR();
+});
+document.getElementById('rotBtn').addEventListener('click', ()=>{ showRot = !showRot; syncR(); });
+
+/* ══════════════════════════════════════════════════════════════
+   탭 4 — 탐구 프로젝트 (교과서 활동)
+     방정식 ax² + by² − 8x + 8y + 10 = 0 에서 a, b 를 움직여 보기
+   ══════════════════════════════════════════════════════════════ */
+const plotP = makePlot(document.getElementById('cvP'));
+plotP.half = 7;
+const PJ = sliders(document.getElementById('slP'), [
+  { k:'a', label:'a', min:-4, max:4, step:0.5, val:2, hi:true },
+  { k:'b', label:'b', min:-4, max:4, step:0.5, val:1, hi:true }
+], ()=>syncP());
+
+document.getElementById('pJump').innerHTML = [
+  ['a=2, b=−2',{a:2,b:-2}], ['a=2, b=0',{a:2,b:0}], ['a=2, b=1',{a:2,b:1}], ['a=2, b=2',{a:2,b:2}],
+  ['a=−3, b=−2',{a:-3,b:-2}], ['a=−2, b=−2',{a:-2,b:-2}], ['a=0, b=−2',{a:0,b:-2}], ['a=3, b=−2',{a:3,b:-2}]
+].map((p,i)=>`<button data-i="${i}">${p[0]}</button>`).join('');
+const PJUMP = [{a:2,b:-2},{a:2,b:0},{a:2,b:1},{a:2,b:2},{a:-3,b:-2},{a:-2,b:-2},{a:0,b:-2},{a:3,b:-2}];
+document.querySelectorAll('#pJump button').forEach(b=>
+  b.addEventListener('click', ()=>PJ.__set(PJUMP[+b.dataset.i])));
+
+function syncP(){
+  const a = PJ.a, b = PJ.b;
+  document.getElementById('pEq').innerHTML =
+    terms([[a,'<i>x</i>²'],[b,'<i>y</i>²'],[-8,'<i>x</i>'],[8,'<i>y</i>'],[10,'']])
+    + '<span class="op"> = </span>0';
+  const cl = classify(a, b, 0, -8, 8, 10);
+  const ty = TYPE[cl.k];
+  document.getElementById('pNow').innerHTML =
+    '지금 그래프는 <b style="color:' + ty.color + '">' + ty.name + '</b>'
+    + (ty.deg ? ' <span style="color:#94a3b8">(퇴화 — 이차곡선이 그려지지 않는 경우)</span>' : '');
+  plotP.fn = (x,y)=> a*x*x + b*y*y - 8*x + 8*y + 10;
+  plotP.extra = (ctx, T)=>{
+    if(cl.k === 'point' && Math.abs(a) > 1e-9 && Math.abs(b) > 1e-9)
+      markPoint(ctx, T, 4/a, -4/b);
+  };
+  plotP.dirty = true;
+}
+
+/* ── 표 채우기 ────────────────────────────────────────────── */
+const SHAPES = ['원','타원','포물선','쌍곡선'];
+const WK1 = {
+  head: '<i>b</i>의 값의 범위',
+  cols: ['<i>b</i> &lt; 0', '<i>b</i> = 0', '<i>b</i> &gt; 0, <i>b</i> ≠ 2', '<i>b</i> = 2'],
+  ans:  ['쌍곡선', '포물선', '타원', '원'],
+  opts: SHAPES,
+  sol:  '<span class="m3">a</span> = 2 (양수)로 고정되어 있으므로 <span class="m3">b</span>의 부호만 보면 됩니다.<br>'
+      + '<span class="m3">b</span> &lt; 0 → <span class="m3">ab</span> &lt; 0 이라 <b>쌍곡선</b>, '
+      + '<span class="m3">b</span> = 0 → <span class="m3">y</span>²항이 사라지고 <span class="m3">y</span>의 일차항만 남아 <b>포물선</b>,<br>'
+      + '<span class="m3">b</span> &gt; 0 (<span class="m3">b</span> ≠ 2) → <span class="m3">ab</span> &gt; 0, <span class="m3">a</span> ≠ <span class="m3">b</span> 라 <b>타원</b>, '
+      + '<span class="m3">b</span> = 2 → <span class="m3">a</span> = <span class="m3">b</span> 라 <b>원</b> '
+      + '(<span class="m3">(x − 2)² + (y + 2)² = 3</span>)'
+};
+const WK2 = {
+  head: '<i>a</i>의 값의 범위',
+  cols: ['<i>a</i> &lt; 0, <i>a</i> ≠ −2', '<i>a</i> = −2', '<i>a</i> = 0', '<i>a</i> &gt; 0'],
+  ans:  ['타원', '원', '포물선', '쌍곡선'],
+  opts: SHAPES,
+  sol:  '<span class="m3">b</span> = −2 (음수)로 고정되어 있습니다.<br>'
+      + '<span class="m3">a</span> &lt; 0 (<span class="m3">a</span> ≠ −2) → <span class="m3">ab</span> &gt; 0, <span class="m3">a</span> ≠ <span class="m3">b</span> 라 <b>타원</b>, '
+      + '<span class="m3">a</span> = −2 → <span class="m3">a</span> = <span class="m3">b</span> 라 <b>원</b> '
+      + '(<span class="m3">(x + 2)² + (y − 2)² = 13</span>),<br>'
+      + '<span class="m3">a</span> = 0 → <span class="m3">x</span>²항이 사라져 <b>포물선</b>, '
+      + '<span class="m3">a</span> &gt; 0 → <span class="m3">ab</span> &lt; 0 이라 <b>쌍곡선</b>'
+};
+const COND_OPTS = ['a = b, a ≠ 0, b ≠ 0', 'ab > 0, a ≠ b', 'ab < 0', 'a, b 중 하나만 0'];
+const WK3 = {
+  head: '이차곡선',
+  rowh: '<i>a</i>, <i>b</i>의 조건',
+  cols: ['원', '포물선', '타원', '쌍곡선'],
+  ans:  ['a = b, a ≠ 0, b ≠ 0', 'a, b 중 하나만 0', 'ab > 0, a ≠ b', 'ab < 0'],
+  given:[true, false, false, false],
+  opts: COND_OPTS,
+  math: true,
+  sol:  '이차항의 계수 <span class="m3">a</span>, <span class="m3">b</span>만으로 곡선의 종류가 정해집니다.<br>'
+      + '두 계수가 <b>같으면 원</b>, <b>부호가 같고 값이 다르면 타원</b>, <b>부호가 다르면 쌍곡선</b>, '
+      + '<b>하나가 0이면 포물선</b>입니다.<br>'
+      + '<span style="color:#64748b">단, 완전제곱식으로 고쳤을 때 우변이 0 이하가 되면 점·직선이 되거나 그래프가 없어집니다(퇴화).</span>'
+};
+
+/* 조건식의 수학 문자만 이탤릭으로 (ab 를 쪼개지 않도록 ab 를 먼저 잡는다) */
+function condHtml(t){ return t.replace(/ab|a|b/g, m => '<i>' + m + '</i>'); }
+
+let pDone = {};
+function buildWk(id, W, key, onDone){
+  const t = document.getElementById(id);
+  const cells = W.cols.map((c,i)=>{
+    if(W.given && W.given[i])
+      return '<td class="given">' + (W.math ? condHtml(W.ans[i]) : W.ans[i]) + '</td>';
+    return '<td class="blank" data-i="' + i + '">'
+      + '<select><option value="">고르기</option>'
+      + W.opts.map(o=>'<option>' + o + '</option>').join('') + '</select></td>';
+  }).join('');
+  t.innerHTML =
+    '<tr><th class="rowh">' + W.head + '</th>' + W.cols.map(c=>'<th>' + c + '</th>').join('') + '</tr>'
+    + '<tr><th class="rowh">' + (W.rowh || '도형') + '</th>' + cells + '</tr>';
+  pDone[key] = W.cols.map((c,i)=> !!(W.given && W.given[i]));
+  t.querySelectorAll('td.blank').forEach(td=>{
+    const i = +td.dataset.i, sel = td.querySelector('select');
+    sel.addEventListener('change', ()=>{
+      td.classList.remove('ok','bad');
+      if(!sel.value) return;
+      if(sel.value === W.ans[i]){
+        td.classList.add('ok');
+        td.innerHTML = '<span class="done"><span class="mk2 o">○</span>'
+          + (W.math ? condHtml(W.ans[i]) : W.ans[i]) + '</span>';
+        pDone[key][i] = true;
+        if(pDone[key].every(Boolean)) document.getElementById(onDone).classList.add('show');
+      } else {
+        td.classList.add('bad');
+        if(!td.querySelector('.mk2'))
+          sel.insertAdjacentHTML('afterend', '<span class="mk2 x" style="margin-left:5px">✕</span>');
+      }
+      scoreP();
+    });
+  });
+}
+function scoreP(){
+  let n = 0, tot = 0;
+  ['w1','w2','w3'].forEach(k=>{
+    (pDone[k] || []).forEach((v,i)=>{
+      if(k === 'w3' && i === 0) return;                 // 원 칸은 예시로 주어짐
+      tot++; if(v) n++;
+    });
+  });
+  document.getElementById('pScoreN').textContent = n + ' / ' + tot;
+  const all = n === tot;
+  document.getElementById('pScoreL').textContent = all
+    ? '표를 모두 완성했어요! 모둠에서 그래프와 방정식의 관계를 발표해 보세요.'
+    : '표의 빈칸을 채워 보세요.';
+  document.getElementById('pScore').classList.toggle('done', all);
+  document.getElementById('pStamp').style.display = all ? 'inline-block' : 'none';
+  if(all && typeof GEO_task === 'function') GEO_task('proj');
+}
+function buildProject(){
+  ['sol1','sol2','sol3'].forEach(id=>document.getElementById(id).classList.remove('show'));
+  document.getElementById('sol1').innerHTML = WK1.sol;
+  document.getElementById('sol2').innerHTML = WK2.sol;
+  document.getElementById('sol3').innerHTML = WK3.sol;
+  buildWk('wk1', WK1, 'w1', 'sol1');
+  buildWk('wk2', WK2, 'w2', 'sol2');
+  buildWk('wk3', WK3, 'w3', 'sol3');
+  scoreP();
+}
+document.getElementById('pReset').addEventListener('click', buildProject);
+buildProject();
+syncP();
+
+makeRuleQuiz(document.getElementById('ruleC'), COND_ROWS);
+document.getElementById('ruleCReset').addEventListener('click', ()=>{
+  makeRuleQuiz(document.getElementById('ruleC'), COND_ROWS); syncC();
+});
+
+syncR(); syncC();
+window.__gf = { classify, standardForm, get R(){return {...R};}, get Q(){return {...Q};},
+  get adv(){return advBox.classList.contains('open');}, get rot(){return showRot;},
+  get half(){return plotR.half;}, get cx(){return plotR.cx;}, get cy(){return plotR.cy;} };
+</script>
+<script>window.PAGE_ID="general";</script>
+<script src="nav.js"></script>
+</body>
+</html>
