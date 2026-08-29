@@ -9,6 +9,9 @@
 <meta name="apple-mobile-web-app-title" content="기하">
 <meta name="application-name" content="기하">
 <title>기하 탐구실 — 입장</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="nav.js"></script>
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
@@ -62,32 +65,115 @@
   #menu.show { display:block; }
   .hello { font-size:14px; color:#334155; margin-bottom:12px; text-align:center; }
   .hello b { color:#0369a1; }
-  .mat {
-    display:block; border:1.5px solid #e2e8f0; border-radius:14px; padding:14px 16px;
-    background:#fff; text-decoration:none; transition:all .13s; cursor:pointer;
-  }
-  .mat:hover { border-color:#0284c7; background:#f0f9ff; transform:translateY(-1px); }
-  .mat .t { font-size:16.5px; font-weight:800; color:#0f172a; display:flex; align-items:center; gap:8px; }
-  .icoImg { width:22px; height:22px; vertical-align:-4px; object-fit:contain; }
-  .subItem .icoImg { width:19px; height:19px; }
-  .mat .t .arw { margin-left:auto; font-size:13px; color:#94a3b8; transition:transform .18s; }
-  .mat.open .arw { transform:rotate(180deg); }
-  .subList { display:none; margin:8px 0 2px; padding-left:4px; }
-  .mat.open + .subList, .subList.open { display:block; }
-  .subItem {
-    display:flex; align-items:center; gap:9px; padding:11px 14px; margin-top:7px;
-    border:1.5px solid #e2e8f0; border-radius:12px; background:#fbfdff;
-    text-decoration:none; color:#334155; font-size:14.5px; font-weight:700; transition:all .12s;
-  }
-  .subItem:hover { border-color:#0284c7; background:#f0f9ff; color:#0369a1; }
-  .subItem .ic { font-size:17px; }
-  .subItem .chk { margin-left:auto; font-size:12px; font-weight:800; color:#2563eb; }
-  .subItem.done { border-color:#93c5fd; background:#eff6ff; }
   #logout {
     margin-top:14px; width:100%; padding:9px 0; font-size:12.5px; font-weight:700;
     background:#fff; color:#94a3b8; border:1.5px solid #e2e8f0; border-radius:10px; cursor:pointer;
   }
   #logout:hover { color:#64748b; }
+
+  /* ══════════ 홈 = 타임라인 ══════════
+     종이색 #EFEFE3 · 강조 #2F45EC · 숫자/영문 라벨은 고정폭 글꼴 */
+  body.homeMode { background:var(--paper); align-items:stretch; padding:0; }
+  body.homeMode .wrap { max-width:none; width:100%; }
+  body.homeMode .logo, body.homeMode .sign, body.homeMode .foot { display:none; }
+  body.homeMode #menu {
+    background:transparent; border:none; box-shadow:none; border-radius:0; padding:0;
+  }
+  :root { --paper:#EFEFE3; --ink:#23241D; --mute:#A8A79A; --lnw:#DCDACD; --lnd:#C7C5B6; --acc:#2F45EC; }
+  #tlWrap {
+    min-height:100vh; box-sizing:border-box; display:flex; flex-direction:column;
+    padding:22px 22px 18px; color:var(--ink);
+    font-family:'IBM Plex Sans KR','Apple SD Gothic Neo','Malgun Gothic',sans-serif;
+  }
+  #tlTop { display:flex; align-items:flex-start; justify-content:space-between; gap:14px; }
+  #tlTop .eyebrow {
+    font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:11px; font-weight:500;
+    letter-spacing:.16em; color:var(--acc);
+  }
+  #tlTop h2 { font-size:25px; font-weight:700; letter-spacing:-.02em; margin-top:7px; color:var(--ink); }
+  #tlTop .who2 { font-size:12.5px; color:var(--mute); margin-top:6px; font-weight:500; }
+  #tlMeter { display:flex; align-items:center; gap:10px; margin-top:16px; }
+  #tlMeter .num {
+    font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:12px; font-weight:500;
+    color:var(--mute); letter-spacing:.08em; white-space:nowrap;
+  }
+  #tlMeter .bar { flex:1; height:1.5px; background:var(--lnw); position:relative; }
+  #tlMeter .bar i { position:absolute; left:0; top:0; height:1.5px; background:var(--acc); }
+
+  #tl { position:relative; margin-top:22px; }
+  #tlSvg { position:absolute; left:0; top:0; z-index:0; pointer-events:none; overflow:visible; display:none; }
+  .stage { position:relative; }
+  .chip {
+    position:relative; z-index:2; display:inline-flex; align-items:center; gap:9px; height:34px;
+    padding:0 14px 0 13px; border-radius:999px; background:var(--paper);
+    border:1.5px solid var(--lnd); box-sizing:border-box; cursor:pointer; user-select:none;
+    -webkit-tap-highlight-color:transparent; font-family:inherit;
+  }
+  .chip .no {
+    font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:12px; font-weight:600;
+    color:var(--acc); letter-spacing:.06em;
+  }
+  .chip .nm { font-size:13.5px; font-weight:700; color:var(--ink); letter-spacing:.01em; white-space:nowrap; }
+  .chip .cv { flex:none; margin-left:2px; transition:transform .18s; }
+  .stage.closed .chip .cv { transform:rotate(-90deg); }
+  .stage.soon .chip { border-color:var(--lnw); }
+  .stage.soon .chip .no, .stage.soon .chip .nm { color:var(--mute); }
+  .chip .tag {
+    font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:10px; font-weight:500;
+    color:var(--mute); letter-spacing:.06em; margin-left:3px; white-space:nowrap;
+  }
+  .items { display:flex; flex-direction:column; margin-top:10px; overflow:hidden; }
+  .stage.closed .items { display:none; }
+  .it {
+    display:flex; align-items:center; gap:9px; height:34px; padding:0 4px 0 2px;
+    box-sizing:border-box; font-size:14px; font-weight:600; letter-spacing:-.005em;
+    color:var(--ink); border-bottom:1px solid var(--lnw); text-decoration:none;
+  }
+  .it.todo { color:var(--mute); }
+  .it.now { color:var(--acc); font-weight:700; border-bottom:1.5px solid var(--acc); }
+  .it.dead { color:var(--mute); cursor:default; }
+  a.it:active { opacity:.6; }
+  .it svg { flex:none; }
+  #tlFoot {
+    margin-top:auto; padding-top:14px; border-top:1.5px solid var(--lnw);
+    display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap;
+  }
+  #tlFoot .sg { display:flex; align-items:center; gap:8px; font-size:11.5px; color:var(--mute); font-weight:500; }
+  #tlFoot .sg img { width:22px; height:22px; }
+  #tlFoot .sg b { color:#7C7B6F; font-weight:600; }
+  #tlFoot button {
+    padding:7px 13px; font-size:11.5px; font-weight:600; border-radius:999px; cursor:pointer;
+    border:1.5px solid var(--lnw); background:transparent; color:var(--mute); font-family:inherit;
+  }
+  #tlFoot button:hover { color:#7C7B6F; border-color:var(--lnd); }
+
+  /* 좁은 화면(기본) — 세로 레일 */
+  #tlRow1, #tlRow2 { display:flex; flex-direction:column; }
+  #tl > .rail { position:absolute; left:15px; top:8px; bottom:8px; width:1.5px; background:var(--lnw); }
+  #tl > .railOn { position:absolute; left:15px; top:8px; width:1.5px; background:var(--acc); }
+  .stage { padding-left:46px; padding-bottom:18px; }
+  .stage:last-child { padding-bottom:0; }
+  .stage .node {
+    position:absolute; left:10px; top:11px; width:12px; height:12px; border-radius:50%;
+    background:var(--paper); border:2px solid var(--lnw); z-index:3;
+  }
+  .stage.reached .node { border-color:var(--acc); }
+
+  /* 넓은 화면 — 가로로 꺾이는 레일 */
+  @media (min-width:1040px){
+    #tlWrap { padding:34px 48px 26px; }
+    #tlTop h2 { font-size:32px; }
+    #tlSvg { display:block; }
+    #tl > .rail, #tl > .railOn, .stage .node { display:none; }
+    #tlRow1 { flex-direction:row; gap:26px; align-items:flex-start; padding-right:96px; }
+    #tlRow2 { flex-direction:row; gap:26px; align-items:flex-start; padding-right:96px; margin-top:40px; }
+    #tlRow1 > .stage { flex:1; min-width:0; }
+    #tlRow2 > .spacer { flex:1; min-width:0; }
+    #tlRow2 > .stage { flex:1; min-width:0; }
+    .stage { padding-left:0; padding-bottom:0; }
+    .items { margin-top:20px; }
+    #tl { margin-top:40px; }
+  }
   /* ── 단원 목차 ── */
   .unit {
     display:flex; align-items:center; gap:13px; width:100%; text-align:left;
@@ -209,11 +295,30 @@
       </button>
     </div>
     <div id="homeView" style="display:none">
-      <div class="homeHead">
-        <button id="backToc">‹ 목차</button>
-        <b>1. 이차곡선</b>
+      <div id="tlWrap">
+        <div id="tlTop">
+          <div>
+            <div class="eyebrow">GEOMETRY LAB</div>
+            <h2>1. 이차곡선</h2>
+            <div class="who2" id="tlWho"></div>
+          </div>
+        </div>
+        <div id="tlMeter"><span class="num" id="tlNum"></span><span class="bar"><i id="tlBar"></i></span></div>
+        <div id="tl">
+          <svg id="tlSvg" fill="none"></svg>
+          <span class="rail"></span><span class="railOn" id="tlRailOn"></span>
+          <div id="tlRow1"></div>
+          <div id="tlRow2"></div>
+        </div>
+        <div id="tlFoot">
+          <span class="sg"><img src="splash-emblem.png" alt="">
+            <span>단국대학교사범대학부속고등학교 <b>차지영선생님</b></span></span>
+          <span style="display:flex; gap:8px;">
+            <button id="backToc">목차</button>
+            <button id="logout2">다른 학생으로</button>
+          </span>
+        </div>
       </div>
-      <div id="matList"></div>
     </div>
     <button id="logout">다른 학생으로 입장하기</button>
   </div>
@@ -268,56 +373,135 @@ function hideMsg(){ msg.className='msg'; }
 function doneList(){
   try{ return JSON.parse(localStorage.getItem('geoDone')||'[]'); }catch(e){ return []; }
 }
-/* 아이콘은 그림이 지정된 항목(원뿔곡선 탐구)에만 — 나머지는 글자만 */
-const ico = o => o.img ? `<img class="icoImg" src="${o.img}" alt=""> ` : '';
+/* ══════════════════════════════════════════════════════════
+   홈 = 타임라인
+   묶음(01~05)을 누르면 접었다 펴고, 접힌 만큼 아랫줄이 올라온다.
+   ══════════════════════════════════════════════════════════ */
+const MARK = {
+  done: '<svg width="13" height="13" viewBox="0 0 12 12" fill="none">'
+      + '<path d="M2.3 6.2 4.7 8.7 9.7 3.4" stroke="currentColor" stroke-width="1.9" '
+      + 'stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  now:  '<svg width="13" height="13" viewBox="0 0 12 12" fill="none">'
+      + '<circle cx="6" cy="6" r="4.7" stroke="currentColor" stroke-width="1.6"/>'
+      + '<circle cx="6" cy="6" r="2.1" fill="currentColor"/></svg>',
+  todo: '<svg width="13" height="13" viewBox="0 0 12 12" fill="none">'
+      + '<circle cx="6" cy="6" r="4.3" stroke="currentColor" stroke-width="1.5"/></svg>'
+};
+const CARET = '<svg class="cv" width="10" height="10" viewBox="0 0 10 10" fill="none">'
+            + '<path d="M2.2 3.8 5 6.6 7.8 3.8" stroke="currentColor" stroke-width="1.5" '
+            + 'stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+function closedSet(){
+  try{ return JSON.parse(sessionStorage.getItem('geoClosed') || '[]'); }catch(e){ return []; }
+}
+function esc2(t){ return String(t).replace(/[&<>"]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m])); }
+
 function renderActs(){
   const done = doneList();
   const acts = GEO_CONFIG.ACTIVITIES;
-  const open = (()=>{ try{ return JSON.parse(sessionStorage.getItem('geoOpenGrp')||'[]'); }catch(e){ return []; } })();
-  const html = GEO_CONFIG.HOME_GROUPS.map(g=>{
-    const kids = acts.filter(a=>a.grp===g.key);
-    if(kids.length===1 && g.key==='conic'){                       // 단일 활동 → 바로 이동
-      const k = kids[0], d = done.includes(k.id);
-      return `<a class="mat${d?' done':''}" href="${k.href}">
-         <div class="t">${ico(g)}${g.title}</div>
-         ${d? '<div class="stamp">완료</div>':''}
-       </a>`;
-    }
-    const allDone = kids.length>0 && kids.every(k=>done.includes(k.id));
-    const isOpen = open.includes(g.key);
-    return `<div class="mat grpHead${allDone?' done':''}${isOpen?' open':''}" data-grp="${g.key}">
-         <div class="t">${ico(g)}${g.title}<span class="arw">▼</span></div>
-         ${allDone? '<div class="stamp">완료</div>':''}
-       </div>
-       <div class="subList${isOpen?' open':''}" data-sub="${g.key}">
-         ${kids.map(k=>{
-            const d = done.includes(k.id);
-            return `<a class="subItem${d?' done':''}" href="${k.href}">
-              ${k.curve || k.title}
-              ${d? '<span class="chk">완료 ✓</span>':''}</a>`;
-         }).join('')}
-       </div>`;
-  }).join('');
-  $('matList').innerHTML = html;
-  $('matList').querySelectorAll('.grpHead').forEach(el=>{
-    el.addEventListener('click', ()=>{
-      const key = el.dataset.grp;
-      const sub = $('matList').querySelector('.subList[data-sub="'+key+'"]');
-      const nowOpen = !el.classList.contains('open');
-      el.classList.toggle('open', nowOpen);
-      sub.classList.toggle('open', nowOpen);
-      let arr = [];
-      try{ arr = JSON.parse(sessionStorage.getItem('geoOpenGrp')||'[]'); }catch(e){}
-      arr = arr.filter(k=>k!==key);
-      if(nowOpen) arr.push(key);
-      sessionStorage.setItem('geoOpenGrp', JSON.stringify(arr));
+  const closed = closedSet();
+  /* 홈 묶음에 속한 활동만 셈 (지오지브라 바로가기는 제외) */
+  const keys = GEO_CONFIG.HOME_GROUPS.map(g => g.key);
+  const listed = acts.filter(a => keys.indexOf(a.grp) >= 0);
+  const total = listed.length;
+  const nDone = listed.filter(a => done.includes(a.id)).length;
+  const nowId = (listed.find(a => !done.includes(a.id)) || {}).id;
+
+  $('tlWho').textContent = (localStorage.getItem('geoName') || '') + '님, 순서대로 따라가 보세요.';
+  $('tlNum').textContent = nDone + ' / ' + total + ' 완료';
+  $('tlBar').style.width = Math.round(nDone / total * 100) + '%';
+
+  const groups = GEO_CONFIG.HOME_GROUPS;
+  let reached = true;
+  const html = groups.map((g, gi) => {
+    const kids = acts.filter(a => a.grp === g.key);
+    const soon = g.soon || [];
+    const allDone = kids.length > 0 && kids.every(k => done.includes(k.id));
+    const isSoon = kids.length === 0 && soon.length > 0;
+    const hasNow = kids.some(k => k.id === nowId);
+    const rows = kids.map(k => {
+      const st = done.includes(k.id) ? 'done' : (k.id === nowId ? 'now' : 'todo');
+      return '<a class="it ' + st + '" href="' + k.href + '">' + MARK[st]
+           + '<span>' + esc2(k.curve || k.title) + '</span></a>';
+    }).concat(soon.map(t =>
+      '<span class="it dead todo">' + MARK.todo + '<span>' + esc2(t) + '</span></span>'
+    )).join('');
+    const isClosed = closed.indexOf(g.key) >= 0;
+    const cls = 'stage' + (isClosed ? ' closed' : '') + (isSoon ? ' soon' : '')
+              + ((allDone || hasNow) ? ' reached' : '');
+    return '<div class="' + cls + '" data-g="' + g.key + '">'
+         + '<span class="node"></span>'
+         + '<button class="chip" data-g="' + g.key + '">'
+         +   '<span class="no">' + String(gi + 1).padStart(2, '0') + '</span>'
+         +   '<span class="nm">' + esc2(g.title) + '</span>'
+         +   (isSoon ? '<span class="tag">준비 중</span>' : '') + CARET
+         + '</button>'
+         + '<div class="items">' + rows + '</div></div>';
+  });
+
+  $('tlRow1').innerHTML = html.slice(0, 4).join('');
+  $('tlRow2').innerHTML = '<div class="spacer"></div><div class="spacer"></div>'
+                        + '<div class="spacer"></div>' + (html[4] || '');
+
+  document.querySelectorAll('#tl .chip').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const key = btn.dataset.g;
+      let arr = closedSet();
+      arr = arr.indexOf(key) >= 0 ? arr.filter(k => k !== key) : arr.concat([key]);
+      sessionStorage.setItem('geoClosed', JSON.stringify(arr));
+      btn.closest('.stage').classList.toggle('closed');
+      drawRail();
     });
   });
+  drawRail();
 }
+
+/* 레일 — 넓은 화면에서는 오른쪽에서 꺾여 아랫줄로 내려간다 */
+function drawRail(){
+  const tl = $('tl'), svg = $('tlSvg');
+  if(!tl || !svg) return;
+  const wide = window.matchMedia('(min-width:1040px)').matches;
+  if(!wide){                                   // 세로 레일 — 지금 단계까지만 파랗게
+    const stages = [...tl.querySelectorAll('.stage')];
+    const last = stages.filter(s => s.classList.contains('reached')).pop();
+    const on = $('tlRailOn');
+    if(on) on.style.height = last
+      ? Math.max(0, last.getBoundingClientRect().top - tl.getBoundingClientRect().top + 17 - 8) + 'px'
+      : '0px';
+    return;
+  }
+  const base = tl.getBoundingClientRect();
+  const c1 = tl.querySelector('#tlRow1 .stage .chip');
+  const s5 = tl.querySelector('#tlRow2 .stage .chip');
+  if(!c1) return;
+  const y1 = c1.getBoundingClientRect().top - base.top + 17;
+  const y2 = s5 ? (s5.getBoundingClientRect().top - base.top + 17) : y1;
+  const row1 = $('tlRow1').getBoundingClientRect();
+  const xEnd = row1.right - base.left - 96;    // 꺾이는 자리(오른쪽 여백) 앞
+  const bulge = xEnd + 94;
+  const w = Math.max(base.width, bulge + 10);
+  const h = y2 + 30;
+  svg.setAttribute('width', w); svg.setAttribute('height', h);
+  svg.setAttribute('viewBox', '0 0 ' + w + ' ' + h);
+  /* 파란 부분은 지금 진행 중인 묶음까지 */
+  const reached = [...$('tlRow1').querySelectorAll('.stage.reached .chip')].pop();
+  const xOn = reached ? (reached.getBoundingClientRect().right - base.left) : 0;
+  svg.innerHTML =
+      '<path d="M 0 ' + y1 + ' H ' + xEnd + ' C ' + bulge + ' ' + y1 + ' ' + bulge + ' ' + y2
+    + ' ' + xEnd + ' ' + y2 + '" stroke="#DCDACD" stroke-width="1.6" stroke-linecap="round"/>'
+    + '<path d="M ' + xEnd + ' ' + y2 + ' H 0" stroke="#DCDACD" stroke-width="1.6" '
+    + 'stroke-linecap="round" stroke-dasharray="2 7"/>'
+    + '<path d="M 0 ' + y1 + ' H ' + xOn + '" stroke="#2F45EC" stroke-width="1.6" stroke-linecap="round"/>';
+}
+let railTm = null;
+window.addEventListener('resize', () => { clearTimeout(railTm); railTm = setTimeout(drawRail, 120); });
+
 function showView(){
   const home = location.hash === '#home';
   $('tocView').style.display  = home ? 'none' : 'block';
   $('homeView').style.display = home ? 'block' : 'none';
+  document.body.classList.toggle('homeMode', home);
+  $('logout').style.display = home ? 'none' : 'block';
   if(home) renderActs();
 }
 function openMenu(name){
@@ -395,6 +579,7 @@ $('unit1').addEventListener('click', ()=>{ location.hash = '#home'; });
 $('backToc').addEventListener('click', ()=>{ location.hash = '#toc'; });
 
 $('logout').addEventListener('click', hardLogout);
+$('logout2').addEventListener('click', hardLogout);
 
 document.getElementById('verBadge').textContent = GEO_CONFIG.VERSION;
 

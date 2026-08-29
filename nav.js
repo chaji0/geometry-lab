@@ -6,7 +6,7 @@
      먼저 선언한 뒤 이 파일을 불러오면 하단 바가 자동으로 생깁니다.
    ════════════════════════════════════════════════════════════ */
 window.GEO_CONFIG = {
-  VERSION: "v1.24",                 // ★ 1단원=v1.x, 2단원=v2.x, 3단원=v3.x — 업로드마다 뒷자리 +1 (v1.11, v1.12, …)
+  VERSION: "v1.25",                 // ★ 1단원=v1.x, 2단원=v2.x, 3단원=v3.x — 업로드마다 뒷자리 +1 (v1.11, v1.12, …)
   APPS_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbx3Ay-gudjjSoRlngyu54umJ9uYRAKhINuwcv229UZUN9_oIQfm9vwAxM32FOPR9wV1/exec",
   /* 담당 선생님 — 실제 명단은 Apps Script(TEACHERS)에서 불러옵니다.
      아래는 인터넷이 안 될 때 쓰는 기본값입니다. */
@@ -16,6 +16,8 @@ window.GEO_CONFIG = {
   ACTIVITIES: [
     { id:'conic',    href:'conic.html',    icon:'⚾', img:'icon-conic.png', short:'원뿔곡선', grp:'conic',
       title:'원뿔곡선 탐구' },
+    { id:'general',  href:'general-form.html', short:'일반형', grp:'conic', curve:'일반형',
+      title:'이차곡선의 일반형' },
     { id:'folding',  href:'folding.html',  icon:'📄', short:'포물선그리기', grp:'draw', curve:'포물선',
       title:'포물선 그리기' },
     { id:'ellipse',  href:'ellipse.html',  icon:'🧵', short:'타원그리기',  grp:'draw', curve:'타원',
@@ -28,8 +30,6 @@ window.GEO_CONFIG = {
       title:'타원 개념 정리' },
     { id:'hconcept', href:'hyperbola-concept.html', icon:'📕', short:'쌍곡선개념', grp:'concept', curve:'쌍곡선',
       title:'쌍곡선 개념 정리' },
-    { id:'general',  href:'general-form.html', short:'일반형', grp:'concept', curve:'일반형',
-      title:'이차곡선의 일반형' },
     { id:'apply',    href:'apply.html',    icon:'🔦', short:'포물선활용',  grp:'apply', curve:'포물선',
       title:'포물선의 활용' },
     { id:'eapply',   href:'ellipse-apply.html', icon:'🪐', short:'타원활용', grp:'apply', curve:'타원',
@@ -40,12 +40,13 @@ window.GEO_CONFIG = {
       title:'지오지브라' }
   ],
   /* 홈 화면 묶음 — 큰 제목 4개 (하위 메뉴는 grp로 자동 수집) */
-  /* 홈 화면 큰 제목 — 원뿔곡선 탐구만 아이콘, 나머지는 글자만 */
+  /* 홈 타임라인의 묶음 — soon 은 아직 안 만든(준비 중) 활동 이름 */
   HOME_GROUPS: [
-    { key:'conic',   img:'icon-conic.png', title:'원뿔곡선 탐구' },
+    { key:'conic',   title:'원뿔곡선 탐구' },
     { key:'draw',    title:'이차곡선 그리기' },
     { key:'concept', title:'이차곡선 개념 정리' },
-    { key:'apply',   title:'이차곡선 활용' }
+    { key:'apply',   title:'이차곡선 활용' },
+    { key:'tangent', title:'이차곡선의 접선', soon:['이차곡선의 접선', '이차곡선 빛반사'] }
   ]
 };
 
@@ -167,10 +168,10 @@ window.GEO_addExtraButtons = function(){
   window.GEO_addSubmitButton(base + 96);        // 질문방 왼쪽
 };
 
-/* 오늘과제제출 버튼 — 상단 바에서는 맨 앞(질문방 왼쪽)으로 옮긴다 */
+/* 오늘과제 버튼 — 상단 바에서는 맨 앞(질문방 왼쪽)으로 옮긴다 */
 window.GEO_addSubmitButton = function(right){
   if(document.getElementById('subBtnFloat')) return null;
-  const el = gxMakeBtn({ id:'subBtnFloat', title:'오늘과제제출', wide:true,
+  const el = gxMakeBtn({ id:'subBtnFloat', title:'오늘과제', wide:true,
     emoji:'📮', img:'icon-submit.png',
     color:'#2f83bd', shadow:'rgba(47,131,189,.28)', right:right,
     onClick:()=>window.GEO_openSubmit() });
@@ -448,7 +449,7 @@ window.GEO_openQnA = async function(){
 
 
 /* ════════════════════════════════════════════════════════════
-   오늘과제제출 — 한 줄 소감 + 연습장 사진 보내기
+   오늘과제 — 한 줄 소감 + 연습장 사진 보내기
    (예전에는 책갈피 모달 안에 있던 기능. 이제 상단 버튼에서 연다)
    · 보낸 날은 버튼 그림이 '제출완료!'로 바뀌고, 날짜가 바뀌면 원래대로
    ════════════════════════════════════════════════════════════ */
@@ -475,7 +476,7 @@ window.GEO_syncSubmitBtn = function(){
   const done = window.GEO_submittedToday();
   const img = b.querySelector('img');
   if(img) img.src = done ? window.GEO_SUBMIT_ICON_DONE : window.GEO_SUBMIT_ICON;
-  b.title = done ? '오늘 과제 제출 완료! (다시 보내려면 누르세요)' : '오늘과제제출';
+  b.title = done ? '오늘 과제 제출 완료! (다시 보내려면 누르세요)' : '오늘과제';
 };
 
 function gxPageLabel(){
@@ -543,7 +544,7 @@ function gxBuildSubmit(){
   bg.id = 'gsubBg';
   bg.innerHTML = `
     <div id="gsub">
-      <h2>오늘과제제출</h2>
+      <h2>오늘과제 제출</h2>
       <div id="gsubDone">오늘은 이미 제출했어요. 다시 보내면 새로 기록됩니다.</div>
       <p>오늘 배운 내용 한 줄 소감과 연습장 사진을 선생님께 보내요.<br>
          <span style="color:#94a3b8" id="gsubWho"></span></p>
