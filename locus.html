@@ -102,25 +102,50 @@ if (localStorage.getItem('geoAppOk') !== '1') location.replace('index.html');
      지오지브라가 쓸 높이가 350px 넘게 줄어든다. 그러면 지오지브라가 스스로
      대수창을 접어 버리고, 설정 창도 높이가 모자라 아래가 잘린다.
      → 전체화면으로 화면 전체를 내주면 둘 다 해결. */
-  #fsBar { position:absolute; left:10px; bottom:10px; z-index:40; display:none; gap:7px; align-items:center; }
-  body.ggbMode #fsBar { display:flex; }
-  #fsBtn, #algBtn {
+  /* 컨트롤은 지오지브라 화면 '안'에 두지 않는다 —
+     지오지브라가 왼쪽 아래에 도구 도움말을 띄우기 때문에 겹쳐서 가려진다.
+     보통 때는 지오지브라 밖(아래 버튼줄 / 오른쪽 아래), 전체화면일 때는 위쪽 띠로 옮긴다. */
+  #fsBar { display:flex; gap:7px; align-items:center; min-width:0; }
+  #fsBtn, #algBtn, #fsPrev, #fsNext {
     padding:7px 15px; font-size:12.8px; font-weight:800; font-family:inherit; cursor:pointer;
     border:1.5px solid #cbd5e1; border-radius:999px; background:rgba(255,255,255,.94); color:#475569;
-    box-shadow:0 3px 12px rgba(16,24,40,.14); white-space:nowrap;
+    white-space:nowrap;
   }
-  #fsBtn:hover, #algBtn:hover { border-color:#12608f; color:#12608f; }
+  #fsBtn:hover, #algBtn:hover, #fsPrev:hover, #fsNext:hover { border-color:#12608f; color:#12608f; }
+  #fsPrev:disabled, #fsNext:disabled { opacity:.4; cursor:default; border-color:#e2e8f0; }
+  #fsCurve {
+    display:inline-flex; align-items:center; gap:8px; padding:6px 15px; border-radius:999px;
+    font-size:14px; font-weight:900; background:#f8fafc; border:1.5px solid #e2e8f0;
+    white-space:nowrap; flex:none;
+  }
+  #fsCurve .dt { width:10px; height:10px; border-radius:50%; background:currentColor; flex:none; }
+  #fsStep {
+    flex:1; min-width:0; font-size:13px; color:#64748b;
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  }
+  body.ggbFull #fsBar { flex:1; }
   #fsClock {
-    display:none; padding:7px 14px; font-size:14.5px; font-weight:900;
-    font-family:Georgia,'Times New Roman',serif; border-radius:999px;
-    background:#12283f; color:#fff; box-shadow:0 3px 12px rgba(16,24,40,.22);
+    padding:6px 15px; border-radius:999px; background:#12283f; color:#fff; flex:none;
+    font-family:Georgia,'Times New Roman',serif; font-size:15px; font-weight:900;
   }
-  body.ggbFull #fsClock { display:block; }
+  /* 전체화면 위쪽 띠 */
+  #fsTop { display:none; }
+  body.ggbFull #fsTop {
+    display:flex; flex:none; align-items:center; gap:10px; padding:7px 12px;
+    background:#fff; border-bottom:1px solid #e2e8f0;
+  }
+  body.ggbFull #main { flex-direction:column; }
+  /* 보통 때는 곡선·단계 표시를 숨긴다 (옆 패널에 이미 있으니까) */
+  body:not(.ggbFull) #fsCurve, body:not(.ggbFull) #fsStep,
+  body:not(.ggbFull) #fsPrev, body:not(.ggbFull) #fsNext,
+  body:not(.ggbFull) #fsClock { display:none; }
   body.ggbFull > *:not(#main) { display:none !important; }
   body.ggbFull #main { position:fixed; inset:0; z-index:9000; }
   body.ggbFull #steps, body.ggbFull #panel,
   body.ggbFull #sbGrip, body.ggbFull #stepsTgl { display:none !important; }
   body.ggbFull #bar { display:none !important; }   /* 전체화면에선 지오지브라에 높이를 모두 준다 */
+  #fsHome { display:none; }
+  body.ggbMode #fsHome { display:inline-flex; }
 
   /* ── 왼쪽 설명 접기 ── */
   #main { position:relative; }
@@ -219,6 +244,7 @@ if (localStorage.getItem('geoAppOk') !== '1') location.replace('index.html');
 </div>
 
 <div id="main">
+  <div id="fsTop"></div>
   <button id="stepsTgl" type="button" title="설명 접기" aria-label="설명 접기">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"
          stroke-linecap="round" stroke-linejoin="round"><polyline points="15 5 8 12 15 19"/></svg>
@@ -239,11 +265,6 @@ if (localStorage.getItem('geoAppOk') !== '1') location.replace('index.html');
       <div id="ggbWrap">
         <div id="ggb"></div>
         <div id="ggbMsg"><div class="spin"></div>지오지브라를 불러오는 중이에요…</div>
-      <div id="fsBar">
-        <button id="fsBtn" type="button">전체화면</button>
-        <button id="algBtn" type="button">대수창 숨기기</button>
-        <span id="fsClock"></span>
-      </div>
       </div>
     </div>
     <div id="bar">
@@ -256,6 +277,15 @@ if (localStorage.getItem('geoAppOk') !== '1') location.replace('index.html');
       <button id="resetBtn" class="previewOnly">처음부터</button>
       <span class="sep"></span>
       <button id="ggbBtn">실전 연습</button>
+      <span id="fsHome"><div id="fsBar">
+        <span id="fsCurve"></span>
+        <span id="fsStep"></span>
+        <button id="fsPrev" type="button">‹ 이전 단계</button>
+        <button id="fsNext" type="button">다음 단계 ›</button>
+        <button id="algBtn" type="button">대수창 숨기기</button>
+        <button id="fsBtn" type="button">전체화면</button>
+        <span id="fsClock"></span>
+      </div></span>
     </div>
   </div>
 </div>
@@ -735,23 +765,49 @@ if(window.visualViewport){
 
 /* ── 지오지브라 전체화면 ── */
 (function(){
-  const btn = document.getElementById('fsBtn'); if(!btn) return;
-  const clk = document.getElementById('fsClock'), big = document.getElementById('tBig');
-  if(!big && clk) clk.remove();          /* 타이머가 없는 연습 페이지에서는 시계 칩 제거 */
+  const btn  = document.getElementById('fsBtn'); if(!btn) return;
+  const bar  = document.getElementById('fsBar');
+  const home = document.getElementById('fsHome');
+  const top  = document.getElementById('fsTop');
+  const curve = document.getElementById('fsCurve'), stepEl = document.getElementById('fsStep');
+  const clk = document.getElementById('fsClock');
+  if(!document.getElementById('tBig') && clk) clk.remove();   /* 타이머 없는 연습 페이지 */
   function set(on){
     document.body.classList.toggle('ggbFull', on);
+    (on ? top : home).appendChild(bar);
     btn.textContent = on ? '전체화면 해제' : '전체화면';
+    refresh();
     setTimeout(()=>fitSoon(60, true), 80);
     setTimeout(()=>fitSoon(60), 420);
   }
   btn.onclick = ()=>set(!document.body.classList.contains('ggbFull'));
+  /* 전체화면에서는 아래 버튼줄이 숨겨지므로 단계 이동을 띠에 둔다 */
+  const pv = document.getElementById('fsPrev'), nx = document.getElementById('fsNext');
+  const rp = document.getElementById('prevBtn'), rn = document.getElementById('nextBtn');
+  if(rp && rn){
+    pv.onclick = ()=>{ rp.click(); refresh(); };
+    nx.onclick = ()=>{ rn.click(); refresh(); };
+  } else { pv.remove(); nx.remove(); }
   addEventListener('keydown', e=>{
     if(e.key === 'Escape' && document.body.classList.contains('ggbFull')) set(false);
   });
-  /* 전체화면일 때도 남은 시간이 보이게 */
-  if(clk && big) setInterval(()=>{
-    if(document.body.classList.contains('ggbFull')) clk.textContent = big.textContent;
-  }, 250);
+  /* 지금 어떤 곡선을, 몇 단계까지 그려야 하는지 */
+  const NAME = { para:'포물선', ell:'타원', hyp:'쌍곡선' };
+  const COL  = { para:'#1d6fa5', ell:'#a78bfa', hyp:'#f59e0b' };
+  function refresh(){
+    const L = window.__lesson; if(!L || !curve) return;
+    curve.innerHTML = '<span class="dt"></span>' + (NAME[L.type] || '');
+    curve.style.color = COL[L.type] || '#334155';
+    const cur = document.querySelector('.stepRow.cur');
+    const pg  = document.getElementById('prog');
+    stepEl.textContent = (pg ? pg.textContent + ' · ' : '')
+      + (cur ? (cur.querySelector('.txt') || {}).textContent.trim() : '');
+    const pv2 = document.getElementById('fsPrev'), nx2 = document.getElementById('fsNext');
+    const rp2 = document.getElementById('prevBtn'), rn2 = document.getElementById('nextBtn');
+    if(pv2 && rp2){ pv2.disabled = rp2.disabled; nx2.disabled = rn2.disabled; }
+  }
+  setInterval(()=>{ if(document.body.classList.contains('ggbFull')) refresh(); }, 300);
+  refresh();
 })();
 
 /* ── 대수창 켜기 / 끄기 ──
