@@ -135,6 +135,10 @@
   .it.todo { color:var(--mute); }
   .it.now { color:var(--acc); font-weight:700; border-bottom:1.5px solid var(--acc); }
   .it.dead { color:var(--mute); cursor:default; }
+  .subhead {
+    font-size:11.5px; font-weight:700; letter-spacing:.03em; color:var(--mute);
+    padding:12px 2px 4px; border-top:1.5px dashed var(--lnw); margin-top:6px;
+  }
   a.it:active { opacity:.6; }
   .it svg { flex:none; }
   #tlFoot {
@@ -432,7 +436,8 @@ function renderActs(){
     const hasNow = kids.some(k => k.id === nowId);
     const rows = kids.map(k => {
       const st = done.includes(k.id) ? 'done' : (k.id === nowId ? 'now' : 'todo');
-      return '<a class="it ' + st + '" href="' + k.href + '">' + MARK[st]
+      return (k.sub ? '<div class="subhead">' + esc2(k.sub) + '</div>' : '')
+           + '<a class="it ' + st + '" href="' + k.href + '">' + MARK[st]
            + '<span>' + esc2(k.curve || k.title) + '</span></a>';
     }).concat(soon.map(t =>
       '<span class="it dead todo">' + MARK.todo + '<span>' + esc2(t) + '</span></span>'

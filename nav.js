@@ -6,7 +6,7 @@
      먼저 선언한 뒤 이 파일을 불러오면 하단 바가 자동으로 생깁니다.
    ════════════════════════════════════════════════════════════ */
 window.GEO_CONFIG = {
-  VERSION: "v1.27",                 // ★ 1단원=v1.x, 2단원=v2.x, 3단원=v3.x — 업로드마다 뒷자리 +1 (v1.11, v1.12, …)
+  VERSION: "v1.28",                 // ★ 1단원=v1.x, 2단원=v2.x, 3단원=v3.x — 업로드마다 뒷자리 +1 (v1.11, v1.12, …)
   APPS_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbx3Ay-gudjjSoRlngyu54umJ9uYRAKhINuwcv229UZUN9_oIQfm9vwAxM32FOPR9wV1/exec",
   /* 담당 선생님 — 실제 명단은 Apps Script(TEACHERS)에서 불러옵니다.
      아래는 인터넷이 안 될 때 쓰는 기본값입니다. */
@@ -24,8 +24,9 @@ window.GEO_CONFIG = {
       title:'타원 그리기' },
     { id:'hdraw',    href:'hyperbola.html', icon:'🥂', short:'쌍곡선그리기', grp:'draw', curve:'쌍곡선',
       title:'쌍곡선 그리기' },
-    { id:'locus',    href:'locus.html',    short:'자취그리기', grp:'construct', curve:'자취 그리기 (연습용)',
-      title:'지오지브라로 자취 그리기' },
+    { id:'locus',    href:'locus.html',    short:'자취그리기', grp:'draw', sub:'이차곡선 작도',
+      curve:'자취 그리기 (연습용)', title:'지오지브라로 자취 그리기' },
+
     { id:'concept',  href:'concept.html',  icon:'📘', short:'포물선개념',  grp:'concept', curve:'포물선',
       title:'포물선 개념 정리' },
     { id:'econcept', href:'ellipse-concept.html', icon:'📙', short:'타원개념', grp:'concept', curve:'타원',
@@ -50,7 +51,6 @@ window.GEO_CONFIG = {
   HOME_GROUPS: [
     { key:'conic',   title:'원뿔곡선 탐구' },
     { key:'draw',    title:'이차곡선 그리기' },
-    { key:'construct', title:'이차곡선 작도' },
     { key:'concept', title:'이차곡선 개념 정리' },
     { key:'apply',   title:'이차곡선 활용' },
     { key:'tangent', title:'이차곡선의 접선' }
@@ -173,6 +173,7 @@ window.GEO_addExtraButtons = function(){
     color:'#0d9488', shadow:'rgba(13,148,136,.28)', right:base,
     onClick:()=>window.GEO_openGallery() });
   window.GEO_addSubmitButton(base + 96);        // 질문방 왼쪽
+  window.GEO_addNoticeButton(base + 195);      // 오늘과제 왼쪽
 };
 
 /* 오늘과제 버튼 — 상단 바에서는 맨 앞(질문방 왼쪽)으로 옮긴다 */
@@ -186,6 +187,159 @@ window.GEO_addSubmitButton = function(right){
   if(host && host.firstChild !== el) host.insertBefore(el, host.firstChild);
   window.GEO_syncSubmitBtn();
   return el;
+};
+
+
+/* ════════════════════════════════════════════════════════════
+   수행평가 공지 — 상단 바 '오늘과제' 왼쪽 버튼
+   ════════════════════════════════════════════════════════════ */
+window.GEO_addNoticeButton = function(right){
+  if(document.getElementById('noticeBtnFloat')) return null;
+  const el = gxMakeBtn({ id:'noticeBtnFloat', title:'수행평가 공지', wide:true,
+    emoji:'📋', img:'icon-notice.png',
+    color:'#e9962a', shadow:'rgba(233,150,42,.28)', right:right,
+    onClick:()=>window.GEO_openNotice() });
+  const host = document.getElementById('gtBtns');
+  if(host && host.firstChild !== el) host.insertBefore(el, host.firstChild);
+  return el;
+};
+
+function gnoBuild(){
+  if(document.getElementById('gnoBg')) return;
+  const css = document.createElement('style');
+  css.textContent = `
+  #gnoBg {
+    position:fixed; inset:0; background:rgba(15,23,42,.45); z-index:2200;
+    display:none; align-items:center; justify-content:center; padding:18px;
+  }
+  #gnoBg.show { display:flex; }
+  #gno {
+    background:#fff; border-radius:18px; width:100%; max-width:720px; max-height:88vh;
+    display:flex; flex-direction:column; box-shadow:0 18px 50px rgba(15,23,42,.3); font-family:inherit;
+  }
+  #gnoHead {
+    padding:17px 22px 13px; border-bottom:1px solid #e2e8f0; flex:none;
+    display:flex; align-items:baseline; gap:10px; flex-wrap:wrap;
+  }
+  #gnoHead h2 { font-size:18px; color:#0f172a; }
+  #gnoHead .sub { font-size:12.5px; color:#94a3b8; }
+  #gnoBody { padding:16px 22px 6px; overflow-y:auto; -webkit-overflow-scrolling:touch; }
+  #gnoBody .row { display:flex; gap:9px; align-items:flex-start; margin-bottom:9px; font-size:14px; line-height:1.7; }
+  #gnoBody .row .k {
+    flex:none; min-width:74px; font-weight:800; color:#0369a1;
+  }
+  #gnoBody .row .v { color:#1e293b; }
+  #gnoBody .row .v b { color:#0f172a; }
+  #gnoBody h3 {
+    font-size:14px; font-weight:800; color:#0369a1; margin:16px 0 7px;
+    padding-top:13px; border-top:1px solid #e2e8f0;
+  }
+  #gnoBody table { border-collapse:collapse; width:100%; font-size:12.5px; margin-bottom:11px; }
+  #gnoBody th, #gnoBody td { border:1px solid #cbd5e1; padding:6px 8px; text-align:center; line-height:1.5; }
+  #gnoBody th { background:#f1f5f9; color:#334155; font-weight:800; }
+  #gnoBody td.l { text-align:left; }
+  #gnoBody td.hd { background:#f8fafc; font-weight:700; color:#334155; }
+  #gnoBody ol { margin:2px 0 6px 0; padding-left:19px; }
+  #gnoBody ol li { font-size:13.5px; line-height:1.85; color:#1e293b; margin-bottom:2px; word-break:keep-all; }
+  #gnoBody .warn {
+    margin:4px 0 10px; padding:10px 13px; border-radius:11px;
+    background:#fff7ed; border:1.5px solid #fed7aa; color:#9a3412;
+    font-size:13px; line-height:1.75;
+  }
+  #gnoFoot {
+    padding:12px 22px 16px; border-top:1px solid #e2e8f0; flex:none;
+    display:flex; gap:8px; justify-content:flex-end; flex-wrap:wrap;
+  }
+  #gnoFoot button, #gnoFoot a {
+    padding:10px 17px; font-size:14px; font-weight:800; border-radius:11px; cursor:pointer;
+    border:1.5px solid #cbd5e1; background:#fff; color:#334155; font-family:inherit;
+    text-decoration:none; display:inline-block;
+  }
+  #gnoFoot a.go { background:#e9962a; border-color:#e9962a; color:#fff; }
+  @media (max-width:560px){
+    #gnoBody { padding:14px 15px 4px; }
+    #gnoHead { padding:15px 16px 11px; }
+    #gnoFoot { padding:11px 15px 14px; }
+    #gnoBody table { font-size:11.5px; }
+    #gnoBody .row { font-size:13.5px; }
+  }
+  `;
+  document.head.appendChild(css);
+
+  const bg = document.createElement('div');
+  bg.id = 'gnoBg';
+  bg.innerHTML = `
+    <div id="gno">
+      <div id="gnoHead">
+        <h2>2026학년도 2학년 2학기 [기하] 수행평가1 공지사항</h2>
+        <span class="sub">공학적 도구를 활용한 이차곡선의 자취 표현</span>
+      </div>
+      <div id="gnoBody">
+        <div class="row"><span class="k">반영 비율</span><span class="v"><b>10%</b></span></div>
+        <div class="row"><span class="k">주제</span><span class="v">공학적 도구를 활용한 <b>이차곡선의 자취 표현</b></span></div>
+        <div class="row"><span class="k">평가 시기</span><span class="v"><b>9월 3일(목)</b>부터 수업시간 이용<br>
+          8월 31일(월), 9월 1일(화) 수업시간에 시범보일 예정</span></div>
+        <div class="row"><span class="k">평가 범위</span><span class="v">1단원 전체</span></div>
+        <div class="row"><span class="k">준비물</span><span class="v"><b>디벗</b></span></div>
+
+        <h3>평가기준</h3>
+        <table>
+          <tr><td class="hd" style="width:110px">성취기준</td>
+              <td class="l">[12기하01-01] 포물선의 뜻을 알고, 포물선을 방정식으로 표현할 수 있다. ~<br>
+                            [12기하01-03] 쌍곡선의 뜻을 알고, 쌍곡선을 방정식으로 표현할 수 있다.</td></tr>
+        </table>
+        <table>
+          <tr><th style="width:110px">성취수준</th><th>내용</th></tr>
+          <tr><td class="hd">A</td><td class="l">이차곡선의 뜻을 설명하고, 이차곡선을 방정식으로 나타낼 수 있다.</td></tr>
+          <tr><td class="hd">B</td><td class="l">이차곡선의 뜻을 이해하고, 이차곡선을 방정식으로 나타낼 수 있다.</td></tr>
+          <tr><td class="hd">C</td><td class="l">이차곡선의 뜻을 알고, 이차곡선을 방정식으로 나타낼 수 있다.</td></tr>
+          <tr><td class="hd">D</td><td class="l">이차곡선의 뜻을 알고, 안내된 절차에 따라 이차곡선을 방정식으로 나타낼 수 있다.</td></tr>
+          <tr><td class="hd">E</td><td class="l">안내된 절차에 따라 이차곡선을 방정식으로 나타낼 수 있다.</td></tr>
+        </table>
+
+        <h3>배점</h3>
+        <table>
+          <tr><th rowspan="2" style="width:96px">시도 횟수</th>
+              <th colspan="3">평가 시기</th></tr>
+          <tr><th>공지 이후 5수업일 이내<br>(5수업일 포함)</th>
+              <th>공지 이후<br>6수업일 ~ 10수업일</th>
+              <th>공지 이후<br>11수업일 ~</th></tr>
+          <tr><td class="hd">1회차 성공</td><td>100</td><td>95</td><td>85</td></tr>
+          <tr><td class="hd">2회차 성공</td><td>97</td><td>92</td><td>82</td></tr>
+          <tr><td class="hd">3회차 성공</td><td>95</td><td>90</td><td>80</td></tr>
+          <tr><td class="hd">4회차 이상 성공</td><td>90</td><td>85</td><td>75<br>(백지 제출 포함)</td></tr>
+        </table>
+        <table>
+          <tr><td class="hd" style="width:150px">평가요소 합산점수</td><td>평가요소 배점에 따름</td>
+              <td class="hd" style="width:130px">미인정 결시<br>또는 미제출자</td></tr>
+          <tr><td class="hd">최종 평가점수(점)</td><td>평가요소 배점에 따름</td><td>70</td></tr>
+        </table>
+
+        <h3>세부 진행방식</h3>
+        <ol>
+          <li>수업 시작 이전, 평가 희망하는 학생들은 미리 교과 교사에게 평가 의사를 밝힌다.</li>
+          <li>수업 종료 후(5~10분 정도 일찍 끝낼 예정), 교과 교사와 복도에 나온다. <b>(디벗 지참)</b></li>
+          <li>본인이 그릴 이차곡선을 뽑는다.</li>
+          <li>시험 응시 확인 서명을 한다. (교과교사 포함)</li>
+          <li>지오지브라(또는 알지오매스)를 이용하여 그린다. <b>(제한시간 90초)</b></li>
+          <li>제한시간이 종료된 후, 재생시켰을 때 자취가 올바르게 그려지면 성공.
+              (그 전에 재생시켜서 성공해도 무방함. 단, <b>재생버튼을 한 번 누를 때마다 시도한 것으로 간주함.</b>)</li>
+        </ol>
+        <div class="warn">준비물 <b>디벗</b>을 꼭 챙기고, 미리 <b>자취 그리기</b>로 연습해 두세요.</div>
+      </div>
+      <div id="gnoFoot">
+        <a class="go" href="locus.html">연습하러 가기</a>
+        <button id="gnoClose">닫기</button>
+      </div>
+    </div>`;
+  document.body.appendChild(bg);
+  bg.addEventListener('click', e=>{ if(e.target === bg) bg.classList.remove('show'); });
+  document.getElementById('gnoClose').addEventListener('click', ()=>bg.classList.remove('show'));
+}
+window.GEO_openNotice = function(){
+  gnoBuild();
+  document.getElementById('gnoBody').scrollTop = 0;
+  document.getElementById('gnoBg').classList.add('show');
 };
 
 /* ════════════════════════════════════════════════════════════
