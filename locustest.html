@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<script>
+/* 입장 가드 */
+if (localStorage.getItem('geoAppOk') !== '1') location.replace('index.html');
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="icon" type="image/svg+xml" href="icon.svg">
+<link rel="apple-touch-icon" href="icon-180.png">
+<meta name="apple-mobile-web-app-title" content="수행평가">
+<title>기하 1차 수행평가 — 이차곡선 자취 작도</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html, body { width:100%; height:100%; overflow:hidden; }
+  body {
+    font-family:'Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif;
+    background:#e9ecf1; color:#334155; display:flex; flex-direction:column; user-select:none;
+  }
+  .rm { font-family:Georgia,'Times New Roman',serif; }
+
+  header {
+    padding:9px 16px 8px; background:#fff; border-bottom:1px solid #e2e8f0;
+    display:flex; align-items:center; gap:11px; flex-wrap:wrap;
+  }
+  header h1 { font-size:17.5px; color:#0f172a; letter-spacing:-.01em; }
+  header .sub { font-size:12.5px; color:#94a3b8; }
+  header .spacer { flex:1; }
+  .modeWrap { display:flex; gap:5px; align-items:center; }
+  .modeWrap .lb { font-size:11.5px; color:#94a3b8; font-weight:700; }
+  .modeBtn {
+    padding:6px 14px; font-size:12.5px; font-weight:800; border-radius:999px; cursor:pointer;
+    border:none; background:#eef1f5; color:#64748b; font-family:inherit; transition:all .13s;
+  }
+  .modeBtn.on { background:#2563eb; color:#fff; box-shadow:0 3px 9px rgba(37,99,235,.3); }
+
+  #main { flex:1; min-height:0; display:flex; --sbw:330px; }
+
+  /* ══════ 왼쪽 패널 — 흰 배경 + 음영 ══════ */
+  #panel {
+    width:var(--sbw,330px); flex:none; overflow-y:auto; background:#e9ecf1;
+    padding:16px 18px 14px; display:flex; flex-direction:column; gap:15px;
+    border-right:1px solid #dce1e8;
+  }
+  .card {
+    background:linear-gradient(145deg,#f6f8fb,#e6eaf0);
+    border-radius:24px; padding:19px 20px 17px; text-align:center;
+    box-shadow:7px 7px 16px rgba(163,177,198,.5), -7px -7px 16px rgba(255,255,255,.95);
+  }
+  .cap {
+    font-size:11.5px; color:#94a3b8; font-weight:800; letter-spacing:.09em;
+    text-transform:none;
+  }
+
+  /* ── 뽑기 ── */
+  #slot {
+    margin:12px 0 4px; height:66px; display:flex; align-items:center; justify-content:center; gap:13px;
+    font-size:38px; font-weight:800; letter-spacing:-.02em; line-height:1; color:#94a3b8;
+    transition:color .18s;
+  }
+  #slot .dt { width:15px; height:15px; border-radius:50%; background:currentColor; flex:none;
+    box-shadow:0 2px 6px rgba(0,0,0,.14); }
+  #slot .ph { color:#a9b4c4; font-size:18px; font-weight:700; letter-spacing:0; }
+  #slot.roll { color:#b6c0cf; }
+  #slotSub { font-size:12.5px; color:#8b96a7; min-height:36px; line-height:1.6; padding:0 4px; }
+  #slotSub b { color:#475569; }
+  #pickBtn {
+    margin-top:9px; width:100%; padding:15px 0; font-size:18px; font-weight:900; letter-spacing:.14em;
+    border:none; border-radius:16px; cursor:pointer; font-family:inherit; color:#fff;
+    background:linear-gradient(145deg,#3b82f6,#2158cf);
+    box-shadow:5px 5px 13px rgba(37,99,235,.32), -4px -4px 11px rgba(255,255,255,.85);
+    transition:transform .1s, box-shadow .1s;
+  }
+  #pickBtn:active { transform:translateY(1px);
+    box-shadow:inset 3px 3px 8px rgba(0,0,0,.22), inset -2px -2px 7px rgba(255,255,255,.22); }
+  #pickBtn:disabled { opacity:.55; cursor:default; }
+  #stats { display:flex; gap:9px; margin-top:13px; }
+  .stat {
+    flex:1; border-radius:13px; padding:8px 4px 7px; font-size:11.5px; color:#8b96a7;
+    display:flex; flex-direction:column; align-items:center; gap:3px;
+    box-shadow:inset 3px 3px 7px rgba(163,177,198,.45), inset -3px -3px 7px rgba(255,255,255,.95);
+  }
+  .stat .lb2 { display:flex; align-items:center; gap:5px; font-weight:700; }
+  .stat .dt { width:7px; height:7px; border-radius:50%; }
+  .stat b { font-size:16.5px; color:#475569; font-family:Georgia,serif; font-weight:700; }
+  #bagNote { font-size:11px; color:#a3adbb; margin-top:9px; min-height:15px; line-height:1.5; }
+
+  /* ── 타이머 ── */
+  #ringWrap { position:relative; width:196px; height:196px; margin:11px auto 12px; }
+  #ringWrap::before {
+    content:''; position:absolute; inset:0; border-radius:50%;
+    background:linear-gradient(145deg,#e4e8ee,#f4f7fa);
+    box-shadow:inset 6px 6px 13px rgba(163,177,198,.55), inset -6px -6px 13px rgba(255,255,255,.95);
+  }
+  #ring { width:100%; height:100%; transform:rotate(-90deg); display:block; position:relative; }
+  #arc { transition:stroke .3s; filter:drop-shadow(0 0 7px rgba(37,99,235,.5)); }
+  #disc {
+    position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
+    width:110px; height:110px; border-radius:50%;
+    background:linear-gradient(145deg,#f7f9fc,#e7ebf1);
+    box-shadow:5px 5px 12px rgba(163,177,198,.5), -5px -5px 12px rgba(255,255,255,.95);
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px;
+  }
+  #tBig { font-size:31px; font-weight:700; color:#3f4c5f; line-height:1; letter-spacing:.01em;
+    font-variant-numeric:tabular-nums; }
+  #tSt { font-size:10.5px; color:#a3adbb; font-weight:700; letter-spacing:.04em; }
+  body.warn #tBig { color:#c2410c; }
+  body.over #tBig { color:#be123c; }
+
+  #tBtns { display:flex; gap:11px; justify-content:center; margin-top:2px; }
+  .rb { display:flex; flex-direction:column; align-items:center; gap:5px; }
+  .rb button {
+    width:52px; height:52px; border-radius:50%; border:none; cursor:pointer; padding:0;
+    background:linear-gradient(145deg,#f6f8fb,#e4e8ee); color:#64748b;
+    box-shadow:4px 4px 10px rgba(163,177,198,.55), -4px -4px 10px rgba(255,255,255,.95);
+    display:flex; align-items:center; justify-content:center; transition:all .12s;
+  }
+  .rb button:hover:not(:disabled) { color:#2563eb; }
+  .rb button:active:not(:disabled) {
+    box-shadow:inset 4px 4px 9px rgba(163,177,198,.6), inset -4px -4px 9px rgba(255,255,255,.95); }
+  .rb button svg { width:22px; height:22px; }
+  .rb button:disabled { opacity:.4; cursor:default; }
+  .rb .lb3 { font-size:10.5px; color:#a3adbb; font-weight:700; }
+  .rb button.act { background:linear-gradient(145deg,#3b82f6,#2158cf); color:#fff;
+    box-shadow:4px 4px 11px rgba(37,99,235,.35), -3px -3px 9px rgba(255,255,255,.9); }
+  .rb button.danger { background:linear-gradient(145deg,#f87171,#dc2626); color:#fff;
+    box-shadow:4px 4px 11px rgba(220,38,38,.35), -3px -3px 9px rgba(255,255,255,.9);
+    animation:pulse 1.4s ease-in-out infinite; }
+  @keyframes pulse {
+    0%,100% { box-shadow:4px 4px 11px rgba(220,38,38,.35), -3px -3px 9px rgba(255,255,255,.9), 0 0 0 0 rgba(220,38,38,.32); }
+    50%     { box-shadow:4px 4px 11px rgba(220,38,38,.35), -3px -3px 9px rgba(255,255,255,.9), 0 0 0 8px rgba(220,38,38,0); }
+  }
+
+  #autoRow { margin-top:14px; font-size:11.5px; color:#8b96a7; display:flex; align-items:center;
+    justify-content:center; gap:7px; font-weight:700; }
+  #autoRow input { width:15px; height:15px; accent-color:#2563eb; }
+  #keys { text-align:center; font-size:10.5px; color:#a3adbb; line-height:1.7; padding-bottom:2px; }
+
+  /* ══════ 오른쪽 — 지오지브라 ══════ */
+  /* 경계선을 끌어 사이드바 폭 조절 */
+  #sbGrip {
+    flex:none; width:7px; background:#eef2f7; border-right:1px solid #e2e8f0;
+    cursor:col-resize; position:relative; touch-action:none;
+  }
+  #sbGrip::before {
+    content:''; position:absolute; left:2px; top:50%; margin-top:-15px;
+    width:3px; height:30px; border-radius:2px; background:#c3cedb;
+  }
+  #sbGrip:hover, body.sbDrag #sbGrip { background:#dbeafe; }
+  #sbGrip:hover::before, body.sbDrag #sbGrip::before { background:#12608f; }
+  #sbGrip::after { content:''; position:absolute; top:0; bottom:0; left:-8px; right:-8px; }
+  body.sbDrag { cursor:col-resize; user-select:none; }
+  body.sbDrag #steps, body.sbDrag #panel, body.sbDrag #sbGrip { transition:none; }
+
+  #view { flex:1; min-width:0; position:relative; background:#fff; }
+  #ggb { width:100%; height:100%; }
+  /* 두 손가락으로 오므리면 축소 / 벌리면 확대 (브라우저가 아닌 지오지브라가 처리) */
+  #ggb canvas { touch-action:none; }
+  #ggbMsg {
+    position:absolute; inset:0; display:flex; flex-direction:column; gap:11px;
+    align-items:center; justify-content:center; text-align:center;
+    color:#64748b; font-size:14.5px; line-height:1.8; padding:24px; background:#fff;
+  }
+  #ggbMsg.hide { display:none; }
+  .spin { width:36px; height:36px; border-radius:50%; border:4px solid #e2e8f0;
+    border-top-color:#2563eb; animation:sp .9s linear infinite; }
+  @keyframes sp { to { transform:rotate(360deg); } }
+  #clearBtn {
+    position:absolute; right:16px; bottom:16px; z-index:6;
+    padding:9px 17px; font-size:13px; font-weight:800; border-radius:999px; cursor:pointer;
+    border:1px solid #e2e8f0; background:rgba(255,255,255,.96); color:#64748b; font-family:inherit;
+    box-shadow:0 4px 14px rgba(16,24,40,.12); transition:all .12s;
+  }
+  #clearBtn:hover { color:#2563eb; border-color:#bfdbfe; }
+
+  /* 시간 종료 잠금 */
+  #lock {
+    position:absolute; inset:0; z-index:20; display:none;
+    align-items:center; justify-content:center; flex-direction:column; gap:9px; text-align:center;
+    background:rgba(226,232,240,.72); backdrop-filter:blur(3px); -webkit-backdrop-filter:blur(3px);
+    cursor:not-allowed;
+  }
+  #lock.on { display:flex; }
+  #lock .lk { width:46px; height:46px; color:#be123c; }
+  #lock .t1 { font-size:20px; font-weight:900; color:#9f1239; letter-spacing:-.01em; }
+  #lock .t2 { font-size:13.5px; color:#64748b; line-height:1.7; }
+  @media (max-height: 880px){
+    #panel { gap:11px; padding:12px 15px 11px; }
+    .card { padding:15px 17px 14px; border-radius:21px; }
+    #slot { height:56px; font-size:33px; margin:9px 0 3px; }
+    #slotSub { min-height:32px; font-size:12px; }
+    #pickBtn { padding:12px 0; font-size:16.5px; margin-top:7px; }
+    #stats { margin-top:10px; }
+    #ringWrap { width:162px; height:162px; margin:8px auto 9px; }
+    #disc { width:92px; height:92px; }
+    #tBig { font-size:26px; }
+    .rb button { width:46px; height:46px; }
+    .rb button svg { width:20px; height:20px; }
+    #autoRow { margin-top:11px; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>이차곡선 자취 작도</h1>
+  <span class="sub">곡선을 뽑고, 90초 안에 오른쪽 지오지브라에서 자취를 작도하세요</span>
+  <span class="spacer"></span>
+  <div class="modeWrap">
+    <span class="lb">뽑기 방식</span>
+    <button class="modeBtn on" id="mRandom">완전 무작위</button>
+    <button class="modeBtn" id="mBag">균등 배분</button>
+  </div>
+</header>
+
+<div id="main">
+  <!-- 왼쪽: 뽑기 + 타이머 -->
+  <div id="panel">
+    <div class="card">
+      <div class="cap">기하 1차 수행평가</div>
+      <div id="slot"><span class="ph">뽑기를 눌러 주세요</span></div>
+      <div id="slotSub"></div>
+      <button id="pickBtn">뽑 기</button>
+      <div id="stats">
+        <div class="stat"><span class="lb2"><span class="dt" style="background:#dc2626"></span>포물선</span><b id="cPara">0</b></div>
+        <div class="stat"><span class="lb2"><span class="dt" style="background:#7c3aed"></span>타원</span><b id="cEll">0</b></div>
+        <div class="stat"><span class="lb2"><span class="dt" style="background:#ea8a04"></span>쌍곡선</span><b id="cHyp">0</b></div>
+      </div>
+      <div id="bagNote"></div>
+    </div>
+
+    <div class="card">
+      <div class="cap">제한 시간 90초</div>
+      <div id="ringWrap">
+        <svg id="ring" viewBox="0 0 200 200">
+          <circle cx="100" cy="100" r="84" fill="none" stroke="rgba(190,201,214,.35)" stroke-width="11"/>
+          <g id="ticks" stroke="#c9d2dd" stroke-width="1.4" stroke-linecap="round"></g>
+          <circle id="arc" cx="100" cy="100" r="84" fill="none" stroke="#2563eb" stroke-width="11"
+                  stroke-linecap="round" stroke-dasharray="527.79" stroke-dashoffset="0"/>
+        </svg>
+        <div id="disc">
+          <div id="tBig">1:30</div>
+          <div id="tSt">준비</div>
+        </div>
+      </div>
+      <div id="tBtns">
+        <div class="rb">
+          <button id="startBtn" title="시작">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 5.6v12.8L19 12z" fill="currentColor"/></svg>
+          </button><span class="lb3">시작</span>
+        </div>
+        <div class="rb">
+          <button id="pauseBtn" title="일시정지">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="5.5" width="3.3" height="13" rx="1.1" fill="currentColor"/><rect x="12.7" y="5.5" width="3.3" height="13" rx="1.1" fill="currentColor"/></svg>
+          </button><span class="lb3">일시정지</span>
+        </div>
+        <div class="rb">
+          <button id="resetBtn" title="리셋">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19.5 12a7.5 7.5 0 1 1-2.2-5.3"/><polyline points="19.5 4 19.5 8.6 14.9 8.6"/></svg>
+          </button><span class="lb3">리셋</span>
+        </div>
+        <div class="rb">
+          <button id="lockBtn" title="잠금 해제" disabled>
+            <svg id="lockIco" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4.5" y="10.5" width="15" height="9.6" rx="2.4"/><path d="M8.4 10.5V7.2A3.6 3.6 0 0 1 15.6 7"/></svg>
+          </button><span class="lb3">잠금 해제</span>
+        </div>
+      </div>
+      <div id="autoRow">
+        <input type="checkbox" id="autoChk" checked>
+        <label for="autoChk">뽑기와 동시에 타이머 시작</label>
+      </div>
+    </div>
+
+    <div id="keys">space = 뽑기 · Enter = 시작/일시정지 · R = 리셋<br>단국대학교사범대학부속고등학교 차지영 선생님</div>
+  </div>
+
+  <!-- 오른쪽: 지오지브라 -->
+  <div id="sbGrip" title="좌우로 끌어 폭 조절 (더블클릭: 기본 폭)"></div>
+  <div id="view">
+    <div id="ggb"></div>
+    <div id="ggbMsg"><div class="spin"></div>지오지브라를 불러오는 중이에요…</div>
+    <button id="clearBtn">새로 시작</button>
+    <div id="lock">
+      <svg class="lk" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <rect x="4.5" y="10.5" width="15" height="9.6" rx="2.4"/><path d="M8.4 10.5V7.2a3.6 3.6 0 0 1 7.2 0v3.3"/>
+      </svg>
+      <div class="t1">시간 종료 — 화면이 잠겼습니다</div>
+      <div class="t2">왼쪽 <b>잠금 해제</b> 버튼을 누르면 다시 사용할 수 있어요</div>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+/* ══════════════════════════════════════════
+   1) 공정한 뽑기 — crypto 난수 + 나머지 편향 제거
+   ══════════════════════════════════════════ */
+const ITEMS = [
+  { key:'para', color:'#dc2626', name:'포물선', hint:'준선 <b class="rm">l</b> 과 초점 <b class="rm">F</b> — 거리가 <b>같은</b> 점의 자취' },
+  { key:'ell',  color:'#7c3aed', name:'타원',   hint:'원 <b>안</b>의 점 <b class="rm">F′</b> — 두 점까지 거리의 <b>합</b>이 일정' },
+  { key:'hyp',  color:'#ea8a04', name:'쌍곡선', hint:'원 <b>밖</b>의 점 <b class="rm">F′</b> — 두 점까지 거리의 <b>차</b>가 일정' }
+];
+function fairIndex(n){
+  const max = Math.floor(4294967296 / n) * n;
+  const buf = new Uint32Array(1);
+  let v;
+  do { crypto.getRandomValues(buf); v = buf[0]; } while(v >= max);
+  return v % n;
+}
+let bag = [];
+function refillBag(){
+  bag = [0,1,2];
+  for(let i=bag.length-1; i>0; i--){                    // Fisher–Yates
+    const j = fairIndex(i+1);
+    const t = bag[i]; bag[i] = bag[j]; bag[j] = t;
+  }
+}
+let mode = 'random';
+const counts = { para:0, ell:0, hyp:0 };
+const slot = document.getElementById('slot'), slotSub = document.getElementById('slotSub');
+const pickBtn = document.getElementById('pickBtn'), bagNote = document.getElementById('bagNote');
+let rolling = null;
+
+function setMode(m){
+  mode = m;
+  document.getElementById('mRandom').classList.toggle('on', m==='random');
+  document.getElementById('mBag').classList.toggle('on', m==='bag');
+  if(m==='bag') refillBag();
+  syncBagNote();
+}
+function syncBagNote(){
+  bagNote.textContent = mode==='bag'
+    ? '가방에 남은 카드 ' + bag.length + '장 — 3명마다 포물선·타원·쌍곡선이 정확히 한 번씩'
+    : '매번 1/3 확률 (암호학적 난수 + 편향 제거)';
+}
+function slotHTML(it){ return '<span class="dt"></span>' + it.name; }
+function showItem(it, big){
+  slot.classList.remove('roll');
+  slot.style.color = it.color;
+  slot.innerHTML = slotHTML(it);
+  slotSub.innerHTML = big ? it.hint : '';
+}
+function pick(){
+  if(rolling) return;
+  if(typeof GEO_task === 'function') GEO_task('pick');
+  pickBtn.disabled = true;
+  slotSub.innerHTML = '';
+  let idx;
+  if(mode === 'bag'){
+    if(bag.length === 0) refillBag();
+    idx = bag.pop();
+  } else {
+    idx = fairIndex(ITEMS.length);
+  }
+  const result = ITEMS[idx];
+  let k = 0, delay = 45;
+  const spin = ()=>{
+    slot.classList.add('roll');
+    slot.style.color = '';
+    slot.innerHTML = slotHTML(ITEMS[k % 3]);
+    k++;
+    if(k < 12){ delay += 8; rolling = setTimeout(spin, delay); }
+    else {
+      rolling = null;
+      showItem(result, true);
+      counts[result.key]++;
+      document.getElementById('cPara').textContent = counts.para;
+      document.getElementById('cEll').textContent  = counts.ell;
+      document.getElementById('cHyp').textContent  = counts.hyp;
+      syncBagNote();
+      pickBtn.disabled = false;
+      beep(880, .12); setTimeout(()=>beep(1320,.16), 130);
+      if(document.getElementById('autoChk').checked){ unlockScreen(); resetTimer(); startTimer(); }
+    }
+  };
+  spin();
+}
+pickBtn.addEventListener('click', pick);
+document.getElementById('mRandom').addEventListener('click', ()=>setMode('random'));
+document.getElementById('mBag').addEventListener('click', ()=>setMode('bag'));
+
+/* ══════════════════════════════════════════
+   2) 90초 타이머
+   ══════════════════════════════════════════ */
+const TOTAL = 90;
+const R = 84, ARC_LEN = 2*Math.PI*R;
+const arc = document.getElementById('arc');
+const tBig = document.getElementById('tBig'), tSt = document.getElementById('tSt');
+const startBtn = document.getElementById('startBtn'), pauseBtn = document.getElementById('pauseBtn');
+const lockBtn = document.getElementById('lockBtn'), lockPane = document.getElementById('lock');
+let left = TOTAL, endAt = 0, timer = null, running = false;
+
+/* 눈금 그리기 */
+(function ticks(){
+  const g = document.getElementById('ticks');
+  let d = '';
+  for(let i=0;i<60;i++){
+    const a = i/60*Math.PI*2, big = i%5===0;
+    const r1 = big ? 61 : 64, r2 = 70;
+    d += '<line x1="'+(100+Math.cos(a)*r1).toFixed(2)+'" y1="'+(100+Math.sin(a)*r1).toFixed(2)
+       + '" x2="'+(100+Math.cos(a)*r2).toFixed(2)+'" y2="'+(100+Math.sin(a)*r2).toFixed(2)
+       + '"'+(big?' stroke-width="2"':'')+'/>';
+  }
+  g.innerHTML = d;
+})();
+
+function fmt(s){
+  s = Math.max(0, s);
+  const m = Math.floor(s/60), r = Math.floor(s%60);
+  return m + ':' + String(r).padStart(2,'0');
+}
+function paint(){
+  const ratio = Math.max(0, left) / TOTAL;
+  arc.setAttribute('stroke-dashoffset', String(ARC_LEN * (1 - ratio)));
+  const col = left<=0 ? '#e11d48' : left<=10 ? '#f97316' : '#2563eb';
+  arc.setAttribute('stroke', col);
+  arc.style.filter = 'drop-shadow(0 0 7px ' + (left<=0 ? 'rgba(225,29,72,.5)' : left<=10 ? 'rgba(249,115,22,.5)' : 'rgba(37,99,235,.5)') + ')';
+  tBig.textContent = left<=0 ? '0:00' : fmt(left);
+  document.body.classList.toggle('warn', left<=10 && left>0);
+  document.body.classList.toggle('over', left<=0);
+  syncBtns();
+}
+function syncBtns(){
+  startBtn.disabled = running || left<=0;
+  pauseBtn.disabled = !running;
+  startBtn.classList.toggle('act', !running && left>0);
+  pauseBtn.classList.toggle('act', running);
+}
+function tick(){
+  left = (endAt - Date.now())/1000;
+  if(left <= 0){
+    left = 0; stopTimer(true); paint();
+    tSt.textContent = '시간 종료';
+    lockScreen();
+    endSound();
+    return;
+  }
+  paint();
+  const sec = Math.ceil(left);
+  if(sec<=5 && sec!==tick._last){ tick._last = sec; beep(660,.08); }
+}
+function startTimer(){
+  if(running || left<=0) return;
+  if(typeof GEO_task === 'function') GEO_task('start');
+  endAt = Date.now() + left*1000;
+  running = true;
+  timer = setInterval(tick, 100);
+  tSt.textContent = '측정 중';
+  paint();
+}
+function pauseTimer(){
+  if(!running) return;
+  clearInterval(timer); timer=null; running=false;
+  left = Math.max(0,(endAt - Date.now())/1000);
+  tSt.textContent = '일시정지';
+  paint();
+}
+function stopTimer(){ clearInterval(timer); timer=null; running=false; }
+function resetTimer(){
+  stopTimer();
+  left = TOTAL; tick._last = 0;
+  document.body.classList.remove('warn','over');
+  tSt.textContent = '준비';
+  paint();
+}
+startBtn.addEventListener('click', startTimer);
+pauseBtn.addEventListener('click', pauseTimer);
+document.getElementById('resetBtn').addEventListener('click', ()=>{ unlockScreen(); resetTimer(); });
+
+/* ══════════════════════════════════════════
+   3) 시간 종료 시 지오지브라 화면 잠금
+   ══════════════════════════════════════════ */
+const ICO_CLOSED = '<rect x="4.5" y="10.5" width="15" height="9.6" rx="2.4"/><path d="M8.4 10.5V7.2a3.6 3.6 0 0 1 7.2 0v3.3"/>';
+const ICO_OPEN   = '<rect x="4.5" y="10.5" width="15" height="9.6" rx="2.4"/><path d="M8.4 10.5V7.2A3.6 3.6 0 0 1 15.6 7"/>';
+let locked = false;
+function lockScreen(){
+  locked = true;
+  lockPane.classList.add('on');
+  lockBtn.disabled = false;
+  lockBtn.classList.add('danger');
+  document.getElementById('lockIco').innerHTML = ICO_CLOSED;
+}
+function unlockScreen(){
+  locked = false;
+  lockPane.classList.remove('on');
+  lockBtn.disabled = true;
+  lockBtn.classList.remove('danger');
+  document.getElementById('lockIco').innerHTML = ICO_OPEN;
+}
+lockBtn.addEventListener('click', ()=>{
+  if(!locked) return;
+  unlockScreen();
+  tSt.textContent = '잠금 해제';
+  beep(520, .1); setTimeout(()=>beep(780,.14), 110);
+});
+
+/* 소리 (WebAudio — 외부 파일 없이) */
+let AC = null;
+function beep(freq, dur, type){
+  try{
+    AC = AC || new (window.AudioContext||window.webkitAudioContext)();
+    const o = AC.createOscillator(), g = AC.createGain();
+    o.type = type || 'sine'; o.frequency.value = freq;
+    o.connect(g); g.connect(AC.destination);
+    const t = AC.currentTime;
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(0.28, t+0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001, t+dur);
+    o.start(t); o.stop(t+dur+0.03);
+  }catch(e){}
+}
+function endSound(){
+  [0,220,440].forEach((d,i)=> setTimeout(()=>beep(i===2?520:784, .3, 'triangle'), d));
+}
+
+/* 단축키 */
+addEventListener('keydown', e=>{
+  const tg = e.target;
+  if(tg && (tg.tagName === 'INPUT' || tg.tagName === 'TEXTAREA' || tg.isContentEditable)) return;
+  if(tg && tg.closest && tg.closest('#view')) return;      // 지오지브라 사용 중에는 무시
+  if(e.code === 'Space'){ e.preventDefault(); pick(); }
+  else if(e.code === 'Enter'){ e.preventDefault(); running ? pauseTimer() : startTimer(); }
+  else if(e.key === 'r' || e.key === 'R'){ unlockScreen(); resetTimer(); }
+});
+
+setMode('random');
+unlockScreen();
+resetTimer();
+
+/* ══════════════════════════════════════════
+   4) 오른쪽 — 지오지브라 (연습용과 동일 설정)
+   ══════════════════════════════════════════ */
+const view = document.getElementById('view');
+const ggbMsg = document.getElementById('ggbMsg');
+let ggbBooted = false, ggbApi = null;
+
+function ggbFail(){
+  ggbMsg.classList.remove('hide');
+  ggbMsg.innerHTML = '지오지브라를 불러오지 못했어요.<br>'
+    + '와이파이(인터넷) 연결을 확인하고 새로고침 해주세요.<br>'
+    + '<span style="font-size:12.5px;color:#94a3b8">(지오지브라는 인터넷이 연결되어 있어야 실행됩니다)</span>';
+}
+function bootGgb(){
+  if(typeof GGBApplet === 'undefined'){ ggbFail(); return; }
+  document.getElementById('ggb').innerHTML = '';
+  ggbMsg.classList.remove('hide');
+  ggbMsg.innerHTML = '<div class="spin"></div>지오지브라를 불러오는 중이에요…';
+  try{
+    const app = new GGBApplet({
+      appName:'classic',
+      width:  view.clientWidth,
+      height: view.clientHeight,
+      language:'ko',
+      showToolBar:true, showAlgebraInput:true, showMenuBar:false,
+      allowStyleBar:true, enableFileFeatures:false, borderColor:'#e2e8f0',
+      enableShiftDragZoom:true, showZoomButtons:true, enableRightClick:false,
+      appletOnLoad: (api)=>{ ggbApi = api; ggbMsg.classList.add('hide'); ggbBooted = true; },
+      scaleContainerClass:'noscale'
+    }, true);
+    app.inject('ggb');
+  }catch(e){ ggbFail(); }
+}
+const sc = document.createElement('script');
+sc.src = 'https://www.geogebra.org/apps/deployggb.js';
+sc.onload = bootGgb;
+sc.onerror = ggbFail;
+document.head.appendChild(sc);
+
+document.getElementById('clearBtn').addEventListener('click', bootGgb);
+
+/* ── 사이드바 폭 조절 (경계선을 좌우로 끌기 / 더블클릭하면 기본값) ── */
+(function(){
+  const KEY = 'ptSbW', DEF = 330, MIN = 250, MAX = 620;
+  const main = document.getElementById('main'), grip = document.getElementById('sbGrip');
+  if(!main || !grip) return;
+  function setW(w){
+    w = Math.max(MIN, Math.min(MAX, Math.round(w)));
+    const lim = Math.max(MIN, Math.round(innerWidth * 0.62));
+    w = Math.min(w, lim);
+    main.style.setProperty('--sbw', w + 'px');
+    return w;
+  }
+  let w0 = DEF;
+  try{ const v = parseInt(localStorage.getItem(KEY), 10); if(v) w0 = v; }catch(e){}
+  setW(w0);
+  let on = false;
+  grip.addEventListener('pointerdown', e=>{
+    on = true; grip.setPointerCapture(e.pointerId);
+    document.body.classList.add('sbDrag'); e.preventDefault();
+  });
+  grip.addEventListener('pointermove', e=>{
+    if(!on) return;
+    const w = setW(e.clientX - main.getBoundingClientRect().left);
+    try{ localStorage.setItem(KEY, w); }catch(err){}
+  });
+  const end = ()=>{ if(!on) return; on = false;
+    document.body.classList.remove('sbDrag'); dispatchEvent(new Event('resize')); };
+  grip.addEventListener('pointerup', end);
+  grip.addEventListener('pointercancel', end);
+  grip.addEventListener('dblclick', ()=>{
+    setW(DEF); try{ localStorage.setItem(KEY, DEF); }catch(e){}
+    dispatchEvent(new Event('resize'));
+  });
+  addEventListener('resize', ()=>{
+    let w = DEF; try{ const v = parseInt(localStorage.getItem(KEY),10); if(v) w = v; }catch(e){}
+    setW(w);
+  });
+})();
+
+/* 창 크기가 바뀌면 크기만 맞춤 (작도는 그대로 유지) */
+function fitGgb(){
+  if(!ggbBooted) return;
+  const w = Math.round(view.clientWidth), h = Math.round(view.clientHeight);
+  if(!w || !h) return;
+  if(ggbApi && ggbApi.setWidth){
+    try{ ggbApi.setWidth(w); ggbApi.setHeight(h); return; }catch(e){}
+  }
+  bootGgb();
+}
+let rt = null;
+addEventListener('resize', ()=>{
+  clearTimeout(rt); rt = setTimeout(fitGgb, 260);
+});
+
+/* (디버그) */
+window.__pt = { fairIndex, get mode(){return mode;}, get counts(){return {...counts};},
+  get left(){return left;}, get total(){return TOTAL;}, get running(){return running;},
+  get locked(){return locked;}, get bagLeft(){return bag.length;},
+  pick, startTimer, pauseTimer, resetTimer, lockScreen, unlockScreen };
+</script>
+<script>window.PAGE_ID="locustest";</script>
+<script src="nav.js"></script>
+</body>
+</html>

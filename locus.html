@@ -42,11 +42,11 @@ if (localStorage.getItem('geoAppOk') !== '1') location.replace('index.html');
   #tabs button.on { background:#12608f; color:#fff; }
   #tabs button.on .dt { background:#fff !important; }
 
-  #main { flex:1; min-height:0; display:flex; }
+  #main { flex:1; min-height:0; display:flex; --sbw:380px; }
 
   /* ── 왼쪽: 단계 ── */
   #steps {
-    width:465px; flex:none; background:#fff; border-right:1px solid #e2e8f0;
+    width:var(--sbw,380px); flex:none; background:#fff; border-right:1px solid #e2e8f0;
     padding:13px 15px; overflow-y:auto;
   }
   #goal {
@@ -97,6 +97,39 @@ if (localStorage.getItem('geoAppOk') !== '1') location.replace('index.html');
     #steps { padding:11px 13px; }
   }
 
+  /* ── 왼쪽 설명 접기 ── */
+  #main { position:relative; }
+  #steps { transition:width .22s ease, padding .22s ease; }
+  body.stepsOff #sbGrip { display:none; }
+  body.stepsOff #steps { width:0; padding-left:0; padding-right:0; border-right-width:0; overflow:hidden; }
+  #stepsTgl {
+    position:absolute; left:calc(var(--sbw,380px) + 4px); top:50%; margin-left:-14px; margin-top:-33px; z-index:30;
+    width:28px; height:66px; padding:0; border:1.5px solid #dbe3ec; border-radius:10px;
+    background:#fff; color:#64748b; cursor:pointer; font-family:inherit;
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 3px 12px rgba(16,24,40,.13);
+    transition:left .22s ease, margin-left .22s ease, color .13s, border-color .13s;
+  }
+  #stepsTgl:hover { color:#12608f; border-color:#93c5fd; }
+  #stepsTgl svg { width:15px; height:15px; transition:transform .22s ease; }
+  body.stepsOff #stepsTgl { left:0; margin-left:0; border-radius:0 10px 10px 0; border-left:none; }
+  body.stepsOff #stepsTgl svg { transform:rotate(180deg); }
+
+  /* 경계선을 끌어 사이드바 폭 조절 */
+  #sbGrip {
+    flex:none; width:7px; background:#eef2f7; border-right:1px solid #e2e8f0;
+    cursor:col-resize; position:relative; touch-action:none;
+  }
+  #sbGrip::before {
+    content:''; position:absolute; left:2px; top:50%; margin-top:-15px;
+    width:3px; height:30px; border-radius:2px; background:#c3cedb;
+  }
+  #sbGrip:hover, body.sbDrag #sbGrip { background:#dbeafe; }
+  #sbGrip:hover::before, body.sbDrag #sbGrip::before { background:#12608f; }
+  #sbGrip::after { content:''; position:absolute; top:0; bottom:0; left:-8px; right:-8px; }
+  body.sbDrag { cursor:col-resize; user-select:none; }
+  body.sbDrag #steps, body.sbDrag #panel, body.sbDrag #sbGrip { transition:none; }
+
   /* ── 오른쪽 ── */
   #view { flex:1; min-width:0; display:flex; flex-direction:column; background:#fff; }
   #stage { flex:1; min-height:0; position:relative; }
@@ -105,6 +138,8 @@ if (localStorage.getItem('geoAppOk') !== '1') location.replace('index.html');
   #ggbWrap { position:absolute; inset:0; display:none; background:#fff; }
   #ggbWrap.show { display:block; }
   #ggb { width:100%; height:100%; }
+  /* 두 손가락으로 오므리면 축소 / 벌리면 확대 (브라우저가 아닌 지오지브라가 처리) */
+  #ggb canvas { touch-action:none; }
   #ggbMsg {
     position:absolute; inset:0; display:flex; flex-direction:column; gap:11px;
     align-items:center; justify-content:center; text-align:center;
@@ -159,11 +194,16 @@ if (localStorage.getItem('geoAppOk') !== '1') location.replace('index.html');
 </div>
 
 <div id="main">
+  <button id="stepsTgl" type="button" title="설명 접기" aria-label="설명 접기">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"
+         stroke-linecap="round" stroke-linejoin="round"><polyline points="15 5 8 12 15 19"/></svg>
+  </button>
   <div id="steps">
     <div id="goal"></div>
     <div id="stepList"></div>
     <div id="whyBox"></div>
   </div>
+  <div id="sbGrip" title="좌우로 끌어 폭 조절 (더블클릭: 기본 폭)"></div>
   <div id="view">
     <div id="stage">
       <div id="cvWrap">
@@ -499,7 +539,6 @@ function sync(){
   document.getElementById('dragHint').style.display = step>=2 ? 'block' : 'none';
   renderSteps();
   dirty = true;
-  if(step >= CONF[type].steps.length-1 && typeof GEO_task === 'function') GEO_task('last');
 }
 
 /* ── 버튼 ── */
@@ -531,7 +570,6 @@ document.querySelectorAll('#tabs button').forEach(b=>b.addEventListener('click',
   document.querySelectorAll('#tabs button').forEach(x=>x.classList.toggle('on', x===b));
   type = b.dataset.t; step = 0; showTrace = false; stopAnim(); syncTrace();
   layout(); sync();
-  if(typeof GEO_task === 'function') GEO_task('see-' + type);
 }));
 
 /* ══════════════════════════════════════════
@@ -541,7 +579,7 @@ document.querySelectorAll('#tabs button').forEach(b=>b.addEventListener('click',
 const ggbBtn  = document.getElementById('ggbBtn');
 const ggbWrap = document.getElementById('ggbWrap');
 const ggbMsg  = document.getElementById('ggbMsg');
-let ggbLoaded = false, ggbBooted = false;
+let ggbLoaded = false, ggbBooted = false, ggbApi = null;
 
 function ggbFail(){
   ggbMsg.classList.remove('hide');
@@ -562,7 +600,8 @@ function bootGgb(){
       language:'ko',
       showToolBar:true, showAlgebraInput:true, showMenuBar:false,
       allowStyleBar:true, enableFileFeatures:false, borderColor:'#e2e8f0',
-      appletOnLoad: ()=>{ ggbMsg.classList.add('hide'); ggbBooted = true; },
+      enableShiftDragZoom:true, showZoomButtons:true, enableRightClick:false,
+      appletOnLoad: (api)=>{ ggbApi = api; ggbMsg.classList.add('hide'); ggbBooted = true; },
       scaleContainerClass:'noscale'
     }, true);
     app.inject('ggb');
@@ -583,14 +622,81 @@ ggbBtn.onclick = ()=>{
   ggbBtn.classList.toggle('on', on);
   document.body.classList.toggle('ggbMode', on);
   ggbBtn.textContent = on ? '미리보기로' : '실전 연습';
-  if(on){ stopAnim(); loadGgb(); if(typeof GEO_task === 'function') GEO_task('ggb'); }
+  if(on){ stopAnim(); loadGgb(); }
 };
-/* 창 크기가 바뀌면 지오지브라 다시 맞춤 */
+/* 창 크기가 바뀌면 지오지브라 크기만 맞춤 (작도는 그대로 유지) */
+function fitGgb(){
+  if(!ggbBooted) return;
+  const w = Math.round(ggbWrap.clientWidth), h = Math.round(ggbWrap.clientHeight);
+  if(!w || !h) return;
+  if(ggbApi && ggbApi.setWidth){
+    try{ ggbApi.setWidth(w); ggbApi.setHeight(h); return; }catch(e){}
+  }
+  bootGgb();
+}
 let rt = null;
 addEventListener('resize', ()=>{
   if(!ggbWrap.classList.contains('show')) return;
-  clearTimeout(rt); rt = setTimeout(()=>{ if(ggbBooted) bootGgb(); }, 600);
+  clearTimeout(rt); rt = setTimeout(fitGgb, 260);
 });
+
+/* ── 사이드바 폭 조절 (경계선을 좌우로 끌기 / 더블클릭하면 기본값) ── */
+(function(){
+  const KEY = 'locusSbW', DEF = 380, MIN = 240, MAX = 680;
+  const main = document.getElementById('main'), grip = document.getElementById('sbGrip');
+  if(!main || !grip) return;
+  function setW(w){
+    w = Math.max(MIN, Math.min(MAX, Math.round(w)));
+    const lim = Math.max(MIN, Math.round(innerWidth * 0.62));
+    w = Math.min(w, lim);
+    main.style.setProperty('--sbw', w + 'px');
+    return w;
+  }
+  let w0 = DEF;
+  try{ const v = parseInt(localStorage.getItem(KEY), 10); if(v) w0 = v; }catch(e){}
+  setW(w0);
+  let on = false;
+  grip.addEventListener('pointerdown', e=>{
+    on = true; grip.setPointerCapture(e.pointerId);
+    document.body.classList.add('sbDrag'); e.preventDefault();
+  });
+  grip.addEventListener('pointermove', e=>{
+    if(!on) return;
+    const w = setW(e.clientX - main.getBoundingClientRect().left);
+    try{ localStorage.setItem(KEY, w); }catch(err){}
+  });
+  const end = ()=>{ if(!on) return; on = false;
+    document.body.classList.remove('sbDrag'); dispatchEvent(new Event('resize')); };
+  grip.addEventListener('pointerup', end);
+  grip.addEventListener('pointercancel', end);
+  grip.addEventListener('dblclick', ()=>{
+    setW(DEF); try{ localStorage.setItem(KEY, DEF); }catch(e){}
+    dispatchEvent(new Event('resize'));
+  });
+  addEventListener('resize', ()=>{
+    let w = DEF; try{ const v = parseInt(localStorage.getItem(KEY),10); if(v) w = v; }catch(e){}
+    setW(w);
+  });
+})();
+
+/* ── 왼쪽 설명 접기 / 펼치기 ── */
+(function(){
+  const tg = document.getElementById('stepsTgl');
+  if(!tg) return;
+  tg.onclick = ()=>{
+    const off = document.body.classList.toggle('stepsOff');
+    tg.title = off ? '설명 펼치기' : '설명 접기';
+    tg.setAttribute('aria-label', tg.title);
+    try{ localStorage.setItem('locusStepsOff', off ? '1' : '0'); }catch(e){}
+    setTimeout(()=>dispatchEvent(new Event('resize')), 250);
+  };
+  try{
+    if(localStorage.getItem('locusStepsOff') === '1'){
+      document.body.classList.add('stepsOff');
+      tg.title = '설명 펼치기'; tg.setAttribute('aria-label', tg.title);
+    }
+  }catch(e){}
+})();
 
 /* ── A 드래그 ── */
 function pos(e){ const r=cv.getBoundingClientRect(); return {x:e.clientX-r.left, y:e.clientY-r.top}; }
