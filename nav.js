@@ -6,7 +6,7 @@
      먼저 선언한 뒤 이 파일을 불러오면 하단 바가 자동으로 생깁니다.
    ════════════════════════════════════════════════════════════ */
 window.GEO_CONFIG = {
-  VERSION: "v1.26",                 // ★ 1단원=v1.x, 2단원=v2.x, 3단원=v3.x — 업로드마다 뒷자리 +1 (v1.11, v1.12, …)
+  VERSION: "v1.27",                 // ★ 1단원=v1.x, 2단원=v2.x, 3단원=v3.x — 업로드마다 뒷자리 +1 (v1.11, v1.12, …)
   APPS_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbx3Ay-gudjjSoRlngyu54umJ9uYRAKhINuwcv229UZUN9_oIQfm9vwAxM32FOPR9wV1/exec",
   /* 담당 선생님 — 실제 명단은 Apps Script(TEACHERS)에서 불러옵니다.
      아래는 인터넷이 안 될 때 쓰는 기본값입니다. */
@@ -24,6 +24,8 @@ window.GEO_CONFIG = {
       title:'타원 그리기' },
     { id:'hdraw',    href:'hyperbola.html', icon:'🥂', short:'쌍곡선그리기', grp:'draw', curve:'쌍곡선',
       title:'쌍곡선 그리기' },
+    { id:'locus',    href:'locus.html',    short:'자취그리기', grp:'construct', curve:'자취 그리기 (연습용)',
+      title:'지오지브라로 자취 그리기' },
     { id:'concept',  href:'concept.html',  icon:'📘', short:'포물선개념',  grp:'concept', curve:'포물선',
       title:'포물선 개념 정리' },
     { id:'econcept', href:'ellipse-concept.html', icon:'📙', short:'타원개념', grp:'concept', curve:'타원',
@@ -36,6 +38,10 @@ window.GEO_CONFIG = {
       title:'타원의 활용' },
     { id:'happly',   href:'hyperbola-apply.html', icon:'🚢', short:'쌍곡선활용', grp:'apply', curve:'쌍곡선',
       title:'쌍곡선의 활용' },
+    { id:'tangent',  href:'tangent.html',  short:'접선', grp:'tangent', curve:'이차곡선의 접선',
+      title:'이차곡선의 접선' },
+    { id:'light',    href:'light.html',    short:'빛', grp:'tangent', curve:'이차곡선과 빛의 관계',
+      title:'이차곡선과 빛의 관계' },
     { id:'geogebra', href:'geogebra.html', icon:'📐', short:'지오지브라',  grp:'tool',
       title:'지오지브라' }
   ],
@@ -44,9 +50,10 @@ window.GEO_CONFIG = {
   HOME_GROUPS: [
     { key:'conic',   title:'원뿔곡선 탐구' },
     { key:'draw',    title:'이차곡선 그리기' },
+    { key:'construct', title:'이차곡선 작도' },
     { key:'concept', title:'이차곡선 개념 정리' },
     { key:'apply',   title:'이차곡선 활용' },
-    { key:'tangent', title:'이차곡선의 접선', soon:['이차곡선의 접선', '이차곡선 빛반사'] }
+    { key:'tangent', title:'이차곡선의 접선' }
   ]
 };
 
@@ -197,7 +204,10 @@ window.GEO_TASKS = {
   hconcept: ['slider'],                                // a·b 슬라이더 움직이기
   general:  ['quiz','proj'],                           // 판정 연습 6문제 + 교과서 33p 표 완성
   happly:   ['steps'],                                 // 위치 찾기 Step 4까지 완주
-  geogebra: ['open']                                   // 지오지브라 실행
+  geogebra: ['open'],                                  // 지오지브라 실행
+  locus:    ['see-ell','see-hyp','ggb'],               // 타원·쌍곡선 탭 + 실전 연습 열기
+  tangent:  ['proof','p42'],                           // 증명 하나 펼치기 + 교과서 42p 탭
+  light:    ['see-ell','see-hyp','see-tel']            // 타원·쌍곡선·반사 망원경 탭
 };
 window.GEO_task = function(key){
   const page = window.PAGE_ID;

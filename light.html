@@ -1,0 +1,1707 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<script>
+/* 입장 가드 */
+if (localStorage.getItem('geoAppOk') !== '1') location.replace('index.html');
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="icon" type="image/svg+xml" href="icon.svg">
+<link rel="apple-touch-icon" href="icon-180.png">
+<meta name="apple-mobile-web-app-title" content="기하">
+<title>이차곡선과 빛의 관계</title>
+<link rel="stylesheet" media="print" onload="this.media='all'"
+  href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap">
+<style>
+  :root { --paper:#EFEFE3; --ink:#23241D; --mute:#A8A79A; --lnw:#DCDACD; --lnd:#C7C5B6;
+          --acc:#2F45EC; --accd:#1B2FC4; --red:#D9463F;
+          --stage:#15161B; --gold:#FFC24A; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html, body { width:100%; height:100%; overflow:hidden; }
+  body { background:var(--paper); color:var(--ink); display:flex; flex-direction:column;
+         font-family:'IBM Plex Sans KR','Apple SD Gothic Neo','Malgun Gothic',sans-serif; }
+  i, .mm, .rm { font-family:Georgia,'Times New Roman',serif; }
+  i { font-style:italic; }
+  .rm { font-style:normal; }
+  .mm { font-style:normal; white-space:nowrap; }
+  sup { font-size:.68em; vertical-align:.5em; }
+  sub { font-size:.68em; vertical-align:-.25em; }
+
+  header { padding:16px 24px 12px; display:flex; align-items:baseline; gap:12px; flex-wrap:wrap; }
+  header .eyebrow { font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:11px; font-weight:500;
+                    letter-spacing:.16em; color:var(--acc); width:100%; }
+  header h1 { font-size:26px; font-weight:700; letter-spacing:-.02em; margin-top:6px; }
+
+  #tabs { display:flex; gap:8px; padding:0 24px 12px; border-bottom:1.5px solid var(--lnw); }
+  #tabs button { display:flex; align-items:center; gap:9px; height:34px; padding:0 17px 0 13px;
+    border-radius:999px; background:transparent; border:1.5px solid var(--lnd);
+    cursor:pointer; font-family:inherit; color:var(--ink); transition:all .13s; }
+  #tabs button .no { font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:12px; font-weight:600;
+                     color:var(--acc); letter-spacing:.06em; }
+  #tabs button .nm { font-size:13.5px; font-weight:700; }
+  #tabs button:hover { border-color:var(--acc); }
+  #tabs button.on { background:var(--acc); border-color:var(--acc); }
+  #tabs button.on .no, #tabs button.on .nm { color:#fff; }
+
+  #main { flex:1; min-height:0; overflow-y:auto; padding:18px 24px 34px; }
+  .pane { display:none; max-width:960px; margin:0 auto; }
+  .pane.on { display:block; }
+
+  .stage { position:relative; border-radius:18px; overflow:hidden; background:var(--stage);
+           box-shadow:0 10px 30px rgba(20,21,26,.16); }
+  .stage canvas { display:block; width:100%; height:min(64vh,600px); min-height:310px; touch-action:manipulation; }
+  @media (max-width:760px){ .stage canvas { height:min(52vh,400px); min-height:270px; } }
+
+  .eqTag { position:absolute; left:16px; top:14px; font-family:Georgia,serif; font-size:15px;
+           color:rgba(255,255,255,.62); letter-spacing:.01em; pointer-events:none; }
+  .prBtn { position:absolute; right:14px; top:12px; height:31px; padding:0 15px; border-radius:999px;
+           border:1.5px solid rgba(255,255,255,.28); background:rgba(255,255,255,.07);
+           color:rgba(255,255,255,.86); font-family:inherit; font-size:12.5px; font-weight:700;
+           cursor:pointer; transition:all .13s; backdrop-filter:blur(3px); }
+  .prBtn:hover { border-color:rgba(255,255,255,.55); background:rgba(255,255,255,.14); }
+  .prBtn.on { background:var(--gold); border-color:var(--gold); color:#2B2410; }
+
+  .note { margin-top:11px; font-size:13.5px; line-height:1.9; color:#4E4D42;
+          padding:11px 15px; border-radius:12px; background:rgba(199,197,182,.24);
+          display:none; }
+  .note.on { display:block; }
+  .note b { color:var(--ink); }
+
+  .telBtns { position:absolute; left:50%; transform:translateX(-50%); top:12px; display:flex; gap:6px;
+             background:rgba(255,255,255,.07); border:1.5px solid rgba(255,255,255,.18);
+             border-radius:999px; padding:3px; backdrop-filter:blur(3px); }
+  .segBtn { height:25px; padding:0 13px; border:0; border-radius:999px; background:transparent;
+            color:rgba(255,255,255,.7); font-family:inherit; font-size:12px; font-weight:700; cursor:pointer; }
+  .segBtn.on { background:rgba(255,255,255,.9); color:#1B1C22; }
+
+
+  .split2 { display:flex; gap:16px; align-items:flex-start; }
+  .split2 .col { flex:1; min-width:0; }
+  @media (max-width:1000px){ .split2 { flex-direction:column; } }
+  .split2 .stage canvas { height:min(54vh,470px); min-height:285px; }
+  .cpCard { border:0; border-radius:0; padding:0; background:transparent; }
+  .cpHead { display:flex; align-items:baseline; justify-content:space-between; margin-bottom:8px; }
+  .cpHead .cap { margin:0; }
+  .cpNo { font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:var(--mute); margin-left:auto; }
+  .cpWrap { position:relative; }
+  .cpWrap canvas { display:block; width:100%; height:min(54vh,470px); min-height:285px;
+                   border-radius:0; cursor:pointer; }
+  .cpL { position:absolute; transform:translate(-50%,-50%); white-space:nowrap; pointer-events:none;
+         font-size:13px; font-weight:600; font-family:Georgia,'Times New Roman',serif; }
+  .cpL.ink { color:#23241D; } .cpL.mute { color:#8E8D80; font-size:12.5px; }
+  .cpL.acc, .cpL.blu { color:#2F45EC; } .cpL.red { color:#D9463F; } .cpL.grn { color:#12876A; }
+  .fr2 { white-space:nowrap; }
+  .cpBtns { display:flex; gap:7px; margin-top:10px; align-items:center; }
+  .cpBtns button { height:30px; padding:0 14px; border-radius:999px; border:1.5px solid var(--lnd);
+    background:transparent; color:var(--ink); font-family:inherit; font-size:12.5px; font-weight:700; cursor:pointer; }
+  .cpBtns button:hover { border-color:var(--acc); }
+  .cpBtns button.pri { background:var(--acc); border-color:var(--acc); color:#fff; }
+  #cpParaCap { margin-top:11px; }
+  #cpParaCap .hint { color:var(--mute); font-size:12.5px; }
+  #telSteps { position:absolute; left:50%; transform:translateX(-50%); bottom:12px; display:flex; gap:6px;
+              flex-wrap:wrap; justify-content:center; max-width:calc(100% - 24px); }
+  #telSteps button { display:flex; align-items:center; gap:7px; height:31px; padding:0 13px 0 9px;
+    border-radius:999px; border:1.5px solid rgba(255,255,255,.20); background:rgba(16,18,24,.62);
+    color:rgba(255,255,255,.72); font-family:inherit; font-size:12.5px; font-weight:600; cursor:pointer;
+    backdrop-filter:blur(4px); transition:all .14s; }
+  #telSteps button i { font-family:'IBM Plex Mono',monospace; font-style:normal; font-size:11px; font-weight:700;
+    width:18px; height:18px; border-radius:50%; background:rgba(255,255,255,.16); color:#fff;
+    display:flex; align-items:center; justify-content:center; }
+  #telSteps button:hover { border-color:rgba(255,255,255,.45); color:#fff; }
+  #telSteps button.on { background:var(--gold); border-color:var(--gold); color:#2B2410; }
+  #telSteps button.on i { background:rgba(0,0,0,.22); color:#2B2410; }
+  #telSteps button.nx { padding:0 15px; background:rgba(255,255,255,.90); color:#1B1C22; border-color:transparent; }
+  #telEye { position:absolute; right:16px; top:58px; width:170px; display:none; text-align:center; }
+  #telEye.on { display:block; }
+  #telEye canvas { width:170px; height:170px; display:block; border-radius:50%; }
+  #telEye .eyeCap { display:block; margin-top:7px; font-size:11.5px; color:rgba(255,255,255,.62); }
+  @media (max-width:760px){ #telEye { width:118px; right:10px; top:52px; } #telEye canvas { width:118px; height:118px; } }
+  #telCap { margin-top:11px; }
+  #telCap .st { color:var(--acc); margin-right:6px; }
+  #telCap .hint { color:var(--mute); font-size:12.5px; }
+  #telWait { position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+             color:rgba(255,255,255,.5); font-size:13px; pointer-events:none; }
+  #cvTel { cursor:grab; }
+  #cvTel.drag { cursor:grabbing; }
+  #foot { font-size:11.5px; color:var(--mute); text-align:center; padding:14px 0 0; }
+</style>
+</head>
+<body>
+<header>
+  <span class="eyebrow">GEOMETRY LAB</span>
+  <h1>이차곡선과 빛의 관계</h1>
+</header>
+
+<div id="tabs">
+  <button data-t="para" class="on"><span class="no">01</span><span class="nm">포물선</span></button>
+  <button data-t="ell"><span class="no">02</span><span class="nm">타원</span></button>
+  <button data-t="hyp"><span class="no">03</span><span class="nm">쌍곡선</span></button>
+  <button data-t="tel"><span class="no">04</span><span class="nm">반사 망원경</span></button>
+</div>
+
+<div id="main">
+  <div class="pane on" data-p="para">
+    <div class="split2">
+      <div class="col">
+        <div class="stage">
+          <span class="eqTag"><i>y</i><sup>2</sup> = 4<i>x</i></span>
+          <button class="prBtn" data-s="para">원리</button>
+          <canvas id="cvPara"></canvas>
+        </div>
+        <div class="note" id="ntPara">
+          <b>접선을 기준으로 두 각이 같습니다.</b>
+          &nbsp;∠<span class="rm">QPF</span> = ∠<span class="rm">SPR</span> —
+          축에 평행하게 들어온 빛은 반사되어 모두 초점 <span class="rm">F</span>로 모입니다.
+        </div>
+      </div>
+      <div class="col">
+        <div class="cpCard">
+          <div class="cpWrap" id="cpParaWrap"><canvas id="cpPara"></canvas></div>
+          <div class="cpBtns">
+            <button id="cpParaBack">이전</button>
+            <button id="cpParaNext" class="pri">다음</button>
+            <button id="cpParaReset">처음부터</button>
+            <span class="cpNo" id="cpParaNo">0 / 7</span>
+          </div>
+        </div>
+        <div class="note on" id="cpParaCap"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="pane" data-p="ell">
+    <div class="split2">
+      <div class="col">
+        <div class="stage">
+          <span class="eqTag"><i>x</i><sup>2</sup>/12 + <i>y</i><sup>2</sup>/3 = 1</span>
+          <button class="prBtn" data-s="ell">원리</button>
+          <canvas id="cvEll"></canvas>
+        </div>
+        <div class="note" id="ntEll">
+          <b>접선이 ∠<span class="rm">F′PF</span>의 외각을 이등분합니다.</b>
+          &nbsp;입사각과 반사각이 같으므로 한 초점에서 나온 빛은 반드시 다른 초점을 지납니다.
+        </div>
+      </div>
+      <div class="col">
+        <div class="cpCard">
+          <div class="cpWrap" id="cpEllWrap"><canvas id="cpEll"></canvas></div>
+          <div class="cpBtns">
+            <button id="cpEllBack">이전</button>
+            <button id="cpEllNext" class="pri">다음</button>
+            <button id="cpEllReset">처음부터</button>
+            <span class="cpNo" id="cpEllNo">0 / 6</span>
+          </div>
+        </div>
+        <div class="note on" id="cpEllCap"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="pane" data-p="hyp">
+    <div class="split2">
+      <div class="col">
+        <div class="stage">
+          <span class="eqTag"><i>x</i><sup>2</sup>/4 − <i>y</i><sup>2</sup>/12 = 1</span>
+          <button class="prBtn" data-s="hyp">원리</button>
+          <canvas id="cvHyp"></canvas>
+        </div>
+        <div class="note" id="ntHyp">
+          <b>접선이 ∠<span class="rm">F′PF</span>를 이등분합니다.</b>
+          &nbsp;한 초점을 향해 간 빛은 반사된 뒤, 다른 초점에서 나온 것처럼 퍼져 나갑니다.
+        </div>
+      </div>
+      <div class="col">
+        <div class="cpCard">
+          <div class="cpWrap" id="cpHypWrap"><canvas id="cpHyp"></canvas></div>
+          <div class="cpBtns">
+            <button id="cpHypBack">이전</button>
+            <button id="cpHypNext" class="pri">다음</button>
+            <button id="cpHypReset">처음부터</button>
+            <span class="cpNo" id="cpHypNo">0 / 5</span>
+          </div>
+        </div>
+        <div class="note on" id="cpHypCap"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="pane" data-p="tel">
+    <div class="stage">
+      <span class="eqTag" id="telTag">카세그레인식</span>
+      <div class="telBtns">
+        <button class="segBtn on" data-m="cas">카세그레인식</button>
+        <button class="segBtn" data-m="new">뉴턴식</button>
+      </div>
+      <button class="prBtn" data-s="tel">원리</button>
+      <canvas id="cvTel"></canvas>
+      <div id="telWait">3D 준비 중…</div>
+      <div id="telEye"><canvas id="telEyeCv"></canvas><span class="eyeCap">접안부에서 보이는 달</span></div>
+      <div id="telSteps">
+        <button class="on"><i>1</i>달을 겨눈다</button>
+        <button><i>2</i>주경에 모인다</button>
+        <button><i>3</i>부경이 되돌린다</button>
+        <button><i>4</i>상이 맺힌다</button>
+        <button id="telNext" class="nx">다음</button>
+      </div>
+    </div>
+    <div class="note on" id="telCap"></div>
+    <div class="note" id="ntTel">
+      <b>포물면의 초점과 쌍곡면의 한 초점을 겹쳐 놓았습니다.</b>
+      &nbsp;주경에서 모인 빛은 그 초점을 향해 가다가 부경에 반사되어, 쌍곡면의 <b>다른 초점</b>에 정확히 모입니다.
+    </div>
+  </div>
+  <div id="foot">기하 탐구실</div>
+</div>
+
+<script>
+'use strict';
+/* ═══════════ 공용 무대 ═══════════ */
+const V = (x,y)=>({x:x,y:y});
+const sub = (a,b)=>V(a.x-b.x, a.y-b.y);
+const add = (a,b)=>V(a.x+b.x, a.y+b.y);
+const mul = (a,s)=>V(a.x*s, a.y*s);
+const len = a=>Math.hypot(a.x,a.y);
+const nrm = a=>{ const l=len(a)||1; return V(a.x/l, a.y/l); };
+
+function Stage(cvId, cfg){
+  const cv = document.getElementById(cvId), g = cv.getContext('2d');
+  let W=0,H=0,k=1,ox=0,oy=0;
+  const S = { photons:[], sparks:[], rings:[], prin:false, t0:performance.now(), running:false };
+  const X = x => ox + k*x, Y = y => oy - k*y;
+
+  function fit(){
+    const r = cv.getBoundingClientRect(); if(!r.width) return;
+    const dpr = Math.min(2, window.devicePixelRatio||1);
+    cv.width = Math.round(r.width*dpr); cv.height = Math.round(r.height*dpr);
+    g.setTransform(dpr,0,0,dpr,0,0);
+    W = r.width; H = r.height;
+    const pad = 18;
+    k = Math.min((W-2*pad)/(cfg.bx1-cfg.bx0), (H-2*pad)/(cfg.by1-cfg.by0));
+    ox = W/2 - k*(cfg.bx0+cfg.bx1)/2;
+    oy = H/2 + k*(cfg.by0+cfg.by1)/2;
+  }
+
+  /* ── 그리기 도우미 ── */
+  function poly(pts, col, w, dash){
+    g.save(); g.beginPath(); g.setLineDash(dash||[]);
+    pts.forEach((p,i)=> i? g.lineTo(X(p.x),Y(p.y)) : g.moveTo(X(p.x),Y(p.y)));
+    g.strokeStyle=col; g.lineWidth=w; g.lineJoin='round'; g.lineCap='round'; g.stroke(); g.restore();
+  }
+  function seg(a,b,col,w,dash){ poly([a,b],col,w,dash); }
+  function dot(p, col, r){ g.beginPath(); g.arc(X(p.x),Y(p.y),r,0,7); g.fillStyle=col; g.fill(); }
+  function label(p, txt, col, dx, dy, it){
+    g.save(); g.fillStyle=col;
+    g.font = (it?'italic ':'') + '600 14px Georgia, serif';
+    g.textAlign='center'; g.textBaseline='middle';
+    g.fillText(txt, X(p.x)+dx, Y(p.y)+dy); g.restore();
+  }
+  function arcBetween(p,u,v,r,col){
+    const a1 = Math.atan2(-u.y,u.x), a2 = Math.atan2(-v.y,v.x);
+    let d = a2-a1; while(d>Math.PI) d-=2*Math.PI; while(d<-Math.PI) d+=2*Math.PI;
+    const cx = X(p.x), cy = Y(p.y), mid = a1+d/2;
+    g.save(); g.setLineDash([]);
+    g.beginPath(); g.arc(cx,cy,r,a1,a1+d,d<0);
+    g.strokeStyle=col; g.lineWidth=1.8; g.stroke();
+    g.beginPath();
+    g.moveTo(cx+Math.cos(mid)*(r-4.5), cy+Math.sin(mid)*(r-4.5));
+    g.lineTo(cx+Math.cos(mid)*(r+4.5), cy+Math.sin(mid)*(r+4.5));
+    g.lineWidth=1.6; g.stroke(); g.restore();
+    return { mid:mid, span:Math.abs(d) };
+  }
+
+  const api = { X:X, Y:Y, poly:poly, seg:seg, dot:dot, label:label, arcBetween:arcBetween,
+                get k(){return k;}, get W(){return W;}, get H(){return H;} };
+
+  /* ── 광자 ── */
+  function fire(paths){
+    paths.forEach(function(pp){
+      S.photons.push({ pts:pp.pts, i:0, u:0, speed:pp.speed||9.5, main:!!pp.main,
+                       trail:[], dead:false, endRing:!!pp.endRing });
+    });
+    run();
+  }
+  function spark(p, n, col){
+    for(let i=0;i<n;i++){
+      const a = Math.random()*Math.PI*2, s = .9+Math.random()*3.4;
+      S.sparks.push({ x:p.x, y:p.y, vx:Math.cos(a)*s, vy:Math.sin(a)*s, life:1, col:col });
+    }
+  }
+
+  function step(dt){
+    S.photons.forEach(function(ph){
+      if(ph.dead) return;
+      let move = ph.speed*dt;
+      while(move>0 && !ph.dead){
+        const a = ph.pts[ph.i], b = ph.pts[ph.i+1];
+        const d = len(sub(b,a));
+        const rest = d*(1-ph.u);
+        if(move < rest){ ph.u += move/d; move = 0; }
+        else {
+          move -= rest; ph.i++; ph.u = 0;
+          if(ph.i >= ph.pts.length-1){
+            ph.dead = true;
+            if(ph.main){
+              if(ph.endRing) S.rings.push({ x:b.x, y:b.y, r:0, life:1 });
+              spark(b, ph.endRing?22:10, '#FFD98A');
+            }
+          } else if(ph.main){
+            spark(ph.pts[ph.i], 16, '#FFF0C0');
+            S.rings.push({ x:ph.pts[ph.i].x, y:ph.pts[ph.i].y, r:0, life:.7 });
+          }
+        }
+      }
+      if(!ph.dead){
+        const a = ph.pts[ph.i], b = ph.pts[ph.i+1];
+        const p = add(a, mul(sub(b,a), ph.u));
+        ph.trail.unshift(p);
+        if(ph.trail.length > 26) ph.trail.pop();
+      } else if(ph.trail.length){ ph.trail.pop(); ph.trail.pop(); }
+    });
+    S.photons = S.photons.filter(ph => !ph.dead || ph.trail.length);
+    S.sparks.forEach(s=>{ s.x += s.vx*dt; s.y += s.vy*dt; s.vx*=.94; s.vy*=.94; s.life -= dt*1.5; });
+    S.sparks = S.sparks.filter(s=>s.life>0);
+    S.rings.forEach(r=>{ r.r += dt*7; r.life -= dt*1.5; });
+    S.rings = S.rings.filter(r=>r.life>0);
+  }
+
+  function drawLight(){
+    g.save(); g.globalCompositeOperation='lighter';
+    g.setLineDash([]);
+    S.photons.forEach(function(ph){
+      const T = ph.trail; if(T.length<2) return;
+      const hd = T[0], tl = T[T.length-1];
+      const path = new Path2D();
+      path.moveTo(X(T[0].x), Y(T[0].y));
+      for(let i=1;i<T.length;i++) path.lineTo(X(T[i].x), Y(T[i].y));
+      const mk = function(a0,a1){
+        const gr = g.createLinearGradient(X(hd.x),Y(hd.y), X(tl.x),Y(tl.y));
+        gr.addColorStop(0,'rgba(255,206,110,'+a0+')');
+        gr.addColorStop(.45,'rgba(255,176,60,'+(a0*.42).toFixed(3)+')');
+        gr.addColorStop(1,'rgba(255,150,40,'+a1+')');
+        return gr;
+      };
+      g.lineCap='round'; g.lineJoin='round';
+      g.strokeStyle = mk(ph.main?.30:.13, 0); g.lineWidth = ph.main?11:6; g.stroke(path);
+      g.strokeStyle = mk(ph.main?.92:.42, 0); g.lineWidth = ph.main?3.4:2;  g.stroke(path);
+      const h = T[0], R = ph.main?13:7;
+      const gr = g.createRadialGradient(X(h.x),Y(h.y),0, X(h.x),Y(h.y),R);
+      gr.addColorStop(0,'rgba(255,255,255,'+(ph.main?.95:.5)+')');
+      gr.addColorStop(.35,'rgba(255,205,105,'+(ph.main?.8:.4)+')');
+      gr.addColorStop(1,'rgba(255,160,40,0)');
+      g.beginPath(); g.arc(X(h.x),Y(h.y),R,0,7); g.fillStyle=gr; g.fill();
+    });
+    S.sparks.forEach(function(s){
+      g.beginPath(); g.arc(X(s.x),Y(s.y), 1.9*s.life+.5, 0, 7);
+      g.fillStyle = 'rgba(255,224,150,'+ s.life.toFixed(3) +')'; g.fill();
+    });
+    S.rings.forEach(function(r){
+      g.beginPath(); g.arc(X(r.x),Y(r.y), r.r*k*.6+3, 0, 7);
+      g.strokeStyle = 'rgba(255,214,120,'+ (r.life*.75).toFixed(3) +')';
+      g.lineWidth = 2.2*r.life+.4; g.stroke();
+    });
+    g.restore();
+  }
+
+  function pulse(p, ph){
+    const t = (performance.now()-S.t0)/1000;
+    const f = (t*0.62 + ph) % 1;
+    g.save();
+    g.beginPath(); g.arc(X(p.x),Y(p.y), 6 + f*15, 0, 7);
+    g.strokeStyle = 'rgba(255,194,74,'+ ((1-f)*.45).toFixed(3) +')'; g.lineWidth=1.6; g.stroke();
+    g.restore();
+  }
+
+  function frame(now){
+    const dt = Math.min(.05, (now - (S.last||now))/1000); S.last = now;
+    fitIfNeeded();
+    g.clearRect(0,0,W,H);
+    g.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--stage').trim() || '#15161B';
+    g.fillRect(0,0,W,H);
+    cfg.draw(api, S.prin);
+    cfg.hot.forEach((h,i)=> pulse(h.p, i*.4));
+    cfg.hot.forEach(h=>{
+      dot(h.p, '#FFC24A', 5.4);
+      label(h.p, h.t, '#FFE7B0', h.dx, h.dy, false);
+    });
+    step(dt); drawLight();
+    if(S.photons.length || S.sparks.length || S.rings.length || true) requestAnimationFrame(frame);
+  }
+  let lastW=0, lastH=0;
+  function fitIfNeeded(){
+    const r = cv.getBoundingClientRect();
+    if(Math.abs(r.width-lastW)>.5 || Math.abs(r.height-lastH)>.5){ lastW=r.width; lastH=r.height; fit(); }
+  }
+  function run(){ if(S.running) return; S.running = true; requestAnimationFrame(frame); }
+
+  cv.addEventListener('click', function(e){
+    const r = cv.getBoundingClientRect();
+    const mx = e.clientX-r.left, my = e.clientY-r.top;
+    let best=null, bd=1e9;
+    cfg.hot.forEach(function(h){
+      const d = Math.hypot(mx - X(h.p.x), my - Y(h.p.y));
+      if(d<bd){ bd=d; best=h; }
+    });
+    if(best && bd < 34){ S.photons=[]; S.sparks=[]; S.rings=[]; fire(cfg.shoot(best.id)); }
+  });
+
+  return { fit:fit, run:run, setPrin:function(v){ S.prin=v; }, getPrin:function(){ return S.prin; },
+           fire:fire, axisY:function(){ return Y(0); }, rect:function(){ return cv.getBoundingClientRect(); },
+           reset:function(){ S.photons=[]; S.sparks=[]; S.rings=[]; } };
+}
+
+/* ═══════════ 색 ═══════════ */
+const CURVE = '#8FE3FF', AX = 'rgba(255,255,255,.20)', GUIDE = 'rgba(255,255,255,.24)',
+      TANG  = '#FF7A6B', TXT = 'rgba(255,255,255,.72)', ANG = '#FFC24A';
+
+/* ═══════════ ① 포물선 ═══════════ */
+const Fp = V(1,0), Pp = V(4,4), Rp = V(8.6,4), Qp = V(-4,0), Sp = V(8.4,6.2);
+const paraPts = (function(){ const a=[]; for(let y=-5.9;y<=6.8;y+=.08) a.push(V(y*y/4, y)); return a; })();
+const paraSide = [5.2, 2.4, -2.6, -4.6];
+
+const scPara = Stage('cvPara', {
+  bx0:-5.0, bx1:11.0, by0:-6.0, by1:6.9,
+  hot:[ {id:'R', p:Rp, t:'R', dx:14, dy:-12}, {id:'F', p:Fp, t:'F', dx:-2, dy:-15} ],
+  draw:function(A, prin){
+    A.seg(V(-4.8,0), V(10.8,0), AX, 1.2);
+    A.seg(V(0,-5.8), V(0,6.7), AX, 1.2);
+    A.seg(V(-4.8,4), V(10.8,4), GUIDE, 1.2, [5,6]);
+    A.poly(paraPts, CURVE, 2.4);
+    A.dot(Pp, '#FFFFFF', 4.4); A.label(Pp, 'P', TXT, -3, -15);
+    A.label(V(9.9,4), 'y = 4', 'rgba(255,255,255,.35)', 0, -12, true);
+    if(prin){
+      A.seg(Qp, Sp, TANG, 2, []);
+      A.seg(Pp, Fp, 'rgba(255,255,255,.5)', 1.5, [4,4]);
+      A.dot(Qp, TANG, 4); A.label(Qp, 'Q', '#FFB3A8', -4, 14);
+      A.dot(Sp, TANG, 4); A.label(Sp, 'S', '#FFB3A8', 12, -6);
+      const uQ = nrm(sub(Qp,Pp)), uF = nrm(sub(Fp,Pp)), uS = nrm(sub(Sp,Pp)), uR = nrm(sub(Rp,Pp));
+      A.arcBetween(Pp, uQ, uF, 26, ANG);
+      A.arcBetween(Pp, uS, uR, 26, ANG);
+    }
+  },
+  shoot:function(id){
+    const out=[];
+    if(id==='R'){
+      out.push({ pts:[Rp, Pp, Fp], main:true, endRing:true, speed:9 });
+      paraSide.forEach(function(y){
+        out.push({ pts:[V(9.4,y), V(y*y/4,y), Fp], speed:9 });
+      });
+    } else {
+      out.push({ pts:[Fp, Pp, V(10.8,4)], main:true, speed:9 });
+      paraSide.forEach(function(y){
+        out.push({ pts:[Fp, V(y*y/4,y), V(10.8,y)], speed:9 });
+      });
+    }
+    return out;
+  }
+});
+
+/* ═══════════ ② 타원 ═══════════ */
+const ea = Math.sqrt(12), eb = Math.sqrt(3), ec = 3;
+const Fe = V(ec,0), Fe2 = V(-ec,0), Pe = V(2, Math.SQRT2);
+const ellPts = (function(){ const a=[]; for(let i=0;i<=180;i++){ const t=i/180*Math.PI*2; a.push(V(ea*Math.cos(t), eb*Math.sin(t))); } return a; })();
+const ellSide = [124, 196, 300].map(d=>{ const t=d*Math.PI/180; return V(ea*Math.cos(t), eb*Math.sin(t)); });
+
+const scEll = Stage('cvEll', {
+  bx0:-4.9, bx1:4.9, by0:-2.55, by1:2.55,
+  hot:[ {id:'F', p:Fe, t:'F', dx:6, dy:-14}, {id:'F2', p:Fe2, t:'F′', dx:-8, dy:-14} ],
+  draw:function(A, prin){
+    A.seg(V(-4.7,0), V(4.7,0), AX, 1.2);
+    A.seg(V(0,-2.4), V(0,2.4), AX, 1.2);
+    A.poly(ellPts, CURVE, 2.4);
+    A.dot(Pe, '#FFFFFF', 4.4); A.label(Pe, 'P', TXT, 4, -14);
+    if(prin){
+      const m = -(eb*eb*Pe.x)/(ea*ea*Pe.y);
+      const t = nrm(V(1,m));
+      A.seg(add(Pe, mul(t,-2.4)), add(Pe, mul(t,2.4)), TANG, 2);
+      A.seg(Pe, Fe, 'rgba(255,255,255,.5)', 1.5, [4,4]);
+      A.seg(Pe, Fe2,'rgba(255,255,255,.5)', 1.5, [4,4]);
+      const uF = nrm(sub(Fe,Pe)), uG = nrm(sub(Fe2,Pe));
+      const t1 = (uF.x*t.x+uF.y*t.y) > 0 ? t : mul(t,-1);
+      A.arcBetween(Pe, uF, t1, 24, ANG);
+      A.arcBetween(Pe, uG, mul(t1,-1), 24, ANG);
+    }
+  },
+  shoot:function(id){
+    const A0 = id==='F' ? Fe : Fe2, B0 = id==='F' ? Fe2 : Fe;
+    const out = [{ pts:[A0, Pe, B0], main:true, endRing:true, speed:5.2 }];
+    ellSide.forEach(function(q){ out.push({ pts:[A0, q, B0], speed:5.2 }); });
+    return out;
+  }
+});
+
+/* ═══════════ ③ 쌍곡선 ═══════════ */
+const ha = 2, hb = Math.sqrt(12), hc = 4;
+const Fh = V(hc,0), Fh2 = V(-hc,0), Ph = V(3, Math.sqrt(15));
+function hypBranch(sg){ const a=[]; for(let t=-1.31;t<=1.311;t+=.025) a.push(V(sg*ha*Math.cosh(t), hb*Math.sinh(t))); return a; }
+const hypR = hypBranch(1), hypL = hypBranch(-1);
+const hypSide = [1.6, -0.75].map(function(t){ return V(ha*Math.cosh(t), hb*Math.sinh(t)); });
+function far(p, u){ return add(p, mul(u, 13)); }
+
+const scHyp = Stage('cvHyp', {
+  bx0:-7.2, bx1:7.2, by0:-5.4, by1:5.4,
+  hot:[ {id:'F', p:Fh, t:'F', dx:6, dy:-14}, {id:'F2', p:Fh2, t:'F′', dx:-8, dy:-14} ],
+  draw:function(A, prin){
+    A.seg(V(-7.0,0), V(7.0,0), AX, 1.2);
+    A.seg(V(0,-5.2), V(0,5.2), AX, 1.2);
+    const s = hb/ha;
+    A.seg(V(-3.0,-3.0*s), V(3.0,3.0*s), 'rgba(255,255,255,.13)', 1.1, [5,6]);
+    A.seg(V(-3.0,3.0*s), V(3.0,-3.0*s), 'rgba(255,255,255,.13)', 1.1, [5,6]);
+    A.poly(hypR, CURVE, 2.4); A.poly(hypL, CURVE, 2.4);
+    A.dot(Ph, '#FFFFFF', 4.4); A.label(Ph, 'P', TXT, 13, -6);
+    if(prin){
+      const m = (hb*hb*Ph.x)/(ha*ha*Ph.y);
+      const t = nrm(V(1,m));
+      A.seg(add(Ph, mul(t,-3.2)), add(Ph, mul(t,3.2)), TANG, 2);
+      A.seg(Ph, Fh, 'rgba(255,255,255,.5)', 1.5, [4,4]);
+      A.seg(Ph, Fh2,'rgba(255,255,255,.5)', 1.5, [4,4]);
+      A.seg(Ph, far(Ph, nrm(sub(Ph,Fh2))), 'rgba(255,255,255,.22)', 1.3, [3,6]);
+      const uF = nrm(sub(Fh,Ph)), uG = nrm(sub(Fh2,Ph));
+      const t1 = (uF.x*t.x+uF.y*t.y) > 0 ? t : mul(t,-1);
+      A.arcBetween(Ph, uF, t1, 26, ANG);
+      A.arcBetween(Ph, t1, uG, 26, ANG);
+    }
+  },
+  shoot:function(id){
+    const A0 = id==='F' ? Fh : Fh2, other = id==='F' ? Fh2 : Fh;
+    const out = [{ pts:[A0, Ph, far(Ph, nrm(sub(Ph, other)))], main:true, speed:6.2 }];
+    hypSide.forEach(function(q){
+      out.push({ pts:[A0, q, far(q, nrm(sub(q, other)))], speed:6.2 });
+    });
+    return out;
+  }
+});
+
+/* ══════════ 원리 — 좌표평면 (포물선) ══════════ */
+(function(){
+const wrap=document.getElementById('cpParaWrap');
+const cv=document.getElementById('cpPara'); if(!cv) return;
+const g=cv.getContext('2d');
+const capEl=document.getElementById('cpParaCap');
+
+const VB={x0:-3.7,x1:5.4,y0:-2.7,y1:4.5};
+const p=1, P={x:2.25,y:3}, F={x:p,y:0}, Q={x:-P.x,y:0}, H={x:-p,y:P.y}, M={x:0,y:P.y/2};
+const INK='#23241D', MUTE='#8E8D80', BLU='#2F45EC';
+let step=0, k=1, ox=0, oy=0, W=0, Hh=0;
+const X=x=>ox+k*x, Y=y=>oy-k*y;
+
+/* ── 애니메이션 ── */
+const anim={};                       // key -> {t0,dur}
+const KEYS=[['curve'],['tan'],['q'],['ph','pf'],['fq'],['hq','fill'],['fh','m'],['arc'],['ray']];
+const R={x:4.95,y:P.y};   // 축에 평행하게 빛이 들어오는 가상의 점
+function A(key){
+  const a=anim[key]; if(!a) return 0;
+  if(a.done) return 1;
+  const t=Math.min(1,(performance.now()-a.t0)/a.dur);
+  if(t>=1) a.done=true;
+  return t;
+}
+function ease(t){ return t<.5 ? 2*t*t : 1-Math.pow(-2*t+2,2)/2; }
+let raf=0;
+function loop(){
+  draw();
+  const busy=Object.keys(anim).some(k2=>anim[k2] && !anim[k2].done);
+  raf = busy ? requestAnimationFrame(loop) : 0;
+}
+function start(keys,dur){
+  keys.forEach(k2=>{ anim[k2]={t0:performance.now(), dur:dur||760, done:false}; });
+  if(!raf) raf=requestAnimationFrame(loop);
+}
+function setDone(keys){ keys.forEach(k2=>{ anim[k2]={t0:0,dur:1,done:true}; }); }
+function clearKeys(keys){ keys.forEach(k2=>{ delete anim[k2]; }); }
+
+/* ── 라벨 ── */
+const LAB=[
+ {id:'eq',  w:{x:3.6,y:-1.6},  dx:0,  dy:0,  html:'<i>y</i><sup>2</sup> = 4<i>px</i>', st:0, cls:'ink'},
+ {id:'dir', w:{x:-1,y:-2.05},  dx:-26, dy:0,  html:'<i>x</i> = −<i>p</i>', st:0, cls:'mute'},
+ {id:'F',   w:F,  dx:13, dy:19,  html:'<span class="rm">F</span>(<i>p</i>, 0)', st:0, cls:'ink'},
+ {id:'P',   w:P,  dx:4,  dy:-25, html:'<span class="rm">P</span>(<i>x</i><sub>1</sub>, <i>y</i><sub>1</sub>)', st:0, cls:'ink'},
+ {id:'O',   w:{x:0,y:0}, dx:-14, dy:15, html:'<span class="rm">O</span>', st:0, cls:'ink'},
+ {id:'ax',  w:{x:VB.x1-.1,y:0}, dx:-4, dy:18, html:'<i>x</i>', st:0, cls:'ink'},
+ {id:'ay',  w:{x:0,y:VB.y1-.1}, dx:16, dy:2,  html:'<i>y</i>', st:0, cls:'ink'},
+ {id:'tan', w:P, dx:62, dy:34, html:'<i>y</i><sub>1</sub><i>y</i> = 2<i>p</i>(<i>x</i> + <i>x</i><sub>1</sub>)', st:1, cls:'ink'},
+ {id:'Q',   w:Q,  dx:0,  dy:20,  html:'−<i>x</i><sub>1</sub>', st:2, cls:'ink'},
+ {id:'H',   w:H,  dx:-17,dy:-11, html:'<span class="rm">H</span>', st:3, cls:'ink'},
+ {id:'M',   w:M,  dx:-2, dy:22,  html:'<span class="rm">M</span>', st:6, cls:'ink'},
+ {id:'R',   w:{x:4.95,y:3}, dx:6, dy:-19, html:'<span class="rm">R</span>', st:8, cls:'ink'}
+];
+const spans={};
+LAB.forEach(function(L){
+  const s=document.createElement('span'); s.className='cpL '+L.cls;
+  s.innerHTML=L.html; wrap.appendChild(s); spans[L.id]=s;
+});
+
+const CAP=[
+ '포물선 <span class="mm"><i>y</i><sup>2</sup> = 4<i>px</i></span>와 준선 <span class="mm"><i>x</i> = −<i>p</i></span>, 초점 <span class="rm">F</span>, 곡선 위의 점 <span class="rm">P</span>입니다. <span class="hint">그림을 클릭해 보세요</span>',
+ '<span class="rm">P</span>에서의 접선은 <b><span class="mm"><i>y</i><sub>1</sub><i>y</i> = 2<i>p</i>(<i>x</i> + <i>x</i><sub>1</sub>)</span></b>',
+ '이 식에 <span class="mm"><i>y</i> = 0</span>을 넣으면 <span class="mm"><i>x</i></span>절편은 <b><span class="mm">(−<i>x</i><sub>1</sub>, 0)</span></b>',
+ '<span class="rm">P</span>에서 준선에 내린 수선의 발이 <span class="rm">H</span>. 포물선의 정의에서 <b><span class="rm">PF</span> = <span class="rm">PH</span></b>',
+ '<span class="mm"><i>x</i></span>절편에서 <span class="rm">F</span>까지 잇습니다. 길이는 <span class="mm"><i>x</i><sub>1</sub> + <i>p</i></span>로 앞의 둘과 같습니다.',
+ '<span class="mm"><i>x</i></span>절편에서 <span class="rm">H</span>까지 이으면 <b>네 변의 길이가 모두 같은 마름모</b>가 됩니다.',
+ '마름모의 두 대각선은 <b>서로를 이등분하고 수직</b>입니다. 교점 <span class="rm">M</span><span class="mm">(0, <i>y</i><sub>1</sub>/2)</span>은 <span class="mm"><i>y</i></span>축 위에 있습니다.',
+ '마름모의 대각선은 각을 이등분하므로 접선은 <b>∠<span class="rm">FPH</span>를 이등분</b>합니다. <span class="rm">PH</span>가 축과 평행하니, 입사각과 반사각이 같아집니다.',
+ '축에 평행하게 <span class="rm">R</span>에서 쏜 빛은 <span class="rm">P</span>에서 반사되어 <b>초점 <span class="rm">F</span></b>로 갑니다.'
+];
+const LAST=CAP.length-1;
+
+function fit(){
+  const r=cv.getBoundingClientRect(); if(!r.width) return;
+  const dpr=Math.min(2,window.devicePixelRatio||1);
+  if(cv.width!==Math.round(r.width*dpr)||cv.height!==Math.round(r.height*dpr)){
+    cv.width=Math.round(r.width*dpr); cv.height=Math.round(r.height*dpr);
+  }
+  g.setTransform(dpr,0,0,dpr,0,0);
+  W=r.width; Hh=r.height;
+  const pad=16;
+  let yz = Hh/2 + Math.min((W-2*pad)/(VB.x1-VB.x0),(Hh-2*pad)/(VB.y1-VB.y0))*(VB.y0+VB.y1)/2;
+  try{
+    if(window.__scPara && window.__scPara.axisY){
+      const a=window.__scPara.rect(), b=cv.getBoundingClientRect();
+      const v=window.__scPara.axisY();
+      if(a && v!=null) yz = a.top + v - b.top;
+    }
+  }catch(e){}
+  yz=Math.max(pad+40, Math.min(Hh-pad-40, yz));
+  k=Math.min((W-2*pad)/(VB.x1-VB.x0), (yz-pad)/VB.y1, (Hh-pad-yz)/(-VB.y0));
+  ox=W/2-k*(VB.x0+VB.x1)/2; oy=yz;
+}
+function line(a,b,col,w,dash){
+  g.save(); g.beginPath(); g.setLineDash(dash||[]);
+  g.moveTo(X(a.x),Y(a.y)); g.lineTo(X(b.x),Y(b.y));
+  g.strokeStyle=col; g.lineWidth=w; g.lineCap='round'; g.stroke(); g.restore();
+}
+/* 서서히 뻗어 나가는 선 */
+function grow(a,b,col,w,t,dash){
+  if(t<=0) return;
+  const e={x:a.x+(b.x-a.x)*t, y:a.y+(b.y-a.y)*t};
+  line(a,e,col,w,dash);
+  if(t<1){
+    g.save(); g.globalCompositeOperation='source-over';
+    const gr=g.createRadialGradient(X(e.x),Y(e.y),0,X(e.x),Y(e.y),9);
+    gr.addColorStop(0,'rgba(255,255,255,.95)'); gr.addColorStop(.35,col); gr.addColorStop(1,'rgba(47,69,236,0)');
+    g.beginPath(); g.arc(X(e.x),Y(e.y),9,0,7); g.fillStyle=gr; g.globalAlpha=.55; g.fill(); g.restore();
+    g.beginPath(); g.arc(X(e.x),Y(e.y),2.6,0,7); g.fillStyle='#fff'; g.fill();
+    g.beginPath(); g.arc(X(e.x),Y(e.y),2.6,0,7); g.strokeStyle=col; g.lineWidth=1.6; g.stroke();
+  }
+}
+function dot(pt,col,r,t){
+  const s=(t===undefined?1:t); if(s<=0) return;
+  g.beginPath(); g.arc(X(pt.x),Y(pt.y),(r||4)*(0.4+0.6*s),0,7);
+  g.save(); g.globalAlpha=Math.min(1,s*1.6); g.fillStyle=col; g.fill(); g.restore();
+}
+function tick(a,b,col){
+  const mx=(a.x+b.x)/2, my=(a.y+b.y)/2;
+  let dx=b.x-a.x, dy=b.y-a.y; const L=Math.hypot(dx,dy); dx/=L; dy/=L;
+  const nx=-dy, ny=dx, s=0.16;
+  line({x:mx-nx*s,y:my-ny*s},{x:mx+nx*s,y:my+ny*s},col,2.2);
+}
+function arc(pt,u,v,r,col,t){
+  const n1=Math.hypot(u.x,u.y), n2=Math.hypot(v.x,v.y);
+  const a1=Math.atan2(-u.y/n1,u.x/n1), a2=Math.atan2(-v.y/n2,v.x/n2);
+  let d=a2-a1; while(d>Math.PI)d-=2*Math.PI; while(d<-Math.PI)d+=2*Math.PI;
+  d*=t;
+  g.save(); g.beginPath(); g.arc(X(pt.x),Y(pt.y),r,a1,a1+d,d<0);
+  g.strokeStyle=col; g.lineWidth=2; g.stroke();
+  if(t>=1){
+    const m=a1+d/2; g.beginPath();
+    g.moveTo(X(pt.x)+Math.cos(m)*(r-4.5), Y(pt.y)+Math.sin(m)*(r-4.5));
+    g.lineTo(X(pt.x)+Math.cos(m)*(r+4.5), Y(pt.y)+Math.sin(m)*(r+4.5));
+    g.lineWidth=1.8; g.stroke();
+  }
+  g.restore();
+}
+
+function draw(){
+  const rr=cv.getBoundingClientRect();
+  if(!rr.width || !rr.height){
+    LAB.forEach(L=>{ const s=spans[L.id]; if(s) s.style.display='none'; });
+    return;
+  }
+  fit(); g.clearRect(0,0,W,Hh);
+  line({x:VB.x0+.1,y:0},{x:VB.x1-.15,y:0}, '#C7C5B6', 1.4);
+  line({x:0,y:VB.y0+.1},{x:0,y:VB.y1-.15}, '#C7C5B6', 1.4);
+  g.fillStyle='#C7C5B6';
+  g.beginPath(); g.moveTo(X(VB.x1-.05),Y(0)); g.lineTo(X(VB.x1-.28),Y(.11)); g.lineTo(X(VB.x1-.28),Y(-.11)); g.fill();
+  g.beginPath(); g.moveTo(X(0),Y(VB.y1-.05)); g.lineTo(X(-.11),Y(VB.y1-.28)); g.lineTo(X(.11),Y(VB.y1-.28)); g.fill();
+  /* 준선 */
+  line({x:-p,y:VB.y0+.2},{x:-p,y:VB.y1-.3}, MUTE, 1.6, [5,5]);
+
+  /* 포물선 (서서히) */
+  const tc=ease(A('curve'));
+  if(tc>0){
+    const y0=VB.y0+.15, y1=VB.y1-.15;
+    g.save(); g.beginPath();
+    let started=false, last=null;
+    const N=200, half=Math.ceil(N/2);
+    /* 꼭짓점에서 위아래로 동시에 자라도록 */
+    for(let s=-1;s<=1;s+=2){
+      started=false;
+      for(let i=0;i<=half;i++){
+        const f=i/half*tc;
+        const y = s>0 ? f*y1 : f*y0;
+        const x = y*y/(4*p); if(x>VB.x1-.2) break;
+        if(!started){ g.moveTo(X(x),Y(y)); started=true; } else g.lineTo(X(x),Y(y));
+      }
+    }
+    g.strokeStyle=INK; g.lineWidth=2.2; g.lineJoin='round'; g.lineCap='round'; g.stroke(); g.restore();
+  }
+
+  /* 접선 */
+  if(step>=1){
+    const t=ease(A('tan'));
+    const dx=P.x-Q.x, dy=P.y-Q.y, L=Math.hypot(dx,dy), ux=dx/L, uy=dy/L;
+    const back=L+1.5, fwd=1.7;
+    grow(P,{x:P.x-ux*back,y:P.y-uy*back}, INK, 1.9, t);
+    grow(P,{x:P.x+ux*fwd, y:P.y+uy*fwd},  INK, 1.9, t);
+  }
+  /* 마름모 채우기 */
+  if(step>=5){
+    const t=ease(A('fill'));
+    g.save(); g.globalAlpha=t*0.9; g.beginPath();
+    [Q,F,P,H].forEach((pt,i)=> i? g.lineTo(X(pt.x),Y(pt.y)) : g.moveTo(X(pt.x),Y(pt.y)));
+    g.closePath(); g.fillStyle='rgba(47,69,236,.09)'; g.fill(); g.restore();
+  }
+  /* 4: PH, PF */
+  if(step>=3){ grow(P,H,BLU,3.4,ease(A('ph'))); grow(P,F,BLU,3.4,ease(A('pf'))); }
+  /* 5: FQ */
+  if(step>=4) grow(F,Q,BLU,3.4,ease(A('fq')));
+  /* 6: HQ + 눈금 */
+  if(step>=5){
+    grow(H,Q,BLU,3.4,ease(A('hq')));
+    if(A('hq')>=1){ [[P,H],[P,F],[F,Q],[H,Q]].forEach(s=>tick(s[0],s[1],BLU)); }
+  }
+  /* 7: 대각선 FH + M + 직교 */
+  if(step>=6){
+    const t=ease(A('fh'));
+    grow(F,H,INK,1.8,t,[6,5]);
+    const tm=ease(A('m'));
+    if(tm>0){
+      const s=0.34;
+      const u={x:P.x-Q.x,y:P.y-Q.y}, v={x:H.x-F.x,y:H.y-F.y};
+      const lu=Math.hypot(u.x,u.y), lv=Math.hypot(v.x,v.y);
+      const a={x:u.x/lu*s,y:u.y/lu*s}, b={x:v.x/lv*s,y:v.y/lv*s};
+      g.save(); g.globalAlpha=tm; g.beginPath();
+      g.moveTo(X(M.x+a.x),Y(M.y+a.y));
+      g.lineTo(X(M.x+a.x+b.x),Y(M.y+a.y+b.y));
+      g.lineTo(X(M.x+b.x),Y(M.y+b.y));
+      g.strokeStyle=INK; g.lineWidth=1.8; g.stroke(); g.restore();
+      dot(M,INK,4.4,tm);
+    }
+  }
+  /* 9: 빛 */
+  if(step>=8){
+    const t=ease(A('ray'));
+    const L1=Math.hypot(P.x-R.x,P.y-R.y), L2=Math.hypot(F.x-P.x,F.y-P.y);
+    const u=t*(L1+L2);
+    if(u<L1) grow(R,P,'#E08A00',3.8,u/L1);
+    else { line(R,P,'#E08A00',3.8); grow(P,F,'#E08A00',3.8,(u-L1)/L2); }
+  }
+  /* 8: 같은 각 */
+  if(step>=7){
+    const t=ease(A('arc'));
+    const uT={x:Q.x-P.x,y:Q.y-P.y}, uF={x:F.x-P.x,y:F.y-P.y}, uH={x:H.x-P.x,y:H.y-P.y};
+    arc(P,uT,uF,34,INK,t); arc(P,uT,uH,34,INK,t);
+  }
+
+  dot(F,INK,4.6); dot(P,INK,4.6);
+  if(step>=2) dot(Q,INK,4.4,ease(A('q')));
+  if(step>=3) dot(H,INK,4.4,ease(A('ph')));
+  if(step>=8) dot(R,INK,4.4,ease(A('ray'))>0?1:0);
+
+  LAB.forEach(function(L){
+    const s=spans[L.id];
+    s.style.display = (step>=L.st) ? 'block' : 'none';
+    s.style.left = (X(L.w.x)+L.dx)+'px';
+    s.style.top  = (Y(L.w.y)+L.dy)+'px';
+  });
+  capEl.innerHTML = CAP[Math.min(step,LAST)];
+  document.getElementById('cpParaNo').textContent = step+' / '+LAST;
+}
+
+function go(n, animate){
+  const prev=step;
+  step=Math.max(0,Math.min(LAST,n));
+  if(animate && step===prev+1){
+    setDone([].concat.apply([],KEYS.slice(0,step)));
+    start(KEYS[step], step===0?1100:(step===8?1700:760));
+  } else {
+    setDone([].concat.apply([],KEYS.slice(0,step+1)));
+    clearKeys([].concat.apply([],KEYS.slice(step+1)));
+  }
+  if(!raf) draw();
+  if(typeof GEO_task==='function') GEO_task('cp-para'+step);
+}
+cv.addEventListener('click', ()=>{ if(step>=LAST){ go(0); start(['curve']); } else go(step+1,true); });
+document.getElementById('cpParaBack').addEventListener('click', e=>{ e.stopPropagation(); go(step-1); });
+document.getElementById('cpParaReset').addEventListener('click', e=>{ e.stopPropagation(); go(0); start(['curve']); });
+document.getElementById('cpParaNext').addEventListener('click', e=>{ e.stopPropagation();
+  if(step>=LAST){ go(0); start(['curve']); } else go(step+1,true); });
+window.addEventListener('resize', ()=>{ if(!raf) draw(); });
+window.__cpParaDraw = draw; window.__cpDraw_para = draw;
+go(0); start(['curve']);
+})();
+
+/* ══════════ 원리 — 좌표평면 (타원 · 쌍곡선) ══════════ */
+function GEO_CP(cfg){
+  const wrap=document.getElementById(cfg.wrap);
+  const cv=document.getElementById(cfg.cv); if(!cv) return;
+  const g=cv.getContext('2d');
+  const capEl=document.getElementById(cfg.cap);
+  const noEl=document.getElementById(cfg.no);
+  const VB=cfg.VB, P=cfg.P, F=cfg.F, G=cfg.G, T=cfg.T;
+  const INK='#23241D', MUTE='#8E8D80', BLU='#2F45EC';
+  let step=0, k=1, ox=0, oy=0, W=0, Hh=0;
+  const X=x=>ox+k*x, Y=y=>oy-k*y;
+
+  const anim={}; let raf=0;
+  function A(key){ const a=anim[key]; if(!a) return 0; if(a.done) return 1;
+    const t=Math.min(1,(performance.now()-a.t0)/a.dur); if(t>=1) a.done=true; return t; }
+  function ease(t){ return t<.5 ? 2*t*t : 1-Math.pow(-2*t+2,2)/2; }
+  function loop(){ draw(); const busy=Object.keys(anim).some(k2=>anim[k2]&&!anim[k2].done);
+    raf = busy ? requestAnimationFrame(loop) : 0; }
+  function start(keys,dur){ keys.forEach(k2=>{
+      const d=(cfg.DUR&&cfg.DUR[k2])||dur||760;
+      anim[k2]={t0:performance.now(),dur:d,done:false}; });
+    if(!raf) raf=requestAnimationFrame(loop); }
+  function setDone(keys){ keys.forEach(k2=>{ anim[k2]={t0:0,dur:1,done:true}; }); }
+  function clearKeys(keys){ keys.forEach(k2=>{ delete anim[k2]; }); }
+  const KEYS=cfg.KEYS, CAP=cfg.CAP, LAST=CAP.length-1;
+
+  const spans={};
+  cfg.LAB.forEach(function(L){
+    const s=document.createElement('span'); s.className='cpL '+(L.cls||'ink');
+    s.innerHTML=L.html; wrap.appendChild(s); spans[L.id]=s;
+  });
+
+  function fit(){
+    const r=cv.getBoundingClientRect(); if(!r.width) return;
+    const dpr=Math.min(2,window.devicePixelRatio||1);
+    if(cv.width!==Math.round(r.width*dpr)||cv.height!==Math.round(r.height*dpr)){
+      cv.width=Math.round(r.width*dpr); cv.height=Math.round(r.height*dpr);
+    }
+    g.setTransform(dpr,0,0,dpr,0,0);
+    W=r.width; Hh=r.height;
+    const pad=16;
+    let yz = Hh/2 + Math.min((W-2*pad)/(VB.x1-VB.x0),(Hh-2*pad)/(VB.y1-VB.y0))*(VB.y0+VB.y1)/2;
+    try{
+      const S=window[cfg.stage];
+      if(S && S.axisY){ const aR=S.rect(), bR=cv.getBoundingClientRect(), v=S.axisY();
+        if(aR && v!=null) yz = aR.top + v - bR.top; }
+    }catch(e){}
+    yz=Math.max(pad+40, Math.min(Hh-pad-40, yz));
+    k=Math.min((W-2*pad)/(VB.x1-VB.x0), (yz-pad)/VB.y1, (Hh-pad-yz)/(-VB.y0));
+    ox=W/2-k*(VB.x0+VB.x1)/2; oy=yz;
+  }
+  function line(a,b,col,w,dash){
+    g.save(); g.beginPath(); g.setLineDash(dash||[]);
+    g.moveTo(X(a.x),Y(a.y)); g.lineTo(X(b.x),Y(b.y));
+    g.strokeStyle=col; g.lineWidth=w; g.lineCap='round'; g.stroke(); g.restore();
+  }
+  function grow(a,b,col,w,t,dash){
+    if(t<=0) return;
+    const e={x:a.x+(b.x-a.x)*t, y:a.y+(b.y-a.y)*t};
+    line(a,e,col,w,dash);
+    if(t<1){
+      g.save();
+      const gr=g.createRadialGradient(X(e.x),Y(e.y),0,X(e.x),Y(e.y),9);
+      gr.addColorStop(0,'rgba(255,255,255,.95)'); gr.addColorStop(.35,col); gr.addColorStop(1,'rgba(47,69,236,0)');
+      g.beginPath(); g.arc(X(e.x),Y(e.y),9,0,7); g.fillStyle=gr; g.globalAlpha=.55; g.fill(); g.restore();
+      g.beginPath(); g.arc(X(e.x),Y(e.y),2.6,0,7); g.fillStyle='#fff'; g.fill();
+      g.beginPath(); g.arc(X(e.x),Y(e.y),2.6,0,7); g.strokeStyle=col; g.lineWidth=1.6; g.stroke();
+    }
+  }
+  function dot(pt,col,r,t){
+    const s=(t===undefined?1:t); if(s<=0) return;
+    g.beginPath(); g.arc(X(pt.x),Y(pt.y),(r||4.4)*(0.4+0.6*s),0,7);
+    g.save(); g.globalAlpha=Math.min(1,s*1.6); g.fillStyle=col; g.fill(); g.restore();
+  }
+  function arc(pt,u,v,r,col,t){
+    const n1=Math.hypot(u.x,u.y), n2=Math.hypot(v.x,v.y);
+    const a1=Math.atan2(-u.y/n1,u.x/n1), a2=Math.atan2(-v.y/n2,v.x/n2);
+    let d=a2-a1; while(d>Math.PI)d-=2*Math.PI; while(d<-Math.PI)d+=2*Math.PI;
+    d*=t;
+    g.save(); g.beginPath(); g.arc(X(pt.x),Y(pt.y),r,a1,a1+d,d<0);
+    g.strokeStyle=col; g.lineWidth=2; g.stroke();
+    if(t>=1){ const m=a1+d/2; g.beginPath();
+      g.moveTo(X(pt.x)+Math.cos(m)*(r-4.5), Y(pt.y)+Math.sin(m)*(r-4.5));
+      g.lineTo(X(pt.x)+Math.cos(m)*(r+4.5), Y(pt.y)+Math.sin(m)*(r+4.5));
+      g.lineWidth=1.8; g.stroke(); }
+    g.restore();
+  }
+  function tick2(a,b,col){
+    const mx=(a.x+b.x)/2, my=(a.y+b.y)/2;
+    let dx=b.x-a.x, dy=b.y-a.y; const L=Math.hypot(dx,dy); dx/=L; dy/=L;
+    const nx=-dy, ny=dx, s=0.11*(VB.x1-VB.x0)/8;
+    line({x:mx-nx*s,y:my-ny*s},{x:mx+nx*s,y:my+ny*s},col,2.2);
+  }
+  function rightAngle(p,u,v,s,col){
+    const lu=Math.hypot(u.x,u.y), lv=Math.hypot(v.x,v.y);
+    const a={x:u.x/lu*s,y:u.y/lu*s}, b={x:v.x/lv*s,y:v.y/lv*s};
+    g.save(); g.beginPath();
+    g.moveTo(X(p.x+a.x),Y(p.y+a.y));
+    g.lineTo(X(p.x+a.x+b.x),Y(p.y+a.y+b.y));
+    g.lineTo(X(p.x+b.x),Y(p.y+b.y));
+    g.strokeStyle=col; g.lineWidth=1.8; g.stroke(); g.restore();
+  }
+  const API={line:line, grow:grow, dot:dot, arc:arc, tick:tick2, rightAngle:rightAngle, X:X, Y:Y, g:g,
+             INK:INK, MUTE:MUTE, BLU:BLU, GOLD:'#E08A00', A:A, ease:ease, VB:VB};
+
+  function draw(){
+    const rr=cv.getBoundingClientRect();
+    if(!rr.width || !rr.height){                 // 탭이 숨겨져 있으면 그리지 않음
+      cfg.LAB.forEach(L=>{ const s=spans[L.id]; if(s) s.style.display='none'; });
+      return;
+    }
+    fit(); g.clearRect(0,0,W,Hh);
+    line({x:VB.x0+.1,y:0},{x:VB.x1-.15,y:0}, '#C7C5B6', 1.4);
+    line({x:0,y:VB.y0+.1},{x:0,y:VB.y1-.15}, '#C7C5B6', 1.4);
+    g.fillStyle='#C7C5B6';
+    g.beginPath(); g.moveTo(X(VB.x1-.05),Y(0)); g.lineTo(X(VB.x1-.3),Y(.13)); g.lineTo(X(VB.x1-.3),Y(-.13)); g.fill();
+    g.beginPath(); g.moveTo(X(0),Y(VB.y1-.05)); g.lineTo(X(-.13),Y(VB.y1-.3)); g.lineTo(X(.13),Y(VB.y1-.3)); g.fill();
+    cfg.draw(API, step);
+    cfg.LAB.forEach(function(L){
+      const s=spans[L.id];
+      s.style.display = (step>=L.st) ? 'block' : 'none';
+      s.style.left = (X(L.w.x)+ (L.dx||0))+'px';
+      s.style.top  = (Y(L.w.y)+ (L.dy||0))+'px';
+    });
+    capEl.innerHTML = CAP[Math.min(step,LAST)];
+    noEl.textContent = step+' / '+LAST;
+  }
+  function go(n, animate){
+    const prev=step;
+    step=Math.max(0,Math.min(LAST,n));
+    if(animate && step===prev+1){ setDone([].concat.apply([],KEYS.slice(0,step))); start(KEYS[step]); }
+    else { setDone([].concat.apply([],KEYS.slice(0,step+1))); clearKeys([].concat.apply([],KEYS.slice(step+1))); }
+    if(!raf) draw();
+    if(typeof GEO_task==='function') GEO_task('cp-'+cfg.key+step);
+  }
+  cv.addEventListener('click', ()=>{ if(step>=LAST){ go(0); start(KEYS[0]); } else go(step+1,true); });
+  document.getElementById(cfg.back).addEventListener('click', e=>{ e.stopPropagation(); go(step-1); });
+  document.getElementById(cfg.reset).addEventListener('click', e=>{ e.stopPropagation(); go(0); start(KEYS[0]); });
+  document.getElementById(cfg.next).addEventListener('click', e=>{ e.stopPropagation();
+    if(step>=LAST){ go(0); start(KEYS[0]); } else go(step+1,true); });
+  window.addEventListener('resize', ()=>{ if(!raf) draw(); });
+  window['__cpDraw_'+cfg.key] = draw;
+  go(0); start(KEYS[0], 1100);
+}
+
+/* ── ② 타원 ── */
+(function(){
+if(!document.getElementById('cpEll')) return;
+const a=5, b=3, c=4;
+const P={x:3,y:2.4}, F={x:c,y:0}, G={x:-c,y:0};
+const NB={x:9,y:20}, NL=Math.hypot(NB.x,NB.y);      // 접선 9x+20y=75 의 법선
+const dF=(NB.x*F.x+NB.y*F.y-75)/(NL*NL);
+const F2={x:F.x-2*dF*NB.x, y:F.y-2*dF*NB.y};        // F를 접선에 대칭시킨 점
+const M0={x:(F.x+F2.x)/2, y:(F.y+F2.y)/2};
+const U={x:NB.y/NL, y:-NB.x/NL};                    // 접선 방향(오른쪽 아래)
+GEO_CP({
+  key:'ell', stage:'__scEll',
+  cv:'cpEll', wrap:'cpEllWrap', cap:'cpEllCap', no:'cpEllNo',
+  back:'cpEllBack', next:'cpEllNext', reset:'cpEllReset',
+  VB:{x0:-6.6,x1:7.6,y0:-4.2,y1:4.8},
+  DUR:{ray:1700},
+  KEYS:[['curve'],['tan'],['pg'],['perp','f2'],['pf','pf2'],['arc'],['ray']],
+  LAB:[
+   {id:'eq', w:{x:-2.6,y:-3.5}, html:'<span class="fr2"><i>x</i><sup>2</sup>/<i>a</i><sup>2</sup></span> + <span class="fr2"><i>y</i><sup>2</sup>/<i>b</i><sup>2</sup></span> = 1', st:0},
+   {id:'F',  w:F, dx:4,  dy:23, html:'<span class="rm">F</span>(<i>c</i>, 0)', st:0},
+   {id:'G',  w:G, dx:-8, dy:23, html:'<span class="rm">F</span>′(−<i>c</i>, 0)', st:0},
+   {id:'P',  w:P, dx:-64,dy:-22, html:'<span class="rm">P</span>(<i>x</i><sub>1</sub>, <i>y</i><sub>1</sub>)', st:0},
+   {id:'O',  w:{x:0,y:0}, dx:-14, dy:16, html:'<span class="rm">O</span>', st:0},
+   {id:'ax', w:{x:7.5,y:0}, dx:-4, dy:18, html:'<i>x</i>', st:0},
+   {id:'ay', w:{x:0,y:4.7}, dx:16, dy:2, html:'<i>y</i>', st:0},
+   {id:'tan',w:P, dx:12, dy:-46, html:'<span class="fr2"><i>x</i><sub>1</sub><i>x</i>/<i>a</i><sup>2</sup></span> + <span class="fr2"><i>y</i><sub>1</sub><i>y</i>/<i>b</i><sup>2</sup></span> = 1', st:1},
+   {id:'l',  w:{x:-0.28,y:3.88}, dx:-15, dy:-4, html:'<i>l</i>', st:1},
+   {id:'F2', w:F2, dx:20, dy:-13, html:'<span class="rm">F</span>″', st:3},
+   {id:'m1', w:{x:4.42,y:1.34}, dx:0, dy:0, html:'<span class="rm">PF</span>', st:4, cls:'blu'},
+   {id:'m2', w:{x:3.95,y:3.30}, dx:0, dy:0, html:'<span class="rm">PF</span>″', st:4, cls:'blu'}
+  ],
+  CAP:[
+   '타원 <span class="mm"><i>x</i><sup>2</sup>/<i>a</i><sup>2</sup> + <i>y</i><sup>2</sup>/<i>b</i><sup>2</sup> = 1</span>과 두 초점 <span class="rm">F</span>′, <span class="rm">F</span>, 타원 위의 점 <span class="rm">P</span>입니다. <span class="hint">그림을 클릭해 보세요</span>',
+   '<span class="rm">P</span>에서의 접선 <span class="mm"><i>l</i></span> : <b><span class="mm"><i>x</i><sub>1</sub><i>x</i>/<i>a</i><sup>2</sup> + <i>y</i><sub>1</sub><i>y</i>/<i>b</i><sup>2</sup> = 1</span></b>',
+   '직선 <span class="rm">PF</span>′를 <span class="rm">P</span> 너머로 늘여 둡니다.',
+   '<span class="rm">F</span>에서 <span class="mm"><i>l</i></span>에 <b>수직인 직선</b>을 그어 직선 <span class="rm">PF</span>′와 만나는 점을 <span class="rm">F</span>″라 합니다.',
+   '<span class="mm"><i>l</i></span>이 <span class="rm">FF</span>″를 수직이등분하므로 <b><span class="rm">PF</span> = <span class="rm">PF</span>″</b> — 삼각형 <span class="rm">PFF</span>″는 이등변삼각형입니다. <span class="hint">(1)</span>',
+   '따라서 <b>∠(<span class="mm"><i>l</i></span>, <span class="rm">PF</span>) = ∠(<span class="mm"><i>l</i></span>, <span class="rm">PF</span>″)</b>이고, <span class="rm">PF</span>″와 <span class="rm">PF</span>′는 한 직선이므로 맞꼭지각에서 <b>= ∠(<span class="mm"><i>l</i></span>, <span class="rm">PF</span>′)</b> — 두 각이 같습니다. <span class="hint">(2)</span>',
+   '입사각과 반사각이 같으므로, <b><span class="rm">F</span>에서 <span class="rm">P</span>로 쏜 빛은 반사되어 반드시 <span class="rm">F</span>′를 지납니다.</b> <span class="hint">(3)</span>'
+  ],
+  draw:function(D, step){
+    const g=D.g, e=D.ease, A=D.A;
+    const tc=e(A('curve'));
+    if(tc>0){
+      g.save(); g.beginPath();
+      const N=240;
+      for(let i=0;i<=N*tc;i++){ const th=Math.PI/2 - i/N*Math.PI*2;
+        const x=a*Math.cos(th), y=b*Math.sin(th);
+        i? g.lineTo(D.X(x),D.Y(y)) : g.moveTo(D.X(x),D.Y(y)); }
+      g.strokeStyle=D.INK; g.lineWidth=2.2; g.lineJoin='round'; g.lineCap='round'; g.stroke(); g.restore();
+    }
+    /* 접선 l */
+    if(step>=1){
+      const t=e(A('tan'));
+      D.grow(P,{x:P.x-U.x*3.65,y:P.y-U.y*3.65}, D.INK,1.9,t);
+      D.grow(P,{x:P.x+U.x*3.55,y:P.y+U.y*3.55}, D.INK,1.9,t);
+    }
+    /* 직선 PF' 연장 */
+    if(step>=2){
+      const t=e(A('pg'));
+      const d={x:P.x-G.x,y:P.y-G.y}, L=Math.hypot(d.x,d.y), u={x:d.x/L,y:d.y/L};
+      D.grow(P,G, D.INK,1.5,t);
+      D.grow(P,{x:P.x+u.x*3.1,y:P.y+u.y*3.1}, D.INK,1.5,t);
+    }
+    /* F에서 l에 수직 → F'' */
+    if(step>=3){
+      const t=e(A('perp'));
+      D.grow(F,F2, D.INK,1.6,t);
+      if(t>=1){
+        const uL={x:U.x,y:U.y}, uP={x:F2.x-F.x,y:F2.y-F.y};
+        D.rightAngle(M0,{x:-uL.x,y:-uL.y},{x:-uP.x,y:-uP.y},0.36,D.INK);
+      }
+    }
+    /* PF = PF'' */
+    if(step>=4){
+      D.grow(P,F, D.BLU,3.2,e(A('pf')));
+      D.grow(P,F2,D.BLU,3.2,e(A('pf2')));
+      if(A('pf2')>=1){ D.tick(P,F,D.BLU); D.tick(P,F2,D.BLU); }
+    }
+    /* 각 */
+    if(step>=5){
+      const t=e(A('arc'));
+      const uA={x:U.x,y:U.y}, uB={x:-U.x,y:-U.y};
+      D.arc(P,uA,{x:F.x-P.x,y:F.y-P.y},   27,D.INK,t);
+      D.arc(P,uA,{x:F2.x-P.x,y:F2.y-P.y}, 27,D.INK,t);
+      D.arc(P,uB,{x:G.x-P.x,y:G.y-P.y},   27,D.INK,t);
+    }
+    /* 빛 */
+    if(step>=6){
+      const t=e(A('ray'));
+      const L1=Math.hypot(P.x-F.x,P.y-F.y), L2=Math.hypot(G.x-P.x,G.y-P.y);
+      const u=t*(L1+L2);
+      if(u<L1) D.grow(F,P,D.GOLD,3.8,u/L1);
+      else { D.line(F,P,D.GOLD,3.8); D.grow(P,G,D.GOLD,3.8,(u-L1)/L2); }
+    }
+    D.dot(F,D.INK); D.dot(G,D.INK); D.dot(P,D.INK,4.8);
+    if(step>=3) D.dot(F2,D.INK,4.4,e(A('f2')));
+  }
+});
+})();
+
+/* ── ③ 쌍곡선 ── */
+(function(){
+if(!document.getElementById('cpHyp')) return;
+const a=2, b=Math.sqrt(12), c=4;
+const P={x:3,y:Math.sqrt(15)}, F={x:c,y:0}, G={x:-c,y:0}, Q={x:a*a/3,y:0};
+const AS=0.42, A2={x:P.x+AS*(P.x-F.x), y:P.y+AS*(P.y-F.y)};   // 선분 FP의 연장선 위의 점 A
+GEO_CP({
+  key:'hyp', stage:'__scHyp',
+  cv:'cpHyp', wrap:'cpHypWrap', cap:'cpHypCap', no:'cpHypNo',
+  back:'cpHypBack', next:'cpHypNext', reset:'cpHypReset',
+  VB:{x0:-6.9,x1:7.0,y0:-4.6,y1:6.4},
+  DUR:{ray:1800},
+  KEYS:[['curve'],['tan','q'],['pf','pg'],['qf','qg'],['arc'],['ray']],
+  LAB:[
+   {id:'eq', w:{x:3.5,y:-3.5}, html:'<span class="fr2"><i>x</i><sup>2</sup>/<i>a</i><sup>2</sup></span> − <span class="fr2"><i>y</i><sup>2</sup>/<i>b</i><sup>2</sup></span> = 1', st:0},
+   {id:'F',  w:F, dx:10, dy:21, html:'<span class="rm">F</span>(<i>c</i>, 0)', st:0},
+   {id:'G',  w:G, dx:-10,dy:21, html:'<span class="rm">F</span>′(−<i>c</i>, 0)', st:0},
+   {id:'P',  w:P, dx:34, dy:-12, html:'<span class="rm">P</span>(<i>x</i><sub>1</sub>, <i>y</i><sub>1</sub>)', st:0},
+   {id:'O',  w:{x:0,y:0}, dx:-15, dy:17, html:'<span class="rm">O</span>', st:0},
+   {id:'ax', w:{x:6.9,y:0}, dx:-4, dy:18, html:'<i>x</i>', st:0},
+   {id:'ay', w:{x:0,y:6.3}, dx:16, dy:2, html:'<i>y</i>', st:0},
+   {id:'tan',w:P, dx:-104, dy:-18, html:'<span class="fr2"><i>x</i><sub>1</sub><i>x</i>/<i>a</i><sup>2</sup></span> − <span class="fr2"><i>y</i><sub>1</sub><i>y</i>/<i>b</i><sup>2</sup></span> = 1', st:1},
+   {id:'Q',  w:Q, dx:-4, dy:20, html:'<span class="rm">Q</span>', st:1},
+   {id:'m1', w:{x:4.15,y:2.35}, dx:0, dy:0, html:'<span class="rm">PF</span>', st:2, cls:'blu'},
+   {id:'m2', w:{x:-1.2,y:2.35}, dx:0, dy:0, html:'<span class="rm">PF</span>′', st:2, cls:'blu'},
+   {id:'A',  w:A2, dx:-6, dy:-19, html:'<span class="rm">A</span>', st:5}
+  ],
+  CAP:[
+   '쌍곡선 <span class="mm"><i>x</i><sup>2</sup>/<i>a</i><sup>2</sup> − <i>y</i><sup>2</sup>/<i>b</i><sup>2</sup> = 1</span>과 두 초점 <span class="rm">F</span>′, <span class="rm">F</span>, 쌍곡선 위의 점 <span class="rm">P</span>입니다. <span class="hint">그림을 클릭해 보세요</span>',
+   '<span class="rm">P</span>에서의 접선 <b><span class="mm"><i>x</i><sub>1</sub><i>x</i>/<i>a</i><sup>2</sup> − <i>y</i><sub>1</sub><i>y</i>/<i>b</i><sup>2</sup> = 1</span></b>이 <span class="mm"><i>x</i></span>축과 만나는 점이 <span class="rm">Q</span><span class="mm">(<i>a</i><sup>2</sup>/<i>x</i><sub>1</sub>, 0)</span>입니다.',
+   '두 초점까지의 거리 <b><span class="rm">PF</span>′ = <i>ex</i><sub>1</sub> + <i>a</i></b>, <b><span class="rm">PF</span> = <i>ex</i><sub>1</sub> − <i>a</i></b> <span class="hint">(<i>e</i> = <i>c</i>/<i>a</i>)</span>',
+   '<span class="rm">Q</span>에서 두 초점까지는 <b><span class="rm">QF</span>′ = <i>c</i> + <i>a</i><sup>2</sup>/<i>x</i><sub>1</sub></b>, <b><span class="rm">QF</span> = <i>c</i> − <i>a</i><sup>2</sup>/<i>x</i><sub>1</sub></b>. 계산해 보면 <b><span class="rm">PF</span>′ : <span class="rm">PF</span> = <span class="rm">QF</span>′ : <span class="rm">QF</span></b> <span class="hint">(1)</span>',
+   '<span class="rm">PQ</span>가 <span class="rm">F</span>′<span class="rm">F</span>를 <span class="rm">PF</span>′ : <span class="rm">PF</span>로 나누므로, 각의 이등분선 정리의 역에서 <b>∠<span class="rm">F</span>′<span class="rm">PQ</span> = ∠<span class="rm">FPQ</span></b> — 접선이 ∠<span class="rm">F</span>′<span class="rm">PF</span>를 이등분합니다. <span class="hint">(2)</span>',
+   '선분 <span class="rm">FP</span>의 연장선 위의 점 <span class="rm">A</span>에서 초점 <span class="rm">F</span>를 향해 빛을 쏘면, <span class="rm">P</span>에서 반사되어 <b>다른 초점 <span class="rm">F</span>′를 지납니다.</b> <span class="hint">(3) 반사 망원경의 부경이 이 성질을 씁니다.</span>'
+  ],
+  draw:function(D, step){
+    const g=D.g, e=D.ease, A=D.A;
+    const tc=e(A('curve'));
+    const s=b/a, xm=4.4;
+    D.line({x:-xm,y:-s*xm},{x:xm,y:s*xm}, D.MUTE, 1.3, [5,5]);
+    D.line({x:-xm,y:s*xm},{x:xm,y:-s*xm}, D.MUTE, 1.3, [5,5]);
+    if(tc>0){
+      const tmax=Math.acosh(6.6/a);
+      [1,-1].forEach(function(sg){
+        g.save(); g.beginPath();
+        const N=140;
+        for(let i=0;i<=N;i++){
+          const f=(i/N)*2-1;
+          if(Math.abs(f)>tc) continue;
+          const t=f*tmax, x=sg*a*Math.cosh(t), y=b*Math.sinh(t);
+          if(Math.abs(x)>7.2||y>6.3||y<-4.5) continue;
+          g.lineTo(D.X(x),D.Y(y));
+        }
+        g.strokeStyle=D.INK; g.lineWidth=2.2; g.lineJoin='round'; g.lineCap='round'; g.stroke(); g.restore();
+      });
+    }
+    /* 접선 + Q */
+    if(step>=1){
+      const t=e(A('tan'));
+      const m=(b*b*P.x)/(a*a*P.y), L=Math.hypot(1,m), u={x:1/L,y:m/L};
+      D.grow(P,{x:P.x-u.x*3.2,y:P.y-u.y*3.2}, D.INK,1.9,t);
+      D.grow(P,{x:P.x+u.x*1.7,y:P.y+u.y*1.7}, D.INK,1.9,t);
+    }
+    /* PF, PF' */
+    if(step>=2){ D.grow(P,F,D.BLU,3.2,e(A('pf'))); D.grow(P,G,D.BLU,3.2,e(A('pg'))); }
+    /* QF, QF' */
+    /* 각 */
+    if(step>=4){
+      const t=e(A('arc'));
+      const uQ={x:Q.x-P.x,y:Q.y-P.y};
+      D.arc(P,uQ,{x:F.x-P.x,y:F.y-P.y}, 30,D.INK,t);
+      D.arc(P,uQ,{x:G.x-P.x,y:G.y-P.y}, 30,D.INK,t);
+    }
+    /* 빛 : A → P → F' */
+    if(step>=5){
+      const t=e(A('ray'));
+      const L1=Math.hypot(P.x-A2.x,P.y-A2.y), L2=Math.hypot(G.x-P.x,G.y-P.y);
+      const u=t*(L1+L2);
+      if(u<L1) D.grow(A2,P,D.GOLD,3.8,u/L1);
+      else { D.line(A2,P,D.GOLD,3.8); D.grow(P,G,D.GOLD,3.8,(u-L1)/L2); }
+    }
+    D.dot(F,D.INK); D.dot(G,D.INK); D.dot(P,D.INK,4.8);
+    if(step>=1) D.dot(Q,D.INK,4.4,e(A('q')));
+    if(step>=5) D.dot(A2,D.INK,4.4,1);
+  }
+});
+})();
+
+/* ═══════════ 탭 · 원리 ═══════════ */
+const SC = { para:scPara, ell:scEll, hyp:scHyp };
+window.__scPara = scPara; window.__scEll = scEll; window.__scHyp = scHyp;
+const NT = { para:'ntPara', ell:'ntEll', hyp:'ntHyp', tel:'ntTel' };
+Object.keys(SC).forEach(k=>{ SC[k].fit(); SC[k].run(); });
+window.addEventListener('resize', ()=>Object.keys(SC).forEach(k=>SC[k].fit()));
+
+document.querySelectorAll('.prBtn').forEach(function(b){
+  b.addEventListener('click', function(){
+    const k = b.dataset.s, on = !b.classList.contains('on');
+    if(SC[k]) SC[k].setPrin(on); else if(window.__telPrin) window.__telPrin(on);
+    b.classList.toggle('on', on);
+    document.getElementById(NT[k]).classList.toggle('on', on);
+    if(typeof GEO_task === 'function') GEO_task('prin');
+  });
+});
+document.querySelectorAll('#tabs button').forEach(function(b){
+  b.addEventListener('click', function(){
+    document.querySelectorAll('#tabs button').forEach(x=>x.classList.toggle('on', x===b));
+    document.querySelectorAll('.pane').forEach(p=>p.classList.toggle('on', p.dataset.p===b.dataset.t));
+    document.getElementById('main').scrollTop = 0;
+    const kk=b.dataset.t;
+    if(SC[kk]) setTimeout(()=>SC[kk].fit(), 30);
+    else if(window.__telShow) window.__telShow();
+    const cpd = window['__cpDraw_'+kk];
+    if(cpd){ cpd(); setTimeout(cpd, 40); setTimeout(cpd, 220); }
+    if(typeof GEO_task === 'function') GEO_task('see-'+b.dataset.t);
+  });
+});
+</script>
+<script type="module">
+/* ══════════ 반사 망원경 3D — 달 관측 ══════════ */
+(function(){
+const CV = document.getElementById('cvTel');
+const WAIT = document.getElementById('telWait');
+let T=null, ren=null, scene=null, cam=null, ready=false, loading=false;
+let scope=null, optic=null, gMirror=null, gRay=null, gPrin=null, gLabel=null, moon=null, focusGlow=null;
+let rays=[], labels=[], envT=null, f1Glow=null;
+let mode='cas', prin=false, step=1, spin=false, tPrev=0, dragged=false;
+
+/* ── 광학 상수(로컬 좌표: 광축 = z, 빛은 +z 로 진행) ── */
+const F=24, RM=4.0, RH=0.5, F1=-24, F2=2.0;
+const ZC=(F1+F2)/2, CC=(F2-F1)/2, ZS=-19.0, AA=Math.abs(ZS-ZC), BB2=CC*CC-AA*AA;
+const RS=0.95, ZN=-19.0, RN=1.5, NFY=F-Math.abs(ZN);
+const TR=4.3, TZ0=-20.4, TZ1=0.8, MOON_D=28, ZSTART=TZ0-MOON_D+4;
+const SHIFT=9.8;                 // 경통 중심을 원점으로
+const TILT=Math.PI*35/180;       // 하늘을 향한 각
+const MOUNT_Y=6.2, GROUND=-6.6;
+const zp = r => -r*r/(4*F);
+const zh = r => ZC - AA*Math.sqrt(1 + r*r/BB2);
+
+function hitSec(P){
+  const D={x:-P.x,y:-P.y,z:F1-P.z}; let lo=0,hi=1;
+  const g=t=>{ const x=P.x+D.x*t,y=P.y+D.y*t,z=P.z+D.z*t; return z-zh(Math.hypot(x,y)); };
+  for(let i=0;i<60;i++){ const m=(lo+hi)/2; if(g(m)>0) lo=m; else hi=m; }
+  const t=(lo+hi)/2; return {x:P.x+D.x*t,y:P.y+D.y*t,z:P.z+D.z*t};
+}
+function hitFlat(P){
+  const D={x:-P.x,y:-P.y,z:F1-P.z};
+  const t=-(P.y+(P.z-ZN))/(D.y+D.z);
+  return {x:P.x+D.x*t,y:P.y+D.y*t,z:P.z+D.z*t};
+}
+function pathOf(r0,phi){
+  const P={x:r0*Math.cos(phi), y:r0*Math.sin(phi), z:zp(r0)};
+  const A={x:P.x, y:P.y, z:ZSTART};
+  if(mode==='cas'){ return [A,P,hitSec(P),{x:0,y:0,z:F2}]; }
+  return [A,P,hitFlat(P),{x:0,y:NFY,z:ZN}];
+}
+const FOCUS = () => mode==='cas' ? {x:0,y:0,z:F2} : {x:0,y:NFY,z:ZN};
+
+/* ── three.js ── */
+async function loadTHREE(){
+  const el=document.getElementById('threeSrc');
+  if(el && el.textContent.length>1000){
+    const u=URL.createObjectURL(new Blob([el.textContent],{type:'text/javascript'}));
+    try { return await import(u); } catch(e){}
+  }
+  try { return await import('./three.module.js'); } catch(e){}
+  return await import('https://cdnjs.cloudflare.com/ajax/libs/three/0.160.0/three.module.min.js');
+}
+function radialTex(stops,size){
+  const c=document.createElement('canvas'); c.width=c.height=size||128;
+  const x=c.getContext('2d'), h=(size||128)/2;
+  const g=x.createRadialGradient(h,h,0,h,h,h);
+  stops.forEach(s=>g.addColorStop(s[0],s[1]));
+  x.fillStyle=g; x.fillRect(0,0,c.width,c.height);
+  return new T.CanvasTexture(c);
+}
+/* 달 표면 (인셋에서도 같은 캔버스를 씀) */
+let MOONC=null;
+function moonCanvas(){
+  if(MOONC) return MOONC;
+  const c=document.createElement('canvas'); c.width=1024; c.height=512;
+  const x=c.getContext('2d');
+  x.fillStyle='#C9C6BE'; x.fillRect(0,0,1024,512);
+  function blob(cx,cy,rx,ry,col,a){
+    x.save(); x.globalAlpha=a; x.fillStyle=col;
+    x.beginPath(); x.ellipse(cx,cy,rx,ry,0,0,7); x.fill(); x.restore();
+  }
+  [[300,190,88,66],[400,150,54,42],[250,265,70,52],[470,215,46,40],
+   [180,150,44,34],[520,140,34,28],[360,255,40,30],[600,190,52,38]]
+   .forEach(b=>blob(b[0],b[1],b[2],b[3],'#8E8A84',.55));
+  for(let i=0;i<220;i++){
+    const cx=Math.random()*1024, cy=Math.random()*512, r=2+Math.random()*16;
+    blob(cx,cy,r,r,'#9E9A93',.35);
+    x.save(); x.globalAlpha=.30; x.strokeStyle='#E8E5DE'; x.lineWidth=1.2;
+    x.beginPath(); x.arc(cx-r*.15,cy-r*.15,r,0,7); x.stroke(); x.restore();
+  }
+  for(let i=0;i<9;i++){
+    const cx=Math.random()*1024, cy=Math.random()*512, r=18+Math.random()*26;
+    blob(cx,cy,r,r,'#7F7C76',.45);
+    x.save(); x.globalAlpha=.5; x.strokeStyle='#EFEDE7'; x.lineWidth=2.4;
+    x.beginPath(); x.arc(cx,cy,r,0,7); x.stroke(); x.restore();
+  }
+  MOONC=c; return c;
+}
+function textSprite(txt,col,px,sc){
+  const c=document.createElement('canvas'), m=c.getContext('2d');
+  const font='700 '+px+'px "IBM Plex Sans KR",-apple-system,sans-serif';
+  m.font=font; const w=Math.ceil(m.measureText(txt).width)+18, h=px+15;
+  c.width=w*2; c.height=h*2; const y=c.getContext('2d');
+  y.scale(2,2); y.font=font; y.textBaseline='middle';
+  y.fillStyle='rgba(10,11,14,.62)'; y.beginPath(); y.roundRect(0,0,w,h,h/2); y.fill();
+  y.fillStyle=col; y.fillText(txt,9,h/2+1);
+  const tx=new T.CanvasTexture(c);
+  const sp=new T.Sprite(new T.SpriteMaterial({map:tx,transparent:true,depthTest:false,depthWrite:false}));
+  const s=(sc||1)*0.0165; sp.scale.set(w*s,h*s,1); sp.renderOrder=12;
+  sp.userData.bw=w*s; sp.userData.bh=h*s;
+  return sp;
+}
+function envMap(){
+  const c=document.createElement('canvas'); c.width=256; c.height=128;
+  const x=c.getContext('2d');
+  const g=x.createLinearGradient(0,0,0,128);
+  g.addColorStop(0,'#CBDCEE'); g.addColorStop(.30,'#7C8EA8');
+  g.addColorStop(.49,'#333A47'); g.addColorStop(.52,'#12141A'); g.addColorStop(1,'#080A0D');
+  x.fillStyle=g; x.fillRect(0,0,256,128);
+  x.fillStyle='rgba(255,250,235,.95)'; x.beginPath(); x.arc(70,24,15,0,7); x.fill();
+  x.fillStyle='rgba(150,190,255,.5)'; x.fillRect(0,44,256,3);
+  const t=new T.CanvasTexture(c); t.mapping=T.EquirectangularReflectionMapping;
+  const pm=new T.PMREMGenerator(ren); const e=pm.fromEquirectangular(t).texture; pm.dispose(); t.dispose();
+  return e;
+}
+function lathe(pts,mat){ const m=new T.Mesh(new T.LatheGeometry(pts,96),mat); m.rotation.x=Math.PI/2; return m; }
+function lineOf(pts,col,op,dash){
+  const g=new T.BufferGeometry().setFromPoints(pts.map(p=>new T.Vector3(p.x,p.y,p.z)));
+  const m=dash? new T.LineDashedMaterial({color:col,transparent:true,opacity:op,dashSize:.5,gapSize:.45})
+               : new T.LineBasicMaterial({color:col,transparent:true,opacity:op});
+  const l=new T.Line(g,m); if(dash) l.computeLineDistances(); return l;
+}
+function segLine(a,b,c0,c1,op){
+  const g=new T.BufferGeometry().setFromPoints([new T.Vector3(a.x,a.y,a.z), new T.Vector3(b.x,b.y,b.z)]);
+  g.setAttribute('color', new T.BufferAttribute(new Float32Array([c0[0],c0[1],c0[2],c1[0],c1[1],c1[2]]),3));
+  return new T.Line(g, new T.LineBasicMaterial({vertexColors:true, transparent:true, opacity:op}));
+}
+
+/* ── 씬 구성 ── */
+function buildWorld(env){
+  /* 별 */
+  const N=420, pos=new Float32Array(N*3);
+  for(let i=0;i<N;i++){
+    const a=Math.random()*Math.PI*2, b=Math.acos(2*Math.random()-1), R=150+Math.random()*80;
+    pos[i*3]=R*Math.sin(b)*Math.cos(a); pos[i*3+1]=Math.abs(R*Math.sin(b)*Math.sin(a))*.9-10; pos[i*3+2]=R*Math.cos(b);
+  }
+  const pg=new T.BufferGeometry(); pg.setAttribute('position',new T.BufferAttribute(pos,3));
+  scene.add(new T.Points(pg,new T.PointsMaterial({color:0xC8DAF0,size:.7,transparent:true,opacity:.6})));
+
+  /* 바닥 */
+  const grid=new T.GridHelper(120,24,0x2A3242,0x1A202C);
+  grid.position.y=GROUND; scene.add(grid);
+  grid.material.transparent=true; grid.material.opacity=.35;
+
+  /* 삼각대 */
+  const metal=new T.MeshStandardMaterial({color:0x4A5262,metalness:.75,roughness:.35,envMap:env});
+  const dark =new T.MeshStandardMaterial({color:0x2A303C,metalness:.5,roughness:.55,envMap:env});
+  const top=new T.Vector3(0,MOUNT_Y-2.6,0);
+  for(let k=0;k<3;k++){
+    const a=k*2*Math.PI/3+Math.PI/6;
+    const foot=new T.Vector3(Math.cos(a)*5.4, GROUND, Math.sin(a)*5.4);
+    const mid=foot.clone().add(top).multiplyScalar(.5);
+    const len=foot.distanceTo(top);
+    const leg=new T.Mesh(new T.CylinderGeometry(.24,.17,len,16), metal);
+    leg.position.copy(mid);
+    leg.quaternion.setFromUnitVectors(new T.Vector3(0,1,0), foot.clone().sub(top).normalize());
+    scene.add(leg);
+  }
+  const col=new T.Mesh(new T.CylinderGeometry(.55,.7,2.4,20), dark);
+  col.position.set(0,MOUNT_Y-1.5,0); scene.add(col);
+  const head=new T.Mesh(new T.BoxGeometry(2.2,1.1,2.2), dark);
+  head.position.set(0,MOUNT_Y-.2,0); scene.add(head);
+  const ring=new T.Mesh(new T.TorusGeometry(TR+.25,.28,12,48), dark);
+  scene.add(ring);   // scope 안에서 다시 배치
+
+  /* 달 */
+  const mt=new T.CanvasTexture(moonCanvas());
+  moon=new T.Mesh(new T.SphereGeometry(4.2,48,32), new T.MeshStandardMaterial({map:mt,roughness:1,metalness:0,emissive:0xFFFFFF,emissiveMap:mt,emissiveIntensity:.55}));
+  scene.add(moon);
+  const halo=new T.Sprite(new T.SpriteMaterial({map:radialTex([[0,'rgba(255,255,240,.30)'],[.35,'rgba(220,230,255,.12)'],[1,'rgba(200,215,255,0)']],256),
+    transparent:true, blending:T.AdditiveBlending, depthWrite:false}));
+  halo.scale.set(24,24,1); moon.add(halo);
+  return ring;
+}
+
+function buildScope(env, ring){
+  scope=new T.Group(); optic=new T.Group(); scope.add(optic);
+  scope.position.set(0,MOUNT_Y,0); scope.rotation.x=TILT; scene.add(scope);
+  optic.position.z=SHIFT;
+
+  const tubeMat=new T.MeshPhysicalMaterial({color:0x6E7C93,metalness:.55,roughness:.35,envMap:env,
+    transparent:true, opacity:.20, side:T.DoubleSide});
+  const tube=new T.Mesh(new T.CylinderGeometry(TR,TR,TZ1-TZ0,64,1,true), tubeMat);
+  tube.rotation.x=Math.PI/2; tube.position.z=(TZ0+TZ1)/2; optic.add(tube);
+  const ringMat=new T.LineBasicMaterial({color:0xA9BED6,transparent:true,opacity:.30});
+  for(let i=0;i<=4;i++){
+    const z=TZ0+(TZ1-TZ0)*i/4, p=[];
+    for(let k=0;k<=72;k++){ const a=k/72*Math.PI*2; p.push(new T.Vector3(TR*Math.cos(a),TR*Math.sin(a),z)); }
+    optic.add(new T.Line(new T.BufferGeometry().setFromPoints(p), ringMat));
+  }
+  if(ring){ ring.position.z=TZ0*0+(-9.8); optic.add(ring); }
+
+  /* 주경 */
+  const dsk=document.createElement('canvas'); dsk.width=dsk.height=256;
+  (function(){ const x=dsk.getContext('2d');
+    const g=x.createRadialGradient(128,128,10,128,128,128);
+    g.addColorStop(0,'#F2F7FF'); g.addColorStop(.62,'#C3D4E6'); g.addColorStop(1,'#7E93AC');
+    x.fillStyle=g; x.fillRect(0,0,256,256); })();
+  const mMat=new T.MeshStandardMaterial({color:0xFFFFFF, map:new T.CanvasTexture(dsk),
+    metalness:1, roughness:.08, envMap:env, side:T.DoubleSide});
+  const pp=[]; for(let i=0;i<=48;i++){ const r=RH+(RM-RH)*i/48; pp.push(new T.Vector2(r,zp(r))); }
+  optic.add(lathe(pp,mMat));
+  const backMat=new T.MeshStandardMaterial({color:0x2C313C,metalness:.35,roughness:.7,envMap:env,side:T.DoubleSide});
+  const bp=[]; for(let i=0;i<=48;i++){ const r=RH+(RM-RH)*i/48; bp.push(new T.Vector2(r,zp(r)+.42)); }
+  optic.add(lathe(bp,backMat));
+  optic.add(lathe([new T.Vector2(RM,zp(RM)),new T.Vector2(RM,zp(RM)+.42)],backMat));
+  optic.add(lathe([new T.Vector2(RH,zp(RH)),new T.Vector2(RH,zp(RH)+.42)],backMat));
+
+  /* 접안부 */
+  const eyeMat=new T.MeshStandardMaterial({color:0x39404E,metalness:.55,roughness:.4,envMap:env});
+  const e1=new T.Mesh(new T.CylinderGeometry(.62,.62,2.3,32), eyeMat);
+  e1.rotation.x=Math.PI/2; e1.position.set(0,0,F2+.7); e1.name='eyeCas'; optic.add(e1);
+  const e2=new T.Mesh(new T.CylinderGeometry(.62,.62,2.3,32), eyeMat);
+  e2.position.set(0,NFY+.6,ZN); e2.name='eyeNew'; optic.add(e2);
+  EYES={eyeCas:e1, eyeNew:e2};
+
+  /* 달 위치 = 경통 앞쪽 광축 방향 */
+  const front=new T.Vector3(0,0,TZ0); optic.localToWorld(front);
+  const dir=new T.Vector3(0,0,-1).applyQuaternion(scope.quaternion).normalize();
+  moon.position.copy(front).add(dir.clone().multiplyScalar(MOON_D));
+  const ml=textSprite('달','#EAF2FF',21,1);
+  ml.position.copy(moon.position).add(new T.Vector3(0,5.6,0)); scene.add(ml);
+  labels.push({sp:ml, steps:[1]});
+}
+let EYES=null;
+
+function buildMirror(env){
+  if(gMirror){ optic.remove(gMirror); }
+  gMirror=new T.Group();
+  const mMat=new T.MeshStandardMaterial({color:0xD2E0EE,metalness:1,roughness:.06,envMap:env,side:T.DoubleSide});
+  const hold=new T.MeshStandardMaterial({color:0x39404E,metalness:.4,roughness:.6,envMap:env});
+  if(mode==='cas'){
+    const sp=[]; for(let i=0;i<=40;i++){ const r=RS*i/40; sp.push(new T.Vector2(r,zh(r))); }
+    gMirror.add(lathe(sp,mMat));
+    const bk=[]; for(let i=0;i<=40;i++){ const r=RS*i/40; bk.push(new T.Vector2(r,zh(r)+.3)); }
+    gMirror.add(lathe(bk,hold));
+    gMirror.add(lathe([new T.Vector2(RS,zh(RS)),new T.Vector2(RS,zh(RS)+.3)],hold));
+    for(let k=0;k<3;k++){ const a=k*2*Math.PI/3;
+      const v=new T.Mesh(new T.BoxGeometry(TR-RS+.3,.07,.45), hold);
+      v.position.set(Math.cos(a)*(RS+TR)/2, Math.sin(a)*(RS+TR)/2, ZS-.1); v.rotation.z=a; gMirror.add(v); }
+  } else {
+    const d=new T.Mesh(new T.CylinderGeometry(RN,RN,.12,64), mMat);
+    d.rotation.x=Math.PI/4; d.position.set(0,0,ZN); gMirror.add(d);
+    for(let k=0;k<3;k++){ const a=k*2*Math.PI/3+Math.PI/2;
+      const v=new T.Mesh(new T.BoxGeometry(TR-RN+.3,.07,.45), hold);
+      v.position.set(Math.cos(a)*(RN+TR)/2, Math.sin(a)*(RN+TR)/2, ZN-.15); v.rotation.z=a; gMirror.add(v); }
+  }
+  optic.add(gMirror);
+  if(EYES){ EYES.eyeCas.visible=(mode==='cas'); EYES.eyeNew.visible=(mode!=='cas'); }
+}
+
+function buildRays(){
+  if(gRay){ optic.remove(gRay); }
+  gRay=new T.Group(); rays=[];
+  const pkTex=radialTex([[0,'rgba(255,255,255,1)'],[.25,'rgba(255,232,170,.95)'],[.55,'rgba(255,190,70,.4)'],[1,'rgba(255,170,50,0)']],128);
+  const C=[[1,.66,.24],[1,.80,.38],[1,.92,.66],[1,1,.95]];
+  const RADII=[1.75,3.35], NA=8;
+  RADII.forEach(function(r0,ri){
+    for(let k=0;k<NA;k++){
+      const phi=k*2*Math.PI/NA + ri*Math.PI/NA;
+      const pts=pathOf(r0,phi), segs=[];
+      for(let i=0;i<3;i++) segs.push(segLine(pts[i],pts[i+1],C[i],C[i+1],.5));
+      segs.forEach(l=>gRay.add(l));
+      const cum=[0]; let L=0;
+      for(let i=0;i<3;i++){ L+=Math.hypot(pts[i+1].x-pts[i].x,pts[i+1].y-pts[i].y,pts[i+1].z-pts[i].z); cum.push(L); }
+      const gp=[pts[0],pts[1],{x:0,y:0,z:F1}];
+      const gc=[0]; let GL=0;
+      for(let i=0;i<2;i++){ GL+=Math.hypot(gp[i+1].x-gp[i].x,gp[i+1].y-gp[i].y,gp[i+1].z-gp[i].z); gc.push(GL); }
+      const gh=segLine(gp[1],gp[2],C[1],C[3],.5); gRay.add(gh);
+      const sp=new T.Sprite(new T.SpriteMaterial({map:pkTex,transparent:true,blending:T.AdditiveBlending,depthWrite:false,depthTest:false}));
+      sp.scale.set(1,1,1); gRay.add(sp);
+      rays.push({pts:pts,cum:cum,segs:segs,sp:sp,gp:gp,gc:gc,gh:gh,ph:(k/NA)*0.6+ri*0.3});
+    }
+  });
+  const fp=FOCUS();
+  focusGlow=new T.Sprite(new T.SpriteMaterial({map:radialTex([[0,'rgba(255,255,255,.95)'],[.2,'rgba(255,238,190,.8)'],[.5,'rgba(255,195,95,.28)'],[1,'rgba(255,175,60,0)']],128),
+    transparent:true, blending:T.AdditiveBlending, depthWrite:false, depthTest:false}));
+  focusGlow.position.set(fp.x,fp.y,fp.z); focusGlow.scale.set(3,3,1); gRay.add(focusGlow);
+  f1Glow=new T.Sprite(focusGlow.material.clone());
+  f1Glow.position.set(0,0,F1); f1Glow.scale.set(3,3,1); gRay.add(f1Glow);
+  optic.add(gRay);
+  applyStep();
+}
+
+function buildLabels(){
+  if(gLabel){ optic.remove(gLabel); }
+  gLabel=new T.Group(); labels=labels.filter(L=>!L.sp.parent||L.sp.parent===scene);
+  const add=(txt,p,steps,col)=>{ const s=textSprite(txt,col||'#EAF2FF',21,1);
+    s.position.set(p.x,p.y,p.z); gLabel.add(s); labels.push({sp:s,steps:steps}); };
+  add('주경 (포물면)', {x:0,y:RM+1.7,z:zp(RM)+.2}, [2,3]);
+  add('구멍', {x:0,y:1.5,z:zp(0)-.3}, [3], '#FFD9A0');
+  add(mode==='cas'?'부경 (쌍곡면)':'부경 (평면거울)', {x:0,y:RS+2.6,z:ZS}, [3]);
+  add('접안부', mode==='cas'?{x:0,y:-1.9,z:F2+1.4}:{x:0,y:NFY+2.2,z:ZN}, [4]);
+  add('초점', {x:0,y:1.9,z:F1}, [2], '#FFD9A0');
+  optic.add(gLabel);
+}
+
+function buildPrin(){
+  if(gPrin){ optic.remove(gPrin); }
+  gPrin=new T.Group();
+  const dotMat=new T.MeshBasicMaterial({color:0xFF6A5A});
+  const mk=(p,txt,dy)=>{
+    const d=new T.Mesh(new T.SphereGeometry(.24,20,14),dotMat); d.position.set(p.x,p.y,p.z); gPrin.add(d);
+    const s=textSprite(txt,'#FFD9A0',21,1); s.position.set(p.x,p.y+(dy||1.4),p.z); gPrin.add(s);
+  };
+  mk({x:0,y:0,z:F1}, mode==='cas'?'포물선의 초점 = 쌍곡선의 한 초점':'포물선의 초점', 1.4);
+  rays.forEach(R=>gPrin.add(lineOf([R.pts[2],{x:0,y:0,z:F1}],0xFFFFFF,.16,true)));
+  if(mode==='cas'){
+    mk({x:0,y:0,z:F2}, '쌍곡선의 다른 초점 — 여기에 상이 맺힌다', -1.7);
+    const s1=[],s2=[];
+    for(let i=-40;i<=40;i++){ const r=RS*2.4*i/40; s1.push({x:r,y:0,z:zh(Math.abs(r))}); s2.push({x:r,y:0,z:2*ZC-zh(Math.abs(r))}); }
+    gPrin.add(lineOf(s1,0x7FD8FF,.55)); gPrin.add(lineOf(s2,0x7FD8FF,.22,true));
+  } else mk({x:0,y:NFY,z:ZN},'초점이 경통 옆으로',1.3);
+  const pr=[]; for(let i=-40;i<=40;i++){ const r=RM*1.05*i/40; pr.push({x:r,y:0,z:zp(Math.abs(r))}); }
+  gPrin.add(lineOf(pr,0x7FD8FF,.55));
+  gPrin.add(lineOf([{x:0,y:0,z:TZ0-3},{x:0,y:0,z:TZ1+3}],0xFFFFFF,.14,true));
+  gPrin.visible=prin; optic.add(gPrin);
+}
+
+/* ── 단계 ── */
+const STEPS=[
+ {t:'달을 겨눈다', d:'달빛은 아주 멀리서 오기 때문에 <b>평행하게</b> 경통으로 들어옵니다. <span class="hint">화면을 드래그하면 망원경을 돌려 볼 수 있어요.</span>'},
+ {t:'주경에 모인다', d:'경통 끝의 <b>포물면 거울(주경)</b>이 평행한 빛을 <b>한 점(초점)</b>으로 모읍니다. 포물선의 반사 성질 그대로예요.'},
+ {t:'부경이 되돌린다', d:'초점에 닿기 전, <b>쌍곡면 거울(부경)</b>이 빛을 받아 주경 가운데 구멍 쪽으로 되돌립니다.'},
+ {t:'상이 맺힌다', d:'구멍을 지난 빛이 <b>접안부</b>에서 한 점에 모여 <b>달의 상</b>을 만듭니다. 거울로 두 번 접혔기 때문에 상하좌우가 뒤집혀 보입니다.'}
+];
+function applyStep(){
+  const vis = step===1?1 : step===2?1 : 3;
+  rays.forEach(R=>{ R.segs.forEach((l,i)=>{ l.visible = i<vis; }); R.sp.visible=true;
+                    if(R.gh) R.gh.visible = (step===2); });
+  if(focusGlow) focusGlow.visible = step>=4;
+  if(f1Glow) f1Glow.visible = (step===2);
+  labels.forEach(L=>{ L.sp.visible = L.steps.indexOf(step)>=0; });
+  document.querySelectorAll('#telSteps button').forEach((b,i)=>b.classList.toggle('on', i+1===step));
+  const S=STEPS[step-1];
+  document.getElementById('telCap').innerHTML='<b class="st">'+step+'. '+S.t+'</b> '+S.d;
+  document.getElementById('telEye').classList.toggle('on', step===4);
+  camTo(step);
+}
+/* 카메라 목표 */
+const camGoal={r:60, th:2.15, ph:1.25};
+let goalTgt=null;
+function worldOf(z,y){ const v=new T.Vector3(0,y||0,z); optic.localToWorld(v); return v; }
+function camTo(s){
+  if(!optic) return;
+  if(s===1){ const mt2=new T.Vector3(0,MOUNT_Y,0);
+             goalTgt = moon ? mt2.clone().lerp(moon.position,.44) : mt2;
+             camGoal.r=74; camGoal.th=2.34; camGoal.ph=1.44; }
+  else if(s===2){ goalTgt=worldOf(-13); camGoal.r=40; camGoal.th=1.62; camGoal.ph=1.30; }
+  else if(s===3){ goalTgt=worldOf(-9.5); camGoal.r=40; camGoal.th=1.48; camGoal.ph=1.30; }
+  else { const f=FOCUS(); goalTgt=worldOf(f.z-1.5,f.y); camGoal.r=23; camGoal.th=mode==='cas'?4.62:1.55; camGoal.ph=1.42; }
+  if(!dragged) { orb.th=camGoal.th; orb.ph=camGoal.ph; }   // 사용자가 안 돌렸으면 각도도 맞춤
+}
+const orb={r:74, th:2.34, ph:1.44};
+let curTgt=null;
+
+/* ── 접안 화면 ── */
+const EYE=document.getElementById('telEyeCv');
+let eyeT0=0;
+function drawEye(now){
+  if(!EYE) return;
+  const box=EYE.getBoundingClientRect(); if(!box.width) return;
+  const dpr=Math.min(2,window.devicePixelRatio||1);
+  if(EYE.width!==Math.round(box.width*dpr)){ EYE.width=Math.round(box.width*dpr); EYE.height=Math.round(box.height*dpr); }
+  const x=EYE.getContext('2d'), W=EYE.width, H=EYE.height, R=Math.min(W,H)/2;
+  x.setTransform(1,0,0,1,0,0); x.clearRect(0,0,W,H);
+  x.fillStyle='#07080B'; x.beginPath(); x.arc(W/2,H/2,R,0,7); x.fill();
+  const t=Math.min(1,(now-eyeT0)/1600);
+  const foc=t*t*(3-2*t);
+  x.save(); x.beginPath(); x.arc(W/2,H/2,R*.97,0,7); x.clip();
+  x.translate(W/2,H/2); x.rotate(Math.PI);              // 반사망원경 → 상하좌우 반전
+  const sc=(0.55+0.45*foc)*R*1.55/512;
+  x.globalAlpha=.25+.75*foc;
+  x.filter='blur('+((1-foc)*9).toFixed(1)+'px)';
+  const m=moonCanvas();
+  x.drawImage(m, 190,60,520,400, -520*sc/1, -400*sc/1, 1040*sc, 800*sc);
+  x.filter='none'; x.restore();
+  x.save(); x.beginPath(); x.arc(W/2,H/2,R*.97,0,7); x.clip();
+  const ph=x.createLinearGradient(W/2-R,0,W/2+R*.45,0);
+  ph.addColorStop(0,'rgba(4,5,8,.80)'); ph.addColorStop(.45,'rgba(4,5,8,.20)'); ph.addColorStop(1,'rgba(4,5,8,0)');
+  x.fillStyle=ph; x.fillRect(0,0,W,H); x.restore();
+  const g=x.createRadialGradient(W/2,H/2,R*.55,W/2,H/2,R);
+  g.addColorStop(0,'rgba(0,0,0,0)'); g.addColorStop(1,'rgba(0,0,0,.85)');
+  x.fillStyle=g; x.beginPath(); x.arc(W/2,H/2,R,0,7); x.fill();
+  x.strokeStyle='rgba(255,255,255,.22)'; x.lineWidth=2*dpr;
+  x.beginPath(); x.arc(W/2,H/2,R-1,0,7); x.stroke();
+}
+
+function resize(){
+  if(!ren) return;
+  const r=CV.getBoundingClientRect(); if(!r.width) return;
+  ren.setPixelRatio(Math.min(2,window.devicePixelRatio||1));
+  ren.setSize(r.width,r.height,false);
+  cam.aspect=r.width/r.height; cam.updateProjectionMatrix();
+}
+function tick(now){
+  requestAnimationFrame(tick);
+  const dt=Math.min(.05,(now-(tPrev||now))/1000); tPrev=now;
+  if(spin) orb.th+=dt*0.09;
+  if(goalTgt){
+    if(!curTgt) curTgt=goalTgt.clone();
+    curTgt.lerp(goalTgt, 1-Math.pow(0.008,dt));
+    orb.r += (camGoal.r-orb.r)*(1-Math.pow(0.02,dt));
+    if(!dragged){
+      orb.th += (camGoal.th-orb.th)*(1-Math.pow(0.02,dt));
+      orb.ph += (camGoal.ph-orb.ph)*(1-Math.pow(0.02,dt));
+    }
+    const s=Math.sin(orb.ph);
+    cam.position.set(curTgt.x+orb.r*s*Math.sin(orb.th), curTgt.y+orb.r*Math.cos(orb.ph), curTgt.z+orb.r*s*Math.cos(orb.th));
+    cam.lookAt(curTgt);
+  }
+  const t=now/1000;
+  const vis = step===1?1 : step===2?2 : 3;
+  rays.forEach(function(R){
+    const P = step===2 ? R.gp : R.pts, CU = step===2 ? R.gc : R.cum;
+    const L=CU[vis];
+    const u=((t*0.11+R.ph)%1)*L;
+    let i=0; while(i<vis-1 && CU[i+1]<u) i++;
+    const f=(u-CU[i])/((CU[i+1]-CU[i])||1);
+    const a=P[i], b=P[i+1];
+    R.sp.position.set(a.x+(b.x-a.x)*f, a.y+(b.y-a.y)*f, a.z+(b.z-a.z)*f);
+    const k=.6+.28*Math.sin(t*5+R.ph*9); R.sp.scale.set(k,k,1);
+  });
+  const q=2.6+.8*Math.sin(t*2.4);
+  if(focusGlow&&focusGlow.visible) focusGlow.scale.set(q,q,1);
+  if(f1Glow&&f1Glow.visible) f1Glow.scale.set(q,q,1);
+  if(moon) moon.rotation.y += dt*0.012;
+  const lk=orb.r/20;
+  scene.traverse(function(o){ if(o.isSprite && o.userData.bw) o.scale.set(o.userData.bw*lk, o.userData.bh*lk, 1); });
+  ren.render(scene,cam);
+  if(step===4) drawEye(now);
+}
+
+async function init(){
+  if(ready||loading) return; loading=true;
+  try { T=await loadTHREE(); } catch(e){ WAIT.textContent='3D를 불러오지 못했어요.'; loading=false; return; }
+  ren=new T.WebGLRenderer({canvas:CV,antialias:true});
+  ren.setClearColor(0x0C0E14,1);
+  ren.toneMapping=T.ACESFilmicToneMapping; ren.toneMappingExposure=1.12;
+  scene=new T.Scene();
+  cam=new T.PerspectiveCamera(36,2,.4,600);
+  envT=envMap();
+  scene.add(new T.HemisphereLight(0x93AAC8,0x14161C,.6));
+  const d1=new T.DirectionalLight(0xFFF3DE,1.15); d1.position.set(-14,20,12); scene.add(d1);
+  const d2=new T.DirectionalLight(0xA6C6FF,.45);  d2.position.set(14,-6,-16); scene.add(d2);
+  const ring=buildWorld(envT);
+  buildScope(envT, ring);
+  buildMirror(envT); buildRays(); buildLabels(); buildPrin(); applyStep();
+  resize(); WAIT.style.display='none'; ready=true; loading=false;
+  eyeT0=performance.now();
+  requestAnimationFrame(tick);
+}
+
+/* ── 조작 ── */
+let drag=null;
+CV.addEventListener('pointerdown',e=>{ drag={x:e.clientX,y:e.clientY}; dragged=true; spin=false; CV.classList.add('drag'); CV.setPointerCapture(e.pointerId); });
+CV.addEventListener('pointermove',e=>{ if(!drag) return;
+  orb.th-=(e.clientX-drag.x)*0.0075;
+  orb.ph=Math.max(.20,Math.min(2.9,orb.ph-(e.clientY-drag.y)*0.0065));
+  drag={x:e.clientX,y:e.clientY}; });
+const up=()=>{ drag=null; CV.classList.remove('drag'); };
+CV.addEventListener('pointerup',up); CV.addEventListener('pointercancel',up);
+CV.addEventListener('wheel',e=>{ e.preventDefault(); camGoal.r=orb.r=Math.max(9,Math.min(120,orb.r*(1+e.deltaY*0.0012))); },{passive:false});
+let pinch=0;
+CV.addEventListener('touchstart',e=>{ if(e.touches.length===2){ dragged=true;
+  pinch=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY); } },{passive:true});
+CV.addEventListener('touchmove',e=>{ if(e.touches.length===2&&pinch){
+  const d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
+  camGoal.r=orb.r=Math.max(9,Math.min(120,orb.r*pinch/d)); pinch=d; } },{passive:true});
+
+document.querySelectorAll('#telSteps button').forEach(function(b,i){
+  b.addEventListener('click',function(){
+    step=i+1; dragged=false; if(step===4) eyeT0=performance.now();
+    if(ready) applyStep(); 
+    if(typeof GEO_task==='function') GEO_task('tel-step'+step);
+  });
+});
+document.getElementById('telNext').addEventListener('click',function(){
+  step=step%4+1; dragged=false; if(step===4) eyeT0=performance.now();
+  if(ready) applyStep();
+  if(typeof GEO_task==='function') GEO_task('tel-step'+step);
+});
+document.querySelectorAll('.segBtn').forEach(function(b){
+  b.addEventListener('click',function(){
+    if(mode===b.dataset.m) return;
+    mode=b.dataset.m;
+    document.querySelectorAll('.segBtn').forEach(x=>x.classList.toggle('on',x===b));
+    document.getElementById('telTag').textContent = mode==='cas'?'카세그레인식':'뉴턴식';
+    if(ready){ buildMirror(envT); buildRays(); buildLabels(); buildPrin(); applyStep(); }
+    if(typeof GEO_task==='function') GEO_task('tel-'+mode);
+  });
+});
+window.__telShow=function(){ init(); setTimeout(resize,40); };
+window.__telPrin=function(v){ prin=v; if(gPrin) gPrin.visible=v; };
+window.addEventListener('resize',()=>{ if(ready) resize(); });
+})();
+</script>
+<script>window.PAGE_ID="light";</script>
+<script src="nav.js"></script>
+</body>
+</html>

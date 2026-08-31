@@ -450,9 +450,11 @@ function renderActs(){
          + '<div class="items">' + rows + '</div></div>';
   });
 
+  /* 윗줄 4개, 아랫줄은 오른쪽에서 왼쪽으로 (S자 순서) */
   $('tlRow1').innerHTML = html.slice(0, 4).join('');
-  $('tlRow2').innerHTML = '<div class="spacer"></div><div class="spacer"></div>'
-                        + '<div class="spacer"></div>' + (html[4] || '');
+  const r2 = html.slice(4).reverse();
+  const padN = Math.max(0, 4 - r2.length);
+  $('tlRow2').innerHTML = '<div class="spacer"></div>'.repeat(padN) + r2.join('');
 
   document.querySelectorAll('#tl .chip').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -465,6 +467,8 @@ function renderActs(){
     });
   });
   drawRail();
+  requestAnimationFrame(drawRail);
+  setTimeout(drawRail, 180);
 }
 
 /* 레일 — 넓은 화면에서는 오른쪽에서 꺾여 아랫줄로 내려간다 */
@@ -485,6 +489,12 @@ function drawRail(){
   const c1 = tl.querySelector('#tlRow1 .stage .chip');
   const s5 = tl.querySelector('#tlRow2 .stage .chip');
   if(!c1) return;
+  /* 아직 화면에 자리가 잡히지 않았으면(폰트 로딩·탭 전환 직후) 잠시 뒤 다시 */
+  if($('tlRow1').getBoundingClientRect().width < 80){
+    if(drawRail._n = (drawRail._n || 0) + 1, drawRail._n < 30) requestAnimationFrame(drawRail);
+    return;
+  }
+  drawRail._n = 0;
   const y1 = c1.getBoundingClientRect().top - base.top + 17;
   const y2 = s5 ? (s5.getBoundingClientRect().top - base.top + 17) : y1;
   const row1 = $('tlRow1').getBoundingClientRect();
