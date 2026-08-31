@@ -234,8 +234,7 @@ if (localStorage.getItem('geoAppOk') !== '1') location.replace('index.html');
 </head>
 <body>
 <header>
-  <h1>지오지브라로 이차곡선 자취 그리기</h1>
-  <span class="sub">단계를 눌러 가며 그대로 따라 해 보세요 — 오른쪽 그림이 그 단계까지 그려집니다</span>
+  <h1>이차곡선 자취 작도 연습</h1>
 </header>
 <div id="tabs">
   <button data-t="para" class="on"><span class="dt"></span>포물선</button>
@@ -276,15 +275,15 @@ if (localStorage.getItem('geoAppOk') !== '1') location.replace('index.html');
       <button id="traceBtn" class="previewOnly">자취 남기기</button>
       <button id="resetBtn" class="previewOnly">처음부터</button>
       <span class="sep"></span>
-      <button id="ggbBtn">실전 연습</button>
+      <button id="ggbBtn">따라해보기</button>
       <span id="fsHome"><div id="fsBar">
         <span id="fsCurve"></span>
+        <span id="fsClock"></span>
         <span id="fsStep"></span>
         <button id="fsPrev" type="button">‹ 이전 단계</button>
         <button id="fsNext" type="button">다음 단계 ›</button>
         <button id="algBtn" type="button">대수창 숨기기</button>
         <button id="fsBtn" type="button">전체화면</button>
-        <span id="fsClock"></span>
       </div></span>
     </div>
   </div>
@@ -682,7 +681,7 @@ ggbBtn.onclick = ()=>{
   ggbWrap.classList.toggle('show', on);
   ggbBtn.classList.toggle('on', on);
   document.body.classList.toggle('ggbMode', on);
-  ggbBtn.textContent = on ? '미리보기로' : '실전 연습';
+  ggbBtn.textContent = on ? '미리보기로' : '따라해보기';
   if(on){ stopAnim(); loadGgb(); }
 };
 /* ── 지오지브라를 칸에 딱 맞추기 ──
@@ -784,10 +783,10 @@ if(window.visualViewport){
   /* 전체화면에서는 아래 버튼줄이 숨겨지므로 단계 이동을 띠에 둔다 */
   const pv = document.getElementById('fsPrev'), nx = document.getElementById('fsNext');
   const rp = document.getElementById('prevBtn'), rn = document.getElementById('nextBtn');
-  if(rp && rn){
+  if(rp && rn && pv && nx){
     pv.onclick = ()=>{ rp.click(); refresh(); };
     nx.onclick = ()=>{ rn.click(); refresh(); };
-  } else { pv.remove(); nx.remove(); }
+  } else { if(pv) pv.remove(); if(nx) nx.remove(); }
   addEventListener('keydown', e=>{
     if(e.key === 'Escape' && document.body.classList.contains('ggbFull')) set(false);
   });

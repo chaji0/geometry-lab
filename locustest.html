@@ -221,9 +221,8 @@ if (localStorage.getItem('geoAppOk') !== '1') location.replace('index.html');
     box-shadow:0 4px 14px rgba(16,24,40,.12); transition:all .12s;
   }
   #clearBtn:hover { color:#2563eb; border-color:#bfdbfe; }
-  /* 보통 때 컨트롤 자리 — 지오지브라 도움말(왼쪽 아래)을 피해 오른쪽 아래 */
-  #fsHome { position:absolute; right:16px; bottom:58px; z-index:6; }
-  body.ggbFull #fsHome { position:static; }
+  /* 보통 때 컨트롤 자리 — 머리말 오른쪽 (지오지브라 화면 밖) */
+  #fsHome { display:flex; align-items:center; }
 
   /* 시간 종료 잠금 */
   #lock {
@@ -236,6 +235,12 @@ if (localStorage.getItem('geoAppOk') !== '1') location.replace('index.html');
   #lock .lk { width:46px; height:46px; color:#be123c; }
   #lock .t1 { font-size:20px; font-weight:900; color:#9f1239; letter-spacing:-.01em; }
   #lock .t2 { font-size:13.5px; color:#64748b; line-height:1.7; }
+  #lockBtn2 {
+    margin-top:6px; padding:11px 26px; font-size:15px; font-weight:900; font-family:inherit;
+    border:none; border-radius:999px; cursor:pointer; background:#be123c; color:#fff;
+    box-shadow:0 6px 18px rgba(190,18,60,.32);
+  }
+  #lockBtn2:hover { background:#9f1239; }
   @media (max-height: 880px){
     #panel { gap:11px; padding:12px 15px 11px; }
     .card { padding:15px 17px 14px; border-radius:21px; }
@@ -254,14 +259,15 @@ if (localStorage.getItem('geoAppOk') !== '1') location.replace('index.html');
 </head>
 <body>
 <header>
-  <h1>이차곡선 자취 작도</h1>
-  <span class="sub">곡선을 뽑고, 90초 안에 오른쪽 지오지브라에서 자취를 작도하세요</span>
+  <h1>이차곡선 자취 작도 수행평가</h1>
   <span class="spacer"></span>
-  <div class="modeWrap">
-    <span class="lb">뽑기 방식</span>
-    <button class="modeBtn on" id="mRandom">완전 무작위</button>
-    <button class="modeBtn" id="mBag">균등 배분</button>
-  </div>
+  <div id="fsHome"><div id="fsBar">
+        <span id="fsCurve"></span>
+        <span id="fsClock"></span>
+        <span id="fsStep"></span>
+        <button id="algBtn" type="button">대수창 숨기기</button>
+        <button id="fsBtn" type="button">전체화면</button>
+      </div></div>
 </header>
 
 <div id="main">
@@ -332,21 +338,13 @@ if (localStorage.getItem('geoAppOk') !== '1') location.replace('index.html');
     <div id="ggb"></div>
     <div id="ggbMsg"><div class="spin"></div>지오지브라를 불러오는 중이에요…</div>
     <button id="clearBtn">새로 시작</button>
-      <div id="fsHome"><div id="fsBar">
-        <span id="fsCurve"></span>
-        <span id="fsStep"></span>
-        <button id="fsPrev" type="button">‹ 이전 단계</button>
-        <button id="fsNext" type="button">다음 단계 ›</button>
-        <button id="algBtn" type="button">대수창 숨기기</button>
-        <button id="fsBtn" type="button">전체화면</button>
-        <span id="fsClock"></span>
-      </div></div>
     <div id="lock">
       <svg class="lk" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <rect x="4.5" y="10.5" width="15" height="9.6" rx="2.4"/><path d="M8.4 10.5V7.2a3.6 3.6 0 0 1 7.2 0v3.3"/>
       </svg>
       <div class="t1">시간 종료 — 화면이 잠겼습니다</div>
-      <div class="t2">왼쪽 <b>잠금 해제</b> 버튼을 누르면 다시 사용할 수 있어요</div>
+      <div class="t2">선생님 확인 후 아래 버튼을 누르세요</div>
+      <button id="lockBtn2" type="button">잠금 해제</button>
     </div>
   </div>
 </div>
@@ -382,13 +380,6 @@ const slot = document.getElementById('slot'), slotSub = document.getElementById(
 const pickBtn = document.getElementById('pickBtn'), bagNote = document.getElementById('bagNote');
 let rolling = null;
 
-function setMode(m){
-  mode = m;
-  document.getElementById('mRandom').classList.toggle('on', m==='random');
-  document.getElementById('mBag').classList.toggle('on', m==='bag');
-  if(m==='bag') refillBag();
-  syncBagNote();
-}
 function syncBagNote(){
   bagNote.textContent = mode==='bag'
     ? '가방에 남은 카드 ' + bag.length + '장 — 3명마다 포물선·타원·쌍곡선이 정확히 한 번씩'
@@ -432,13 +423,13 @@ function pick(){
       pickBtn.disabled = false;
       beep(880, .12); setTimeout(()=>beep(1320,.16), 130);
       if(document.getElementById('autoChk').checked){ unlockScreen(); resetTimer(); startTimer(); }
+      /* 곡선이 정해지면 바로 전체화면으로 — 작도할 공간을 최대한 넓게 */
+      if(window.__fsSet) window.__fsSet(true);
     }
   };
   spin();
 }
 pickBtn.addEventListener('click', pick);
-document.getElementById('mRandom').addEventListener('click', ()=>setMode('random'));
-document.getElementById('mBag').addEventListener('click', ()=>setMode('bag'));
 
 /* ══════════════════════════════════════════
    2) 90초 타이머
@@ -548,6 +539,7 @@ function unlockScreen(){
   lockBtn.classList.remove('danger');
   document.getElementById('lockIco').innerHTML = ICO_OPEN;
 }
+document.getElementById('lockBtn2').addEventListener('click', ()=>lockBtn.click());
 lockBtn.addEventListener('click', ()=>{
   if(!locked) return;
   unlockScreen();
@@ -584,7 +576,7 @@ addEventListener('keydown', e=>{
   else if(e.key === 'r' || e.key === 'R'){ unlockScreen(); resetTimer(); }
 });
 
-setMode('random');
+syncBagNote();                       /* 뽑기 방식은 '완전 무작위' 고정 */
 unlockScreen();
 resetTimer();
 
@@ -726,13 +718,14 @@ if(window.visualViewport){
     setTimeout(()=>fitSoon(60), 420);
   }
   btn.onclick = ()=>set(!document.body.classList.contains('ggbFull'));
+  window.__fsSet = set;
   /* 전체화면에서는 아래 버튼줄이 숨겨지므로 단계 이동을 띠에 둔다 */
   const pv = document.getElementById('fsPrev'), nx = document.getElementById('fsNext');
   const rp = document.getElementById('prevBtn'), rn = document.getElementById('nextBtn');
-  if(rp && rn){
+  if(rp && rn && pv && nx){
     pv.onclick = ()=>{ rp.click(); refresh(); };
     nx.onclick = ()=>{ rn.click(); refresh(); };
-  } else { pv.remove(); nx.remove(); }
+  } else { if(pv) pv.remove(); if(nx) nx.remove(); }
   addEventListener('keydown', e=>{
     if(e.key === 'Escape' && document.body.classList.contains('ggbFull')) set(false);
   });
