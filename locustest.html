@@ -139,6 +139,29 @@ if (localStorage.getItem('geoAppOk') !== '1') location.replace('index.html');
   #keys { text-align:center; font-size:10.5px; color:#a3adbb; line-height:1.7; padding-bottom:2px; }
 
   /* ══════ 오른쪽 — 지오지브라 ══════ */
+  /* ── 지오지브라 전체화면 ──
+     아이패드는 브라우저 주소창 + 앱 상단바 + 페이지 머리말 + 하단바까지 빼고 나면
+     지오지브라가 쓸 높이가 350px 넘게 줄어든다. 그러면 지오지브라가 스스로
+     대수창을 접어 버리고, 설정 창도 높이가 모자라 아래가 잘린다.
+     → 전체화면으로 화면 전체를 내주면 둘 다 해결. */
+  #fsBar { position:absolute; left:10px; bottom:10px; z-index:40; display:flex; gap:7px; align-items:center; }
+  #fsBtn, #algBtn {
+    padding:7px 15px; font-size:12.8px; font-weight:800; font-family:inherit; cursor:pointer;
+    border:1.5px solid #cbd5e1; border-radius:999px; background:rgba(255,255,255,.94); color:#475569;
+    box-shadow:0 3px 12px rgba(16,24,40,.14); white-space:nowrap;
+  }
+  #fsBtn:hover, #algBtn:hover { border-color:#12608f; color:#12608f; }
+  #fsClock {
+    display:none; padding:7px 14px; font-size:14.5px; font-weight:900;
+    font-family:Georgia,'Times New Roman',serif; border-radius:999px;
+    background:#12283f; color:#fff; box-shadow:0 3px 12px rgba(16,24,40,.22);
+  }
+  body.ggbFull #fsClock { display:block; }
+  body.ggbFull > *:not(#main) { display:none !important; }
+  body.ggbFull #main { position:fixed; inset:0; z-index:9000; }
+  body.ggbFull #steps, body.ggbFull #panel,
+  body.ggbFull #sbGrip, body.ggbFull #stepsTgl { display:none !important; }
+
   /* 경계선을 끌어 사이드바 폭 조절 */
   #sbGrip {
     flex:none; width:7px; background:#eef2f7; border-right:1px solid #e2e8f0;
@@ -154,7 +177,7 @@ if (localStorage.getItem('geoAppOk') !== '1') location.replace('index.html');
   body.sbDrag { cursor:col-resize; user-select:none; }
   body.sbDrag #steps, body.sbDrag #panel, body.sbDrag #sbGrip { transition:none; }
 
-  #view { flex:1; min-width:0; position:relative; background:#fff; }
+  #view { flex:1; min-width:0; position:relative; background:#fff; overflow:hidden; }
   #ggb { width:100%; height:100%; }
   /* 두 손가락으로 오므리면 축소 / 벌리면 확대 (브라우저가 아닌 지오지브라가 처리) */
   #ggb canvas { touch-action:none; }
@@ -281,6 +304,11 @@ if (localStorage.getItem('geoAppOk') !== '1') location.replace('index.html');
     <div id="ggb"></div>
     <div id="ggbMsg"><div class="spin"></div>지오지브라를 불러오는 중이에요…</div>
     <button id="clearBtn">새로 시작</button>
+      <div id="fsBar">
+        <button id="fsBtn" type="button">전체화면</button>
+        <button id="algBtn" type="button">대수창 숨기기</button>
+        <span id="fsClock"></span>
+      </div>
     <div id="lock">
       <svg class="lk" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <rect x="4.5" y="10.5" width="15" height="9.6" rx="2.4"/><path d="M8.4 10.5V7.2a3.6 3.6 0 0 1 7.2 0v3.3"/>
@@ -555,7 +583,8 @@ function bootGgb(){
       showToolBar:true, showAlgebraInput:true, showMenuBar:false,
       allowStyleBar:true, enableFileFeatures:false, borderColor:'#e2e8f0',
       enableShiftDragZoom:true, showZoomButtons:true, enableRightClick:false,
-      appletOnLoad: (api)=>{ ggbApi = api; ggbMsg.classList.add('hide'); ggbBooted = true; },
+      appletOnLoad: (api)=>{ ggbApi = api; ggbMsg.classList.add('hide'); ggbBooted = true;
+        lastW = lastH = 0; fitSoon(500, true); },
       scaleContainerClass:'noscale'
     }, true);
     app.inject('ggb');
@@ -608,20 +637,79 @@ document.getElementById('clearBtn').addEventListener('click', bootGgb);
   });
 })();
 
-/* 창 크기가 바뀌면 크기만 맞춤 (작도는 그대로 유지) */
-function fitGgb(){
+/* ── 지오지브라를 칸에 딱 맞추기 ──
+   애플릿은 만들 때 정한 px 크기를 그대로 갖고 있어서, 나중에 칸이 줄면(하단 바가
+   생기거나, 화면을 돌리거나, 사이드바를 끌거나) 애플릿이 칸보다 커져서 아래·오른쪽이
+   잘린다. 설정 창 아래가 잘리는 것도 같은 이유.
+   → 칸 크기가 바뀔 때마다 setSize + recalculateEnvironments 로 다시 맞춘다. */
+let fitT = null, lastW = 0, lastH = 0;
+function fitGgb(force){
   if(!ggbBooted) return;
+  
   const w = Math.round(view.clientWidth), h = Math.round(view.clientHeight);
   if(!w || !h) return;
-  if(ggbApi && ggbApi.setWidth){
-    try{ ggbApi.setWidth(w); ggbApi.setHeight(h); return; }catch(e){}
+  /* 몇 px 차이로 자꾸 크기를 바꾸면 지오지브라가 배치를 다시 짜다가
+     대수창을 접어 버린다. 의미 있는 변화일 때만 건드린다. */
+  if(!force && Math.abs(w - lastW) < 6 && Math.abs(h - lastH) < 6) return;
+  lastW = w; lastH = h;
+  if(ggbApi){
+    try{
+      if(ggbApi.setSize) ggbApi.setSize(w, h);
+      else { ggbApi.setWidth(w); ggbApi.setHeight(h); }
+      /* 이걸 빼먹으면 지오지브라가 예전 크기·위치를 기억해서 클릭 위치가 어긋나고
+         설정 창이 잘린다 */
+      if(ggbApi.recalculateEnvironments) ggbApi.recalculateEnvironments();
+      return;
+    }catch(e){}
   }
   bootGgb();
 }
-let rt = null;
-addEventListener('resize', ()=>{
-  clearTimeout(rt); rt = setTimeout(fitGgb, 260);
-});
+function fitSoon(ms, force){ clearTimeout(fitT); fitT = setTimeout(()=>fitGgb(force), ms || 240); }
+
+/* 칸 크기가 바뀌면(사이드바 끌기·설명 접기·하단 바 생성·화면 회전 …) 자동으로 다시 맞춤 */
+if(window.ResizeObserver){
+  try{ new ResizeObserver(()=>fitSoon(240)).observe(view); }catch(e){}
+}
+addEventListener('resize', ()=>fitSoon(240));
+addEventListener('orientationchange', ()=>fitSoon(500, true));
+if(window.visualViewport){
+  try{ visualViewport.addEventListener('resize', ()=>fitSoon(320)); }catch(e){}
+}
+
+/* ── 지오지브라 전체화면 ── */
+(function(){
+  const btn = document.getElementById('fsBtn'); if(!btn) return;
+  const clk = document.getElementById('fsClock'), big = document.getElementById('tBig');
+  if(!big && clk) clk.remove();          /* 타이머가 없는 연습 페이지에서는 시계 칩 제거 */
+  function set(on){
+    document.body.classList.toggle('ggbFull', on);
+    btn.textContent = on ? '전체화면 해제' : '전체화면';
+    setTimeout(()=>fitSoon(60, true), 80);
+    setTimeout(()=>fitSoon(60), 420);
+  }
+  btn.onclick = ()=>set(!document.body.classList.contains('ggbFull'));
+  addEventListener('keydown', e=>{
+    if(e.key === 'Escape' && document.body.classList.contains('ggbFull')) set(false);
+  });
+  /* 전체화면일 때도 남은 시간이 보이게 */
+  if(clk && big) setInterval(()=>{
+    if(document.body.classList.contains('ggbFull')) clk.textContent = big.textContent;
+  }, 250);
+})();
+
+/* ── 대수창 켜기 / 끄기 ──
+   메뉴바를 껐기 때문에, 지오지브라가 스스로 대수창을 접어 버리면 학생이
+   되살릴 방법이 없다. 그래서 직접 버튼을 둔다. */
+(function(){
+  const ab = document.getElementById('algBtn'); if(!ab) return;
+  let algOn = true;
+  ab.onclick = ()=>{
+    algOn = !algOn;
+    ab.textContent = algOn ? '대수창 숨기기' : '대수창 보이기';
+    try{ if(ggbApi && ggbApi.setPerspective) ggbApi.setPerspective(algOn ? 'AG' : 'G'); }catch(e){}
+    fitSoon(120, true);
+  };
+})();
 
 /* (디버그) */
 window.__pt = { fairIndex, get mode(){return mode;}, get counts(){return {...counts};},
