@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>체외 충격파 쇄석기 3D 탐구 · 타원의 두 초점</title>
+<link rel="stylesheet" media="print" onload="this.media='all'"
+  href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap">
+<style>
+:root{
+  --paper:#EFEFE3; --ink:#23241D; --dim:#A8A79A; --line:#DCDACD; --line2:#C7C5B6;
+  --acc:#2F45EC; --acc2:#1B2FC4; --card:#F5F5EC;
+}
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;overflow:hidden;overscroll-behavior:none}
+body{font-family:'IBM Plex Sans KR','Apple SD Gothic Neo','Malgun Gothic',system-ui,sans-serif;
+  background:var(--paper); color:var(--ink); font-size:14.5px; line-height:1.55}
+#app{display:flex; height:100%; width:100%}
+#stage{flex:1; position:relative; min-width:0; background:var(--paper)}
+canvas{display:block; width:100%; height:100%; touch-action:none; cursor:grab}
+canvas.drag{cursor:grabbing}
+#panel{width:388px; flex:none; background:var(--paper); border-left:1px solid var(--line);
+  overflow-y:auto; overscroll-behavior:contain; padding:16px 18px 44px}
+@media (max-width:940px){
+  #app{flex-direction:column}
+  #stage{height:48%; flex:none}
+  #panel{width:auto; flex:1; border-left:0; border-top:1px solid var(--line); padding:12px 14px 44px}
+}
+.mono{font-family:'IBM Plex Mono',ui-monospace,monospace}
+.eyebrow{font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:10.5px; letter-spacing:.16em;
+  color:var(--dim); text-transform:uppercase; margin-bottom:6px}
+h1{font-size:20px; margin:0 0 4px; letter-spacing:-.4px; font-weight:700}
+.sub{font-size:12.5px; color:var(--dim); margin-bottom:14px; line-height:1.6}
+i.m{font-family:Georgia,'Times New Roman',serif; font-style:italic; font-size:1.04em}
+.tabs{display:flex; gap:6px; margin-bottom:14px}
+.tabs button{flex:1; height:34px; border:1.5px solid var(--line2); background:transparent; color:var(--dim);
+  font:inherit; font-weight:600; font-size:12.5px; border-radius:999px; cursor:pointer}
+.tabs button.on{border-color:var(--acc); color:var(--acc)}
+section{display:none} section.on{display:block}
+.card{border:1px solid var(--line); border-radius:12px; padding:12px 13px; margin-bottom:12px; background:var(--card)}
+.card h2{font-size:12px; margin:0 0 9px; letter-spacing:.06em; color:var(--dim);
+  font-family:'IBM Plex Mono',ui-monospace,monospace; text-transform:uppercase; font-weight:600}
+.part{display:flex; align-items:center; gap:9px; height:36px; border-bottom:1px solid var(--line);
+  cursor:pointer; font-size:13px}
+.part:last-child{border-bottom:0}
+.part .dot{width:9px;height:9px;border-radius:3px;flex:none}
+.part .nm{flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.part .sp{font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:11px; color:var(--dim)}
+.part.on{color:var(--acc)} .part.on .sp{color:var(--acc)}
+.desc{font-size:12.5px; color:var(--ink); background:#E9E9DC; border-radius:9px; padding:9px 11px; margin-top:10px; line-height:1.65}
+.desc b{color:var(--acc)}
+.row{display:flex; align-items:center; gap:10px; margin:9px 0}
+.row label{width:104px; flex:none; font-size:12px; color:var(--dim)}
+.row input[type=range]{flex:1; accent-color:var(--acc); height:20px}
+.row .num{width:66px; text-align:right; font-family:'IBM Plex Mono',ui-monospace,monospace;
+  font-size:12px; color:var(--ink)}
+.btn{border:1.5px solid var(--line2); background:transparent; color:var(--dim); font:inherit;
+  font-size:11.5px; font-weight:700; padding:0 14px; height:32px; border-radius:999px; cursor:pointer}
+.btn:hover{border-color:var(--acc); color:var(--acc)}
+.btn.pri{background:var(--acc); border-color:var(--acc); color:#fff}
+.btn.pri:hover{background:var(--acc2); border-color:var(--acc2); color:#fff}
+.btnrow{display:flex; gap:7px; flex-wrap:wrap; margin-top:4px}
+.toggles{display:flex; flex-wrap:wrap; gap:6px}
+.toggles label{display:inline-flex; align-items:center; gap:5px; border:1px solid var(--line2);
+  border-radius:999px; padding:5px 10px; font-size:12px; cursor:pointer; user-select:none; color:var(--dim)}
+.toggles label:has(input:checked){color:var(--acc); border-color:var(--acc)}
+.toggles input{accent-color:var(--acc); margin:0}
+.bar{height:9px; border-radius:999px; background:#E1E0D2; overflow:hidden; margin:7px 0 3px}
+.bar>i{display:block; height:100%; background:var(--acc); width:0}
+.eqbar{display:flex; height:22px; border-radius:6px; overflow:hidden; border:1px solid var(--line2); margin:8px 0 4px}
+.eqbar span{display:flex; align-items:center; justify-content:center;
+  font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:10.5px; color:#fff}
+.eqbar .r1{background:var(--acc)} .eqbar .r2{background:#8E93C9}
+.kv{display:flex; justify-content:space-between; font-size:12.5px; padding:6px 0; border-bottom:1px solid var(--line)}
+.kv:last-child{border-bottom:0}
+.kv b{font-family:'IBM Plex Mono',ui-monospace,monospace; font-weight:600}
+details{border:1px solid var(--line); border-radius:12px; padding:10px 13px; margin-bottom:10px; background:var(--card)}
+details summary{cursor:pointer; font-weight:600; font-size:13px; list-style:none; color:var(--ink)}
+details summary::-webkit-details-marker{display:none}
+details summary::before{content:"+ "; color:var(--acc); font-family:'IBM Plex Mono',monospace}
+details[open] summary::before{content:"− "}
+details ol,details ul{margin:10px 0 2px; padding-left:19px; font-size:12.5px; line-height:1.85; color:var(--ink)}
+details p{font-size:12.5px; line-height:1.75; margin:9px 0 2px}
+.note{font-size:11.5px; color:var(--dim); line-height:1.6; margin-top:8px}
+.foot{font-size:11px; color:var(--dim); text-align:center; margin-top:14px;
+  font-family:'IBM Plex Mono',ui-monospace,monospace; letter-spacing:.04em}
+#tools{position:absolute; right:12px; top:12px; display:flex; gap:6px}
+#tools .btn{background:var(--paper)}
+#tip{position:absolute; left:12px; top:12px; font-size:11.5px; color:var(--dim);
+  background:rgba(239,239,227,.86); border:1px solid var(--line); border-radius:999px; padding:5px 12px}
+#hud{position:absolute; left:12px; bottom:12px; display:flex; flex-wrap:wrap; gap:6px; max-width:calc(100% - 24px)}
+.chip{background:rgba(239,239,227,.9); border:1px solid var(--line); border-radius:999px; padding:4px 11px;
+  font-size:11.5px; font-family:'IBM Plex Mono',ui-monospace,monospace}
+.chip i{font-style:normal; color:var(--dim); margin-right:4px}
+.chip.acc{border-color:var(--acc); color:var(--acc)}
+@media (max-width:700px){ #tip{font-size:10.5px} .chip{font-size:10.5px; padding:3px 9px} .chip.wide{display:none} }
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="stage">
+    <canvas id="c"></canvas>
+    <div id="tip">끌면 회전 · 휠/두 손가락 확대 · 부품을 누르면 강조</div>
+    <div id="tools">
+      <button class="btn" id="btnReset">시점 초기화</button>
+      <button class="btn" id="btnCut">단면 보기</button>
+    </div>
+    <div id="hud"></div>
+  </div>
+
+  <aside id="panel">
+    <div class="eyebrow">Geometry Lab · 이차곡선</div>
+    <h1>체외 충격파 쇄석기</h1>
+    <div class="sub">타원의 두 초점 성질을 쓰는 의료 기기 · 전기수압식(도르니어 HM3 계열) 실제 구조와 수치를 반영했습니다.</div>
+
+    <div class="tabs">
+      <button data-s="0" class="on">기계 구조</button>
+      <button data-s="1">충격파 발사</button>
+      <button data-s="2">수학 원리</button>
+    </div>
+
+    <section class="on" id="s0">
+      <div class="card">
+        <h2>부품</h2>
+        <div id="parts"></div>
+        <div class="desc" id="partDesc"></div>
+      </div>
+      <div class="card">
+        <h2>실제 제원</h2>
+        <div class="kv"><span>반타원체 장반경 <i class="m">a</i></span><b>138 mm</b></div>
+        <div class="kv"><span>단반경 <i class="m">b</i></span><b>77.5 mm</b></div>
+        <div class="kv"><span>중심에서 초점까지 <i class="m">c</i></span><b>114 mm</b></div>
+        <div class="kv"><span>두 초점 사이 <span class="mono">F₁F₂ = 2<i class="m">c</i></span></span><b>228 mm</b></div>
+        <div class="kv"><span>반사경 개구 지름</span><b>150 mm</b></div>
+        <div class="kv"><span>충격파 이동 거리 2<i class="m">a</i></span><b>276 mm</b></div>
+      </div>
+      <div class="card">
+        <h2>표시</h2>
+        <div class="toggles">
+          <label><input type="checkbox" id="tBody" checked>환자·테이블</label>
+          <label><input type="checkbox" id="tCush" checked>물주머니</label>
+          <label><input type="checkbox" id="tAim">조준 장치</label>
+          <label><input type="checkbox" id="tZone" checked>초점 영역</label>
+          <label><input type="checkbox" id="tLab" checked>이름표</label>
+          <label><input type="checkbox" id="tRay" checked>충격파 경로</label>
+        </div>
+      </div>
+    </section>
+
+    <section id="s1">
+      <div class="card">
+        <h2>발사</h2>
+        <div class="btnrow">
+          <button class="btn pri" id="btnShot">한 발 발사</button>
+          <button class="btn" id="btnAuto">연속 발사</button>
+          <button class="btn" id="btnRe">결석 되돌리기</button>
+        </div>
+        <div class="row"><label>방전 전압</label><input type="range" id="sKv" min="16" max="24" step="0.5" value="20"><span class="num" id="nKv"></span></div>
+        <div class="row"><label>결석 어긋남</label><input type="range" id="sOff" min="0" max="30" step="0.5" value="0"><span class="num" id="nOff"></span></div>
+        <div class="note" id="offNote"></div>
+      </div>
+      <div class="card">
+        <h2>파쇄 상태</h2>
+        <div class="kv"><span>누적 충격파</span><b><span id="nShots">0</span> 발</b></div>
+        <div class="kv"><span>초점의 최고 압력 <span class="mono">P₊</span></span><b><span id="nP">40</span> MPa</b></div>
+        <div class="kv"><span>이번 발의 유효 타격률</span><b><span id="nEff">100</span> %</b></div>
+        <div class="bar"><i id="barBk"></i></div>
+        <div class="note" id="bkNote">결석은 한 방에 깨지지 않습니다. 미세한 균열이 쌓이는 <b>피로 파괴</b>라 실제 시술도 보통 1000~3000발을 씁니다.</div>
+      </div>
+      <div class="card">
+        <h2>속도</h2>
+        <div class="row"><label>슬로모션</label><input type="range" id="sSlow" min="0.15" max="2" step="0.05" value="0.55"><span class="num" id="nSlow"></span></div>
+        <div class="note">실제 충격파는 물속에서 <span class="mono">1.5 mm/µs</span>(초속 1500 m)로 달려 F₁에서 F₂까지 <span class="mono">184 µs</span>만에 도착합니다. 화면은 약 <span class="mono" id="nSf">2700</span>배 느리게 보여 줍니다.</div>
+      </div>
+      <details>
+        <summary>결석은 어떻게 깨지나</summary>
+        <ul>
+          <li><b>스폴레이션</b> — 결석 뒷면에서 되돌아온 파가 잡아당기는 힘(인장)으로 바뀌어 뒤쪽부터 부서집니다.</li>
+          <li><b>공동 현상</b> — 뒤따르는 음압(−8 MPa)이 물속에 기포를 만들고, 기포가 찌그러지며 초속 100 m의 물줄기로 결석을 때립니다.</li>
+          <li><b>전단·압착</b> — 결석 속(약 3000 m/s)과 물(1500 m/s)의 속도 차이 때문에 결석을 조이는 힘이 생깁니다.</li>
+          <li><b>피로</b> — 위 과정이 수천 번 쌓여 균열이 자라야 조각납니다.</li>
+        </ul>
+      </details>
+    </section>
+
+    <section id="s2">
+      <div class="card">
+        <h2>고른 경로</h2>
+        <div class="row"><label>발사 각 <i class="m">φ</i></label><input type="range" id="sPhi" min="6" max="136" step="0.5" value="72"><span class="num" id="nPhi"></span></div>
+        <div class="eqbar"><span class="r1" id="e1"></span><span class="r2" id="e2"></span></div>
+        <div class="kv"><span>F₁ → 반사경 <span class="mono"><i class="m">r</i>₁</span></span><b><span id="nR1"></span> mm</b></div>
+        <div class="kv"><span>반사경 → F₂ <span class="mono"><i class="m">r</i>₂</span></span><b><span id="nR2"></span> mm</b></div>
+        <div class="kv"><span>합 <span class="mono"><i class="m">r</i>₁ + <i class="m">r</i>₂</span></span><b><span id="nRs"></span> mm = 2<i class="m">a</i></b></div>
+        <div class="kv"><span>도달 시간</span><b><span id="nT"></span> µs</b></div>
+        <div class="kv"><span>입사각 = 반사각</span><b><span id="nAng"></span>°</b></div>
+        <div class="note"><i class="m">φ</i>를 아무리 바꿔도 <span class="mono"><i class="m">r</i>₁ + <i class="m">r</i>₂</span>는 <span class="mono">276 mm</span>로 일정합니다. 그래서 모든 충격파가 <b>같은 순간</b>에 F₂에 모입니다.</div>
+      </div>
+      <details open>
+        <summary>왜 한 초점에서 나간 파가 다른 초점에 모이는가</summary>
+        <ol>
+          <li>타원(을 축 둘레로 돌린 반타원체) 위의 점 P에 대해 <span class="mono">PF₁ + PF₂ = 2<i class="m">a</i></span> — 타원의 정의입니다.</li>
+          <li>점 P에서의 접선(공간에서는 접평면)은 <span class="mono">∠F₁P</span>와 <span class="mono">∠F₂P</span>가 이루는 각을 이등분합니다. 즉 <b>법선</b>이 각 <span class="mono">F₁PF₂</span>를 이등분합니다.</li>
+          <li>따라서 F₁에서 나와 P에 닿은 파는 반사 법칙(입사각 = 반사각)에 따라 <b>정확히 F₂ 쪽으로</b> 튕깁니다.</li>
+          <li>게다가 어느 P를 거치든 달린 거리가 <span class="mono">2<i class="m">a</i></span>로 같으므로 모두 <b>같은 시각</b>에 F₂에 도착합니다. 시간이 어긋나지 않아 압력이 그대로 겹쳐 쌓입니다.</li>
+        </ol>
+        <p>구면파가 퍼지는 모습을 <i class="m">s</i> = (달린 거리)로 보면, 아직 반사되지 않은 부분은 <b>F₁을 중심으로 반지름 <i class="m">s</i>인 구</b>, 반사된 부분은 <b>F₂를 중심으로 반지름 <span class="mono">2<i class="m">a</i> − <i class="m">s</i></span>인 구</b>입니다. 화면의 파란 파면이 정확히 그 모습입니다.</p>
+      </details>
+      <details>
+        <summary>접선이 각을 이등분하는 이유</summary>
+        <ol>
+          <li>타원 위의 점 P에서 접선 <i class="m">ℓ</i>을 긋고, F₂를 <i class="m">ℓ</i>에 대칭시킨 점을 F₂′라 하자.</li>
+          <li>접선 위의 P가 아닌 임의의 점 Q에 대해 <span class="mono">QF₁ + QF₂ &gt; 2<i class="m">a</i> = PF₁ + PF₂</span> (접선은 타원 바깥에 있으므로).</li>
+          <li>대칭에서 <span class="mono">QF₂ = QF₂′</span>, <span class="mono">PF₂ = PF₂′</span>이므로 <span class="mono">QF₁ + QF₂′ &gt; PF₁ + PF₂′</span>.</li>
+          <li>즉 P는 <span class="mono">F₁ → <i class="m">ℓ</i> → F₂</span> 경로를 가장 짧게 하는 점이고, 최단 경로는 <b>F₁, P, F₂′가 한 직선</b>일 때이다. 이때 접선이 이루는 두 각이 같아진다. ∎</li>
+          <li>빛과 소리가 최단 시간 경로를 따르는 것(페르마의 원리)과 같은 이야기입니다.</li>
+        </ol>
+      </details>
+      <details>
+        <summary>탐구 과제</summary>
+        <ul>
+          <li><i class="m">a</i> = 138 mm, <i class="m">c</i> = 114 mm일 때 <i class="m">b</i>를 구하고, 화면의 값과 비교해 보세요.</li>
+          <li>F₁에서 바로 위(<i class="m">φ</i> = 180°)로 쏜 파와 바로 아래(<i class="m">φ</i> = 0°)로 쏜 파의 <i class="m">r</i>₁은 각각 얼마입니까? 왜 그 합이 2<i class="m">a</i>가 되는지 설명해 보세요.</li>
+          <li>결석을 F₂에서 10 mm 옮기면 왜 잘 깨지지 않을까요? 초점 영역(지름 12 mm)의 크기와 연결해 설명해 보세요.</li>
+          <li>반사경을 더 깊게(개구를 넓게) 만들면 F₂에 모이는 에너지는 어떻게 될까요? 몸에 닿는 피부 면적과 함께 생각해 보세요.</li>
+          <li>같은 원리를 쓰는 다른 사례(속삭이는 회랑, 타원형 당구대)를 찾아 원리를 설명해 보세요.</li>
+        </ul>
+      </details>
+    </section>
+
+    <div class="foot">F₁ 전극 · F₂ 결석 · <i class="m">r</i>₁ + <i class="m">r</i>₂ = 2<i class="m">a</i> = 276 mm</div>
+  </aside>
+</div>
+<script>
+"use strict";
+/* ============ 벡터 ============ */
+const add=(a,b)=>[a[0]+b[0],a[1]+b[1],a[2]+b[2]];
+const sub=(a,b)=>[a[0]-b[0],a[1]-b[1],a[2]-b[2]];
+const mul=(a,k)=>[a[0]*k,a[1]*k,a[2]*k];
+const dot=(a,b)=>a[0]*b[0]+a[1]*b[1]+a[2]*b[2];
+const cross=(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]];
+const len=a=>Math.hypot(a[0],a[1],a[2]);
+const norm=a=>{const l=len(a)||1;return [a[0]/l,a[1]/l,a[2]/l];};
+const DEG=Math.PI/180;
+const clamp=(x,a,b)=>x<a?a:(x>b?b:x);
+const fmt=(x,n=1)=>(Math.abs(x)<5e-4?0:x).toFixed(n);
+
+/* ============ 실제 제원 (단위: cm, 1 cm = 10 mm) ============
+   도르니어 HM3 계열 전기수압식: a=138mm, b=77.5mm, c=114mm,
+   개구 지름 150mm, 물속 음속 1.5 mm/µs                            */
+const A=13.8, B=7.75, Cq=Math.sqrt(A*A-B*B), E=Cq/A, LSEMI=B*B/A;
+const F1=[0,0,-Cq], F2C=[0,0,Cq];
+const ZCUT=-3.48;                      // 개구면(반지름 7.5cm)
+const UMAX=Math.acos(-ZCUT/A);
+const PATH=2*A;                        // 27.6 cm
+const SPEED=0.15;                      // cm/µs (=1.5 mm/µs)
+const ZONE_R=0.6, ZONE_H=3.0;          // 초점 영역 지름 12mm × 길이 60mm
+
+function rF1(phi){return LSEMI/(1+E*Math.cos(phi));}
+function dirOf(phi,psi){return [Math.sin(phi)*Math.cos(psi),Math.sin(phi)*Math.sin(psi),-Math.cos(phi)];}
+function hitOf(phi,psi){const r=rF1(phi);return {r:r,p:add(F1,mul(dirOf(phi,psi),r))};}
+const PHIMAX=(function(){
+  const zof=ph=>-Cq-rF1(ph)*Math.cos(ph);
+  let lo=1e-4,hi=Math.PI-1e-4;
+  for(let i=0;i<70;i++){const m=(lo+hi)/2; if(zof(m)<ZCUT) lo=m; else hi=m;}
+  return (lo+hi)/2;
+})();
+/* 시각 s(달린 거리)일 때 방향 (phi,psi) 파면의 위치 */
+function wavePt(phi,psi,s){
+  const h=hitOf(phi,psi);
+  if(s<=h.r) return add(F1,mul(dirOf(phi,psi),s));
+  const u=norm(sub(h.p,F2C));
+  return add(F2C,mul(u,Math.max(0,PATH-s)));
+}
+function epoint(u,v){return [B*Math.sin(u)*Math.cos(v),B*Math.sin(u)*Math.sin(v),-A*Math.cos(u)];}
+function enorm(p){return norm([p[0]/(B*B),p[1]/(B*B),p[2]/(A*A)]);}
+
+/* ============ 상태 ============ */
+const S={sec:0, s:-1, shots:0, broken:0, kv:20, off:0, slow:0.55,
+  auto:false, cut:true, hl:null, spark:0, impact:0,
+  body:true, cush:true, aim:false, zone:true, lab:true, ray:true,
+  phi:72*DEG};
+const cam={dist:70, az:-1.02, el:0.40, target:[0,0,3.0], fov:40};
+function stonePos(){return [S.off/10,0,Cq];}   /* 어긋남은 mm 입력 → cm */
+
+/* ============ 캔버스 / 카메라 ============ */
+const cv=document.getElementById('c'), ctx=cv.getContext('2d');
+let W=0,H=0,DPR=1;
+function resize(){
+  DPR=Math.min(window.devicePixelRatio||1,2.5);
+  const r=cv.getBoundingClientRect();
+  W=Math.max(1,Math.round(r.width)); H=Math.max(1,Math.round(r.height));
+  cv.width=Math.round(W*DPR); cv.height=Math.round(H*DPR);
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+}
+let EYE=[0,0,0],FW=[1,0,0],RT=[0,1,0],UP=[0,0,1],FOC=1;
+function updateCam(){
+  EYE=[cam.target[0]+cam.dist*Math.cos(cam.el)*Math.cos(cam.az),
+       cam.target[1]+cam.dist*Math.cos(cam.el)*Math.sin(cam.az),
+       cam.target[2]+cam.dist*Math.sin(cam.el)];
+  FW=norm(sub(cam.target,EYE));
+  RT=norm(cross(FW,[0,0,1]));
+  UP=cross(RT,FW);
+  FOC=(H/2)/Math.tan(cam.fov*DEG/2);
+}
+function proj(p){
+  const v=sub(p,EYE), z=dot(v,FW);
+  if(z<0.25) return null;
+  return {x:W/2+dot(v,RT)*FOC/z, y:H/2-dot(v,UP)*FOC/z, z:z};
+}
+function ray(px,py){
+  return {o:EYE, d:norm(add(add(mul(RT,(px-W/2)/FOC),mul(UP,-(py-H/2)/FOC)),FW))};
+}
+
+/* ============ 색 ============ */
+const PAPER='#EFEFE3', INK='#23241D', DIM='#A8A79A', LINEC='#DCDACD', ACC='#2F45EC';
+const MET_IN=[196,197,186], MET_OUT=[110,111,101], CASE=[74,75,68];
+const LD=norm([0.42,-0.78,0.78]);
+function shade(base,t,extra){
+  const k=clamp(0.34+0.72*t+(extra||0),0,1.45);
+  return 'rgb('+Math.round(clamp(base[0]*k,0,255))+','+Math.round(clamp(base[1]*k,0,255))+','+Math.round(clamp(base[2]*k,0,255))+')';
+}
+const RGBA=(r,g,b,a)=>'rgba('+r+','+g+','+b+','+a+')';
+
+/* ============ 깊이 정렬 렌더러 ============ */
+let prims=[];
+function push(z,fn){prims.push({z:z,fn:fn});}
+function depth(pts){let s=0;for(let i=0;i<pts.length;i++)s+=len(sub(pts[i],EYE));return s/pts.length;}
+function polyNow(pts,fill,stroke,lw,dash){
+  const q=[]; for(let i=0;i<pts.length;i++){const t=proj(pts[i]); if(!t)return; q.push(t);}
+  ctx.beginPath(); ctx.moveTo(q[0].x,q[0].y);
+  for(let i=1;i<q.length;i++) ctx.lineTo(q[i].x,q[i].y);
+  ctx.closePath();
+  if(fill){ctx.fillStyle=fill;ctx.fill();}
+  if(stroke){ctx.save();ctx.setLineDash(dash||[]);ctx.strokeStyle=stroke;ctx.lineWidth=lw||1;ctx.stroke();ctx.restore();}
+}
+function segNow(a,b,color,lw,dash){
+  const p=proj(a),q=proj(b); if(!p||!q) return;
+  ctx.save(); ctx.setLineDash(dash||[]); ctx.strokeStyle=color; ctx.lineWidth=lw||1.4; ctx.lineCap='round';
+  ctx.beginPath(); ctx.moveTo(p.x,p.y); ctx.lineTo(q.x,q.y); ctx.stroke(); ctx.restore();
+}
+function quad(pts,fill,stroke,lw){push(depth(pts),()=>polyNow(pts,fill,stroke,lw));}
+function line3(a,b,color,lw,dash){push(depth([a,b]),()=>segNow(a,b,color,lw,dash));}
+function dot3(p,color,r,ring){
+  push(len(sub(p,EYE)),()=>{
+    const q=proj(p); if(!q)return;
+    ctx.beginPath(); ctx.arc(q.x,q.y,r,0,7); ctx.fillStyle=color; ctx.fill();
+    if(ring){ctx.lineWidth=1.6;ctx.strokeStyle=ring;ctx.stroke();}
+  });
+}
+function flush(){
+  prims.sort((a,b)=>b.z-a.z);
+  for(let i=0;i<prims.length;i++) prims[i].fn();
+  prims=[];
+}
+/* 겉면(오버레이) 글자 */
+function label(p,text,color,dx,dy,small){
+  const q=proj(p); if(!q) return;
+  ctx.save();
+  ctx.font=(small?'600 11.5px ':'600 12.5px ')+"'IBM Plex Sans KR',system-ui,sans-serif";
+  ctx.textAlign='left'; ctx.textBaseline='middle';
+  const x=q.x+(dx||0), y=q.y+(dy||0);
+  ctx.strokeStyle='rgba(239,239,227,.92)'; ctx.lineWidth=4; ctx.lineJoin='round';
+  ctx.strokeText(text,x,y); ctx.fillStyle=color; ctx.fillText(text,x,y);
+  ctx.strokeStyle=color; ctx.globalAlpha=.45; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(q.x,q.y); ctx.lineTo(x-3,y); ctx.stroke();
+  ctx.restore();
+}
+function mathLabel(p,text,color,dx,dy){
+  const q=proj(p); if(!q) return;
+  ctx.save(); ctx.font="italic 700 16px Georgia,'Times New Roman',serif";
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.strokeStyle='rgba(239,239,227,.92)'; ctx.lineWidth=4; ctx.lineJoin='round';
+  ctx.strokeText(text,q.x+(dx||0),q.y+(dy||0));
+  ctx.fillStyle=color; ctx.fillText(text,q.x+(dx||0),q.y+(dy||0)); ctx.restore();
+}
+/* ============ 잘라 보기 ============ */
+let HDIR=[1,0,0];
+function cutHide(p){ if(!S.cut) return false; return (p[0]*HDIR[0]+p[1]*HDIR[1])>0; }
+
+/* ============ 결석 모양 ============ */
+const STONE=(function(){
+  const NU=7,NV=12,v=[],f=[];
+  const rnd=(i,j)=>{const x=Math.sin(i*12.9898+j*78.233)*43758.5453; return x-Math.floor(x);};
+  for(let i=0;i<=NU;i++)for(let j=0;j<NV;j++){
+    const u=Math.PI*i/NU, w=2*Math.PI*j/NV, rr=0.5*(0.76+0.46*rnd(i,j));
+    v.push([rr*Math.sin(u)*Math.cos(w), rr*Math.sin(u)*Math.sin(w), rr*Math.cos(u)]);
+  }
+  for(let i=0;i<NU;i++)for(let j=0;j<NV;j++){
+    f.push([i*NV+j, i*NV+(j+1)%NV, (i+1)*NV+(j+1)%NV, (i+1)*NV+j]);
+  }
+  return {v:v,f:f};
+})();
+const FRAG=(function(){const a=[];for(let i=0;i<11;i++){
+  const t=i*2.399, u=Math.cos(i*1.17);
+  a.push(norm([Math.cos(t)*Math.sqrt(1-u*u),Math.sin(t)*Math.sqrt(1-u*u),u]));} return a;})();
+
+function drawStone(cen,sc,base,hl){
+  for(const q of STONE.f){
+    const p=q.map(k=>add(cen,mul(STONE.v[k],sc)));
+    if(cutHide(p[0])) continue;
+    const n=norm(cross(sub(p[1],p[0]),sub(p[3],p[0])));
+    const t=Math.max(0,dot(n,LD));
+    quad(p, hl?shade([80,96,236],t):shade(base,t), 'rgba(0,0,0,.13)', .5);
+  }
+}
+
+/* ============ 장면 ============ */
+function drawReflector(){
+  const NU=18,NV=44, hl=(S.hl==='reflector');
+  for(let i=0;i<NU;i++)for(let j=0;j<NV;j++){
+    const u0=UMAX*i/NU,u1=UMAX*(i+1)/NU, v0=2*Math.PI*j/NV, v1=2*Math.PI*(j+1)/NV;
+    const p=[epoint(u0,v0),epoint(u0,v1),epoint(u1,v1),epoint(u1,v0)];
+    const cen=mul(add(add(p[0],p[1]),add(p[2],p[3])),0.25);
+    if(cutHide(cen)) continue;
+    const n=enorm(cen), toEye=norm(sub(EYE,cen)), inner=dot(n,toEye)<0;
+    if(inner){
+      const nn=mul(n,-1), t=Math.max(0,dot(nn,LD));
+      const r=sub(mul(nn,2*dot(nn,LD)),LD);
+      const spec=0.55*Math.pow(Math.max(0,dot(norm(r),toEye)),18);
+      quad(p, hl?shade([186,192,232],t,spec):shade(MET_IN,t,spec), null, 0);
+    }else{
+      const t=Math.max(0,dot(n,LD));
+      quad(p, hl?shade([96,110,186],t):shade(MET_OUT,t), null, 0);
+    }
+  }
+  // 개구 테두리
+  const NR=64;
+  for(let j=0;j<NR;j++){
+    const v0=2*Math.PI*j/NR, v1=2*Math.PI*(j+1)/NR;
+    const a=epoint(UMAX,v0), b=epoint(UMAX,v1);
+    if(cutHide(a)) continue;
+    line3(a,b, hl?ACC:'#7E7F72', 1.6);
+  }
+}
+function drawCasing(){
+  const R=8.6, Z0=-15.4, NV=44, hl=(S.hl==='reflector');
+  for(let j=0;j<NV;j++){
+    const v0=2*Math.PI*j/NV, v1=2*Math.PI*(j+1)/NV;
+    const p=[[R*Math.cos(v0),R*Math.sin(v0),Z0],[R*Math.cos(v1),R*Math.sin(v1),Z0],
+             [R*Math.cos(v1),R*Math.sin(v1),ZCUT],[R*Math.cos(v0),R*Math.sin(v0),ZCUT]];
+    const cen=mul(add(add(p[0],p[1]),add(p[2],p[3])),0.25);
+    if(cutHide(cen)) continue;
+    const n=norm([cen[0],cen[1],0]);
+    if(dot(n,norm(sub(EYE,cen)))<0) continue;
+    quad(p, shade(CASE,Math.max(0,dot(n,LD))), null, 0);
+    // 윗면 링(개구 둘레)
+    const a=[R*Math.cos(v0),R*Math.sin(v0),ZCUT], b=[R*Math.cos(v1),R*Math.sin(v1),ZCUT];
+    const a2=[7.5*Math.cos(v0),7.5*Math.sin(v0),ZCUT], b2=[7.5*Math.cos(v1),7.5*Math.sin(v1),ZCUT];
+    quad([a,b,b2,a2], shade(CASE,0.75), null, 0);
+  }
+  // 바닥
+  for(let j=0;j<NV;j++){
+    const v0=2*Math.PI*j/NV, v1=2*Math.PI*(j+1)/NV;
+    const p=[[0,0,Z0],[R*Math.cos(v0),R*Math.sin(v0),Z0],[R*Math.cos(v1),R*Math.sin(v1),Z0]];
+    if(cutHide(p[1])) continue;
+    quad(p, shade(CASE,0.18), null, 0);
+  }
+}
+function drawElectrode(){
+  const hl=(S.hl==='electrode');
+  const col=hl?ACC:'#33342E';
+  line3([0,0,-15.2],[0,0,-11.78], col, 7);
+  line3([0,0,-11.78],[0,0,-11.62], hl?ACC:'#9A9A8C', 5);
+  line3([1.5,0,-13.6],[1.5,0,-10.6], col, 3.4);
+  line3([1.5,0,-10.6],[0.12,0,-11.05], col, 3.2);
+  if(S.spark>0){
+    const k=S.spark;
+    push(len(sub(F1,EYE))-0.01,()=>{
+      const q=proj(F1); if(!q) return;
+      ctx.save(); ctx.globalAlpha=k;
+      const g=ctx.createRadialGradient(q.x,q.y,0,q.x,q.y,26*(1.2-k*0.5));
+      g.addColorStop(0,'rgba(255,255,255,.95)'); g.addColorStop(.35,'rgba(120,150,255,.75)');
+      g.addColorStop(1,'rgba(47,69,236,0)');
+      ctx.fillStyle=g; ctx.beginPath(); ctx.arc(q.x,q.y,26*(1.2-k*0.5),0,7); ctx.fill(); ctx.restore();
+    });
+  }
+}
+function drawWater(){
+  const NV=44, hl=(S.hl==='water');
+  for(let j=0;j<NV;j++){
+    const v0=2*Math.PI*j/NV, v1=2*Math.PI*(j+1)/NV;
+    const p=[[0,0,ZCUT],[7.5*Math.cos(v0),7.5*Math.sin(v0),ZCUT],[7.5*Math.cos(v1),7.5*Math.sin(v1),ZCUT]];
+    if(cutHide(p[1])) continue;
+    quad(p, hl?'rgba(47,69,236,.20)':'rgba(47,69,236,.085)', null, 0);
+  }
+}
+function drawCushion(){
+  if(!S.cush) return;
+  const hl=(S.hl==='cushion'), NV=40, NT=9, ZT=2.0;
+  const rad=t=>7.5+1.5*Math.sin(Math.PI*t)-1.1*t;
+  for(let i=0;i<NT;i++)for(let j=0;j<NV;j++){
+    const t0=i/NT,t1=(i+1)/NT, r0=rad(t0), r1=rad(t1);
+    const z0=ZCUT+(ZT-ZCUT)*t0, z1=ZCUT+(ZT-ZCUT)*t1;
+    const v0=2*Math.PI*j/NV, v1=2*Math.PI*(j+1)/NV;
+    const p=[[r0*Math.cos(v0),r0*Math.sin(v0),z0],[r0*Math.cos(v1),r0*Math.sin(v1),z0],
+             [r1*Math.cos(v1),r1*Math.sin(v1),z1],[r1*Math.cos(v0),r1*Math.sin(v0),z1]];
+    const cen=mul(add(add(p[0],p[1]),add(p[2],p[3])),0.25);
+    if(cutHide(cen)) continue;
+    quad(p, hl?'rgba(47,69,236,.22)':'rgba(47,69,236,.10)', 'rgba(47,69,236,.10)', .5);
+  }
+  // 피부 접촉면(젤)
+  for(let j=0;j<NV;j++){
+    const v0=2*Math.PI*j/NV, v1=2*Math.PI*(j+1)/NV, r=rad(1);
+    const a=[r*Math.cos(v0),r*Math.sin(v0),ZT], b=[r*Math.cos(v1),r*Math.sin(v1),ZT];
+    if(cutHide(a)) continue;
+    line3(a,b, hl?ACC:'rgba(47,69,236,.5)', 1.6);
+  }
+}
+function drawTable(){
+  if(!S.body) return;
+  const hl=(S.hl==='table'), ZT=1.95, ZB=1.2;
+  const col=hl?'rgba(47,69,236,.20)':'#E6E4D7';
+  const X0=-15,X1=15,Y0=-18,Y1=18,ST=2.5;
+  for(let x=X0;x<X1-0.01;x+=ST)for(let y=Y0;y<Y1-0.01;y+=ST){
+    const cx=x+ST/2, cy=y+ST/2;
+    if(Math.hypot(cx,cy)<8.6) continue;            // 치료 헤드 개구부
+    if(cutHide([cx,cy,ZT])) continue;
+    quad([[x,y,ZT],[x+ST,y,ZT],[x+ST,y+ST,ZT],[x,y+ST,ZT]],col,'rgba(199,197,182,.55)',.5);
+    if(Math.abs(y-Y0)<.01) quad([[x,y,ZB],[x+ST,y,ZB],[x+ST,y,ZT],[x,y,ZT]],'#D6D4C6',null,0);
+    if(Math.abs(x-X0)<.01) quad([[x,y,ZB],[x,y+ST,ZB],[x,y+ST,ZT],[x,y,ZT]],'#DBD9CB',null,0);
+  }
+}
+function bodyPt(th,y){
+  const n=2.7, ex=2/n;
+  const cx=Math.cos(th), cz=Math.sin(th);
+  const x=14.5*Math.sign(cx)*Math.pow(Math.abs(cx),ex);
+  const z=14.4+12.4*Math.sign(cz)*Math.pow(Math.abs(cz),ex);
+  return [x,y,z];
+}
+function drawBody(){
+  if(!S.body) return;
+  const hl=(S.hl==='body'), NT=44, NY=10, Y0=-17, Y1=17;
+  for(let i=0;i<NT;i++)for(let j=0;j<NY;j++){
+    const t0=2*Math.PI*i/NT, t1=2*Math.PI*(i+1)/NT;
+    const y0=Y0+(Y1-Y0)*j/NY, y1=Y0+(Y1-Y0)*(j+1)/NY;
+    const p=[bodyPt(t0,y0),bodyPt(t1,y0),bodyPt(t1,y1),bodyPt(t0,y1)];
+    const cen=mul(add(add(p[0],p[1]),add(p[2],p[3])),0.25);
+    if(cen[2]<1.9||cen[2]>18) continue;
+    if(cutHide(cen)) continue;
+    const n=norm(cross(sub(p[1],p[0]),sub(p[3],p[0])));
+    const t=Math.abs(dot(n,LD));
+    quad(p, hl?'rgba(47,69,236,.16)':'rgba(206,166,140,'+(0.16+0.16*t).toFixed(3)+')', null, 0);
+  }
+  // 몸통 절단면(윗면)
+  {
+    const ZC=18;
+    const halfx=14.5*Math.pow(Math.max(0,1-Math.pow((ZC-14.4)/12.4,2.7)),1/2.7);
+    for(let y=-17;y<17-0.01;y+=2.5){
+      const p=[[-halfx,y,ZC],[halfx,y,ZC],[halfx,y+2.5,ZC],[-halfx,y+2.5,ZC]];
+      if(cutHide([0,y+1.25,ZC])) continue;
+      quad(p,'rgba(206,166,140,.34)','rgba(180,140,116,.30)',.6);
+    }
+  }
+  // 콩팥
+  const K=[S.off/10,1.2,Cq], KR=[2.6,4.4,2.8], NU2=12,NV2=18;
+  for(let i=0;i<NU2;i++)for(let j=0;j<NV2;j++){
+    const u0=Math.PI*i/NU2,u1=Math.PI*(i+1)/NU2, v0=2*Math.PI*j/NV2, v1=2*Math.PI*(j+1)/NV2;
+    const f=(u,v)=>{
+      const bend=1-0.32*Math.exp(-Math.pow((Math.sin(u)*Math.cos(v)-(-1)),2)*2.2);
+      return [K[0]+KR[0]*Math.sin(u)*Math.cos(v)*bend, K[1]+KR[1]*Math.cos(u), K[2]+KR[2]*Math.sin(u)*Math.sin(v)*bend];
+    };
+    const p=[f(u0,v0),f(u0,v1),f(u1,v1),f(u1,v0)];
+    const cen=mul(add(add(p[0],p[1]),add(p[2],p[3])),0.25);
+    if(cutHide(cen)) continue;
+    const n=norm(cross(sub(p[1],p[0]),sub(p[3],p[0])));
+    const t=Math.abs(dot(n,LD));
+    quad(p,'rgba(176,98,80,'+(0.14+0.20*t).toFixed(3)+')',null,0);
+  }
+}
+function drawZone(){
+  if(!S.zone) return;
+  const NV=40;
+  for(let k=-3;k<=3;k++){
+    const z=Cq+ZONE_H*k/3.2, rr=ZONE_R*Math.sqrt(Math.max(0,1-Math.pow(k/3.4,2)));
+    for(let j=0;j<NV;j++){
+      const v0=2*Math.PI*j/NV, v1=2*Math.PI*(j+1)/NV;
+      const a=[rr*Math.cos(v0),rr*Math.sin(v0),z], b=[rr*Math.cos(v1),rr*Math.sin(v1),z];
+      if(cutHide(a)) continue;
+      line3(a,b,'rgba(47,69,236,.30)',1);
+    }
+  }
+  line3([0,0,Cq-ZONE_H],[0,0,Cq+ZONE_H],'rgba(47,69,236,.30)',1,[3,4]);
+}
+function drawAim(){
+  if(!S.aim) return;
+  const hl=(S.hl==='aim');
+  const dirs=[[0.55,0.35,1],[-0.5,0.42,1]];
+  for(const d0 of dirs){
+    const d=norm(d0);
+    const a=add(F2C,mul(d,-26)), b=add(F2C,mul(d,22));
+    line3(a,b, hl?ACC:'rgba(47,69,236,.42)',1.2,[5,5]);
+    const box=(p,s)=>{
+      const q=[[-s,-s,0],[s,-s,0],[s,s,0],[-s,s,0]].map(v=>add(p,[v[0],v[1],v[2]]));
+      quad(q, hl?'rgba(47,69,236,.5)':'rgba(60,62,54,.55)',null,0);
+    };
+    box(a,1.6); box(b,2.1);
+  }
+}
+let WAVE_LINES=[], WAVE_CREST=[], WAVE_A=0;
+/* 타원체의 나머지 부분(실제로는 없는 부분) */
+function drawGhost(){
+  const T=[-HDIR[1],HDIR[0],0], pc=Math.atan2(T[1],T[0]);
+  const N=46;
+  for(const ps of [pc,pc+Math.PI]){
+    for(let i=0;i<N;i++){
+      const u0=UMAX+(Math.PI-UMAX)*i/N, u1=UMAX+(Math.PI-UMAX)*(i+1)/N;
+      const a=[B*Math.sin(u0)*Math.cos(ps),B*Math.sin(u0)*Math.sin(ps),-A*Math.cos(u0)];
+      const b=[B*Math.sin(u1)*Math.cos(ps),B*Math.sin(u1)*Math.sin(ps),-A*Math.cos(u1)];
+      line3(a,b,'rgba(35,36,29,.26)',1.2,[5,5]);
+    }
+    for(let i=0;i<N;i++){
+      const u0=UMAX*i/N,u1=UMAX*(i+1)/N;
+      const a=[B*Math.sin(u0)*Math.cos(ps),B*Math.sin(u0)*Math.sin(ps),-A*Math.cos(u0)];
+      const b=[B*Math.sin(u1)*Math.cos(ps),B*Math.sin(u1)*Math.sin(ps),-A*Math.cos(u1)];
+      line3(a,b,'rgba(35,36,29,.42)',1.6);
+    }
+  }
+  for(let j=0;j<48;j++){
+    const v0=2*Math.PI*j/48, v1=2*Math.PI*(j+1)/48;
+    const a=[B*Math.cos(v0),B*Math.sin(v0),0], b=[B*Math.cos(v1),B*Math.sin(v1),0];
+    line3(a,b,'rgba(35,36,29,.16)',1,[4,5]);
+  }
+}
+/* 절단면 채우기 */
+function cutFaces(){
+  if(!S.cut) return;
+  const T=[-HDIR[1],HDIR[0],0];
+  const at=s0=>[s0*T[0],s0*T[1],0];
+  if(S.body){
+    const Zb=2.0, Zt=18, N=18;
+    const X=z=>14.5*Math.pow(Math.max(0,1-Math.pow(Math.abs((z-14.4)/12.4),2.7)),1/2.7);
+    const smax=z=>Math.min(Math.abs(T[0])>1e-3?X(z)/Math.abs(T[0]):99, Math.abs(T[1])>1e-3?17/Math.abs(T[1]):99);
+    for(let i=0;i<N;i++){
+      const z0=Zb+(Zt-Zb)*i/N, z1=Zb+(Zt-Zb)*(i+1)/N;
+      const a=smax(z0), b=smax(z1);
+      const p=[add(at(-a),[0,0,z0]),add(at(a),[0,0,z0]),add(at(b),[0,0,z1]),add(at(-b),[0,0,z1])];
+      quad(p,'rgba(214,176,150,.42)',null,0);
+    }
+    // 피부 테두리
+    for(let i=0;i<N;i++){
+      const z0=Zb+(Zt-Zb)*i/N, z1=Zb+(Zt-Zb)*(i+1)/N;
+      const a=smax(z0), b=smax(z1);
+      line3(add(at(a),[0,0,z0]),add(at(b),[0,0,z1]),'rgba(168,124,100,.55)',1.4);
+      line3(add(at(-a),[0,0,z0]),add(at(-b),[0,0,z1]),'rgba(168,124,100,.55)',1.4);
+    }
+  }
+  // 반사경 껍질 단면(두께 있는 금속 띠)
+  {
+    const N=26, TH=0.55;
+    for(let i=0;i<N;i++){
+      const u0=UMAX*i/N, u1=UMAX*(i+1)/N;
+      for(const sg of [1,-1]){
+        const A2=add(at(sg*B*Math.sin(u0)),[0,0,-A*Math.cos(u0)]);
+        const B2=add(at(sg*B*Math.sin(u1)),[0,0,-A*Math.cos(u1)]);
+        const oA=add(at(sg*(B+TH)*Math.sin(u0)),[0,0,-(A+TH)*Math.cos(u0)]);
+        const oB=add(at(sg*(B+TH)*Math.sin(u1)),[0,0,-(A+TH)*Math.cos(u1)]);
+        quad([A2,B2,oB,oA],'#7C7D70','#5E5F54',.6);
+      }
+    }
+  }
+  if(S.cush){
+    const ZT=2.0, NT=9, rad=t=>7.5+1.5*Math.sin(Math.PI*t)-1.1*t;
+    for(let i=0;i<NT;i++){
+      const t0=i/NT,t1=(i+1)/NT, r0=rad(t0), r1=rad(t1);
+      const z0=ZCUT+(ZT-ZCUT)*t0, z1=ZCUT+(ZT-ZCUT)*t1;
+      quad([add(at(-r0),[0,0,z0]),add(at(r0),[0,0,z0]),add(at(r1),[0,0,z1]),add(at(-r1),[0,0,z1])],
+           'rgba(47,69,236,.10)',null,0);
+    }
+  }
+}
+/* 파면 */
+function drawWave(){
+  if(S.s<0||S.s>PATH) return;
+  const NV=26, NP=24, s=S.s;
+  const g=[];
+  for(let j=0;j<=NV;j++){
+    const psi=2*Math.PI*j/NV, row=[];
+    for(let i=0;i<=NP;i++) row.push(wavePt(PHIMAX*i/NP,psi,s));
+    g.push(row);
+  }
+  const fade=0.9-0.35*Math.abs(s/PATH-0.5)*2;
+  for(let j=0;j<NV;j++)for(let i=0;i<NP;i++){
+    const p=[g[j][i],g[j+1][i],g[j+1][i+1],g[j][i+1]];
+    const cen=mul(add(add(p[0],p[1]),add(p[2],p[3])),0.25);
+    if(cutHide(cen)) continue;
+    quad(p,'rgba(47,69,236,'+(0.075*fade).toFixed(3)+')',null,0);
+  }
+  WAVE_LINES.length=0;
+  for(let j=0;j<=NV;j+=2)for(let i=0;i<NP;i++){
+    if(cutHide(g[j][i])) continue;
+    WAVE_LINES.push([g[j][i],g[j][i+1]]);
+  }
+  WAVE_A=0.62*fade;
+  // 절단면 위의 파면 마루(굵은 곡선)
+  WAVE_CREST.length=0;
+  const T=[-HDIR[1],HDIR[0],0], pc=Math.atan2(T[1],T[0]);
+  for(const ps of [pc,pc+Math.PI]){
+    const row=[];
+    for(let i=0;i<=NP;i++) row.push(wavePt(PHIMAX*i/NP,ps,s));
+    WAVE_CREST.push(row);
+  }
+}
+/* 충격파 경로 */
+function drawRays(){
+  if(!S.ray) return;
+  const psis=[0,2*Math.PI/3,4*Math.PI/3], phis=[0.42,0.95,1.55,2.15];
+  for(const psi of psis)for(const ph of phis){
+    const h=hitOf(ph,psi);
+    if(cutHide(h.p)) continue;
+    line3(F1,h.p,'rgba(47,69,236,.38)',1.1);
+    line3(h.p,F2C,'rgba(47,69,236,.38)',1.1);
+    if(S.s>=0&&S.s<=PATH){
+      const p=wavePt(ph,psi,S.s);
+      dot3(p,ACC,3.2,PAPER);
+    }
+  }
+}
+/* 선택한 경로 · 접평면 · 법선 */
+function drawPick(){
+  if(S.sec!==2) return;
+  const psi=Math.atan2(HDIR[0],-HDIR[1]);   // 절단면 위(옆모습으로 보이는 방향)
+  const ph=S.phi, h=hitOf(ph,psi), Q=h.p;
+  const n=enorm(Q);
+  const t1=norm(cross(n,[0,0,1])), t2=norm(cross(n,t1));
+  const sz=2.6;
+  const pl=[add(add(Q,mul(t1,sz)),mul(t2,sz)),add(add(Q,mul(t1,-sz)),mul(t2,sz)),
+            add(add(Q,mul(t1,-sz)),mul(t2,-sz)),add(add(Q,mul(t1,sz)),mul(t2,-sz))];
+  quad(pl,'rgba(47,69,236,.10)','rgba(47,69,236,.55)',1.2);
+  line3(Q,add(Q,mul(n,-3.4)),'rgba(35,36,29,.75)',1.4,[4,4]);
+  line3(F1,Q,ACC,2.4);
+  line3(Q,F2C,ACC,2.4);
+  push(len(sub(Q,EYE))-.02,()=>{
+    const q=proj(Q); if(!q)return;
+    ctx.beginPath(); ctx.arc(q.x,q.y,4,0,7); ctx.fillStyle=ACC; ctx.fill();
+    ctx.lineWidth=2; ctx.strokeStyle=PAPER; ctx.stroke();
+  });
+  window.__pick={Q:Q,n:n,r1:h.r,r2:PATH-h.r};
+}
+/* ============ 전체 그리기 ============ */
+function drawScene(){
+  updateCam();
+  HDIR=norm([EYE[0]-cam.target[0],EYE[1]-cam.target[1],0]);
+  const g=ctx.createLinearGradient(0,0,0,H);
+  g.addColorStop(0,'#F4F4EA'); g.addColorStop(1,'#E7E7DA');
+  ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+
+  if(S.sec!==2) drawCasing();
+  drawReflector(); if(S.sec===2) drawGhost(); drawElectrode(); drawWater();
+  drawCushion(); drawTable(); drawBody(); cutFaces(); drawZone(); drawAim();
+  drawRays(); drawWave(); drawPick();
+
+  // 축과 두 초점
+  line3([0,0,-A-1],[0,0,Cq+5],'rgba(35,36,29,.22)',1,[3,5]);
+  dot3(F1,'#E0A200',4.5,PAPER);
+  const SP=stonePos();
+  if(S.broken<1) drawStone(SP,1,[74,71,63],S.hl==='stone');
+  else{
+    const k=Math.min(1,(performance.now()-S.brokeT)/900);
+    for(let i=0;i<FRAG.length;i++){
+      const d=FRAG[i];
+      drawStone(add(SP,mul(d,0.25+1.15*k)),0.30+0.06*Math.sin(i*2.3),[86,82,72],false);
+    }
+  }
+  if(S.impact>0){
+    push(0,()=>{
+      const q=proj(F2C); if(!q)return;
+      const k=S.impact;
+      ctx.save(); ctx.globalAlpha=k;
+      const rr=10+46*(1-k);
+      const gg=ctx.createRadialGradient(q.x,q.y,0,q.x,q.y,rr);
+      gg.addColorStop(0,'rgba(255,255,255,.9)'); gg.addColorStop(.4,'rgba(47,69,236,.5)');
+      gg.addColorStop(1,'rgba(47,69,236,0)');
+      ctx.fillStyle=gg; ctx.beginPath(); ctx.arc(q.x,q.y,rr,0,7); ctx.fill();
+      ctx.restore();
+    });
+  }
+  flush();
+  if(S.s>=0&&S.s<=PATH){
+    ctx.save(); ctx.strokeStyle='rgba(47,69,236,'+WAVE_A.toFixed(3)+')'; ctx.lineWidth=1.4; ctx.lineCap='round';
+    ctx.beginPath();
+    for(const L of WAVE_LINES){const a=proj(L[0]),b=proj(L[1]); if(!a||!b)continue;
+      ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y);}
+    ctx.stroke();
+    ctx.strokeStyle='rgba(47,69,236,'+Math.min(1,WAVE_A*1.5).toFixed(3)+')'; ctx.lineWidth=2.8;
+    ctx.shadowColor='rgba(47,69,236,.45)'; ctx.shadowBlur=8;
+    for(const row of WAVE_CREST){
+      ctx.beginPath(); let started=false;
+      for(const p of row){const q=proj(p); if(!q){started=false;continue;}
+        if(!started){ctx.moveTo(q.x,q.y);started=true;} else ctx.lineTo(q.x,q.y);}
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  /* --- 겉면 글자 --- */
+  const psiF=Math.atan2(EYE[1],EYE[0])+(S.cut?Math.PI:0);
+  if(S.lab){
+    label(epoint(UMAX*0.62,psiF),'반타원체 반사경',S.hl==='reflector'?ACC:'#5F5D52',16,-6);
+    label(F1,'전극 · 고전압 방전',S.hl==='electrode'?ACC:'#8A6A10',24,26);
+    if(S.cush) label([7.0*Math.cos(psiF),7.0*Math.sin(psiF),-0.7],'물주머니',S.hl==='cushion'?ACC:'#4257C9',16,4);
+    if(S.body){
+      label([12*Math.cos(psiF),12*Math.sin(psiF),1.95],'환자 테이블',S.hl==='table'?ACC:'#7C7A6D',14,-4);
+      label([S.off/10+1.6,1.2,Cq+2.6],'콩팥',S.hl==='body'?ACC:'#9C5A48',12,-4);
+    }
+    label(stonePos(),'결석 (F₂)',S.hl==='stone'?ACC:'#3E3B33',17,-15);
+    if(S.zone) label([0,0,Cq-ZONE_H],'초점 영역 Ø12 × 60 mm',ACC,16,26,true);
+  }
+  mathLabel(F1,'F₁','#8A6A10',-17,-9);
+  mathLabel(F2C,'F₂',ACC,-18,6);
+  if(S.sec===2&&window.__pick){
+    const pk=window.__pick;
+    mathLabel(mul(add(F1,pk.Q),0.5),'r₁',ACC,-8,-14);
+    mathLabel(mul(add(pk.Q,F2C),0.5),'r₂',ACC,14,-2);
+  }
+  drawHUD();
+}
+/* ============ HUD ============ */
+const hud=document.getElementById('hud');
+function chip(k,v,acc){return '<div class="chip'+(acc?' acc':'')+'"><i>'+k+'</i>'+v+'</div>';}
+function drawHUD(){
+  const s=S.s<0?0:Math.min(S.s,PATH);
+  let h='';
+  h+=chip('달린 거리',fmt(s*10,0)+' mm');
+  h+=chip('경과',fmt(s/SPEED,0)+' µs');
+  h+=chip('F₂까지',fmt((PATH-s)*10,0)+' mm',S.s>=0);
+  h+=chip('누적',S.shots+' 발');
+  h+='<div class="chip wide"><i>r₁+r₂</i>276 mm = 2a</div>';
+  hud.innerHTML=h;
+}
+/* ============ 부품 목록 ============ */
+const PARTS=[
+ {k:'reflector',n:'반타원체 반사경',s:'2a = 276 mm',c:'#9A9B8E',
+  d:'속이 거울처럼 다듬어진 <b>반타원체</b>입니다. 타원을 장축 둘레로 돌린 모양이라 한 초점에서 나간 파가 벽에 부딪히면 모두 다른 초점으로 튕깁니다.'},
+ {k:'electrode',n:'전극 (F₁ 자리)',s:'16~24 kV',c:'#E0A200',
+  d:'물속에서 <b>고전압 방전</b>을 일으켜 순간적으로 플라스마 기포를 만듭니다. 이 폭발이 충격파의 출발점이고, 그 자리가 바로 <b>첫 번째 초점 F₁</b>입니다.'},
+ {k:'water',n:'커플링 물',s:'1500 m/s',c:'#6E7ED8',
+  d:'충격파는 공기를 거의 통과하지 못합니다(0.1% 미만). 물은 사람 몸과 성질이 비슷해 <b>약 99%</b>가 그대로 몸속으로 들어갑니다.'},
+ {k:'cushion',n:'물주머니 · 젤',s:'피부 밀착',c:'#4257C9',
+  d:'물을 채운 주머니를 피부에 대고 <b>젤</b>로 빈틈을 없앱니다. 공기 방울이 끼면 그 자리에서 충격파가 튕겨 나가 효과가 크게 떨어집니다.'},
+ {k:'table',n:'환자 테이블',s:'3축 이동',c:'#B9B7A9',
+  d:'테이블을 <b>앞뒤·좌우·위아래</b>로 조금씩 움직여 결석을 F₂에 정확히 올려놓습니다. 기계가 초점을 옮기는 것이 아니라 <b>환자를 옮깁니다</b>.'},
+ {k:'body',n:'환자 · 콩팥',s:'깊이 약 94 mm',c:'#B0624F',
+  d:'개구면에서 F₂까지가 약 13 cm이므로, 피부에서 <b>9~10 cm</b> 깊이에 있는 콩팥 결석에 초점이 놓입니다.'},
+ {k:'stone',n:'결석 (F₂ 자리)',s:'Ø 10 mm',c:'#4A4740',
+  d:'두 번째 초점 <b>F₂</b>에 결석을 맞춥니다. 한 발로는 깨지지 않고, 균열이 쌓이는 <b>피로 파괴</b>로 부서집니다.'},
+ {k:'aim',n:'조준 장치',s:'X선 · 초음파',c:'#6E7ED8',
+  d:'X선 두 방향 투시나 초음파로 결석을 찾아 <b>F₂와 겹치도록</b> 테이블을 움직입니다. 시술 중에도 계속 확인합니다.'}
+];
+const partsEl=document.getElementById('parts'), descEl=document.getElementById('partDesc');
+partsEl.innerHTML=PARTS.map(p=>'<div class="part" data-k="'+p.k+'"><span class="dot" style="background:'+p.c+'"></span>'+
+  '<span class="nm">'+p.n+'</span><span class="sp">'+p.s+'</span></div>').join('');
+const DEFDESC='부품 이름을 누르면 그 부분이 강조되고 설명이 나옵니다. 화면은 기계를 반으로 잘라 속을 보여 주는 <b>단면</b>입니다.';
+function selPart(k){
+  S.hl=k;
+  partsEl.querySelectorAll('.part').forEach(e=>e.classList.toggle('on',e.dataset.k===k));
+  const p=PARTS.find(x=>x.k===k);
+  descEl.innerHTML=p?p.d:DEFDESC;
+  if(k==='aim') {S.aim=true; document.getElementById('tAim').checked=true;}
+}
+partsEl.querySelectorAll('.part').forEach(e=>e.onclick=()=>selPart(S.hl===e.dataset.k?null:e.dataset.k));
+selPart(null);
+
+/* ============ 패널 갱신 ============ */
+function pressure(){return 40*Math.pow(S.kv/20,2);}
+function effi(){const d=S.off; return Math.exp(-Math.pow(d/7.5,2));}
+function updatePanel(){
+  document.getElementById('nKv').textContent=fmt(S.kv,1)+' kV';
+  document.getElementById('nOff').textContent=fmt(S.off,1)+' mm';
+  document.getElementById('nSlow').textContent=fmt(S.slow,2)+' 초';
+  document.getElementById('nSf').textContent=Math.round(S.slow*5435/100)*100;
+  document.getElementById('nP').textContent=fmt(pressure(),0);
+  document.getElementById('nEff').textContent=fmt(effi()*100,0);
+  document.getElementById('nShots').textContent=S.shots;
+  document.getElementById('barBk').style.width=(S.broken*100).toFixed(1)+'%';
+  const on=document.getElementById('offNote');
+  on.innerHTML = S.off<=1 ? '결석이 F₂에 정확히 놓였습니다. 충격파가 한 점에 모입니다.'
+    : (S.off<=6 ? '초점 영역(지름 12 mm) 안에 겨우 걸쳐 있습니다. 힘이 줄어듭니다.'
+    : '초점 영역을 벗어났습니다. 압력이 급격히 떨어져 결석이 거의 깨지지 않고, 주변 조직만 자극합니다.');
+  document.getElementById('nPhi').textContent=fmt(S.phi/DEG,0)+'°';
+  const r1=rF1(S.phi), r2=PATH-r1;
+  document.getElementById('nR1').textContent=fmt(r1*10,1);
+  document.getElementById('nR2').textContent=fmt(r2*10,1);
+  document.getElementById('nRs').textContent=fmt(PATH*10,1);
+  document.getElementById('nT').textContent=fmt(PATH/SPEED,0);
+  document.getElementById('e1').style.flex=r1; document.getElementById('e2').style.flex=r2;
+  document.getElementById('e1').textContent=fmt(r1*10,0);
+  document.getElementById('e2').textContent=fmt(r2*10,0);
+  const h=hitOf(S.phi,0), n=enorm(h.p);
+  const a1=Math.acos(clamp(Math.abs(dot(norm(sub(F1,h.p)),n)),-1,1))/DEG;
+  document.getElementById('nAng').textContent=fmt(a1,1);
+}
+/* ============ 발사 ============ */
+function fire(){ if(S.s>=0) return; S.s=0; S.spark=1; }
+function impact(){
+  S.impact=1; S.shots++;
+  const dmg=0.020*(pressure()/40)*effi();
+  if(S.broken<1){ S.broken=Math.min(1,S.broken+dmg);
+    if(S.broken>=1){S.brokeT=performance.now(); S.auto=false; document.getElementById('btnAuto').classList.remove('pri');} }
+  updatePanel();
+}
+/* ============ 입력 ============ */
+let last=null; const touches=new Map(); let pinch=null;
+function localPt(ev){const r=cv.getBoundingClientRect();return [ev.clientX-r.left,ev.clientY-r.top];}
+cv.addEventListener('pointerdown',ev=>{
+  cv.setPointerCapture(ev.pointerId); last=localPt(ev); touches.set(ev.pointerId,last);
+  cv.classList.add('drag');
+});
+cv.addEventListener('pointermove',ev=>{
+  const p=localPt(ev);
+  if(touches.has(ev.pointerId)) touches.set(ev.pointerId,p);
+  if(touches.size===2){
+    const v=[...touches.values()], d=Math.hypot(v[0][0]-v[1][0],v[0][1]-v[1][1]);
+    if(pinch) cam.dist=clamp(cam.dist*pinch/d,26,170);
+    pinch=d; last=null; return;
+  }
+  if(!last) return;
+  if(ev.pointerType==='mouse'&&ev.buttons===0){last=p;return;}
+  cam.az-=(p[0]-last[0])*0.008;
+  cam.el=clamp(cam.el+(p[1]-last[1])*0.006,-0.35,1.35);
+  last=p;
+});
+['pointerup','pointercancel','pointerleave'].forEach(t=>cv.addEventListener(t,ev=>{
+  touches.delete(ev.pointerId); if(touches.size<2) pinch=null;
+  if(t!=='pointerleave'||!touches.size){last=null; cv.classList.remove('drag');}
+}));
+cv.addEventListener('wheel',e=>{e.preventDefault();
+  cam.dist=clamp(cam.dist*(1+Math.sign(e.deltaY)*0.09),26,170);},{passive:false});
+
+/* ============ UI ============ */
+document.querySelectorAll('.tabs button').forEach(b=>{
+  b.onclick=()=>{
+    document.querySelectorAll('.tabs button').forEach(x=>x.classList.remove('on'));
+    b.classList.add('on'); S.sec=+b.dataset.s;
+    document.querySelectorAll('section').forEach((s,i)=>s.classList.toggle('on',i===S.sec));
+    if(S.sec===2){ S.body=false; S.cush=false; selPart(null); document.getElementById('tBody').checked=false;
+      document.getElementById('tCush').checked=false; cam.target=[0,0,0]; cam.dist=52; }
+    else if(S.sec===0){ S.body=true; S.cush=true; document.getElementById('tBody').checked=true;
+      document.getElementById('tCush').checked=true; cam.target=[0,0,3.5]; cam.dist=76; }
+  };
+});
+const tg=(id,key)=>{const e=document.getElementById(id); e.onchange=()=>{S[key]=e.checked;};};
+tg('tBody','body'); tg('tCush','cush'); tg('tAim','aim'); tg('tZone','zone');
+tg('tLab','lab'); tg('tRay','ray');
+const bindR=(id,key,f)=>{const e=document.getElementById(id);
+  e.oninput=()=>{S[key]=parseFloat(e.value)*(f||1); updatePanel();};};
+bindR('sKv','kv'); bindR('sOff','off'); bindR('sSlow','slow'); bindR('sPhi','phi',DEG);
+document.getElementById('btnShot').onclick=fire;
+document.getElementById('btnAuto').onclick=e=>{
+  S.auto=!S.auto; e.target.classList.toggle('pri',S.auto);
+  e.target.textContent=S.auto?'연속 정지':'연속 발사';
+  if(S.auto) fire();
+};
+document.getElementById('btnRe').onclick=()=>{S.broken=0;S.shots=0;updatePanel();};
+document.getElementById('btnReset').onclick=()=>{
+  cam.az=-1.02; cam.el=0.42; cam.dist=S.sec===2?52:76; cam.target=[0,0,S.sec===2?0:3.5];};
+const btnCut=document.getElementById('btnCut');
+btnCut.onclick=()=>{S.cut=!S.cut; btnCut.classList.toggle('pri',S.cut);
+  btnCut.textContent=S.cut?'단면 끄기':'단면 보기';};
+btnCut.classList.toggle('pri',S.cut); btnCut.textContent=S.cut?'단면 끄기':'단면 보기';
+
+/* ============ 루프 ============ */
+let t0=performance.now(), autoWait=0;
+function loop(t){
+  const dt=Math.min(0.05,(t-t0)/1000); t0=t;
+  if(S.s>=0){
+    S.s+=PATH*dt/S.slow;
+    if(S.s>=PATH){ S.s=-1; impact(); }
+  }else if(S.auto){
+    autoWait-=dt; if(autoWait<=0){ fire(); autoWait=0.35; }
+  }
+  if(S.spark>0) S.spark=Math.max(0,S.spark-dt*4.5);
+  if(S.impact>0) S.impact=Math.max(0,S.impact-dt*2.2);
+  drawScene();
+  requestAnimationFrame(loop);
+}
+new ResizeObserver(resize).observe(document.getElementById('stage'));
+resize(); updatePanel(); requestAnimationFrame(loop);
+</script>
+</body>
+</html>

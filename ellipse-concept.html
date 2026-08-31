@@ -87,7 +87,6 @@ if (localStorage.getItem('geoAppOk') !== '1') location.replace('index.html');
 <body>
 <header>
   <h1>타원 개념 정리</h1>
-  <p><i>a</i>, <i>b</i> 값을 움직여 초점·꼭짓점·장축·단축이 어떻게 변하는지 살펴보세요</p>
 </header>
 
 <div id="main">
@@ -138,23 +137,17 @@ if (localStorage.getItem('geoAppOk') !== '1') location.replace('index.html');
       </svg>
     </div>
 
-    <div class="defBox">
-      평면 위의 두 점 F, F′으로부터의 <b>거리의 합이 일정한</b> 점들의 자취를 <b>타원</b>이라 합니다.<br>
-      · 두 점 F, F′ → <span class="term t-focus">초점</span><br>
-      · 두 초점을 지나는 직선이 타원과 만나는 점 A, A′과 그 수직이등분선이 타원과 만나는 점 B, B′ → <span class="term t-vertex">꼭짓점</span><br>
-      · 선분 AA′ → <span class="term t-axis">장축</span> , 선분 BB′ → <span class="term t-axis">단축</span><br>
-      · 장축과 단축의 교점 → <span class="term t-center">중심</span>
-    </div>
-
     <h2>2. 타원의 방정식</h2>
     <div class="fcard">
       <div class="cond">두 초점으로부터 거리의 합이 일정한 타원의 방정식</div>
       <div class="formula"><span class="frac"><span class="top"><i>x</i><sup style="font-size:12px">2</sup></span><span class="bot"><i>a</i><sup style="font-size:12px">2</sup></span></span> + <span class="frac"><span class="top"><i>y</i><sup style="font-size:12px">2</sup></span><span class="bot"><i>b</i><sup style="font-size:12px">2</sup></span></span> = 1</div>
       <div class="sub">
-        · <i>a</i> &gt; <i>b</i> &gt; 0 → 초점이 <b><i>x</i>축 위</b>: F(<i>c</i>, 0), F′(−<i>c</i>, 0), <i>c</i> = √(<i>a</i>² − <i>b</i>²)<br>
-        &nbsp;&nbsp;거리의 합 = 장축 = 2<i>a</i> · 단축 = 2<i>b</i><br>
-        · <i>b</i> &gt; <i>a</i> &gt; 0 → 초점이 <b><i>y</i>축 위</b>: F(0, <i>c</i>), F′(0, −<i>c</i>), <i>c</i> = √(<i>b</i>² − <i>a</i>²)<br>
-        &nbsp;&nbsp;거리의 합 = 장축 = 2<i>b</i> · 단축 = 2<i>a</i>
+        · <i>a</i> &gt; <i>b</i> &gt; 0 → 초점이 <b><i>x</i>축 위</b>: F(<i>c</i>, 0), F′(−<i>c</i>, 0)<br>
+        &nbsp;&nbsp;<i>c</i> = √(<i>a</i>² − <i>b</i>²)<br>
+        &nbsp;&nbsp;장축 = 2<i>a</i> · 단축 = 2<i>b</i><br>
+        · <i>b</i> &gt; <i>a</i> &gt; 0 → 초점이 <b><i>y</i>축 위</b>: F(0, <i>c</i>), F′(0, −<i>c</i>)<br>
+        &nbsp;&nbsp;<i>c</i> = √(<i>b</i>² − <i>a</i>²)<br>
+        &nbsp;&nbsp;장축 = 2<i>b</i> · 단축 = 2<i>a</i>
       </div>
       <div class="now" id="nowLine"></div>
     </div>

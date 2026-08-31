@@ -32,12 +32,12 @@ if (localStorage.getItem('geoAppOk') !== '1') location.replace('index.html');
   sup { font-size:.68em; vertical-align:.5em; }
   sub { font-size:.68em; vertical-align:-.25em; }
 
-  header { padding:16px 24px 12px; display:flex; align-items:baseline; gap:12px; flex-wrap:wrap; }
+  header { padding:14px 24px 11px; display:flex; align-items:baseline; gap:0 12px; flex-wrap:wrap; }
   header .eyebrow {
     font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:11px; font-weight:500;
-    letter-spacing:.16em; color:var(--acc); width:100%;
+    letter-spacing:.16em; color:var(--acc); width:100%; line-height:1.1;
   }
-  header h1 { font-size:26px; font-weight:700; letter-spacing:-.02em; margin-top:6px; }
+  header h1 { font-size:26px; font-weight:700; letter-spacing:-.02em; margin-top:0; line-height:1.15; }
   header .sub { font-size:13px; color:var(--mute); font-weight:500; }
 
   #tabs { display:flex; gap:8px; padding:0 24px 12px; border-bottom:1.5px solid var(--lnw); }
@@ -145,7 +145,6 @@ if (localStorage.getItem('geoAppOk') !== '1') location.replace('index.html');
 <header>
   <span class="eyebrow">GEOMETRY LAB</span>
   <h1>이차곡선의 접선</h1>
-  <span class="sub">공식을 누르면 그 자리에서 증명이 펼쳐집니다</span>
 </header>
 
 <div id="tabs">
@@ -205,7 +204,6 @@ if (localStorage.getItem('geoAppOk') !== '1') location.replace('index.html');
           <td class="f blue" data-k="hyp2-p" tabindex="0" role="button"><span class="fr"><span class="nu"><i>x</i><sub>1</sub><i>x</i></span><span class="de"><i>a</i><sup>2</sup></span></span> − <span class="fr"><span class="nu"><i>y</i><sub>1</sub><i>y</i></span><span class="de"><i>b</i><sup>2</sup></span></span> = −1</td>
         </tr>
       </table>
-          <div class="tHint">오른쪽 두 칸의 공식을 눌러 보세요 — 옆에 증명이 나타납니다.</div>
         </div>
       </div>
       <div class="right">

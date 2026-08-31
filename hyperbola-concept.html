@@ -100,7 +100,6 @@ if (localStorage.getItem('geoAppOk') !== '1') location.replace('index.html');
 <body>
 <header>
   <h1>쌍곡선 개념 정리</h1>
-  <p>식을 눌러 그래프를 켜고 끄면서, <i>a</i>·<i>b</i> 값을 움직여 초점·꼭짓점·주축·점근선을 살펴보세요</p>
 </header>
 
 <div id="main">
@@ -156,25 +155,15 @@ if (localStorage.getItem('geoAppOk') !== '1') location.replace('index.html');
       </svg>
     </div>
 
-    <div class="defBox">
-      평면 위의 두 점 F, F′으로부터의 <b>거리의 차가 일정한</b> 점들의 자취를 <b>쌍곡선</b>이라 합니다.<br>
-      · 두 점 F, F′ → <span class="term t-focus">초점</span><br>
-      · 쌍곡선이 직선 FF′과 만나는 두 점 A, A′ → <span class="term t-vertex">꼭짓점</span><br>
-      · 선분 AA′ → <span class="term t-axis">주축</span><br>
-      · 주축의 중점(= 두 초점의 중점) → <span class="term t-center">중심</span><br>
-      · 곡선이 한없이 가까워지는 두 직선 → <span class="term t-asym">점근선</span> <span style="color:#94a3b8;font-size:12px">(오른쪽 그래프의 하늘색 점선)</span>
-    </div>
-
     <h2>2. 쌍곡선의 방정식</h2>
     <div class="fcard on" id="card1">
       <div class="cond">(1) 초점이 <b><i>x</i>축 위</b>에 있을 때 — 좌우로 벌어진 쌍곡선</div>
       <div class="formula"><span class="frac"><span class="top"><i>x</i><sup style="font-size:12px">2</sup></span><span class="bot"><i>a</i><sup style="font-size:12px">2</sup></span></span> − <span class="frac"><span class="top"><i>y</i><sup style="font-size:12px">2</sup></span><span class="bot"><i>b</i><sup style="font-size:12px">2</sup></span></span> = 1</div>
       <div class="sub">
         초점 F(<i>c</i>, 0), F′(−<i>c</i>, 0) — <b><i>c</i> = √(<i>a</i>² + <i>b</i>²)</b><br>
-        꼭짓점 A(<i>a</i>, 0), A′(−<i>a</i>, 0) · 거리의 차 = 주축의 길이 = <b>2<i>a</i></b>
+        꼭짓점 A(<i>a</i>, 0), A′(−<i>a</i>, 0) · 주축의 길이 = <b>2<i>a</i></b>
       </div>
       <div class="now" id="now1"></div>
-      <div class="tapHint">👆 카드를 누르면 그래프를 켜고 끌 수 있어요</div>
     </div>
 
     <div class="fcard" id="card2">
@@ -182,10 +171,9 @@ if (localStorage.getItem('geoAppOk') !== '1') location.replace('index.html');
       <div class="formula"><span class="frac"><span class="top"><i>x</i><sup style="font-size:12px">2</sup></span><span class="bot"><i>a</i><sup style="font-size:12px">2</sup></span></span> − <span class="frac"><span class="top"><i>y</i><sup style="font-size:12px">2</sup></span><span class="bot"><i>b</i><sup style="font-size:12px">2</sup></span></span> = −1</div>
       <div class="sub">
         초점 F(0, <i>c</i>), F′(0, −<i>c</i>) — <b><i>c</i> = √(<i>a</i>² + <i>b</i>²)</b> (같아요!)<br>
-        꼭짓점 B(0, <i>b</i>), B′(0, −<i>b</i>) · 거리의 차 = 주축의 길이 = <b>2<i>b</i></b>
+        꼭짓점 B(0, <i>b</i>), B′(0, −<i>b</i>) · 주축의 길이 = <b>2<i>b</i></b>
       </div>
       <div class="now" id="now2"></div>
-      <div class="tapHint">👆 카드를 누르면 그래프를 켜고 끌 수 있어요</div>
     </div>
 
     <div class="conjNote" id="conjNote">
