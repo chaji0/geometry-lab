@@ -6,7 +6,7 @@
      먼저 선언한 뒤 이 파일을 불러오면 하단 바가 자동으로 생깁니다.
    ════════════════════════════════════════════════════════════ */
 window.GEO_CONFIG = {
-  VERSION: "v1.35",                 // ★ 1단원=v1.x, 2단원=v2.x, 3단원=v3.x — 업로드마다 뒷자리 +1 (v1.11, v1.12, …)
+  VERSION: "v1.36",                 // ★ 1단원=v1.x, 2단원=v2.x, 3단원=v3.x — 업로드마다 뒷자리 +1 (v1.11, v1.12, …)
   APPS_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbx3Ay-gudjjSoRlngyu54umJ9uYRAKhINuwcv229UZUN9_oIQfm9vwAxM32FOPR9wV1/exec",
   /* 담당 선생님 — 실제 명단은 Apps Script(TEACHERS)에서 불러옵니다.
      아래는 인터넷이 안 될 때 쓰는 기본값입니다. */
@@ -833,8 +833,12 @@ window.GEO_openSubmit = function(){
   const idx = acts.findIndex(a => a.id === window.PAGE_ID);
   if(idx < 0) return;
   const me = acts[idx];
-  const prevHref = idx > 0 ? acts[idx-1].href : 'index.html#home';
-  const nextHref = idx < acts.length-1 ? acts[idx+1].href : 'index.html#home';
+  /* 지오지브라(grp:'tool')는 오른쪽 위 G 버튼으로만 — 이전/다음 순서에서 뺀다 */
+  const navActs = acts.filter(a => a.grp !== 'tool');
+  const nIdx = navActs.findIndex(a => a.id === window.PAGE_ID);
+  const prevHref = (nIdx > 0) ? navActs[nIdx-1].href : 'index.html#home';
+  const lastOne = (nIdx >= 0 && nIdx === navActs.length - 1);
+  const nextHref = (nIdx >= 0 && !lastOne) ? navActs[nIdx+1].href : 'index.html#home';
 
   /* ── 스타일 ── */
   const css = document.createElement('style');
@@ -884,7 +888,8 @@ window.GEO_openSubmit = function(){
           <path d="M2 1 h12 v18 l-6 -5.2 -6 5.2 z" fill="#dc2626"/>
         </svg>
       </button>
-      <a href="${nextHref}" id="gnavNext">다음 ›</a>
+      ${ lastOne ? '<button id="gnavNext">다음 ›</button>'
+                 : '<a href="'+nextHref+'" id="gnavNext">다음 ›</a>' }
     </div>`;
   document.body.appendChild(bar);
 
@@ -901,6 +906,11 @@ window.GEO_openSubmit = function(){
   }
   window.GEO_setBookmark = function(){ localStorage.setItem('geoBookmark', me.id); };
 
+  if(lastOne){
+    document.getElementById('gnavNext').addEventListener('click', ()=>{
+      showToast('추후 공개');
+    });
+  }
   document.getElementById('gnavMark').addEventListener('click', ()=>{
     window.GEO_setBookmark();
     showToast(`'오늘 여기까지' 책갈피를 꽂았습니다. 다음에 [${me.short}]부터 열립니다.`);
