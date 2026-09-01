@@ -6,7 +6,7 @@
      먼저 선언한 뒤 이 파일을 불러오면 하단 바가 자동으로 생깁니다.
    ════════════════════════════════════════════════════════════ */
 window.GEO_CONFIG = {
-  VERSION: "v1.38",                 // ★ 1단원=v1.x, 2단원=v2.x, 3단원=v3.x — 업로드마다 뒷자리 +1 (v1.11, v1.12, …)
+  VERSION: "v1.39",                 // ★ 1단원=v1.x, 2단원=v2.x, 3단원=v3.x — 업로드마다 뒷자리 +1 (v1.11, v1.12, …)
   APPS_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbx3Ay-gudjjSoRlngyu54umJ9uYRAKhINuwcv229UZUN9_oIQfm9vwAxM32FOPR9wV1/exec",
   /* ── 담당 선생님 ───────────────────────────────────────────────
      선생님마다 '자기 구글 시트 + 자기 드라이브'를 씁니다.
@@ -490,6 +490,9 @@ function gxModal(){
     #gxLightBg.show { display:flex; }
     #gxLightBg img { max-width:96vw; max-height:82vh; border-radius:12px; background:#1e293b; }
     #gxLightBg a { color:#7dd3fc; font-size:13px; }
+    #gxLightBg .gxSaveOne { padding:10px 22px; font-size:14px; font-weight:800; font-family:inherit;
+      border:none; border-radius:999px; background:#0284c7; color:#fff; cursor:pointer; }
+    #gxLightBg .gxSaveOne:disabled { opacity:.55; }
     `;
     document.head.appendChild(css);
     bg = document.createElement('div');
@@ -505,6 +508,99 @@ function gxModal(){
   return bg;
 }
 
+
+/* ════════════════════════════════════════════════════════════
+   기기 안 사진 보관함
+   — 제출한 사진을 아이패드 자체에 남겨 두면 과제방이 즉시 열립니다.
+     (드라이브는 선생님이 보시는 원본, 이건 학생이 보는 사본)
+   ════════════════════════════════════════════════════════════ */
+window.GEO_photos = (function(){
+  const DBN='geoPhotos', STORE='ph', KEEP=60;      // 최근 60장만 남김
+  let dbp = null;
+  function db(){
+    if(dbp) return dbp;
+    dbp = new Promise(function(res, rej){
+      if(!window.indexedDB) return rej(new Error('no idb'));
+      let rq;
+      try{ rq = indexedDB.open(DBN, 1); }catch(e){ return rej(e); }
+      rq.onupgradeneeded = function(){
+        const d = rq.result;
+        if(!d.objectStoreNames.contains(STORE)){
+          const st = d.createObjectStore(STORE, { keyPath:'k', autoIncrement:true });
+          st.createIndex('sid', 'sid', { unique:false });
+        }
+      };
+      rq.onsuccess = function(){ res(rq.result); };
+      rq.onerror   = function(){ rej(rq.error); };
+    });
+    return dbp;
+  }
+  function tx(mode){
+    return db().then(function(d){ return d.transaction(STORE, mode).objectStore(STORE); });
+  }
+  function mmdd(){
+    const d = new Date();
+    return String(d.getMonth()+1).padStart(2,'0') + String(d.getDate()).padStart(2,'0');
+  }
+  /* 오늘 제출한 사진 저장 */
+  async function add(sid, list){
+    if(!sid || !list || !list.length) return;
+    const st = await tx('readwrite');
+    const date = mmdd(), ts = Date.now();
+    list.forEach(function(data, i){ st.add({ sid:sid, date:date, ts:ts+i, data:data }); });
+    await new Promise(function(res){ st.transaction.oncomplete = res; st.transaction.onerror = res; });
+    trim(sid);
+  }
+  /* 이 학생의 사진을 최근 것부터 */
+  async function bySid(sid){
+    if(!sid) return [];
+    const st = await tx('readonly');
+    const rows = await new Promise(function(res){
+      const out = [], rq = st.index('sid').openCursor(IDBKeyRange.only(sid));
+      rq.onsuccess = function(){ const c = rq.result;
+        if(c){ out.push(c.value); c.continue(); } else res(out); };
+      rq.onerror = function(){ res(out); };
+    });
+    rows.sort(function(a,b){ return b.ts - a.ts; });
+    return rows;
+  }
+  /* 오래된 것부터 지워 용량 지키기 */
+  async function trim(sid){
+    try{
+      const rows = await bySid(sid);
+      if(rows.length <= KEEP) return;
+      const st = await tx('readwrite');
+      rows.slice(KEEP).forEach(function(r){ st.delete(r.k); });
+    }catch(e){}
+  }
+  return { add:add, bySid:bySid, mmdd:mmdd };
+})();
+
+/* dataURL 을 파일로 바꿔 아이패드 공유 시트(→ 이미지 저장)를 띄운다.
+   iOS 는 웹페이지가 사진첩에 바로 쓰는 것을 막아 두었기 때문에,
+   마지막 '이미지 저장' 탭 한 번은 아이패드가 요구하는 절차입니다. */
+window.GEO_savePhotos = async function(list){
+  const files = (list || []).map(function(d, i){
+    const m = /^data:(image\/[\w+.-]+);base64,(.+)$/.exec(d);
+    if(!m) return null;
+    const bin = atob(m[2]), arr = new Uint8Array(bin.length);
+    for(let j = 0; j < bin.length; j++) arr[j] = bin.charCodeAt(j);
+    const ext = m[1].indexOf('png') >= 0 ? 'png' : 'jpg';
+    return new File([arr], '기하과제_' + window.GEO_photos.mmdd() + '_' + (i+1) + '.' + ext, { type:m[1] });
+  }).filter(Boolean);
+  if(!files.length) return 'none';
+  if(navigator.canShare && navigator.share && navigator.canShare({ files:files })){
+    try{ await navigator.share({ files:files }); return 'shared'; }
+    catch(e){ return (e && e.name === 'AbortError') ? 'cancel' : 'fail'; }
+  }
+  files.forEach(function(f){                      // 공유가 안 되는 기기 — 내려받기
+    const a = document.createElement('a'), u = URL.createObjectURL(f);
+    a.href = u; a.download = f.name; document.body.appendChild(a); a.click();
+    setTimeout(function(){ URL.revokeObjectURL(u); a.remove(); }, 1200);
+  });
+  return 'download';
+};
+
 /* ── 📸 나의 과제방: 내가 올린 사진을 날짜별로 ── */
 window.GEO_openGallery = async function(){
   const sid  = localStorage.getItem('geoSid')  || '';
@@ -515,52 +611,95 @@ window.GEO_openGallery = async function(){
   const body = bg.querySelector('#gxBody');
   body.innerHTML = '<div class="gxLoad">사진을 불러오는 중이에요…</div>';
   bg.classList.add('show');
+
+  const label = d => parseInt(d.slice(0,2),10) + '월 ' + parseInt(d.slice(2),10) + '일';
+  let localByDate = {}, driveByDate = {}, order = [];
+
+  function paint(note){
+    const dates = order.slice();
+    if(!dates.length){
+      body.innerHTML = '<div class="gxLoad">아직 제출한 사진이 없어요.<br>'+
+        '활동을 마치고 <b>오늘과제</b>에서 연습장 사진을 올려 보세요! 📷</div>';
+      return;
+    }
+    body.innerHTML = dates.map(function(d){
+      const loc = localByDate[d] || [], drv = (driveByDate[d] || []).slice(loc.length);
+      return '<div class="gxDate">'+label(d)+'</div><div class="gxGrid">'+
+        loc.map(function(r,i){ return '<img src="'+r.data+'" data-d="'+d+'" data-i="'+i+'" alt="과제 사진">'; }).join('')+
+        drv.map(function(it){ return '<img loading="lazy" src="https://drive.google.com/thumbnail?id='+
+          encodeURIComponent(it.id)+'&sz=w400" data-id="'+gxEsc(it.id)+'" alt="과제 사진">'; }).join('')+
+        '</div>';
+    }).join('') + (note || '');
+    bind();
+  }
+
+  function bind(){
+    body.querySelectorAll('.gxGrid img').forEach(function(img){
+      img.addEventListener('click', function(){
+        let lb = document.getElementById('gxLightBg');
+        if(!lb){
+          lb = document.createElement('div'); lb.id = 'gxLightBg';
+          document.body.appendChild(lb);
+          lb.addEventListener('click', function(e){
+            if(e.target.tagName!=='A' && e.target.tagName!=='BUTTON') lb.classList.remove('show');
+          });
+        }
+        if(img.dataset.id){
+          lb.innerHTML = '<img src="https://drive.google.com/thumbnail?id='+encodeURIComponent(img.dataset.id)+
+            '&sz=w1600" alt="과제 사진 크게 보기">'+
+            '<a href="https://drive.google.com/file/d/'+encodeURIComponent(img.dataset.id)+
+            '/view" target="_blank" rel="noopener">드라이브에서 열기 ↗</a>';
+        } else {
+          const rec = (localByDate[img.dataset.d] || [])[+img.dataset.i];
+          if(!rec) return;
+          lb.innerHTML = '<img src="'+rec.data+'" alt="과제 사진 크게 보기">'+
+            '<button class="gxSaveOne" type="button">사진첩에 저장</button>';
+          const sb = lb.querySelector('.gxSaveOne');
+          sb.addEventListener('click', async function(){
+            sb.disabled = true;
+            const r = await window.GEO_savePhotos([rec.data]);
+            sb.disabled = false;
+            if(r === 'shared')        gxToast('사진첩에 저장했어요 ✅');
+            else if(r === 'download') gxToast('사진을 내려받았어요');
+            else if(r === 'fail')     gxToast('저장할 수 없는 기기예요');
+          });
+        }
+        lb.classList.add('show');
+      });
+    });
+  }
+
+  /* 1) 이 아이패드에 남아 있는 사진 — 기다릴 필요 없이 바로 */
+  try{
+    const rows = await window.GEO_photos.bySid(sid);
+    rows.forEach(function(r){
+      if(!localByDate[r.date]){ localByDate[r.date] = []; order.push(r.date); }
+      localByDate[r.date].push(r);
+    });
+    order.sort(function(a,b){ return b.localeCompare(a); });
+    if(rows.length) paint();
+  }catch(e){}
+
+  /* 2) 드라이브에 있는 것(다른 기기에서 낸 것 등)을 뒤이어 채움 */
   try{
     const url = window.GEO_url()
       + '?action=myphotos&sid=' + encodeURIComponent(sid)
       + '&name=' + encodeURIComponent(name);
     const r = await (await fetch(url)).json();
     if(!r.ok) throw new Error('server');
-    if(!r.items.length){
-      body.innerHTML = '<div class="gxLoad">아직 제출한 사진이 없어요.<br>'+
-        '활동을 마치고 책갈피(🔖)에서 연습장 사진을 올려 보세요! 📷</div>';
-      return;
-    }
-    // 날짜(MMdd)별로 묶기 — 서버에서 최근 날짜부터 내려옴
-    const groups = [];
-    r.items.forEach(it=>{
-      const g = groups[groups.length-1];
-      if(g && g.date === it.date) g.items.push(it);
-      else groups.push({ date: it.date, items: [it] });
+    r.items.forEach(function(it){
+      if(!driveByDate[it.date]){ driveByDate[it.date] = []; if(order.indexOf(it.date)<0) order.push(it.date); }
+      driveByDate[it.date].push(it);
     });
-    body.innerHTML = groups.map(g=>{
-      const label = parseInt(g.date.slice(0,2),10) + '월 ' + parseInt(g.date.slice(2),10) + '일';
-      return '<div class="gxDate">'+label+'</div><div class="gxGrid">'+
-        g.items.map(it=>
-          '<img loading="lazy" src="https://drive.google.com/thumbnail?id='+encodeURIComponent(it.id)+
-          '&sz=w400" data-id="'+gxEsc(it.id)+'" alt="과제 사진">').join('')+
-        '</div>';
-    }).join('');
-    // 크게 보기
-    body.querySelectorAll('.gxGrid img').forEach(img=>{
-      img.addEventListener('click', ()=>{
-        let lb = document.getElementById('gxLightBg');
-        if(!lb){
-          lb = document.createElement('div'); lb.id = 'gxLightBg';
-          document.body.appendChild(lb);
-          lb.addEventListener('click', e=>{ if(e.target.tagName!=='A') lb.classList.remove('show'); });
-        }
-        const id = img.dataset.id;
-        lb.innerHTML = '<img src="https://drive.google.com/thumbnail?id='+encodeURIComponent(id)+
-          '&sz=w1600" alt="과제 사진 크게 보기">'+
-          '<a href="https://drive.google.com/file/d/'+encodeURIComponent(id)+
-          '/view" target="_blank" rel="noopener">드라이브에서 열기 ↗</a>';
-        lb.classList.add('show');
-      });
-    });
+    order.sort(function(a,b){ return b.localeCompare(a); });
+    paint();
   }catch(e){
-    body.innerHTML = '<div class="gxLoad">사진을 불러오지 못했어요 😢<br>'+
-      '인터넷 연결을 확인하고 다시 열어 주세요.</div>';
+    if(!order.length){
+      body.innerHTML = '<div class="gxLoad">사진을 불러오지 못했어요 😢<br>'+
+        '인터넷 연결을 확인하고 다시 열어 주세요.</div>';
+    }else{
+      paint('<div class="gxLoad" style="padding:14px 0 0">이 아이패드에 저장된 사진만 보이는 중이에요.</div>');
+    }
   }
 };
 
@@ -833,15 +972,78 @@ function gxBuildSubmit(){
       if(!r.ok) throw new Error('server');
       window.GEO_markSubmitted();
       if(window.GEO_setBookmark) window.GEO_setBookmark();
+      const sent = photos.slice();                 // 이번에 보낸 사진
       bg.classList.remove('show');
       document.getElementById('gsubText').value = '';
       photos.length = 0; renderThumbs();
+      /* 이 아이패드에도 남겨 둔다 — 과제방이 기다림 없이 열리도록 */
+      if(sent.length){ try{ await window.GEO_photos.add(sid, sent); }catch(e){} }
       gxToast('오늘 과제를 제출했어요! 제출완료 ✅');
+      if(sent.length) setTimeout(function(){ gxAskSave(sent); }, 900);
     }catch(e){
       gxToast('전송에 실패했어요. 인터넷 연결을 확인하고 다시 시도해 주세요.');
     }
     btn.disabled = false; btn.textContent = '보내기';
   });
+}
+
+
+/* ── 제출 뒤: 사진첩에도 넣을지 물어보기 ──
+   '예'를 누른 그 손짓이 있어야 아이패드가 공유 시트를 띄워 줍니다.
+   그래서 자동 저장은 불가능하고, 마지막에 '이미지 저장' 탭 한 번이 남습니다. */
+function gxAskSave(list){
+  if(!list || !list.length) return;
+  let bg = document.getElementById('gsavBg');
+  if(!bg){
+    const css = document.createElement('style');
+    css.textContent = `
+    #gsavBg { position:fixed; inset:0; background:rgba(15,23,42,.55); z-index:2400;
+      display:none; align-items:center; justify-content:center; padding:20px; }
+    #gsavBg.show { display:flex; }
+    #gsavCard { background:#fff; border-radius:20px; max-width:340px; width:100%;
+      padding:22px 22px 18px; box-shadow:0 20px 60px rgba(15,23,42,.3); text-align:center;
+      font-family:inherit; }
+    #gsavCard h3 { font-size:17px; color:#0f172a; margin-bottom:7px; font-weight:800; }
+    #gsavCard p { font-size:13.5px; color:#64748b; line-height:1.65; margin-bottom:17px; }
+    #gsavThumbs { display:flex; gap:6px; justify-content:center; margin-bottom:15px; }
+    #gsavThumbs img { width:52px; height:52px; object-fit:cover; border-radius:10px;
+      border:1px solid #e2e8f0; }
+    #gsavBtns { display:flex; gap:9px; }
+    #gsavBtns button { flex:1; padding:12px 0; font-size:14.5px; font-weight:800;
+      border-radius:12px; cursor:pointer; font-family:inherit; border:1.5px solid #cbd5e1;
+      background:#fff; color:#475569; }
+    #gsavBtns button.pri { background:#0284c7; border-color:#0284c7; color:#fff; }
+    #gsavBtns button:disabled { opacity:.6; }
+    `;
+    document.head.appendChild(css);
+    bg = document.createElement('div');
+    bg.id = 'gsavBg';
+    bg.innerHTML = `<div id="gsavCard">
+        <h3>사진첩에 저장할까요?</h3>
+        <p>제출은 이미 끝났어요.<br>내 아이패드 사진첩에도 남겨 둘 수 있어요.</p>
+        <div id="gsavThumbs"></div>
+        <div id="gsavBtns">
+          <button id="gsavNo">괜찮아요</button>
+          <button id="gsavYes" class="pri">예, 저장할게요</button>
+        </div>
+      </div>`;
+    document.body.appendChild(bg);
+    bg.addEventListener('click', function(e){ if(e.target===bg) bg.classList.remove('show'); });
+    document.getElementById('gsavNo').addEventListener('click', function(){ bg.classList.remove('show'); });
+  }
+  document.getElementById('gsavThumbs').innerHTML =
+    list.map(function(d){ return '<img src="'+d+'" alt="">'; }).join('');
+  const yes = document.getElementById('gsavYes');
+  yes.textContent = '예, 저장할게요'; yes.disabled = false;
+  yes.onclick = async function(){
+    yes.disabled = true; yes.textContent = '저장하는 중…';
+    const r = await window.GEO_savePhotos(list);
+    bg.classList.remove('show');
+    if(r === 'shared')        gxToast('사진첩에 저장했어요 ✅');
+    else if(r === 'download') gxToast('사진을 내려받았어요');
+    else if(r === 'fail')     gxToast('이 기기에서는 저장할 수 없어요');
+  };
+  bg.classList.add('show');
 }
 
 window.GEO_openSubmit = function(){
