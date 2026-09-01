@@ -103,9 +103,10 @@ if (localStorage.getItem('geoAppOk') !== '1') location.replace('index.html');
   .cpBtns button.pri { background:var(--acc); border-color:var(--acc); color:#fff; }
   #cpParaCap { margin-top:11px; }
   #cpParaCap .hint { color:var(--mute); font-size:12.5px; }
-  #telSteps { position:absolute; left:50%; transform:translateX(-50%); bottom:12px; display:flex; gap:6px;
-              flex-wrap:wrap; justify-content:center; max-width:calc(100% - 24px); }
-  #telSteps button { display:flex; align-items:center; gap:7px; height:31px; padding:0 13px 0 9px;
+  #telSteps { position:absolute; left:12px; bottom:12px; display:flex; gap:6px;
+              flex-wrap:wrap; justify-content:flex-start; max-width:calc(100% - 354px); }
+  @media (max-width:760px){ #telSteps { max-width:calc(100% - 24px); } }
+  #telSteps button { display:flex; align-items:center; gap:6px; height:31px; padding:0 11px 0 8px;
     border-radius:999px; border:1.5px solid rgba(255,255,255,.20); background:rgba(16,18,24,.62);
     color:rgba(255,255,255,.72); font-family:inherit; font-size:12.5px; font-weight:600; cursor:pointer;
     backdrop-filter:blur(4px); transition:all .14s; }
@@ -116,6 +117,17 @@ if (localStorage.getItem('geoAppOk') !== '1') location.replace('index.html');
   #telSteps button.on { background:var(--gold); border-color:var(--gold); color:#2B2410; }
   #telSteps button.on i { background:rgba(0,0,0,.22); color:#2B2410; }
   #telSteps button.nx { padding:0 15px; background:rgba(255,255,255,.90); color:#1B1C22; border-color:transparent; }
+  #telSec { position:absolute; right:12px; bottom:12px; width:330px; border-radius:14px; overflow:hidden;
+            background:rgba(10,11,15,.78); border:1px solid rgba(255,255,255,.16); backdrop-filter:blur(4px); }
+  #telSec .secHead { display:flex; align-items:center; justify-content:space-between; padding:6px 8px 4px 12px; }
+  #telSec .secHead span { font-size:11.5px; font-weight:700; color:rgba(255,255,255,.72); letter-spacing:.02em; }
+  #telSec .secHead span i { font-style:normal; color:var(--gold); margin-right:5px; font-family:'IBM Plex Mono',monospace; font-size:11px; }
+  #telSec .secHead button { height:20px; padding:0 9px; border-radius:999px; border:1px solid rgba(255,255,255,.22);
+    background:transparent; color:rgba(255,255,255,.7); font-family:inherit; font-size:11px; font-weight:700; cursor:pointer; }
+  #telSec canvas { display:block; width:330px; height:200px; min-height:0; }
+  #telSec.min { width:auto; } #telSec.min canvas { display:none; } #telSec.min .secHead { padding:6px 8px 6px 12px; }
+  @media (max-width:760px){ #telSec { width:210px; bottom:auto; top:46px; left:10px; right:auto; }
+                            #telSec canvas { width:210px; height:130px; } }
   #telEye { position:absolute; right:16px; top:58px; width:170px; display:none; text-align:center; }
   #telEye.on { display:block; }
   #telEye canvas { width:170px; height:170px; display:block; border-radius:50%; }
@@ -242,6 +254,10 @@ if (localStorage.getItem('geoAppOk') !== '1') location.replace('index.html');
       <canvas id="cvTel"></canvas>
       <div id="telWait">3D 준비 중…</div>
       <div id="telEye"><canvas id="telEyeCv"></canvas><span class="eyeCap">접안부에서 보이는 달</span></div>
+      <div id="telSec">
+        <div class="secHead"><span><i>단면</i>빛이 지나가는 길</span><button id="secTgl">접기</button></div>
+        <canvas id="cvSec"></canvas>
+      </div>
       <div id="telSteps">
         <button class="on"><i>1</i>달을 겨눈다</button>
         <button><i>2</i>주경에 모인다</button>
@@ -1398,7 +1414,7 @@ function buildScope(env, ring){
 
   const tubeMat=new T.MeshPhysicalMaterial({color:0x6E7C93,metalness:.55,roughness:.35,envMap:env,
     transparent:true, opacity:.20, side:T.DoubleSide});
-  const tube=new T.Mesh(new T.CylinderGeometry(TR,TR,TZ1-TZ0,64,1,true), tubeMat);
+  const tube=new T.Mesh(new T.CylinderGeometry(TR,TR,TZ1-TZ0,64,1,true), tubeMat); TUBE=tube;
   tube.rotation.x=Math.PI/2; tube.position.z=(TZ0+TZ1)/2; optic.add(tube);
   const ringMat=new T.LineBasicMaterial({color:0xA9BED6,transparent:true,opacity:.30});
   for(let i=0;i<=4;i++){
@@ -1440,7 +1456,7 @@ function buildScope(env, ring){
   ml.position.copy(moon.position).add(new T.Vector3(0,5.6,0)); scene.add(ml);
   labels.push({sp:ml, steps:[1]});
 }
-let EYES=null;
+let EYES=null, TUBE=null;
 
 function buildMirror(env){
   if(gMirror){ optic.remove(gMirror); }
@@ -1513,24 +1529,48 @@ function buildLabels(){
   optic.add(gLabel);
 }
 
+function tubeOf(pts,col,rad,op){
+  const curve=new T.CatmullRomCurve3(pts.map(p=>new T.Vector3(p.x,p.y,p.z)),false,'centripetal');
+  const g=new T.TubeGeometry(curve, Math.max(24,pts.length*2), rad||.08, 8, false);
+  const m=new T.Mesh(g,new T.MeshBasicMaterial({color:col,transparent:true,opacity:op==null?.95:op,depthTest:false,depthWrite:false}));
+  m.renderOrder=11; return m;
+}
 function buildPrin(){
   if(gPrin){ optic.remove(gPrin); }
   gPrin=new T.Group();
-  const dotMat=new T.MeshBasicMaterial({color:0xFF6A5A});
+  const dotMat=new T.MeshBasicMaterial({color:0xFF6A5A,depthTest:false}); 
   const mk=(p,txt,dy)=>{
-    const d=new T.Mesh(new T.SphereGeometry(.24,20,14),dotMat); d.position.set(p.x,p.y,p.z); gPrin.add(d);
+    const d=new T.Mesh(new T.SphereGeometry(.26,20,14),dotMat); d.position.set(p.x,p.y,p.z); d.renderOrder=12; gPrin.add(d);
     const s=textSprite(txt,'#FFD9A0',21,1); s.position.set(p.x,p.y+(dy||1.4),p.z); gPrin.add(s);
   };
+  const CUR=0x7FD8FF;
   mk({x:0,y:0,z:F1}, mode==='cas'?'포물선의 초점 = 쌍곡선의 한 초점':'포물선의 초점', 1.4);
   rays.forEach(R=>gPrin.add(lineOf([R.pts[2],{x:0,y:0,z:F1}],0xFFFFFF,.16,true)));
+  /* 포물선 — 주경의 단면(두 평면). 거울 밖까지 이어 그려 곡선임이 보이게 */
+  const EXT=RM*1.32;
+  [[1,0],[0,1]].forEach(function(ax){
+    const pr=[]; for(let i=-48;i<=48;i++){ const r=EXT*i/48; pr.push({x:r*ax[0],y:r*ax[1],z:zp(Math.abs(r))}); }
+    gPrin.add(tubeOf(pr,CUR,.085,.95));
+  });
+  const pl=textSprite('포물선 — 주경의 단면','#7FD8FF',21,1); pl.position.set(0,EXT+1.1,zp(EXT)); gPrin.add(pl);
   if(mode==='cas'){
     mk({x:0,y:0,z:F2}, '쌍곡선의 다른 초점 — 여기에 상이 맺힌다', -1.7);
-    const s1=[],s2=[];
-    for(let i=-40;i<=40;i++){ const r=RS*2.4*i/40; s1.push({x:r,y:0,z:zh(Math.abs(r))}); s2.push({x:r,y:0,z:2*ZC-zh(Math.abs(r))}); }
-    gPrin.add(lineOf(s1,0x7FD8FF,.55)); gPrin.add(lineOf(s2,0x7FD8FF,.22,true));
-  } else mk({x:0,y:NFY,z:ZN},'초점이 경통 옆으로',1.3);
-  const pr=[]; for(let i=-40;i<=40;i++){ const r=RM*1.05*i/40; pr.push({x:r,y:0,z:zp(Math.abs(r))}); }
-  gPrin.add(lineOf(pr,0x7FD8FF,.55));
+    const HE=RS*2.6;
+    [[1,0],[0,1]].forEach(function(ax){
+      const s1=[],s2=[];
+      for(let i=-40;i<=40;i++){ const r=HE*i/40;
+        s1.push({x:r*ax[0],y:r*ax[1],z:zh(Math.abs(r))}); s2.push({x:r*ax[0],y:r*ax[1],z:2*ZC-zh(Math.abs(r))}); }
+      gPrin.add(tubeOf(s1,CUR,.085,.95));      // 부경이 되는 가지
+      gPrin.add(tubeOf(s2,CUR,.05,.38));       // 다른 가지(실제로는 없음)
+    });
+    const hl=textSprite('쌍곡선 — 부경의 단면','#7FD8FF',21,1); hl.position.set(0,-(HE+1.2),zh(HE)); gPrin.add(hl);
+    const hl2=textSprite('쌍곡선의 다른 가지','#9DB6C8',19,1); hl2.position.set(0,-(HE+1.0),2*ZC-zh(HE)); gPrin.add(hl2);
+  } else {
+    mk({x:0,y:NFY,z:ZN},'초점이 경통 옆으로',-1.6);
+    /* 평면거울의 단면(45°) */
+    const fl=[]; for(let i=-10;i<=10;i++){ const r=RN*i/10; fl.push({x:0,y:r*Math.SQRT1_2,z:ZN+r*Math.SQRT1_2}); }
+    gPrin.add(tubeOf(fl,0xE8F0FF,.07,.9));
+  }
   gPrin.add(lineOf([{x:0,y:0,z:TZ0-3},{x:0,y:0,z:TZ1+3}],0xFFFFFF,.14,true));
   gPrin.visible=prin; optic.add(gPrin);
 }
@@ -1538,10 +1578,15 @@ function buildPrin(){
 /* ── 단계 ── */
 const STEPS=[
  {t:'달을 겨눈다', d:'달빛은 아주 멀리서 오기 때문에 <b>평행하게</b> 경통으로 들어옵니다. <span class="hint">화면을 드래그하면 망원경을 돌려 볼 수 있어요.</span>'},
- {t:'주경에 모인다', d:'경통 끝의 <b>포물면 거울(주경)</b>이 평행한 빛을 <b>한 점(초점)</b>으로 모읍니다. 포물선의 반사 성질 그대로예요.'},
+ {t:'주경에 모인다', d:'경통 끝의 <b>포물면 거울(주경)</b>이 평행한 빛을 <b>한 점(초점)</b>으로 모읍니다. 포물선의 반사 성질 그대로예요. <span class="hint">오른쪽 아래 단면 그림에서 빛의 길을 확인하세요.</span>'},
  {t:'부경이 되돌린다', d:'초점에 닿기 전, <b>쌍곡면 거울(부경)</b>이 빛을 받아 주경 가운데 구멍 쪽으로 되돌립니다.'},
  {t:'상이 맺힌다', d:'구멍을 지난 빛이 <b>접안부</b>에서 한 점에 모여 <b>달의 상</b>을 만듭니다. 거울로 두 번 접혔기 때문에 상하좌우가 뒤집혀 보입니다.'}
 ];
+function applyStepLite(){
+  document.querySelectorAll('#telSteps button:not(.nx)').forEach((b,i)=>b.classList.toggle('on', i+1===step));
+  const S=STEPS[step-1];
+  document.getElementById('telCap').innerHTML='<b class="st">'+step+'. '+S.t+'</b> '+S.d;
+}
 function applyStep(){
   const vis = step===1?1 : step===2?1 : 3;
   rays.forEach(R=>{ R.segs.forEach((l,i)=>{ l.visible = i<vis; }); R.sp.visible=true;
@@ -1549,11 +1594,12 @@ function applyStep(){
   if(focusGlow) focusGlow.visible = step>=4;
   if(f1Glow) f1Glow.visible = (step===2);
   labels.forEach(L=>{ L.sp.visible = L.steps.indexOf(step)>=0; });
-  document.querySelectorAll('#telSteps button').forEach((b,i)=>b.classList.toggle('on', i+1===step));
+  document.querySelectorAll('#telSteps button:not(.nx)').forEach((b,i)=>b.classList.toggle('on', i+1===step));
   const S=STEPS[step-1];
   document.getElementById('telCap').innerHTML='<b class="st">'+step+'. '+S.t+'</b> '+S.d;
   document.getElementById('telEye').classList.toggle('on', step===4);
   camTo(step);
+  if(typeof drawSecNow==='function') drawSecNow();
 }
 /* 카메라 목표 */
 const camGoal={r:60, th:2.15, ph:1.25};
@@ -1669,6 +1715,141 @@ async function init(){
   requestAnimationFrame(tick);
 }
 
+
+/* ══ 단면 인셋 — 빛이 지나가는 길(개념도, 비례는 과장) ══ */
+const SEC=document.getElementById('cvSec'), SECBOX=document.getElementById('telSec');
+/* 카세그레인: 초점거리 p=1(곡선이 잘 보이게), 뉴턴: p=2.4(45° 평면거울이 빛다발을 다 받으려면 느린 거울이어야 함) */
+const RMIR=0.85, RHOLE=0.12, SD=0.5;
+const HA=0.37, HC=(SD+1)/2, HX0=(SD-1)/2, HB2=HC*HC-HA*HA;   // 쌍곡선(초점 F(-1,0), F'(d,0))
+const FLATX=-1.85, FLATL=0.34;                               // 뉴턴식 평면거울: x+y=FLATX, 길이 ±FLATL
+let SP=1.0;
+const sPar=y=>-y*y/(4*SP);
+const sHyp=y=>HX0-HA*Math.sqrt(1+y*y/HB2);
+const sHyp2=y=>HX0+HA*Math.sqrt(1+y*y/HB2);
+let SF1={x:-1,y:0}; const SF2={x:SD,y:0}, SFN={x:FLATX,y:FLATX+2.4};
+const SEC_Y=[-0.85,-0.65,-0.45,0.45,0.65,0.85];
+function secPath(y0){
+  const P={x:sPar(y0),y:y0}, A={x:(mode==='cas'?-1.85:-3.05),y:y0}, D={x:SF1.x-P.x,y:SF1.y-P.y};
+  if(mode==='cas'){
+    let lo=0,hi=1; const g=t=>{const x=P.x+D.x*t,y=P.y+D.y*t; return x-sHyp(y);};
+    for(let i=0;i<50;i++){const m=(lo+hi)/2; if(g(m)>0) lo=m; else hi=m;}
+    const t=(lo+hi)/2; return [A,P,{x:P.x+D.x*t,y:P.y+D.y*t},SF2];
+  }
+  const t=(FLATX-P.x-P.y)/(D.x+D.y);
+  return [A,P,{x:P.x+D.x*t,y:P.y+D.y*t},SFN];
+}
+let secPaths=[], secMode=null;
+function secBuild(){
+  SP = mode==='cas' ? 1.0 : 2.4; SF1={x:-SP,y:0};
+  secPaths=SEC_Y.map(function(y0){
+    const pts=secPath(y0), cum=[0]; let L=0;
+    for(let i=0;i<3;i++){ L+=Math.hypot(pts[i+1].x-pts[i].x,pts[i+1].y-pts[i].y); cum.push(L); }
+    return {pts:pts,cum:cum,ph:(y0+1)*0.37};
+  });
+  secMode=mode;
+}
+let secHidden=false;
+document.getElementById('secTgl').addEventListener('click',function(e){
+  e.stopPropagation(); secHidden=!secHidden; SECBOX.classList.toggle('min',secHidden);
+  this.textContent=secHidden?'단면 보기':'접기'; if(!secHidden) drawSecNow();
+});
+function drawSecNow(){ drawSec(performance.now()); }
+function drawSec(now){
+  if(!SEC || secHidden) return;
+  const box=SEC.getBoundingClientRect(); if(!box.width) return;
+  if(secMode!==mode) secBuild();
+  const dpr=Math.min(2,window.devicePixelRatio||1);
+  if(SEC.width!==Math.round(box.width*dpr)||SEC.height!==Math.round(box.height*dpr)){ SEC.width=Math.round(box.width*dpr); SEC.height=Math.round(box.height*dpr); }
+  const x=SEC.getContext('2d'), W=box.width, H=box.height;
+  x.setTransform(dpr,0,0,dpr,0,0); x.clearRect(0,0,W,H);
+  const isCas = mode==='cas';
+  const XMIN=isCas?-1.95:-3.15, XMAX=isCas?0.78:0.2, YR=1.12;
+  const sc=Math.min((W-16)/(XMAX-XMIN), (H-22)/(2*YR));
+  const ox=8+(W-16-(XMAX-XMIN)*sc)/2 - XMIN*sc, oy=H/2+4;
+  const X=p=>ox+p.x*sc, Y=p=>oy-p.y*sc;
+  const vis = step===1?1 : step===2?2 : 3;
+  const kor="600 11px 'IBM Plex Sans KR',system-ui,sans-serif", mth="italic 700 13px Georgia,serif";
+  function txt(str,px,py,col,font,align){ x.font=font||kor; x.textAlign=align||'left'; x.textBaseline='middle';
+    x.lineWidth=3; x.strokeStyle='rgba(10,11,15,.85)'; x.strokeText(str,px,py); x.fillStyle=col; x.fillText(str,px,py); }
+  function curve(fn,y0,y1,col,lw,dash){ x.save(); x.setLineDash(dash||[]); x.strokeStyle=col; x.lineWidth=lw; x.lineCap='round';
+    x.beginPath(); for(let i=0;i<=40;i++){ const y=y0+(y1-y0)*i/40, p={x:fn(y),y:y}; if(i===0) x.moveTo(X(p),Y(p)); else x.lineTo(X(p),Y(p)); }
+    x.stroke(); x.restore(); }
+  /* 광축·경통 */
+  x.save(); x.setLineDash([3,4]); x.strokeStyle='rgba(255,255,255,.22)'; x.lineWidth=1;
+  x.beginPath(); x.moveTo(X({x:XMIN,y:0}),oy); x.lineTo(X({x:XMAX,y:0}),oy); x.stroke(); x.restore();
+  x.strokeStyle='rgba(169,190,214,.28)'; x.lineWidth=1.2;
+  [[XMIN+0.1,0.06]].forEach(function(seg){ [1,-1].forEach(function(sg){ const yy=sg*(RMIR+0.06);
+    x.beginPath(); x.moveTo(X({x:seg[0],y:yy}),Y({x:0,y:yy})); x.lineTo(X({x:seg[1],y:yy}),Y({x:0,y:yy})); x.stroke(); }); });
+  /* 포물선: 거울 밖까지 점선, 거울 부분은 굵게 */
+  curve(sPar,-YR,YR,'rgba(127,216,255,.35)',1,[3,3]);
+  if(isCas){ curve(sPar,RHOLE,RMIR,'#7FD8FF',3.2); curve(sPar,-RMIR,-RHOLE,'#7FD8FF',3.2); }
+  else curve(sPar,-RMIR,RMIR,'#7FD8FF',3.2);
+  txt('포물선', X({x:sPar(RMIR)+0.02,y:0})+6, Y({x:0,y:RMIR})+2, '#7FD8FF');
+  txt('주경', X({x:sPar(RMIR)+0.02,y:0})+6, Y({x:0,y:RMIR})+15, 'rgba(255,255,255,.7)');
+  /* 부경 */
+  if(isCas){
+    const show=step>=3||prin;
+    curve(sHyp,-0.72,0.72,'rgba(127,216,255,'+(show?.35:.18)+')',1,[3,3]);
+    curve(sHyp,-0.42,0.42, show?'#7FD8FF':'rgba(127,216,255,.55)', show?3.2:2);
+    if(prin){ curve(sHyp2,-0.72,0.72,'rgba(127,216,255,.30)',1,[3,3]); txt('다른 가지',X({x:sHyp2(0.72),y:0})-2,Y({x:0,y:-0.72})+9,'rgba(157,182,200,.8)',kor,'right'); }
+    if(show){ txt('쌍곡선', X({x:sHyp(0.42),y:0})-6, Y({x:0,y:0.42})-9, '#7FD8FF', kor, 'right');
+              txt('부경', X({x:sHyp(0.42),y:0})-6, Y({x:0,y:0.42})+4, 'rgba(255,255,255,.7)', kor, 'right'); }
+  } else {
+    const show=step>=3||prin, L=FLATL;
+    x.save(); x.strokeStyle= show?'#E8F0FF':'rgba(232,240,255,.5)'; x.lineWidth=show?3.2:2; x.lineCap='round';
+    x.beginPath(); x.moveTo(X({x:FLATX+L,y:-L}),Y({x:0,y:-L})); x.lineTo(X({x:FLATX-L,y:L}),Y({x:0,y:L})); x.stroke(); x.restore();
+    if(show) txt('평면거울', X({x:FLATX-L,y:0})-6, Y({x:0,y:L})-8, '#E8F0FF', kor, 'right');
+  }
+  /* 빛 */
+  const t=now/1000;
+  secPaths.forEach(function(R){
+    const P = step===2 ? [R.pts[0],R.pts[1],SF1] : R.pts;
+    for(let i=0;i<vis;i++){
+      const a=P[i], b=P[i+1];
+      const g=x.createLinearGradient(X(a),Y(a),X(b),Y(b));
+      g.addColorStop(0,['rgba(255,168,61,.75)','rgba(255,204,97,.8)','rgba(255,236,170,.85)'][i]);
+      g.addColorStop(1,['rgba(255,204,97,.8)','rgba(255,236,170,.85)','rgba(255,255,244,.9)'][i]);
+      x.strokeStyle=g; x.lineWidth=1.4; x.beginPath(); x.moveTo(X(a),Y(a)); x.lineTo(X(b),Y(b)); x.stroke();
+    }
+    if(step===1){ /* 화살표 */
+      const a=P[0], b=P[1], mx=X(a)+(X(b)-X(a))*0.55, my=Y(a);
+      x.fillStyle='rgba(255,204,97,.9)'; x.beginPath(); x.moveTo(mx+5,my); x.lineTo(mx-3,my-3.5); x.lineTo(mx-3,my+3.5); x.closePath(); x.fill();
+    }
+    /* 달리는 광자 */
+    const CU = step===2 ? [0,R.cum[1],R.cum[1]+Math.hypot(SF1.x-P[1].x,SF1.y-P[1].y)] : R.cum;
+    const PP = P;
+    const L=CU[vis], u=((t*0.16+R.ph)%1)*L;
+    let i=0; while(i<vis-1 && CU[i+1]<u) i++;
+    const f=(u-CU[i])/((CU[i+1]-CU[i])||1), a=PP[i], b=PP[i+1];
+    const px=X(a)+(X(b)-X(a))*f, py=Y(a)+(Y(b)-Y(a))*f;
+    const rg=x.createRadialGradient(px,py,0,px,py,6);
+    rg.addColorStop(0,'rgba(255,255,255,1)'); rg.addColorStop(.4,'rgba(255,225,150,.8)'); rg.addColorStop(1,'rgba(255,170,50,0)');
+    x.fillStyle=rg; x.beginPath(); x.arc(px,py,6,0,7); x.fill();
+  });
+  /* 초점 */
+  function focus(p,label,col,dy,glow){
+    if(glow){ const r=9+2*Math.sin(t*4); const g=x.createRadialGradient(X(p),Y(p),0,X(p),Y(p),r*2.2);
+      g.addColorStop(0,'rgba(255,255,255,.9)'); g.addColorStop(.35,'rgba(255,225,150,.55)'); g.addColorStop(1,'rgba(255,170,50,0)');
+      x.fillStyle=g; x.beginPath(); x.arc(X(p),Y(p),r*2.2,0,7); x.fill(); }
+    x.fillStyle=col; x.beginPath(); x.arc(X(p),Y(p),3.2,0,7); x.fill();
+    txt(label, X(p), Y(p)+dy, col, mth, 'center');
+  }
+  focus(SF1, 'F', '#FF6A5A', -13, step===2);
+  if(isCas){
+    if(step>=3||prin) focus(SF2, 'F′', '#FF6A5A', 14, step>=4);
+    if(step>=4) txt('상', X(SF2)+11, Y(SF2)-11, 'rgba(255,255,255,.85)');
+  } else {
+    if(step>=3||prin) focus(SFN, 'F′', '#FF6A5A', -13, step>=4);
+    if(step>=4) txt('상', X(SFN)+12, Y(SFN)+2, 'rgba(255,255,255,.85)');
+  }
+  /* 아래 설명 한 줄 */
+  const cap = isCas
+    ? ['평행한 빛이 들어온다','포물선: 평행광 → 초점 F로','쌍곡선: F로 가던 빛 → 다른 초점 F′로','F′에 상이 맺힌다'][step-1]
+    : ['평행한 빛이 들어온다','포물선: 평행광 → 초점 F로','평면거울: 초점을 옆으로 옮긴다','F′에 상이 맺힌다'][step-1];
+  txt(cap, 10, H-9, 'rgba(255,255,255,.62)', "500 10.5px 'IBM Plex Sans KR',system-ui,sans-serif");
+}
+(function secLoop(now){ drawSec(now||0); requestAnimationFrame(secLoop); })(0);
+
 /* ── 조작 ── */
 let drag=null;
 CV.addEventListener('pointerdown',e=>{ drag={x:e.clientX,y:e.clientY}; dragged=true; spin=false; CV.classList.add('drag'); CV.setPointerCapture(e.pointerId); });
@@ -1686,16 +1867,16 @@ CV.addEventListener('touchmove',e=>{ if(e.touches.length===2&&pinch){
   const d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
   camGoal.r=orb.r=Math.max(9,Math.min(120,orb.r*pinch/d)); pinch=d; } },{passive:true});
 
-document.querySelectorAll('#telSteps button').forEach(function(b,i){
+document.querySelectorAll('#telSteps button:not(.nx)').forEach(function(b,i){
   b.addEventListener('click',function(){
     step=i+1; dragged=false; if(step===4) eyeT0=performance.now();
-    if(ready) applyStep(); 
+    if(ready) applyStep(); else applyStepLite();
     if(typeof GEO_task==='function') GEO_task('tel-step'+step);
   });
 });
 document.getElementById('telNext').addEventListener('click',function(){
   step=step%4+1; dragged=false; if(step===4) eyeT0=performance.now();
-  if(ready) applyStep();
+  if(ready) applyStep(); else applyStepLite();
   if(typeof GEO_task==='function') GEO_task('tel-step'+step);
 });
 document.querySelectorAll('.segBtn').forEach(function(b){
@@ -1704,12 +1885,13 @@ document.querySelectorAll('.segBtn').forEach(function(b){
     mode=b.dataset.m;
     document.querySelectorAll('.segBtn').forEach(x=>x.classList.toggle('on',x===b));
     document.getElementById('telTag').textContent = mode==='cas'?'카세그레인식':'뉴턴식';
+    secBuild(); drawSecNow();
     if(ready){ buildMirror(envT); buildRays(); buildLabels(); buildPrin(); applyStep(); }
     if(typeof GEO_task==='function') GEO_task('tel-'+mode);
   });
 });
 window.__telShow=function(){ init(); setTimeout(resize,40); };
-window.__telPrin=function(v){ prin=v; if(gPrin) gPrin.visible=v; };
+window.__telPrin=function(v){ prin=v; if(gPrin) gPrin.visible=v; if(TUBE) TUBE.material.opacity=v?.09:.20; drawSecNow(); };
 window.addEventListener('resize',()=>{ if(ready) resize(); });
 })();
 </script>
