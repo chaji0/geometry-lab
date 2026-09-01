@@ -6,12 +6,24 @@
      먼저 선언한 뒤 이 파일을 불러오면 하단 바가 자동으로 생깁니다.
    ════════════════════════════════════════════════════════════ */
 window.GEO_CONFIG = {
-  VERSION: "v1.37",                 // ★ 1단원=v1.x, 2단원=v2.x, 3단원=v3.x — 업로드마다 뒷자리 +1 (v1.11, v1.12, …)
+  VERSION: "v1.38",                 // ★ 1단원=v1.x, 2단원=v2.x, 3단원=v3.x — 업로드마다 뒷자리 +1 (v1.11, v1.12, …)
   APPS_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbx3Ay-gudjjSoRlngyu54umJ9uYRAKhINuwcv229UZUN9_oIQfm9vwAxM32FOPR9wV1/exec",
-  /* 담당 선생님 — 실제 명단은 Apps Script(TEACHERS)에서 불러옵니다.
-     아래는 인터넷이 안 될 때 쓰는 기본값입니다. */
+  /* ── 담당 선생님 ───────────────────────────────────────────────
+     선생님마다 '자기 구글 시트 + 자기 드라이브'를 씁니다.
+     학생이 입장할 때 고른 선생님(localStorage 'geoTeacher')에 따라
+     승인·소감·사진·질문이 그 선생님 주소로만 오갑니다.
+
+     ★ 선생님을 바꾸거나 추가할 때는 이 목록만 고치면 됩니다.
+       id  : 한 번 정하면 바꾸지 마세요 (학생 아이패드에 저장됩니다)
+       url : 그 선생님의 Apps Script 웹 앱 주소 (/exec 로 끝남)
+     ───────────────────────────────────────────────────────────── */
   TEACHERS: [
-    { id: 'cha', name: '차지영 선생님' }
+    { id: 'cha',  name: '차지영 선생님',
+      url: "https://script.google.com/macros/s/AKfycbx3Ay-gudjjSoRlngyu54umJ9uYRAKhINuwcv229UZUN9_oIQfm9vwAxM32FOPR9wV1/exec" },
+    { id: 'jeon', name: '전승환 선생님',
+      url: "https://script.google.com/macros/s/AKfycbzlFU6p-txGf2QHqpDdN7OL4Lt2VWwix9yXW0M8m-ieD_oKNY-RzLHB13UOWOvdauXDHw/exec" },
+    { id: 'ko',   name: '고강원 선생님',
+      url: "https://script.google.com/macros/s/AKfycbwKAOBhXxbKdN894x85u8uUqQsFLIkg99YsBNSiHDy1K2plDNZUUUZgust6ksiR413vgg/exec" }
   ],
   ACTIVITIES: [
     { id:'conic',    href:'conic.html',    icon:'⚾', img:'icon-conic.png', short:'원뿔곡선', grp:'conic',
@@ -57,6 +69,23 @@ window.GEO_CONFIG = {
     { key:'apply',   title:'이차곡선 활용' },
     { key:'tangent', title:'이차곡선의 접선' }
   ]
+};
+
+/* ════════════════════════════════════════════════════════════
+   이 학생의 담당 선생님 주소
+   — 예전에 이미 들어와 있던 학생은 담당이 비어 있으므로 첫 번째
+     선생님(차지영)으로 봅니다. 그래야 로그아웃 없이 그대로 이어집니다.
+   ════════════════════════════════════════════════════════════ */
+window.GEO_teacherId = function(){
+  const list = (window.GEO_CONFIG.TEACHERS || []);
+  const saved = localStorage.getItem('geoTeacher') || '';
+  if(saved && list.some(t => t.id === saved)) return saved;
+  return list.length ? list[0].id : '';
+};
+window.GEO_url = function(){
+  const list = (window.GEO_CONFIG.TEACHERS || []);
+  const me = list.find(t => t.id === window.GEO_teacherId());
+  return (me && me.url) || window.GEO_CONFIG.APPS_SCRIPT_URL || '';
 };
 
 /* ════════════════════════════════════════════════════════════
@@ -487,7 +516,7 @@ window.GEO_openGallery = async function(){
   body.innerHTML = '<div class="gxLoad">사진을 불러오는 중이에요…</div>';
   bg.classList.add('show');
   try{
-    const url = window.GEO_CONFIG.APPS_SCRIPT_URL
+    const url = window.GEO_url()
       + '?action=myphotos&sid=' + encodeURIComponent(sid)
       + '&name=' + encodeURIComponent(name);
     const r = await (await fetch(url)).json();
@@ -554,7 +583,7 @@ window.GEO_openQnA = async function(){
   async function loadList(){
     const list = body.querySelector('#gxQList');
     try{
-      const url = window.GEO_CONFIG.APPS_SCRIPT_URL
+      const url = window.GEO_url()
         + '?action=myquestions&sid=' + encodeURIComponent(sid)
         + '&name=' + encodeURIComponent(name);
       const r = await (await fetch(url)).json();
@@ -597,7 +626,7 @@ window.GEO_openQnA = async function(){
     const btn = body.querySelector('#gxAskBtn');
     btn.disabled = true; btn.textContent = '보내는 중…';
     try{
-      const res = await fetch(window.GEO_CONFIG.APPS_SCRIPT_URL, {
+      const res = await fetch(window.GEO_url(), {
         method: 'POST',
         body: JSON.stringify({ action:'ask', sid, name, text:q.slice(0,500) })
       });
@@ -786,14 +815,14 @@ function gxBuildSubmit(){
     try{
       let r;
       if(photos.length){
-        const res = await fetch(window.GEO_CONFIG.APPS_SCRIPT_URL, {
+        const res = await fetch(window.GEO_url(), {
           method:'POST',
           body: JSON.stringify({ action:'feedback', sid, name, page,
                                  text:text.slice(0,500), photos })
         });
         r = await res.json();
       } else {
-        const url = window.GEO_CONFIG.APPS_SCRIPT_URL
+        const url = window.GEO_url()
           + '?action=feedback&sid=' + encodeURIComponent(sid)
           + '&name=' + encodeURIComponent(name)
           + '&page=' + encodeURIComponent(page)
