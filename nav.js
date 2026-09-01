@@ -6,7 +6,7 @@
      먼저 선언한 뒤 이 파일을 불러오면 하단 바가 자동으로 생깁니다.
    ════════════════════════════════════════════════════════════ */
 window.GEO_CONFIG = {
-  VERSION: "v1.39",                 // ★ 1단원=v1.x, 2단원=v2.x, 3단원=v3.x — 업로드마다 뒷자리 +1 (v1.11, v1.12, …)
+  VERSION: "v1.41",                 // ★ 1단원=v1.x, 2단원=v2.x, 3단원=v3.x — 업로드마다 뒷자리 +1 (v1.11, v1.12, …)
   APPS_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbx3Ay-gudjjSoRlngyu54umJ9uYRAKhINuwcv229UZUN9_oIQfm9vwAxM32FOPR9wV1/exec",
   /* ── 담당 선생님 ───────────────────────────────────────────────
      선생님마다 '자기 구글 시트 + 자기 드라이브'를 씁니다.
@@ -490,6 +490,12 @@ function gxModal(){
     #gxLightBg.show { display:flex; }
     #gxLightBg img { max-width:96vw; max-height:82vh; border-radius:12px; background:#1e293b; }
     #gxLightBg a { color:#7dd3fc; font-size:13px; }
+    #gxOldWrap { text-align:center; padding:20px 0 4px; border-top:1px solid #e2e8f0; margin-top:18px; }
+    #gxOldBtn { padding:11px 24px; font-size:14px; font-weight:800; font-family:inherit;
+      border:1.5px solid #cbd5e1; border-radius:999px; background:#fff; color:#475569; cursor:pointer; }
+    #gxOldBtn:hover:not(:disabled) { border-color:#0284c7; color:#0369a1; }
+    #gxOldBtn:disabled { opacity:.6; }
+    .gxOldNote { font-size:12px; color:#94a3b8; line-height:1.6; margin-top:9px; }
     #gxLightBg .gxSaveOne { padding:10px 22px; font-size:14px; font-weight:800; font-family:inherit;
       border:none; border-radius:999px; background:#0284c7; color:#fff; cursor:pointer; }
     #gxLightBg .gxSaveOne:disabled { opacity:.55; }
@@ -618,8 +624,9 @@ window.GEO_openGallery = async function(){
   function paint(note){
     const dates = order.slice();
     if(!dates.length){
-      body.innerHTML = '<div class="gxLoad">아직 제출한 사진이 없어요.<br>'+
-        '활동을 마치고 <b>오늘과제</b>에서 연습장 사진을 올려 보세요! 📷</div>';
+      body.innerHTML = '<div class="gxLoad">이 아이패드에 저장된 사진이 아직 없어요.<br>'+
+        '활동을 마치고 <b>오늘과제</b>에서 연습장 사진을 올려 보세요! 📷</div>' + oldBtnHTML();
+      bindOld();
       return;
     }
     body.innerHTML = dates.map(function(d){
@@ -629,8 +636,8 @@ window.GEO_openGallery = async function(){
         drv.map(function(it){ return '<img loading="lazy" src="https://drive.google.com/thumbnail?id='+
           encodeURIComponent(it.id)+'&sz=w400" data-id="'+gxEsc(it.id)+'" alt="과제 사진">'; }).join('')+
         '</div>';
-    }).join('') + (note || '');
-    bind();
+    }).join('') + oldBtnHTML() + (note || '');
+    bind(); bindOld();
   }
 
   function bind(){
@@ -669,7 +676,7 @@ window.GEO_openGallery = async function(){
     });
   }
 
-  /* 1) 이 아이패드에 남아 있는 사진 — 기다릴 필요 없이 바로 */
+  /* 이 아이패드에 남아 있는 사진 — 기다릴 필요 없이 바로 */
   try{
     const rows = await window.GEO_photos.bySid(sid);
     rows.forEach(function(r){
@@ -677,30 +684,43 @@ window.GEO_openGallery = async function(){
       localByDate[r.date].push(r);
     });
     order.sort(function(a,b){ return b.localeCompare(a); });
-    if(rows.length) paint();
   }catch(e){}
 
-  /* 2) 드라이브에 있는 것(다른 기기에서 낸 것 등)을 뒤이어 채움 */
-  try{
-    const url = window.GEO_url()
-      + '?action=myphotos&sid=' + encodeURIComponent(sid)
-      + '&name=' + encodeURIComponent(name);
-    const r = await (await fetch(url)).json();
-    if(!r.ok) throw new Error('server');
-    r.items.forEach(function(it){
-      if(!driveByDate[it.date]){ driveByDate[it.date] = []; if(order.indexOf(it.date)<0) order.push(it.date); }
-      driveByDate[it.date].push(it);
-    });
-    order.sort(function(a,b){ return b.localeCompare(a); });
-    paint();
-  }catch(e){
-    if(!order.length){
-      body.innerHTML = '<div class="gxLoad">사진을 불러오지 못했어요 😢<br>'+
-        '인터넷 연결을 확인하고 다시 열어 주세요.</div>';
-    }else{
-      paint('<div class="gxLoad" style="padding:14px 0 0">이 아이패드에 저장된 사진만 보이는 중이에요.</div>');
-    }
+  /* 드라이브는 부르지 않는다.
+     폴더가 커질수록 목록을 훑는 데 오래 걸려서, 과제방을 열 때마다 느려졌다.
+     예전 사진은 학생이 버튼을 눌렀을 때만 불러온다. */
+  let driveLoaded = false;
+  function oldBtnHTML(){
+    if(driveLoaded) return '';
+    return '<div id="gxOldWrap"><button id="gxOldBtn" type="button">예전 사진 보기</button>'
+      + '<div class="gxOldNote">지난 수업에 낸 사진은 선생님 드라이브에 있어요. 불러오는 데 몇 초 걸립니다.</div></div>';
   }
+  function bindOld(){
+    const b2 = document.getElementById('gxOldBtn');
+    if(!b2) return;
+    b2.addEventListener('click', async function(){
+      b2.disabled = true; b2.textContent = '불러오는 중…';
+      try{
+        const url = window.GEO_url()
+          + '?action=myphotos&sid=' + encodeURIComponent(sid)
+          + '&name=' + encodeURIComponent(name);
+        const r = await (await fetch(url)).json();
+        if(!r.ok) throw new Error('server');
+        r.items.forEach(function(it){
+          if(!driveByDate[it.date]){ driveByDate[it.date] = []; if(order.indexOf(it.date)<0) order.push(it.date); }
+          driveByDate[it.date].push(it);
+        });
+        order.sort(function(a,b){ return b.localeCompare(a); });
+        driveLoaded = true;
+        paint();
+        if(!order.length) body.innerHTML = '<div class="gxLoad">아직 제출한 사진이 없어요.</div>';
+      }catch(e){
+        b2.disabled = false; b2.textContent = '예전 사진 보기';
+        gxToast('예전 사진을 불러오지 못했어요. 인터넷 연결을 확인해 주세요.');
+      }
+    });
+  }
+  paint();
 };
 
 /* ── 💬 질문: 보내기 + 나의 질문/답변 ── */

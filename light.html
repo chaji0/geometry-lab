@@ -235,7 +235,7 @@ if (localStorage.getItem('geoAppOk') !== '1') location.replace('index.html');
             <button id="cpHypBack">이전</button>
             <button id="cpHypNext" class="pri">다음</button>
             <button id="cpHypReset">처음부터</button>
-            <span class="cpNo" id="cpHypNo">0 / 5</span>
+            <span class="cpNo" id="cpHypNo">0 / 6</span>
           </div>
         </div>
         <div class="note on" id="cpHypCap"></div>
@@ -1044,7 +1044,7 @@ GEO_CP({
   CAP:[
    '타원 <span class="mm"><i>x</i><sup>2</sup>/<i>a</i><sup>2</sup> + <i>y</i><sup>2</sup>/<i>b</i><sup>2</sup> = 1</span>과 두 초점 <span class="rm">F</span>′, <span class="rm">F</span>, 타원 위의 점 <span class="rm">P</span>입니다. <span class="hint">그림을 클릭해 보세요</span>',
    '<span class="rm">P</span>에서의 접선 <span class="mm"><i>l</i></span> : <b><span class="mm"><i>x</i><sub>1</sub><i>x</i>/<i>a</i><sup>2</sup> + <i>y</i><sub>1</sub><i>y</i>/<i>b</i><sup>2</sup> = 1</span></b>',
-   '직선 <span class="rm">PF</span>′를 <span class="rm">P</span> 너머로 늘여 둡니다.',
+   '직선 <span class="rm">PF</span>′를 그립니다.',
    '<span class="rm">F</span>에서 <span class="mm"><i>l</i></span>에 <b>수직인 직선</b>을 그어 직선 <span class="rm">PF</span>′와 만나는 점을 <span class="rm">F</span>″라 합니다.',
    '<span class="mm"><i>l</i></span>이 <span class="rm">FF</span>″를 수직이등분하므로 <b><span class="rm">PF</span> = <span class="rm">PF</span>″</b> — 삼각형 <span class="rm">PFF</span>″는 이등변삼각형입니다. <span class="hint">(1)</span>',
    '따라서 <b>∠(<span class="mm"><i>l</i></span>, <span class="rm">PF</span>) = ∠(<span class="mm"><i>l</i></span>, <span class="rm">PF</span>″)</b>이고, <span class="rm">PF</span>″와 <span class="rm">PF</span>′는 한 직선이므로 맞꼭지각에서 <b>= ∠(<span class="mm"><i>l</i></span>, <span class="rm">PF</span>′)</b> — 두 각이 같습니다. <span class="hint">(2)</span>',
@@ -1116,14 +1116,19 @@ GEO_CP({
 if(!document.getElementById('cpHyp')) return;
 const a=2, b=Math.sqrt(12), c=4;
 const P={x:3,y:Math.sqrt(15)}, F={x:c,y:0}, G={x:-c,y:0}, Q={x:a*a/3,y:0};
-const AS=0.42, A2={x:P.x+AS*(P.x-F.x), y:P.y+AS*(P.y-F.y)};   // 선분 FP의 연장선 위의 점 A
+const NB={x:9,y:-Math.sqrt(15)}, NL=Math.hypot(NB.x,NB.y);   // 접선 9x − √15 y = 12 의 법선
+const dF=(NB.x*F.x+NB.y*F.y-12)/(NL*NL);
+const F2={x:F.x-2*dF*NB.x, y:F.y-2*dF*NB.y};                 // F를 접선에 대칭시킨 점
+const M0={x:(F.x+F2.x)/2, y:(F.y+F2.y)/2};
+const U={x:NB.y/NL, y:-NB.x/NL};                             // 접선 방향(P → Q, 왼쪽 아래)
+const AS=0.42, A2={x:P.x+AS*(P.x-F.x), y:P.y+AS*(P.y-F.y)};  // 선분 FP의 연장선 위의 점 A
 GEO_CP({
   key:'hyp', stage:'__scHyp',
   cv:'cpHyp', wrap:'cpHypWrap', cap:'cpHypCap', no:'cpHypNo',
   back:'cpHypBack', next:'cpHypNext', reset:'cpHypReset',
   VB:{x0:-6.9,x1:7.0,y0:-4.6,y1:6.4},
   DUR:{ray:1800},
-  KEYS:[['curve'],['tan','q'],['pf','pg'],['qf','qg'],['arc'],['ray']],
+  KEYS:[['curve'],['tan','q'],['pg'],['perp','f2'],['pf','pf2'],['arc'],['ray']],
   LAB:[
    {id:'eq', w:{x:3.5,y:-3.5}, html:'<span class="fr2"><i>x</i><sup>2</sup>/<i>a</i><sup>2</sup></span> − <span class="fr2"><i>y</i><sup>2</sup>/<i>b</i><sup>2</sup></span> = 1', st:0},
    {id:'F',  w:F, dx:10, dy:21, html:'<span class="rm">F</span>(<i>c</i>, 0)', st:0},
@@ -1133,18 +1138,21 @@ GEO_CP({
    {id:'ax', w:{x:6.9,y:0}, dx:-4, dy:18, html:'<i>x</i>', st:0},
    {id:'ay', w:{x:0,y:6.3}, dx:16, dy:2, html:'<i>y</i>', st:0},
    {id:'tan',w:P, dx:-104, dy:-18, html:'<span class="fr2"><i>x</i><sub>1</sub><i>x</i>/<i>a</i><sup>2</sup></span> − <span class="fr2"><i>y</i><sub>1</sub><i>y</i>/<i>b</i><sup>2</sup></span> = 1', st:1},
+   {id:'l',  w:{x:3.79,y:5.71}, dx:15, dy:-2, html:'<i>l</i>', st:1},
    {id:'Q',  w:Q, dx:-4, dy:20, html:'<span class="rm">Q</span>', st:1},
-   {id:'m1', w:{x:4.15,y:2.35}, dx:0, dy:0, html:'<span class="rm">PF</span>', st:2, cls:'blu'},
-   {id:'m2', w:{x:-1.2,y:2.35}, dx:0, dy:0, html:'<span class="rm">PF</span>′', st:2, cls:'blu'},
-   {id:'A',  w:A2, dx:-6, dy:-19, html:'<span class="rm">A</span>', st:5}
+   {id:'F2', w:F2, dx:-12, dy:-17, html:'<span class="rm">F</span>″', st:3},
+   {id:'m1', w:{x:4.30,y:2.10}, dx:0, dy:0, html:'<span class="rm">PF</span>', st:4, cls:'blu'},
+   {id:'m2', w:{x:0.90,y:3.50}, dx:0, dy:0, html:'<span class="rm">PF</span>″', st:4, cls:'blu'},
+   {id:'A',  w:A2, dx:-6, dy:-19, html:'<span class="rm">A</span>', st:6}
   ],
   CAP:[
    '쌍곡선 <span class="mm"><i>x</i><sup>2</sup>/<i>a</i><sup>2</sup> − <i>y</i><sup>2</sup>/<i>b</i><sup>2</sup> = 1</span>과 두 초점 <span class="rm">F</span>′, <span class="rm">F</span>, 쌍곡선 위의 점 <span class="rm">P</span>입니다. <span class="hint">그림을 클릭해 보세요</span>',
-   '<span class="rm">P</span>에서의 접선 <b><span class="mm"><i>x</i><sub>1</sub><i>x</i>/<i>a</i><sup>2</sup> − <i>y</i><sub>1</sub><i>y</i>/<i>b</i><sup>2</sup> = 1</span></b>이 <span class="mm"><i>x</i></span>축과 만나는 점이 <span class="rm">Q</span><span class="mm">(<i>a</i><sup>2</sup>/<i>x</i><sub>1</sub>, 0)</span>입니다.',
-   '두 초점까지의 거리 <b><span class="rm">PF</span>′ = <i>ex</i><sub>1</sub> + <i>a</i></b>, <b><span class="rm">PF</span> = <i>ex</i><sub>1</sub> − <i>a</i></b> <span class="hint">(<i>e</i> = <i>c</i>/<i>a</i>)</span>',
-   '<span class="rm">Q</span>에서 두 초점까지는 <b><span class="rm">QF</span>′ = <i>c</i> + <i>a</i><sup>2</sup>/<i>x</i><sub>1</sub></b>, <b><span class="rm">QF</span> = <i>c</i> − <i>a</i><sup>2</sup>/<i>x</i><sub>1</sub></b>. 계산해 보면 <b><span class="rm">PF</span>′ : <span class="rm">PF</span> = <span class="rm">QF</span>′ : <span class="rm">QF</span></b> <span class="hint">(1)</span>',
-   '<span class="rm">PQ</span>가 <span class="rm">F</span>′<span class="rm">F</span>를 <span class="rm">PF</span>′ : <span class="rm">PF</span>로 나누므로, 각의 이등분선 정리의 역에서 <b>∠<span class="rm">F</span>′<span class="rm">PQ</span> = ∠<span class="rm">FPQ</span></b> — 접선이 ∠<span class="rm">F</span>′<span class="rm">PF</span>를 이등분합니다. <span class="hint">(2)</span>',
-   '선분 <span class="rm">FP</span>의 연장선 위의 점 <span class="rm">A</span>에서 초점 <span class="rm">F</span>를 향해 빛을 쏘면, <span class="rm">P</span>에서 반사되어 <b>다른 초점 <span class="rm">F</span>′를 지납니다.</b> <span class="hint">(3) 반사 망원경의 부경이 이 성질을 씁니다.</span>'
+   '<span class="rm">P</span>에서의 접선 <span class="mm"><i>l</i></span> : <b><span class="mm"><i>x</i><sub>1</sub><i>x</i>/<i>a</i><sup>2</sup> − <i>y</i><sub>1</sub><i>y</i>/<i>b</i><sup>2</sup> = 1</span></b> — <span class="mm"><i>x</i></span>축과 만나는 점을 <span class="rm">Q</span>라 하면 <b>직선 <span class="rm">PQ</span></b>입니다.',
+   '직선 <span class="rm">PF</span>′를 그립니다.',
+   '<span class="rm">F</span>에서 <span class="mm"><i>l</i></span>에 <b>수직인 직선</b>을 그어 직선 <span class="rm">PF</span>′와 만나는 점을 <span class="rm">F</span>″라 합니다.',
+   '<span class="mm"><i>l</i></span>이 <span class="rm">FF</span>″를 수직이등분하므로 <b><span class="rm">PF</span> = <span class="rm">PF</span>″</b> — 삼각형 <span class="rm">PFF</span>″는 이등변삼각형입니다. <span class="hint">(1)</span>',
+   '따라서 <b>∠(<span class="mm"><i>l</i></span>, <span class="rm">PF</span>) = ∠(<span class="mm"><i>l</i></span>, <span class="rm">PF</span>″)</b>이고, <span class="rm">F</span>″는 직선 <span class="rm">PF</span>′ 위에 있으므로 <b>= ∠(<span class="mm"><i>l</i></span>, <span class="rm">PF</span>′)</b> — 두 각이 같습니다. <span class="hint">(2)</span>',
+   '입사각과 반사각이 같으므로, 선분 <span class="rm">FP</span>의 연장선 위의 점 <span class="rm">A</span>에서 초점 <span class="rm">F</span>를 향해 쏜 빛은 <span class="rm">P</span>에서 반사되어 <b>반드시 다른 초점 <span class="rm">F</span>′를 지납니다.</b> <span class="hint">(3) 반사 망원경의 부경이 이 성질을 씁니다.</span>'
   ],
   draw:function(D, step){
     const g=D.g, e=D.ease, A=D.A;
@@ -1167,25 +1175,42 @@ GEO_CP({
         g.strokeStyle=D.INK; g.lineWidth=2.2; g.lineJoin='round'; g.lineCap='round'; g.stroke(); g.restore();
       });
     }
-    /* 접선 + Q */
+    /* 접선 l = 직선 PQ */
     if(step>=1){
       const t=e(A('tan'));
-      const m=(b*b*P.x)/(a*a*P.y), L=Math.hypot(1,m), u={x:1/L,y:m/L};
-      D.grow(P,{x:P.x-u.x*3.2,y:P.y-u.y*3.2}, D.INK,1.9,t);
-      D.grow(P,{x:P.x+u.x*1.7,y:P.y+u.y*1.7}, D.INK,1.9,t);
+      D.grow(P,{x:P.x+U.x*6.2,y:P.y+U.y*6.2}, D.INK,1.9,t);
+      D.grow(P,{x:P.x-U.x*2.6,y:P.y-U.y*2.6}, D.INK,1.9,t);
     }
-    /* PF, PF' */
-    if(step>=2){ D.grow(P,F,D.BLU,3.2,e(A('pf'))); D.grow(P,G,D.BLU,3.2,e(A('pg'))); }
-    /* QF, QF' */
-    /* 각 */
+    /* 직선 PF' */
+    if(step>=2){
+      const t=e(A('pg'));
+      const d={x:P.x-G.x,y:P.y-G.y}, L=Math.hypot(d.x,d.y), u={x:d.x/L,y:d.y/L};
+      D.grow(P,G, D.INK,1.5,t);
+      D.grow(P,{x:P.x+u.x*2.2,y:P.y+u.y*2.2}, D.INK,1.5,t);
+    }
+    /* F에서 l에 수직 → F'' */
+    if(step>=3){
+      const t=e(A('perp'));
+      D.grow(F,F2, D.INK,1.6,t);
+      if(t>=1){
+        const uL={x:U.x,y:U.y}, uP={x:F2.x-F.x,y:F2.y-F.y};
+        D.rightAngle(M0,{x:-uL.x,y:-uL.y},{x:-uP.x,y:-uP.y},0.32,D.INK);
+      }
+    }
+    /* PF = PF'' */
     if(step>=4){
+      D.grow(P,F, D.BLU,3.2,e(A('pf')));
+      D.grow(P,F2,D.BLU,3.2,e(A('pf2')));
+      if(A('pf2')>=1){ D.tick(P,F,D.BLU); D.tick(P,F2,D.BLU); }
+    }
+    /* 각 */
+    if(step>=5){
       const t=e(A('arc'));
-      const uQ={x:Q.x-P.x,y:Q.y-P.y};
-      D.arc(P,uQ,{x:F.x-P.x,y:F.y-P.y}, 30,D.INK,t);
-      D.arc(P,uQ,{x:G.x-P.x,y:G.y-P.y}, 30,D.INK,t);
+      D.arc(P,U,{x:F.x-P.x,y:F.y-P.y},   28,D.INK,t);
+      D.arc(P,U,{x:F2.x-P.x,y:F2.y-P.y}, 28,D.INK,t);
     }
     /* 빛 : A → P → F' */
-    if(step>=5){
+    if(step>=6){
       const t=e(A('ray'));
       const L1=Math.hypot(P.x-A2.x,P.y-A2.y), L2=Math.hypot(G.x-P.x,G.y-P.y);
       const u=t*(L1+L2);
@@ -1194,7 +1219,8 @@ GEO_CP({
     }
     D.dot(F,D.INK); D.dot(G,D.INK); D.dot(P,D.INK,4.8);
     if(step>=1) D.dot(Q,D.INK,4.4,e(A('q')));
-    if(step>=5) D.dot(A2,D.INK,4.4,1);
+    if(step>=3) D.dot(F2,D.INK,4.4,e(A('f2')));
+    if(step>=6) D.dot(A2,D.INK,4.4,1);
   }
 });
 })();
