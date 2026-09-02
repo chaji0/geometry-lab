@@ -6,7 +6,7 @@
      먼저 선언한 뒤 이 파일을 불러오면 하단 바가 자동으로 생깁니다.
    ════════════════════════════════════════════════════════════ */
 window.GEO_CONFIG = {
-  VERSION: "v1.41",                 // ★ 1단원=v1.x, 2단원=v2.x, 3단원=v3.x — 업로드마다 뒷자리 +1 (v1.11, v1.12, …)
+  VERSION: "v1.42",                 // ★ 1단원=v1.x, 2단원=v2.x, 3단원=v3.x — 업로드마다 뒷자리 +1 (v1.11, v1.12, …)
   APPS_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbx3Ay-gudjjSoRlngyu54umJ9uYRAKhINuwcv229UZUN9_oIQfm9vwAxM32FOPR9wV1/exec",
   /* ── 담당 선생님 ───────────────────────────────────────────────
      선생님마다 '자기 구글 시트 + 자기 드라이브'를 씁니다.
@@ -53,6 +53,8 @@ window.GEO_CONFIG = {
       title:'타원의 활용' },
     { id:'happly',   href:'hyperbola-apply.html', icon:'🚢', short:'쌍곡선활용', grp:'apply', curve:'쌍곡선',
       title:'쌍곡선의 활용' },
+    { id:'orbit',    href:'orbit.html',    icon:'☄', short:'태양계', grp:'apply', curve:'태양계와 이차곡선',
+      title:'태양계와 이차곡선' },
     { id:'tangent',  href:'tangent.html',  short:'접선', grp:'tangent', curve:'이차곡선의 접선',
       title:'이차곡선의 접선' },
     { id:'light',    href:'light.html',    short:'빛', grp:'tangent', curve:'이차곡선과 빛의 관계',
@@ -389,6 +391,7 @@ window.GEO_TASKS = {
   hconcept: ['slider'],                                // a·b 슬라이더 움직이기
   general:  ['quiz','proj'],                           // 판정 연습 6문제 + 교과서 33p 표 완성
   happly:   ['steps'],                                 // 위치 찾기 Step 4까지 완주
+  orbit:    ['orb-ellipse','orb-mode-real'],           // 타원 궤도 보기 + 실제 태양계 모드
   geogebra: ['open'],                                  // 지오지브라 실행
   locus:    ['see-ell','see-hyp','ggb'],               // 타원·쌍곡선 탭 + 실전 연습 열기
   locustest:['pick','start'],                          // 곡선 뽑기 + 타이머 시작
