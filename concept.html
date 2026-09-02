@@ -11,96 +11,121 @@ if (localStorage.getItem('geoAppOk') !== '1') location.replace('index.html');
 <link rel="icon" type="image/svg+xml" href="icon.svg">
 <link rel="apple-touch-icon" href="icon-180.png">
 <meta name="apple-mobile-web-app-title" content="기하">
-<title>포물선 개념 정리</title>
+<title>포물선의 방정식</title>
+<link rel="stylesheet" media="print" onload="this.media='all'"
+  href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap">
 <style>
-  * { margin:0; padding:0; box-sizing:border-box; }
+  :root { --paper:#EFEFE3; --ink:#23241D; --ink2:#55564A; --mute:#A8A79A;
+          --lnw:#DCDACD; --lnd:#C7C5B6; --acc:#2F45EC; --card:#F5F5EC; --fig:#FBFBF5;
+          --ok:#1F7A4C; }
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
   html, body { width:100%; height:100%; overflow:hidden; }
   body {
-    font-family:'Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif;
-    background:#f1f5fb; color:#1e293b; display:flex; flex-direction:column;
+    font-family:'IBM Plex Sans KR','Apple SD Gothic Neo','Malgun Gothic',sans-serif;
+    background:var(--paper); color:var(--ink); display:flex; flex-direction:column;
+    font-size:14.5px; line-height:1.6;
   }
-  header {
-    padding:9px 16px; background:#fff; border-bottom:1px solid #e2e8f0;
-    display:flex; align-items:baseline; gap:12px; flex-wrap:wrap;
-  }
-  header h1 { font-size:18px; color:#0f172a; }
-  header p { font-size:12px; color:#64748b; }
-  #main { flex:1; display:flex; min-height:0; }
+  header { padding:8px 20px 7px; display:flex; align-items:baseline; gap:0 10px; flex-wrap:wrap; }
+  header h1 { font-size:17.5px; font-weight:700; letter-spacing:-.01em; line-height:1.3; }
+  header p { font-size:12.5px; color:var(--mute); }
+  header i { font-family:Georgia,'Times New Roman',serif; }
+  #main { flex:1; display:flex; min-height:0; border-top:1.5px solid var(--lnw); }
 
   /* ── 왼쪽: 개념 정리 ── */
-  #panel {
-    width:352px; flex:none; background:#fff; border-right:1px solid #e2e8f0;
-    padding:16px; overflow-y:auto;
-  }
-  #panel h2 { font-size:15.5px; color:#0f172a; margin-bottom:10px; }
-  #panel h2.dim { color:#94a3b8; margin-top:22px; }
-  .figBox {
-    border:1px solid #e2e8f0; border-radius:12px; padding:6px 8px; background:#fff;
-    margin-bottom:12px; display:flex; justify-content:center;
-  }
-  .fcard i, .cond i { font-family:Georgia,'Times New Roman',serif; }
-  .defBox {
-    border:1px solid #e2e8f0; background:#f8fafc; border-radius:12px;
-    padding:11px 13px; font-size:13px; color:#475569; line-height:1.7; margin-bottom:12px;
-  }
-  .defBox b { color:#0f172a; }
-  .fcard {
-    border:2px solid #e2e8f0; border-radius:14px; padding:13px 15px; margin-top:10px;
-    cursor:pointer; background:#fbfdff; transition:all .15s; user-select:none;
-  }
-  .fcard .cond { font-size:13px; color:#475569; line-height:1.6; }
-  .fcard .formula {
-    font-size:24px; font-weight:800; margin:7px 0 4px; font-family:Georgia,'Times New Roman',serif;
-    letter-spacing:.5px;
-  }
-  .fcard .now { font-size:12.3px; color:#64748b; line-height:1.6; }
-  .fcard .tapHint { font-size:11.5px; color:#94a3b8; margin-top:5px; }
-  #card1 .formula { color:#dc2626; }
-  #card2 .formula { color:#2563eb; }
-  #card1.on { border-color:#dc2626; background:#fef2f2; }
-  #card2.on { border-color:#2563eb; background:#eff6ff; }
-  .fcard sup { font-size:14px; }
-  .soonBox {
-    border:1px dashed #cbd5e1; border-radius:12px; padding:11px 13px;
-    font-size:12.5px; color:#94a3b8; margin-top:8px;
-  }
+  #panel { width:352px; flex:none; border-right:1.5px solid var(--lnw);
+           padding:16px 18px 32px; overflow-y:auto; }
+  #panel h2 { font-size:14px; font-weight:700; color:var(--ink); margin-bottom:11px;
+              padding-bottom:7px; border-bottom:1.5px solid var(--lnw); }
+  #panel h2.dim { color:var(--mute); margin-top:24px; }
+  .figBox { border:1.5px solid var(--lnw); border-radius:16px; padding:8px 10px;
+            background:#fff; margin-bottom:14px; display:flex; justify-content:center; }
+  .fcard i, .cond i, .defBox i, .sub i, .now i { font-family:Georgia,'Times New Roman',serif; }
+
+  .defBox { border:1.5px solid var(--lnw); background:var(--card); border-radius:16px;
+            padding:12px 14px; font-size:13px; color:var(--ink2); line-height:1.75; margin-bottom:12px; }
+  .defBox b { color:var(--ink); }
+  .defBox .term { display:inline-block; padding:1px 9px; border-radius:999px; font-weight:600;
+                  font-size:12.3px; border:1.5px solid var(--lnd); color:var(--ink); background:transparent; }
+  .t-focus, .t-vertex, .t-axis, .t-center, .t-asym { }
+
+  .fcard { border:1.5px solid var(--lnw); border-radius:16px; padding:14px 16px; margin-top:10px;
+           background:var(--card); user-select:none; transition:border-color .13s, background .13s; }
+  #card1, #card2 { cursor:pointer; }
+  #card1.on, #card2.on { background:#fff; }
+  #card1.on { border-color:var(--ink); }
+  #card2.on { border-color:var(--acc); }
+  .fcard .cond { font-size:13px; color:var(--ink2); line-height:1.65; }
+  .fcard .formula { font-size:23px; font-weight:700; margin:9px 0 4px; text-align:center;
+                    font-family:Georgia,'Times New Roman',serif; letter-spacing:.3px; color:var(--ink); }
+  #card1 .formula, #card2 .formula { color:var(--mute); }
+  #card1.on .formula { color:var(--ink); }
+  #card2.on .formula { color:var(--acc); }
+  .fcard .formula .frac { display:inline-block; text-align:center; vertical-align:middle; margin:0 2px; }
+  .fcard .formula .frac .top { display:block; border-bottom:1.6px solid currentColor; padding:0 5px 1px; font-size:17px; }
+  .fcard .formula .frac .bot { display:block; padding:1px 5px 0; font-size:17px; }
+  .fcard sup { font-size:.68em; vertical-align:.5em; }
+  .fcard .sub { font-size:12.6px; color:var(--ink2); line-height:2.05; margin-top:7px; }
+  .fcard .sub b { color:var(--ink); }
+  .fcard .sub .fr { display:inline-flex; flex-direction:column; align-items:center;
+                    vertical-align:middle; margin:0 1px; line-height:1.1; font-size:.94em;
+                    position:relative; top:-.05em; }
+  .fcard .sub .fr .nu { border-bottom:1.4px solid currentColor; padding:0 4px 1px; }
+  .fcard .sub .fr .de { padding:1px 4px 0; }
+  .fcard .now { font-size:12.6px; line-height:1.7; margin-top:9px; padding-top:9px;
+                border-top:1px solid var(--lnw); color:var(--mute); min-height:18px; }
+  .fcard .tapHint { font-size:11.5px; color:var(--mute); margin-top:5px; }
+
+  .soonBox { border:1.5px dashed var(--lnd); border-radius:16px; padding:12px 14px;
+             font-size:12.5px; color:var(--mute); margin-top:8px; }
+  .conjNote { border:1.5px solid var(--lnw); background:var(--card); border-radius:16px;
+              padding:11px 13px; font-size:12.4px; color:var(--ink2); line-height:1.7;
+              margin-top:10px; display:none; }
+  .conjNote b { color:var(--ink); }
+  .conjNote i { font-family:Georgia,serif; }
 
   /* ── 오른쪽: 그래프 ── */
   #graphSide { flex:1; min-width:0; display:flex; flex-direction:column; }
-  #gwrap { flex:1; min-height:0; position:relative; }
+  #gwrap { flex:1; min-height:0; position:relative; background:var(--fig); }
   #graph { width:100%; height:100%; display:block; touch-action:none; }
-  #pbar {
-    padding:10px 16px; background:#fff; border-top:1px solid #e2e8f0;
-    display:flex; align-items:center; gap:13px;
-  }
-  #pbar .pv { font-size:19px; font-weight:800; color:#0f172a; min-width:88px; }
-  #pbar .pv span { color:#7c3aed; }
-  #pbar input[type=range] { flex:1; accent-color:#7c3aed; height:30px; }
-  #pbar .note { font-size:11.5px; color:#94a3b8; flex:none; }
-  #quizBox {
-    margin-top:10px; background:#fff; border:1.5px solid #bae6fd; border-radius:14px;
-    padding:13px 14px;
-  }
-  #quizBox .qq { font-size:14px; font-weight:800; color:#0c4a6e; line-height:1.6; }
+  #pbar { padding:10px 20px; background:var(--paper); border-top:1.5px solid var(--lnw);
+          display:flex; align-items:center; gap:14px; flex-wrap:wrap; }
+  #pbar .grp { display:flex; align-items:center; gap:11px; flex:1 1 260px; }
+  #pbar .pv { font-size:18px; font-weight:700; color:var(--ink); min-width:78px;
+              font-family:Georgia,'Times New Roman',serif; }
+  #pbar .pv span { font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:16px; }
+  #pbar .pv.va span { color:var(--ink); }
+  #pbar .pv.vb span { color:var(--acc); }
+  #pbar input[type=range] { flex:1; height:30px; accent-color:var(--acc); min-width:0; }
+  #pbar #aSlider { accent-color:#23241D; }
+  #pbar #bSlider { accent-color:#2F45EC; }
+  #pbar .note { font-size:12px; color:var(--mute); flex:none;
+                font-family:'IBM Plex Mono',ui-monospace,monospace; }
+  #circNote, #asymNote { font-size:12px; color:var(--mute); flex-basis:100%; line-height:1.6; }
+  #circNote b, #asymNote b { color:var(--ink); }
+  #circNote i, #asymNote i { font-family:Georgia,serif; }
+  #circNote { display:none; }
+
+  #quizBox { margin:0; background:var(--card); border:1.5px solid var(--lnw); border-radius:16px;
+             padding:14px 16px; }
+  #quizBox .qq { font-size:13.5px; font-weight:700; color:var(--ink); line-height:1.7; }
   #quizBox .qq i { font-family:Georgia,'Times New Roman',serif; }
   #quizBox textarea {
-    width:100%; box-sizing:border-box; margin-top:9px; height:64px; padding:9px 11px;
-    font-size:14px; font-family:inherit; border:1.5px solid #cbd5e1; border-radius:10px;
-    outline:none; resize:vertical; background:#fbfdff; line-height:1.6;
+    width:100%; margin-top:10px; height:64px; padding:9px 12px; font-size:14px;
+    font-family:inherit; line-height:1.7; color:var(--ink); background:#fff;
+    border:1.5px solid var(--lnd); border-radius:12px; outline:none; resize:vertical;
   }
-  #quizBox textarea:focus { border-color:#0284c7; }
-  #quizBox .qState { margin-top:6px; font-size:11.5px; color:#94a3b8; }
-  #quizBox .qState.ok { color:#059669; font-weight:700; }
+  #quizBox textarea:focus { border-color:var(--acc); }
+  #quizBox .qState { margin-top:7px; font-size:12px; color:var(--mute); }
+  #quizBox .qState.ok { color:var(--ok); font-weight:600; }
 </style>
 </head>
 <body>
 <header>
-  <h1>포물선 개념 정리</h1>
+  <h1>포물선의 방정식</h1>
 </header>
 
 <div id="main">
   <div id="panel">
-    <h2>1. 포물선의 방정식</h2>
     <div class="figBox">
       <svg viewBox="0 0 230 185" style="width:100%;max-width:270px">
         <!-- 준선 l -->
@@ -143,18 +168,16 @@ if (localStorage.getItem('geoAppOk') !== '1') location.replace('index.html');
 
     <div class="fcard on" id="card1">
       <div class="cond">(1) 초점이 <b>F(<i>p</i>, 0)</b>, 준선이 <b><i>x</i> = −<i>p</i></b> 인 포물선</div>
-      <div class="formula"><i>y</i><sup>2</sup> = 4<i>px</i> <span style="font-size:13px;color:#94a3b8">(단, <i>p</i> ≠ 0)</span></div>
+      <div class="formula"><i>y</i><sup>2</sup> = 4<i>px</i> <span style="font-size:13px;color:#A8A79A">(단, <i>p</i> ≠ 0)</span></div>
       <div class="now" id="now1"></div>
     </div>
 
     <div class="fcard" id="card2">
       <div class="cond">(2) 초점이 <b>F(0, <i>p</i>)</b>, 준선이 <b><i>y</i> = −<i>p</i></b> 인 포물선</div>
-      <div class="formula"><i>x</i><sup>2</sup> = 4<i>py</i> <span style="font-size:13px;color:#94a3b8">(단, <i>p</i> ≠ 0)</span></div>
+      <div class="formula"><i>x</i><sup>2</sup> = 4<i>py</i> <span style="font-size:13px;color:#A8A79A">(단, <i>p</i> ≠ 0)</span></div>
       <div class="now" id="now2"></div>
     </div>
 
-    <h2 class="dim">2. 접선의 방정식</h2>
-    <div class="soonBox">추후 공개 — 먼저 포물선과 친해져 봅시다 🙂</div>
   </div>
 
   <div id="graphSide">
@@ -167,7 +190,7 @@ if (localStorage.getItem('geoAppOk') !== '1') location.replace('index.html');
     <div id="quizBox">
       <div class="qq">질문. <i>p</i> (<i>p</i> ≠ 0)의 값에 따라 포물선의 모양이 어떻게 변하나요?</div>
       <textarea id="qAns" placeholder="슬라이더를 움직이며 관찰한 것을 적어 보세요"></textarea>
-      <div class="qState" id="qState">답을 적으면 자동으로 저장돼요 ✏️</div>
+      <div class="qState" id="qState">적으면 자동으로 저장됩니다</div>
     </div>
   </div>
 </div>
@@ -201,12 +224,12 @@ function draw(){
     cv.width = Math.round(w*dpr); cv.height = Math.round(h*dpr);
   }
   ctx.setTransform(dpr,0,0,dpr,0,0);
-  ctx.fillStyle = '#ffffff'; ctx.fillRect(0,0,w,h);
+  ctx.fillStyle = '#FBFBF5'; ctx.fillRect(0,0,w,h);
   const v = view();
   const xmax = (w/2)/v.s, ymax = (h/2)/v.s;
 
   /* 격자 */
-  ctx.strokeStyle = '#eef2f7'; ctx.lineWidth = 1;
+  ctx.strokeStyle = '#E3E2D5'; ctx.lineWidth = 1;
   for(let i=Math.ceil(-xmax); i<=xmax; i++){
     if(i===0) continue;
     ctx.beginPath(); ctx.moveTo(X(v,i),0); ctx.lineTo(X(v,i),h); ctx.stroke();
@@ -217,50 +240,50 @@ function draw(){
   }
 
   /* 축 */
-  ctx.strokeStyle = '#334155'; ctx.lineWidth = 1.6;
+  ctx.strokeStyle = '#C7C5B6'; ctx.lineWidth = 1.6;
   ctx.beginPath(); ctx.moveTo(0,v.cy); ctx.lineTo(w,v.cy); ctx.stroke();
   ctx.beginPath(); ctx.moveTo(v.cx,0); ctx.lineTo(v.cx,h); ctx.stroke();
-  ctx.fillStyle = '#334155';
+  ctx.fillStyle = '#C7C5B6';
   ctx.beginPath(); ctx.moveTo(w-2,v.cy); ctx.lineTo(w-12,v.cy-5); ctx.lineTo(w-12,v.cy+5); ctx.fill();
   ctx.beginPath(); ctx.moveTo(v.cx,2); ctx.lineTo(v.cx-5,12); ctx.lineTo(v.cx+5,12); ctx.fill();
 
   /* 눈금 + 숫자 */
-  ctx.font = '12px sans-serif'; ctx.fillStyle = '#64748b';
+  ctx.font = '12px "IBM Plex Mono",ui-monospace,monospace'; ctx.fillStyle = '#8A897C';
   ctx.textAlign = 'center';
   for(let i=Math.ceil(-xmax); i<=xmax; i++){
     if(i===0) continue;
     ctx.beginPath(); ctx.moveTo(X(v,i), v.cy-4); ctx.lineTo(X(v,i), v.cy+4);
-    ctx.strokeStyle='#334155'; ctx.lineWidth=1.2; ctx.stroke();
+    ctx.strokeStyle='#C7C5B6'; ctx.lineWidth=1.2; ctx.stroke();
     if(Math.abs(i)<=8) ctx.fillText(i, X(v,i), v.cy+18);
   }
   ctx.textAlign = 'right';
   for(let i=Math.ceil(-ymax); i<=ymax; i++){
     if(i===0) continue;
     ctx.beginPath(); ctx.moveTo(v.cx-4, Y(v,i)); ctx.lineTo(v.cx+4, Y(v,i));
-    ctx.strokeStyle='#334155'; ctx.lineWidth=1.2; ctx.stroke();
+    ctx.strokeStyle='#C7C5B6'; ctx.lineWidth=1.2; ctx.stroke();
     ctx.fillText(i, v.cx-8, Y(v,i)+4);
   }
   ctx.fillText('O', v.cx-7, v.cy+16);
-  ctx.font = 'italic bold 15px Georgia'; ctx.fillStyle='#334155';
+  ctx.font = 'italic bold 15px Georgia'; ctx.fillStyle='#C7C5B6';
   ctx.textAlign='left';
   ctx.fillText('x', w-16, v.cy-10);
   ctx.fillText('y', v.cx+10, 16);
   ctx.textAlign='left';
 
   const label = (text,color,x,y,align)=>{
-    ctx.font = 'bold 13.5px sans-serif'; ctx.textAlign = align||'left';
-    ctx.lineJoin='round'; ctx.strokeStyle='rgba(255,255,255,.92)'; ctx.lineWidth=4;
+    ctx.font = '600 13px "IBM Plex Sans KR",sans-serif'; ctx.textAlign = align||'left';
+    ctx.lineJoin='round'; ctx.strokeStyle='rgba(251,251,245,.94)'; ctx.lineWidth=4;
     ctx.strokeText(text,x,y); ctx.fillStyle=color; ctx.fillText(text,x,y);
     ctx.textAlign='left';
   };
   const dot = (x,y,c)=>{
     ctx.beginPath(); ctx.arc(x,y,5.5,0,7); ctx.fillStyle=c; ctx.fill();
-    ctx.strokeStyle='#fff'; ctx.lineWidth=1.8; ctx.stroke();
+    ctx.strokeStyle='#FBFBF5'; ctx.lineWidth=1.8; ctx.stroke();
   };
 
-  /* (1) y² = 4px — 빨강 */
+  /* (1) y² = 4px — 검정 */
   if(show1){
-    ctx.strokeStyle = '#dc2626'; ctx.lineWidth = 3;
+    ctx.strokeStyle = '#23241D'; ctx.lineWidth = 3;
     ctx.beginPath();
     let started = false;
     const yr = ymax + 0.5;
@@ -272,18 +295,18 @@ function draw(){
     }
     ctx.stroke();
     // 준선 x = -p
-    ctx.strokeStyle = '#dc2626'; ctx.lineWidth = 2; ctx.setLineDash([8,6]);
+    ctx.strokeStyle = '#A8A79A'; ctx.lineWidth = 2; ctx.setLineDash([8,6]);
     ctx.beginPath(); ctx.moveTo(X(v,-p), 0); ctx.lineTo(X(v,-p), h); ctx.stroke();
     ctx.setLineDash([]);
     // 초점
-    dot(X(v,p), Y(v,0), '#dc2626');
-    label(`F(${fmt(p)}, 0)`, '#b91c1c', X(v,p)+9, Y(v,0)-10);
-    label(`x = ${fmt(-p)}`, '#b91c1c', X(v,-p)+6, 20);
+    dot(X(v,p), Y(v,0), '#23241D');
+    label(`F(${fmt(p)}, 0)`, '#23241D', X(v,p)+9, Y(v,0)-10);
+    label(`x = ${fmt(-p)}`, '#8A897C', X(v,-p)+6, 20);
   }
 
   /* (2) x² = 4py — 파랑 */
   if(show2){
-    ctx.strokeStyle = '#2563eb'; ctx.lineWidth = 3;
+    ctx.strokeStyle = '#2F45EC'; ctx.lineWidth = 3;
     ctx.beginPath();
     let started = false;
     const xr = xmax + 0.5;
@@ -295,13 +318,13 @@ function draw(){
     }
     ctx.stroke();
     // 준선 y = -p
-    ctx.strokeStyle = '#2563eb'; ctx.lineWidth = 2; ctx.setLineDash([8,6]);
+    ctx.strokeStyle = '#A8A79A'; ctx.lineWidth = 2; ctx.setLineDash([8,6]);
     ctx.beginPath(); ctx.moveTo(0, Y(v,-p)); ctx.lineTo(w, Y(v,-p)); ctx.stroke();
     ctx.setLineDash([]);
     // 초점
-    dot(X(v,0), Y(v,p), '#2563eb');
-    label(`F(0, ${fmt(p)})`, '#1d4ed8', X(v,0)+10, Y(v,p)-9);
-    label(`y = ${fmt(-p)}`, '#1d4ed8', 10, Y(v,-p)-7);
+    dot(X(v,0), Y(v,p), '#2F45EC');
+    label(`F(0, ${fmt(p)})`, '#2F45EC', X(v,0)+10, Y(v,p)-9);
+    label(`y = ${fmt(-p)}`, '#8A897C', 10, Y(v,-p)-7);
   }
 }
 
@@ -313,10 +336,10 @@ const pVal = document.getElementById('pVal'), pSlider = document.getElementById(
 function updateNow(){
   pVal.textContent = fmt(p);
   now1.innerHTML = show1
-    ? `현재: <b style="color:#dc2626"><i>y</i>² = ${fmt(4*p)}<i>x</i></b> · 초점 F(${fmt(p)}, 0) · 준선 <i>x</i> = ${fmt(-p)}`
+    ? `현재: <b style="color:#23241D"><i>y</i>² = ${fmt(4*p)}<i>x</i></b> · 초점 F(${fmt(p)}, 0) · 준선 <i>x</i> = ${fmt(-p)}`
     : '&nbsp;';
   now2.innerHTML = show2
-    ? `현재: <b style="color:#2563eb"><i>x</i>² = ${fmt(4*p)}<i>y</i></b> · 초점 F(0, ${fmt(p)}) · 준선 <i>y</i> = ${fmt(-p)}`
+    ? `현재: <b style="color:#2F45EC"><i>x</i>² = ${fmt(4*p)}<i>y</i></b> · 초점 F(0, ${fmt(p)}) · 준선 <i>y</i> = ${fmt(-p)}`
     : '&nbsp;';
 }
 card1.addEventListener('click', ()=>{ show1=!show1; card1.classList.toggle('on',show1); updateNow(); dirty=true; });
@@ -354,7 +377,7 @@ updateNow();
   const saved = localStorage.getItem(AKEY);
   function judge(){
     const ok = ta.value.trim().length >= 5;
-    st.textContent = ok ? '저장했어요 ✓ (완료 조건 달성!)' : '답을 적으면 자동으로 저장돼요 ✏️';
+    st.textContent = ok ? '저장했습니다' : '적으면 자동으로 저장됩니다';
     st.className = 'qState' + (ok ? ' ok' : '');
     if(ok && window.GEO_task) GEO_task('answer');
   }

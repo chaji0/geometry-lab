@@ -11,100 +11,121 @@ if (localStorage.getItem('geoAppOk') !== '1') location.replace('index.html');
 <link rel="icon" type="image/svg+xml" href="icon.svg">
 <link rel="apple-touch-icon" href="icon-180.png">
 <meta name="apple-mobile-web-app-title" content="기하">
-<title>쌍곡선 개념 정리</title>
+<title>쌍곡선의 방정식</title>
+<link rel="stylesheet" media="print" onload="this.media='all'"
+  href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap">
 <style>
-  * { margin:0; padding:0; box-sizing:border-box; }
+  :root { --paper:#EFEFE3; --ink:#23241D; --ink2:#55564A; --mute:#A8A79A;
+          --lnw:#DCDACD; --lnd:#C7C5B6; --acc:#2F45EC; --card:#F5F5EC; --fig:#FBFBF5;
+          --ok:#1F7A4C; }
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
   html, body { width:100%; height:100%; overflow:hidden; }
   body {
-    font-family:'Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif;
-    background:#f1f5fb; color:#1e293b; display:flex; flex-direction:column;
+    font-family:'IBM Plex Sans KR','Apple SD Gothic Neo','Malgun Gothic',sans-serif;
+    background:var(--paper); color:var(--ink); display:flex; flex-direction:column;
+    font-size:14.5px; line-height:1.6;
   }
-  header {
-    padding:9px 16px; background:#fff; border-bottom:1px solid #e2e8f0;
-    display:flex; align-items:baseline; gap:12px; flex-wrap:wrap;
-  }
-  header h1 { font-size:18px; color:#0f172a; }
-  header p { font-size:12px; color:#64748b; }
+  header { padding:8px 20px 7px; display:flex; align-items:baseline; gap:0 10px; flex-wrap:wrap; }
+  header h1 { font-size:17.5px; font-weight:700; letter-spacing:-.01em; line-height:1.3; }
+  header p { font-size:12.5px; color:var(--mute); }
   header i { font-family:Georgia,'Times New Roman',serif; }
-  #main { flex:1; display:flex; min-height:0; }
+  #main { flex:1; display:flex; min-height:0; border-top:1.5px solid var(--lnw); }
 
   /* ── 왼쪽: 개념 정리 ── */
-  #panel {
-    width:352px; flex:none; background:#fff; border-right:1px solid #e2e8f0;
-    padding:16px; overflow-y:auto;
-  }
-  #panel h2 { font-size:15.5px; color:#0f172a; margin-bottom:10px; }
-  .figBox {
-    border:1px solid #e2e8f0; border-radius:12px; padding:6px 8px; background:#fff;
-    margin-bottom:12px; display:flex; justify-content:center;
-  }
-  .fcard i, .cond i, .defBox i { font-family:Georgia,'Times New Roman',serif; }
-  .defBox {
-    border:1px solid #e2e8f0; background:#f8fafc; border-radius:12px;
-    padding:11px 13px; font-size:13px; color:#475569; line-height:1.7; margin-bottom:12px;
-  }
-  .defBox b { color:#0f172a; }
-  .defBox .term { display:inline-block; padding:0 7px; border-radius:8px; font-weight:800; font-size:12.3px; }
-  .t-focus { background:#dcfce7; color:#15803d; }
-  .t-vertex { background:#ede9fe; color:#6d28d9; }
-  .t-axis { background:#dbeafe; color:#1d4ed8; }
-  .t-center { background:#ffedd5; color:#c2410c; }
-  .t-asym { background:#e0f2fe; color:#0369a1; }
-  .fcard {
-    border:2px solid #e2e8f0; border-radius:14px; padding:13px 15px; margin-top:10px;
-    background:#fbfdff; user-select:none; cursor:pointer; transition:all .15s;
-  }
-  #card1.on { border-color:#dc2626; background:#fef2f2; }
-  #card2.on { border-color:#2563eb; background:#eff6ff; }
-  #card1 .formula { color:#dc2626; }
-  #card2 .formula { color:#2563eb; }
-  .fcard .tapHint { font-size:11.5px; color:#94a3b8; margin-top:5px; }
-  .conjNote {
-    border:1px dashed #93c5fd; background:#f0f7ff; border-radius:12px;
-    padding:9px 12px; font-size:12.4px; color:#1d4ed8; line-height:1.65; margin-top:10px;
-    display:none;
-  }
-  .conjNote i { font-family:Georgia,serif; }
-  .fcard .cond { font-size:13px; color:#475569; line-height:1.6; }
-  .fcard .formula {
-    font-size:22px; font-weight:800; margin:8px 0 4px; font-family:Georgia,'Times New Roman',serif;
-    letter-spacing:.5px; text-align:center;
-  }
+  #panel { width:352px; flex:none; border-right:1.5px solid var(--lnw);
+           padding:16px 18px 32px; overflow-y:auto; }
+  #panel h2 { font-size:14px; font-weight:700; color:var(--ink); margin-bottom:11px;
+              padding-bottom:7px; border-bottom:1.5px solid var(--lnw); }
+  #panel h2.dim { color:var(--mute); margin-top:24px; }
+  .figBox { border:1.5px solid var(--lnw); border-radius:16px; padding:8px 10px;
+            background:#fff; margin-bottom:14px; display:flex; justify-content:center; }
+  .fcard i, .cond i, .defBox i, .sub i, .now i { font-family:Georgia,'Times New Roman',serif; }
+
+  .defBox { border:1.5px solid var(--lnw); background:var(--card); border-radius:16px;
+            padding:12px 14px; font-size:13px; color:var(--ink2); line-height:1.75; margin-bottom:12px; }
+  .defBox b { color:var(--ink); }
+  .defBox .term { display:inline-block; padding:1px 9px; border-radius:999px; font-weight:600;
+                  font-size:12.3px; border:1.5px solid var(--lnd); color:var(--ink); background:transparent; }
+  .t-focus, .t-vertex, .t-axis, .t-center, .t-asym { }
+
+  .fcard { border:1.5px solid var(--lnw); border-radius:16px; padding:14px 16px; margin-top:10px;
+           background:var(--card); user-select:none; transition:border-color .13s, background .13s; }
+  #card1, #card2 { cursor:pointer; }
+  #card1.on, #card2.on { background:#fff; }
+  #card1.on { border-color:var(--ink); }
+  #card2.on { border-color:var(--acc); }
+  .fcard .cond { font-size:13px; color:var(--ink2); line-height:1.65; }
+  .fcard .formula { font-size:23px; font-weight:700; margin:9px 0 4px; text-align:center;
+                    font-family:Georgia,'Times New Roman',serif; letter-spacing:.3px; color:var(--ink); }
+  #card1 .formula, #card2 .formula { color:var(--mute); }
+  #card1.on .formula { color:var(--ink); }
+  #card2.on .formula { color:var(--acc); }
   .fcard .formula .frac { display:inline-block; text-align:center; vertical-align:middle; margin:0 2px; }
-  .fcard .formula .frac .top { display:block; border-bottom:2px solid currentColor; padding:0 5px 1px; font-size:17px; }
+  .fcard .formula .frac .top { display:block; border-bottom:1.6px solid currentColor; padding:0 5px 1px; font-size:17px; }
   .fcard .formula .frac .bot { display:block; padding:1px 5px 0; font-size:17px; }
-  .fcard .sub { font-size:12.6px; color:#475569; line-height:1.8; margin-top:6px; }
-  .fcard .sub b { color:#0f172a; }
-  .fcard .now { font-size:12.6px; line-height:1.7; margin-top:8px; border-top:1px dashed #e2e8f0;
-    padding-top:8px; color:#64748b; min-height:18px; }
+  .fcard sup { font-size:.68em; vertical-align:.5em; }
+  .fcard .sub { font-size:12.6px; color:var(--ink2); line-height:2.05; margin-top:7px; }
+  .fcard .sub b { color:var(--ink); }
+  .fcard .sub .fr { display:inline-flex; flex-direction:column; align-items:center;
+                    vertical-align:middle; margin:0 1px; line-height:1.1; font-size:.94em;
+                    position:relative; top:-.05em; }
+  .fcard .sub .fr .nu { border-bottom:1.4px solid currentColor; padding:0 4px 1px; }
+  .fcard .sub .fr .de { padding:1px 4px 0; }
+  .fcard .now { font-size:12.6px; line-height:1.7; margin-top:9px; padding-top:9px;
+                border-top:1px solid var(--lnw); color:var(--mute); min-height:18px; }
+  .fcard .tapHint { font-size:11.5px; color:var(--mute); margin-top:5px; }
+
+  .soonBox { border:1.5px dashed var(--lnd); border-radius:16px; padding:12px 14px;
+             font-size:12.5px; color:var(--mute); margin-top:8px; }
+  .conjNote { border:1.5px solid var(--lnw); background:var(--card); border-radius:16px;
+              padding:11px 13px; font-size:12.4px; color:var(--ink2); line-height:1.7;
+              margin-top:10px; display:none; }
+  .conjNote b { color:var(--ink); }
+  .conjNote i { font-family:Georgia,serif; }
 
   /* ── 오른쪽: 그래프 ── */
   #graphSide { flex:1; min-width:0; display:flex; flex-direction:column; }
-  #gwrap { flex:1; min-height:0; position:relative; }
+  #gwrap { flex:1; min-height:0; position:relative; background:var(--fig); }
   #graph { width:100%; height:100%; display:block; touch-action:none; }
-  #pbar {
-    padding:9px 16px; background:#fff; border-top:1px solid #e2e8f0;
-    display:flex; align-items:center; gap:13px; flex-wrap:wrap;
+  #pbar { padding:10px 20px; background:var(--paper); border-top:1.5px solid var(--lnw);
+          display:flex; align-items:center; gap:14px; flex-wrap:wrap; }
+  #pbar .grp { display:flex; align-items:center; gap:11px; flex:1 1 260px; }
+  #pbar .pv { font-size:18px; font-weight:700; color:var(--ink); min-width:78px;
+              font-family:Georgia,'Times New Roman',serif; }
+  #pbar .pv span { font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:16px; }
+  #pbar .pv.va span { color:var(--ink); }
+  #pbar .pv.vb span { color:var(--acc); }
+  #pbar input[type=range] { flex:1; height:30px; accent-color:var(--acc); min-width:0; }
+  #pbar #aSlider { accent-color:#23241D; }
+  #pbar #bSlider { accent-color:#2F45EC; }
+  #pbar .note { font-size:12px; color:var(--mute); flex:none;
+                font-family:'IBM Plex Mono',ui-monospace,monospace; }
+  #circNote, #asymNote { font-size:12px; color:var(--mute); flex-basis:100%; line-height:1.6; }
+  #circNote b, #asymNote b { color:var(--ink); }
+  #circNote i, #asymNote i { font-family:Georgia,serif; }
+  #circNote { display:none; }
+
+  #quizBox { margin:0; background:var(--card); border:1.5px solid var(--lnw); border-radius:16px;
+             padding:14px 16px; }
+  #quizBox .qq { font-size:13.5px; font-weight:700; color:var(--ink); line-height:1.7; }
+  #quizBox .qq i { font-family:Georgia,'Times New Roman',serif; }
+  #quizBox textarea {
+    width:100%; margin-top:10px; height:64px; padding:9px 12px; font-size:14px;
+    font-family:inherit; line-height:1.7; color:var(--ink); background:#fff;
+    border:1.5px solid var(--lnd); border-radius:12px; outline:none; resize:vertical;
   }
-  #pbar .grp { display:flex; align-items:center; gap:10px; flex:1 1 260px; }
-  #pbar .pv { font-size:18px; font-weight:800; color:#0f172a; min-width:74px; font-family:Georgia,serif; }
-  #pbar .pv.va span { color:#dc2626; }
-  #pbar .pv.vb span { color:#2563eb; }
-  #pbar input[type=range] { flex:1; height:30px; }
-  #aSlider { accent-color:#dc2626; }
-  #bSlider { accent-color:#2563eb; }
-  #asymNote { font-size:12px; font-weight:800; color:#0369a1; flex-basis:100%; }
-  #asymNote i { font-family:Georgia,serif; }
+  #quizBox textarea:focus { border-color:var(--acc); }
+  #quizBox .qState { margin-top:7px; font-size:12px; color:var(--mute); }
+  #quizBox .qState.ok { color:var(--ok); font-weight:600; }
 </style>
 </head>
 <body>
 <header>
-  <h1>쌍곡선 개념 정리</h1>
+  <h1>쌍곡선의 방정식</h1>
 </header>
 
 <div id="main">
   <div id="panel">
-    <h2>1. 쌍곡선의 뜻</h2>
     <div class="figBox">
       <svg viewBox="0 0 262 206" style="width:100%;max-width:290px">
         <!-- 좌표축 -->
@@ -155,29 +176,30 @@ if (localStorage.getItem('geoAppOk') !== '1') location.replace('index.html');
       </svg>
     </div>
 
-    <h2>2. 쌍곡선의 방정식</h2>
     <div class="fcard on" id="card1">
-      <div class="cond">(1) 초점이 <b><i>x</i>축 위</b>에 있을 때 — 좌우로 벌어진 쌍곡선</div>
+      <div class="cond">(1) 초점이 <b><i>x</i>축 위</b>에 있을 때</div>
       <div class="formula"><span class="frac"><span class="top"><i>x</i><sup style="font-size:12px">2</sup></span><span class="bot"><i>a</i><sup style="font-size:12px">2</sup></span></span> − <span class="frac"><span class="top"><i>y</i><sup style="font-size:12px">2</sup></span><span class="bot"><i>b</i><sup style="font-size:12px">2</sup></span></span> = 1</div>
       <div class="sub">
-        초점 F(<i>c</i>, 0), F′(−<i>c</i>, 0) — <b><i>c</i> = √(<i>a</i>² + <i>b</i>²)</b><br>
-        꼭짓점 A(<i>a</i>, 0), A′(−<i>a</i>, 0) · 주축의 길이 = <b>2<i>a</i></b>
+        초점 F(<i>c</i>, 0), F′(−<i>c</i>, 0) — <b><i>c</i>² = <i>a</i>² + <i>b</i>²</b><br>
+        꼭짓점 A(<i>a</i>, 0), A′(−<i>a</i>, 0) · 주축의 길이 = <b>2<i>a</i></b><br>
+        점근선 <b><i>y</i> = ±<span class="fr"><span class="nu"><i>b</i></span><span class="de"><i>a</i></span></span><i>x</i></b>
       </div>
       <div class="now" id="now1"></div>
     </div>
 
     <div class="fcard" id="card2">
-      <div class="cond">(2) 초점이 <b><i>y</i>축 위</b>에 있을 때 — 위아래로 벌어진 쌍곡선</div>
+      <div class="cond">(2) 초점이 <b><i>y</i>축 위</b>에 있을 때</div>
       <div class="formula"><span class="frac"><span class="top"><i>x</i><sup style="font-size:12px">2</sup></span><span class="bot"><i>a</i><sup style="font-size:12px">2</sup></span></span> − <span class="frac"><span class="top"><i>y</i><sup style="font-size:12px">2</sup></span><span class="bot"><i>b</i><sup style="font-size:12px">2</sup></span></span> = −1</div>
       <div class="sub">
-        초점 F(0, <i>c</i>), F′(0, −<i>c</i>) — <b><i>c</i> = √(<i>a</i>² + <i>b</i>²)</b> (같아요!)<br>
-        꼭짓점 B(0, <i>b</i>), B′(0, −<i>b</i>) · 주축의 길이 = <b>2<i>b</i></b>
+        초점 F(0, <i>c</i>), F′(0, −<i>c</i>) — <b><i>c</i>² = <i>a</i>² + <i>b</i>²</b><br>
+        꼭짓점 B(0, <i>b</i>), B′(0, −<i>b</i>) · 주축의 길이 = <b>2<i>b</i></b><br>
+        점근선 <b><i>y</i> = ±<span class="fr"><span class="nu"><i>b</i></span><span class="de"><i>a</i></span></span><i>x</i></b>
       </div>
       <div class="now" id="now2"></div>
     </div>
 
     <div class="conjNote" id="conjNote">
-      🔎 두 쌍곡선을 함께 켜 보세요 — <b>점근선 <i>y</i> = ±(<i>b</i>/<i>a</i>)<i>x</i>가 완전히 똑같아요!</b>
+      두 쌍곡선을 함께 켜 보세요 — <b>점근선 <i>y</i> = ±(<i>b</i>/<i>a</i>)<i>x</i>가 완전히 똑같아요!</b>
       이렇게 우변만 1과 −1로 다른 두 쌍곡선을 <b>켤레쌍곡선</b>이라고 해요.
     </div>
   </div>
@@ -193,7 +215,7 @@ if (localStorage.getItem('geoAppOk') !== '1') location.replace('index.html');
         <div class="pv vb"><i style="font-family:Georgia">b</i> = <span id="bVal">1.5</span></div>
         <input type="range" id="bSlider" min="0.5" max="4" step="0.1" value="1.5">
       </div>
-      <div id="asymNote">📐 하늘색 점선 = 점근선 <i>y</i> = ±(<i>b</i>/<i>a</i>)<i>x</i> — 두 경우가 <b>같은 점근선</b>을 공유해요 (타원과 달리 <i>c</i>² = <i>a</i>² <b>+</b> <i>b</i>²!)</div>
+      <div id="asymNote">회색 점선 = 점근선 <i>y</i> = ±(<i>b</i>/<i>a</i>)<i>x</i> — 두 경우가 <b>같은 점근선</b>을 공유해요 (타원과 달리 <i>c</i>² = <i>a</i>² <b>+</b> <i>b</i>²!)</div>
     </div>
   </div>
 </div>
@@ -226,11 +248,11 @@ function draw(){
     cv.width = Math.round(w*dpr); cv.height = Math.round(h*dpr);
   }
   ctx.setTransform(dpr,0,0,dpr,0,0);
-  ctx.fillStyle = '#ffffff'; ctx.fillRect(0,0,w,h);
+  ctx.fillStyle = '#FBFBF5'; ctx.fillRect(0,0,w,h);
   const v = view();
   const xmax = (w/2)/v.s, ymax = (h/2)/v.s;
 
-  ctx.strokeStyle = '#eef2f7'; ctx.lineWidth = 1;
+  ctx.strokeStyle = '#E3E2D5'; ctx.lineWidth = 1;
   for(let i=Math.ceil(-xmax); i<=xmax; i++){
     if(i===0) continue;
     ctx.beginPath(); ctx.moveTo(X(v,i),0); ctx.lineTo(X(v,i),h); ctx.stroke();
@@ -240,47 +262,47 @@ function draw(){
     ctx.beginPath(); ctx.moveTo(0,Y(v,i)); ctx.lineTo(w,Y(v,i)); ctx.stroke();
   }
 
-  ctx.strokeStyle = '#334155'; ctx.lineWidth = 1.6;
+  ctx.strokeStyle = '#C7C5B6'; ctx.lineWidth = 1.6;
   ctx.beginPath(); ctx.moveTo(0,v.cy); ctx.lineTo(w,v.cy); ctx.stroke();
   ctx.beginPath(); ctx.moveTo(v.cx,0); ctx.lineTo(v.cx,h); ctx.stroke();
-  ctx.fillStyle = '#334155';
+  ctx.fillStyle = '#C7C5B6';
   ctx.beginPath(); ctx.moveTo(w-2,v.cy); ctx.lineTo(w-12,v.cy-5); ctx.lineTo(w-12,v.cy+5); ctx.fill();
   ctx.beginPath(); ctx.moveTo(v.cx,2); ctx.lineTo(v.cx-5,12); ctx.lineTo(v.cx+5,12); ctx.fill();
 
-  ctx.font = '12px sans-serif'; ctx.fillStyle = '#64748b'; ctx.textAlign = 'center';
+  ctx.font = '12px "IBM Plex Mono",ui-monospace,monospace'; ctx.fillStyle = '#8A897C'; ctx.textAlign = 'center';
   for(let i=Math.ceil(-xmax); i<=xmax; i++){
     if(i===0) continue;
     ctx.beginPath(); ctx.moveTo(X(v,i), v.cy-4); ctx.lineTo(X(v,i), v.cy+4);
-    ctx.strokeStyle='#334155'; ctx.lineWidth=1.2; ctx.stroke();
+    ctx.strokeStyle='#C7C5B6'; ctx.lineWidth=1.2; ctx.stroke();
     ctx.fillText(i, X(v,i), v.cy+18);
   }
   ctx.textAlign = 'right';
   for(let i=Math.ceil(-ymax); i<=ymax; i++){
     if(i===0) continue;
     ctx.beginPath(); ctx.moveTo(v.cx-4, Y(v,i)); ctx.lineTo(v.cx+4, Y(v,i));
-    ctx.strokeStyle='#334155'; ctx.lineWidth=1.2; ctx.stroke();
+    ctx.strokeStyle='#C7C5B6'; ctx.lineWidth=1.2; ctx.stroke();
     ctx.fillText(i, v.cx-8, Y(v,i)+4);
   }
   ctx.fillText('O', v.cx-7, v.cy+16);
-  ctx.font = 'italic bold 15px Georgia'; ctx.fillStyle='#334155'; ctx.textAlign='left';
+  ctx.font = 'italic bold 15px Georgia'; ctx.fillStyle='#C7C5B6'; ctx.textAlign='left';
   ctx.fillText('x', w-16, v.cy-10);
   ctx.fillText('y', v.cx+10, 16);
 
   const label = (text,color,x,y,align)=>{
     ctx.font = 'bold 15px Georgia,serif'; ctx.textAlign = align||'left';
-    ctx.lineJoin='round'; ctx.strokeStyle='rgba(255,255,255,.92)'; ctx.lineWidth=4;
+    ctx.lineJoin='round'; ctx.strokeStyle='rgba(251,251,245,.94)'; ctx.lineWidth=4;
     ctx.strokeText(text,x,y); ctx.fillStyle=color; ctx.fillText(text,x,y);
     ctx.textAlign='left';
   };
   const dot = (x,y,c,r)=>{
     ctx.beginPath(); ctx.arc(x,y,r||5.5,0,7); ctx.fillStyle=c; ctx.fill();
-    ctx.strokeStyle='#fff'; ctx.lineWidth=1.8; ctx.stroke();
+    ctx.strokeStyle='#FBFBF5'; ctx.lineWidth=1.8; ctx.stroke();
   };
 
   const c = Math.sqrt(A*A + B*B);
 
   /* 점근선 (하늘 점선) — 두 쌍곡선이 공유! */
-  ctx.strokeStyle='#2ea7d8'; ctx.lineWidth=1.8; ctx.setLineDash([8,6]);
+  ctx.strokeStyle='#A8A79A'; ctx.lineWidth=1.8; ctx.setLineDash([8,6]);
   for(const sgn of [1,-1]){
     ctx.beginPath();
     ctx.moveTo(X(v,-xmax), Y(v,-sgn*B/A*xmax));
@@ -304,31 +326,31 @@ function draw(){
     }
   };
 
-  /* (1) x²/a² − y²/b² = 1 — 빨강 (좌우) */
+  /* (1) x²/a² − y²/b² = 1 — 검정 (좌우) */
   if(show1){
-    ctx.strokeStyle='#0e8ac2'; ctx.lineWidth=4.5; ctx.lineCap='round';   // 주축
+    ctx.strokeStyle='#2F45EC'; ctx.lineWidth=3.4; ctx.lineCap='round';   // 주축
     ctx.beginPath(); ctx.moveTo(X(v,-A),Y(v,0)); ctx.lineTo(X(v,A),Y(v,0)); ctx.stroke();
-    drawBranch((t,s)=>s*A*Math.cosh(t), t=>B*Math.sinh(t), '#e8442e');
-    dot(X(v,A),Y(v,0),'#7c3aed',4.5);  label('A','#111', X(v,A)+8, Y(v,0)+20);
-    dot(X(v,-A),Y(v,0),'#7c3aed',4.5); label('A′','#111', X(v,-A)-8, Y(v,0)+20,'right');
-    dot(X(v,c),Y(v,0),'#dc2626');  label('F('+fmt(c)+', 0)','#b91c1c', X(v,c)+9, Y(v,0)-12);
-    dot(X(v,-c),Y(v,0),'#dc2626'); label('F′(−'+fmt(c)+', 0)','#b91c1c', X(v,-c)-9, Y(v,0)-12,'right');
+    drawBranch((t,s)=>s*A*Math.cosh(t), t=>B*Math.sinh(t), '#23241D');
+    dot(X(v,A),Y(v,0),'#2F45EC',4.5);  label('A','#23241D', X(v,A)+8, Y(v,0)+20);
+    dot(X(v,-A),Y(v,0),'#2F45EC',4.5); label('A′','#23241D', X(v,-A)-8, Y(v,0)+20,'right');
+    dot(X(v,c),Y(v,0),'#23241D');  label('F('+fmt(c)+', 0)','#23241D', X(v,c)+9, Y(v,0)-12);
+    dot(X(v,-c),Y(v,0),'#23241D'); label('F′(−'+fmt(c)+', 0)','#23241D', X(v,-c)-9, Y(v,0)-12,'right');
   }
 
   /* (2) x²/a² − y²/b² = −1 — 파랑 (위아래) */
   if(show2){
-    ctx.strokeStyle='#0e8ac2'; ctx.lineWidth=4.5; ctx.lineCap='round';   // 주축
+    ctx.strokeStyle='#2F45EC'; ctx.lineWidth=3.4; ctx.lineCap='round';   // 주축
     ctx.beginPath(); ctx.moveTo(X(v,0),Y(v,-B)); ctx.lineTo(X(v,0),Y(v,B)); ctx.stroke();
-    drawBranch(t=>A*Math.sinh(t), (t,s)=>s*B*Math.cosh(t), '#2563eb');
-    dot(X(v,0),Y(v,B),'#7c3aed',4.5);  label('B','#111', X(v,0)+11, Y(v,B)+16);
-    dot(X(v,0),Y(v,-B),'#7c3aed',4.5); label('B′','#111', X(v,0)+11, Y(v,-B)-8);
-    dot(X(v,0),Y(v,c),'#2563eb');  label('F(0, '+fmt(c)+')','#1d4ed8', X(v,0)+12, Y(v,c)-10);
-    dot(X(v,0),Y(v,-c),'#2563eb'); label('F′(0, −'+fmt(c)+')','#1d4ed8', X(v,0)+12, Y(v,-c)+20);
+    drawBranch(t=>A*Math.sinh(t), (t,s)=>s*B*Math.cosh(t), '#2F45EC');
+    dot(X(v,0),Y(v,B),'#2F45EC',4.5);  label('B','#23241D', X(v,0)+11, Y(v,B)+16);
+    dot(X(v,0),Y(v,-B),'#2F45EC',4.5); label('B′','#23241D', X(v,0)+11, Y(v,-B)-8);
+    dot(X(v,0),Y(v,c),'#2F45EC');  label('F(0, '+fmt(c)+')','#2F45EC', X(v,0)+12, Y(v,c)-10);
+    dot(X(v,0),Y(v,-c),'#2F45EC'); label('F′(0, −'+fmt(c)+')','#2F45EC', X(v,0)+12, Y(v,-c)+20);
   }
 
   /* 점근선 라벨 */
   const lx=Math.min(xmax*0.8, 4.4);
-  label('y = '+fmt(B/A)+'x','#0369a1', X(v,lx)-6, Y(v,B/A*lx)-8,'right');
+  label('y = '+fmt(B/A)+'x','#A8A79A', X(v,lx)-6, Y(v,B/A*lx)-8,'right');
 }
 
 /* ── 상태 갱신 ── */
@@ -342,10 +364,10 @@ function updateNow(){
   aVal.textContent = fmt(A); bVal.textContent = fmt(B);
   const c = Math.sqrt(A*A+B*B);
   now1.innerHTML = show1
-    ? `현재: <b style="color:#dc2626"><i>x</i>²/${fmt(A*A)} − <i>y</i>²/${fmt(B*B)} = 1</b> · 초점 F(±${fmt(c)}, 0) · 주축 ${fmt(2*A)} · 점근선 <i>y</i> = ±${fmt(B/A)}<i>x</i>`
+    ? `현재: <b style="color:#23241D"><i>x</i>²/${fmt(A*A)} − <i>y</i>²/${fmt(B*B)} = 1</b> · 초점 F(±${fmt(c)}, 0) · 주축 ${fmt(2*A)} · 점근선 <i>y</i> = ±${fmt(B/A)}<i>x</i>`
     : '&nbsp;';
   now2.innerHTML = show2
-    ? `현재: <b style="color:#2563eb"><i>x</i>²/${fmt(A*A)} − <i>y</i>²/${fmt(B*B)} = −1</b> · 초점 F(0, ±${fmt(c)}) · 주축 ${fmt(2*B)} · 점근선 <i>y</i> = ±${fmt(B/A)}<i>x</i>`
+    ? `현재: <b style="color:#2F45EC"><i>x</i>²/${fmt(A*A)} − <i>y</i>²/${fmt(B*B)} = −1</b> · 초점 F(0, ±${fmt(c)}) · 주축 ${fmt(2*B)} · 점근선 <i>y</i> = ±${fmt(B/A)}<i>x</i>`
     : '&nbsp;';
   conjNote.style.display = (show1 && show2) ? 'block' : 'none';
 }

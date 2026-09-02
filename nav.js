@@ -6,7 +6,7 @@
      먼저 선언한 뒤 이 파일을 불러오면 하단 바가 자동으로 생깁니다.
    ════════════════════════════════════════════════════════════ */
 window.GEO_CONFIG = {
-  VERSION: "v1.43",                 // ★ 1단원=v1.x, 2단원=v2.x, 3단원=v3.x — 업로드마다 뒷자리 +1 (v1.11, v1.12, …)
+  VERSION: "v1.44",                 // ★ 1단원=v1.x, 2단원=v2.x, 3단원=v3.x — 업로드마다 뒷자리 +1 (v1.11, v1.12, …)
   APPS_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbx3Ay-gudjjSoRlngyu54umJ9uYRAKhINuwcv229UZUN9_oIQfm9vwAxM32FOPR9wV1/exec",
   /* ── 담당 선생님 ───────────────────────────────────────────────
      선생님마다 '자기 구글 시트 + 자기 드라이브'를 씁니다.
@@ -42,11 +42,11 @@ window.GEO_CONFIG = {
       curve:'자취 그리기 (실전)', title:'이차곡선 자취 작도 — 실전' },
 
     { id:'concept',  href:'concept.html',  icon:'📘', short:'포물선개념',  grp:'concept', curve:'포물선',
-      title:'포물선 개념 정리' },
+      title:'포물선의 방정식' },
     { id:'econcept', href:'ellipse-concept.html', icon:'📙', short:'타원개념', grp:'concept', curve:'타원',
-      title:'타원 개념 정리' },
+      title:'타원의 방정식' },
     { id:'hconcept', href:'hyperbola-concept.html', icon:'📕', short:'쌍곡선개념', grp:'concept', curve:'쌍곡선',
-      title:'쌍곡선 개념 정리' },
+      title:'쌍곡선의 방정식' },
     { id:'apply',    href:'apply.html',    icon:'🔦', short:'포물선활용',  grp:'apply', curve:'포물선',
       title:'포물선의 활용' },
     { id:'eapply',   href:'ellipse-apply.html', icon:'🪐', short:'타원활용', grp:'apply', curve:'타원',
@@ -67,7 +67,7 @@ window.GEO_CONFIG = {
   HOME_GROUPS: [
     { key:'conic',   title:'원뿔곡선 탐구' },
     { key:'draw',    title:'이차곡선 그리기' },
-    { key:'concept', title:'이차곡선 개념 정리' },
+    { key:'concept', title:'이차곡선 방정식' },
     { key:'apply',   title:'이차곡선 활용' },
     { key:'tangent', title:'이차곡선의 접선' }
   ]

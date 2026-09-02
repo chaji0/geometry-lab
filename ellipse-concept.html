@@ -11,82 +11,117 @@ if (localStorage.getItem('geoAppOk') !== '1') location.replace('index.html');
 <link rel="icon" type="image/svg+xml" href="icon.svg">
 <link rel="apple-touch-icon" href="icon-180.png">
 <meta name="apple-mobile-web-app-title" content="기하">
-<title>타원 개념 정리</title>
+<title>타원의 방정식</title>
+<link rel="stylesheet" media="print" onload="this.media='all'"
+  href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap">
 <style>
-  * { margin:0; padding:0; box-sizing:border-box; }
+  :root { --paper:#EFEFE3; --ink:#23241D; --ink2:#55564A; --mute:#A8A79A;
+          --lnw:#DCDACD; --lnd:#C7C5B6; --acc:#2F45EC; --card:#F5F5EC; --fig:#FBFBF5;
+          --ok:#1F7A4C; }
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
   html, body { width:100%; height:100%; overflow:hidden; }
   body {
-    font-family:'Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif;
-    background:#f1f5fb; color:#1e293b; display:flex; flex-direction:column;
+    font-family:'IBM Plex Sans KR','Apple SD Gothic Neo','Malgun Gothic',sans-serif;
+    background:var(--paper); color:var(--ink); display:flex; flex-direction:column;
+    font-size:14.5px; line-height:1.6;
   }
-  header {
-    padding:9px 16px; background:#fff; border-bottom:1px solid #e2e8f0;
-    display:flex; align-items:baseline; gap:12px; flex-wrap:wrap;
-  }
-  header h1 { font-size:18px; color:#0f172a; }
-  header p { font-size:12px; color:#64748b; }
+  header { padding:8px 20px 7px; display:flex; align-items:baseline; gap:0 10px; flex-wrap:wrap; }
+  header h1 { font-size:17.5px; font-weight:700; letter-spacing:-.01em; line-height:1.3; }
+  header p { font-size:12.5px; color:var(--mute); }
   header i { font-family:Georgia,'Times New Roman',serif; }
-  #main { flex:1; display:flex; min-height:0; }
+  #main { flex:1; display:flex; min-height:0; border-top:1.5px solid var(--lnw); }
 
   /* ── 왼쪽: 개념 정리 ── */
-  #panel {
-    width:352px; flex:none; background:#fff; border-right:1px solid #e2e8f0;
-    padding:16px; overflow-y:auto;
-  }
-  #panel h2 { font-size:15.5px; color:#0f172a; margin-bottom:10px; }
-  .figBox {
-    border:1px solid #e2e8f0; border-radius:12px; padding:6px 8px; background:#fff;
-    margin-bottom:12px; display:flex; justify-content:center;
-  }
-  .fcard i, .cond i, .defBox i { font-family:Georgia,'Times New Roman',serif; }
-  .defBox {
-    border:1px solid #e2e8f0; background:#f8fafc; border-radius:12px;
-    padding:11px 13px; font-size:13px; color:#475569; line-height:1.7; margin-bottom:12px;
-  }
-  .defBox b { color:#0f172a; }
-  .defBox .term { display:inline-block; padding:0 7px; border-radius:8px; font-weight:800; font-size:12.3px; }
-  .t-focus { background:#dcfce7; color:#15803d; }
-  .t-vertex { background:#ede9fe; color:#6d28d9; }
-  .t-axis { background:#dbeafe; color:#1d4ed8; }
-  .t-center { background:#ffedd5; color:#c2410c; }
-  .fcard {
-    border:2px solid #dc2626; border-radius:14px; padding:13px 15px; margin-top:10px;
-    background:#fef9f9; user-select:none;
-  }
-  .fcard .cond { font-size:13px; color:#475569; line-height:1.6; }
-  .fcard .formula {
-    font-size:22px; font-weight:800; margin:8px 0 4px; font-family:Georgia,'Times New Roman',serif;
-    letter-spacing:.5px; color:#dc2626; text-align:center;
-  }
+  #panel { width:352px; flex:none; border-right:1.5px solid var(--lnw);
+           padding:16px 18px 32px; overflow-y:auto; }
+  #panel h2 { font-size:14px; font-weight:700; color:var(--ink); margin-bottom:11px;
+              padding-bottom:7px; border-bottom:1.5px solid var(--lnw); }
+  #panel h2.dim { color:var(--mute); margin-top:24px; }
+  .figBox { border:1.5px solid var(--lnw); border-radius:16px; padding:8px 10px;
+            background:#fff; margin-bottom:14px; display:flex; justify-content:center; }
+  .fcard i, .cond i, .defBox i, .sub i, .now i { font-family:Georgia,'Times New Roman',serif; }
+
+  .defBox { border:1.5px solid var(--lnw); background:var(--card); border-radius:16px;
+            padding:12px 14px; font-size:13px; color:var(--ink2); line-height:1.75; margin-bottom:12px; }
+  .defBox b { color:var(--ink); }
+  .defBox .term { display:inline-block; padding:1px 9px; border-radius:999px; font-weight:600;
+                  font-size:12.3px; border:1.5px solid var(--lnd); color:var(--ink); background:transparent; }
+  .t-focus, .t-vertex, .t-axis, .t-center, .t-asym { }
+
+  .fcard { border:1.5px solid var(--lnw); border-radius:16px; padding:14px 16px; margin-top:10px;
+           background:var(--card); user-select:none; transition:border-color .13s, background .13s; }
+  #card1, #card2 { cursor:pointer; }
+  #card1.on, #card2.on { background:#fff; }
+  #card1.on { border-color:var(--ink); }
+  #card2.on { border-color:var(--acc); }
+  .fcard .cond { font-size:13px; color:var(--ink2); line-height:1.65; }
+  .fcard .formula { font-size:23px; font-weight:700; margin:9px 0 4px; text-align:center;
+                    font-family:Georgia,'Times New Roman',serif; letter-spacing:.3px; color:var(--ink); }
+  #card1 .formula, #card2 .formula { color:var(--mute); }
+  #card1.on .formula { color:var(--ink); }
+  #card2.on .formula { color:var(--acc); }
   .fcard .formula .frac { display:inline-block; text-align:center; vertical-align:middle; margin:0 2px; }
-  .fcard .formula .frac .top { display:block; border-bottom:2px solid currentColor; padding:0 5px 1px; font-size:17px; }
+  .fcard .formula .frac .top { display:block; border-bottom:1.6px solid currentColor; padding:0 5px 1px; font-size:17px; }
   .fcard .formula .frac .bot { display:block; padding:1px 5px 0; font-size:17px; }
-  .fcard .sub { font-size:12.6px; color:#475569; line-height:1.8; margin-top:6px; }
-  .fcard .sub b { color:#0f172a; }
-  .fcard .now { font-size:12.6px; line-height:1.7; margin-top:8px; border-top:1px dashed #fecaca;
-    padding-top:8px; color:#64748b; min-height:18px; }
+  .fcard sup { font-size:.68em; vertical-align:.5em; }
+  .fcard .sub { font-size:12.6px; color:var(--ink2); line-height:2.05; margin-top:7px; }
+  .fcard .sub b { color:var(--ink); }
+  .fcard .sub .fr { display:inline-flex; flex-direction:column; align-items:center;
+                    vertical-align:middle; margin:0 1px; line-height:1.1; font-size:.94em;
+                    position:relative; top:-.05em; }
+  .fcard .sub .fr .nu { border-bottom:1.4px solid currentColor; padding:0 4px 1px; }
+  .fcard .sub .fr .de { padding:1px 4px 0; }
+  .fcard .now { font-size:12.6px; line-height:1.7; margin-top:9px; padding-top:9px;
+                border-top:1px solid var(--lnw); color:var(--mute); min-height:18px; }
+  .fcard .tapHint { font-size:11.5px; color:var(--mute); margin-top:5px; }
+
+  .soonBox { border:1.5px dashed var(--lnd); border-radius:16px; padding:12px 14px;
+             font-size:12.5px; color:var(--mute); margin-top:8px; }
+  .conjNote { border:1.5px solid var(--lnw); background:var(--card); border-radius:16px;
+              padding:11px 13px; font-size:12.4px; color:var(--ink2); line-height:1.7;
+              margin-top:10px; display:none; }
+  .conjNote b { color:var(--ink); }
+  .conjNote i { font-family:Georgia,serif; }
 
   /* ── 오른쪽: 그래프 ── */
   #graphSide { flex:1; min-width:0; display:flex; flex-direction:column; }
-  #gwrap { flex:1; min-height:0; position:relative; }
+  #gwrap { flex:1; min-height:0; position:relative; background:var(--fig); }
   #graph { width:100%; height:100%; display:block; touch-action:none; }
-  #pbar {
-    padding:9px 16px; background:#fff; border-top:1px solid #e2e8f0;
-    display:flex; align-items:center; gap:13px; flex-wrap:wrap;
+  #pbar { padding:10px 20px; background:var(--paper); border-top:1.5px solid var(--lnw);
+          display:flex; align-items:center; gap:14px; flex-wrap:wrap; }
+  #pbar .grp { display:flex; align-items:center; gap:11px; flex:1 1 260px; }
+  #pbar .pv { font-size:18px; font-weight:700; color:var(--ink); min-width:78px;
+              font-family:Georgia,'Times New Roman',serif; }
+  #pbar .pv span { font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:16px; }
+  #pbar .pv.va span { color:var(--ink); }
+  #pbar .pv.vb span { color:var(--acc); }
+  #pbar input[type=range] { flex:1; height:30px; accent-color:var(--acc); min-width:0; }
+  #pbar #aSlider { accent-color:#23241D; }
+  #pbar #bSlider { accent-color:#2F45EC; }
+  #pbar .note { font-size:12px; color:var(--mute); flex:none;
+                font-family:'IBM Plex Mono',ui-monospace,monospace; }
+  #circNote, #asymNote { font-size:12px; color:var(--mute); flex-basis:100%; line-height:1.6; }
+  #circNote b, #asymNote b { color:var(--ink); }
+  #circNote i, #asymNote i { font-family:Georgia,serif; }
+  #circNote { display:none; }
+
+  #quizBox { margin:0; background:var(--card); border:1.5px solid var(--lnw); border-radius:16px;
+             padding:14px 16px; }
+  #quizBox .qq { font-size:13.5px; font-weight:700; color:var(--ink); line-height:1.7; }
+  #quizBox .qq i { font-family:Georgia,'Times New Roman',serif; }
+  #quizBox textarea {
+    width:100%; margin-top:10px; height:64px; padding:9px 12px; font-size:14px;
+    font-family:inherit; line-height:1.7; color:var(--ink); background:#fff;
+    border:1.5px solid var(--lnd); border-radius:12px; outline:none; resize:vertical;
   }
-  #pbar .grp { display:flex; align-items:center; gap:10px; flex:1 1 260px; }
-  #pbar .pv { font-size:18px; font-weight:800; color:#0f172a; min-width:74px; font-family:Georgia,serif; }
-  #pbar .pv.va span { color:#dc2626; }
-  #pbar .pv.vb span { color:#2563eb; }
-  #pbar input[type=range] { flex:1; height:30px; }
-  #aSlider { accent-color:#dc2626; }
-  #bSlider { accent-color:#2563eb; }
-  #circNote { font-size:12px; font-weight:800; color:#7c3aed; flex-basis:100%; display:none; }
+  #quizBox textarea:focus { border-color:var(--acc); }
+  #quizBox .qState { margin-top:7px; font-size:12px; color:var(--mute); }
+  #quizBox .qState.ok { color:var(--ok); font-weight:600; }
 </style>
 </head>
 <body>
 <header>
-  <h1>타원 개념 정리</h1>
+  <h1>타원의 방정식</h1>
 </header>
 
 <div id="main">
@@ -137,16 +172,15 @@ if (localStorage.getItem('geoAppOk') !== '1') location.replace('index.html');
       </svg>
     </div>
 
-    <h2>2. 타원의 방정식</h2>
     <div class="fcard">
       <div class="cond">두 초점으로부터 거리의 합이 일정한 타원의 방정식</div>
       <div class="formula"><span class="frac"><span class="top"><i>x</i><sup style="font-size:12px">2</sup></span><span class="bot"><i>a</i><sup style="font-size:12px">2</sup></span></span> + <span class="frac"><span class="top"><i>y</i><sup style="font-size:12px">2</sup></span><span class="bot"><i>b</i><sup style="font-size:12px">2</sup></span></span> = 1</div>
       <div class="sub">
         · <i>a</i> &gt; <i>b</i> &gt; 0 → 초점이 <b><i>x</i>축 위</b>: F(<i>c</i>, 0), F′(−<i>c</i>, 0)<br>
-        &nbsp;&nbsp;<i>c</i> = √(<i>a</i>² − <i>b</i>²)<br>
+        &nbsp;&nbsp;<i>c</i>² = <i>a</i>² − <i>b</i>²<br>
         &nbsp;&nbsp;장축 = 2<i>a</i> · 단축 = 2<i>b</i><br>
         · <i>b</i> &gt; <i>a</i> &gt; 0 → 초점이 <b><i>y</i>축 위</b>: F(0, <i>c</i>), F′(0, −<i>c</i>)<br>
-        &nbsp;&nbsp;<i>c</i> = √(<i>b</i>² − <i>a</i>²)<br>
+        &nbsp;&nbsp;<i>c</i>² = <i>b</i>² − <i>a</i>²<br>
         &nbsp;&nbsp;장축 = 2<i>b</i> · 단축 = 2<i>a</i>
       </div>
       <div class="now" id="nowLine"></div>
@@ -164,7 +198,7 @@ if (localStorage.getItem('geoAppOk') !== '1') location.replace('index.html');
         <div class="pv vb"><i style="font-family:Georgia">b</i> = <span id="bVal">2.5</span></div>
         <input type="range" id="bSlider" min="1" max="4.5" step="0.1" value="2.5">
       </div>
-      <div id="circNote">⭕ <i style="font-family:Georgia">a</i> = <i style="font-family:Georgia">b</i> 이면 두 초점이 중심에서 하나로 — 바로 원!</div>
+      <div id="circNote"><i style="font-family:Georgia">a</i> = <i style="font-family:Georgia">b</i> 이면 두 초점이 중심에서 하나로 — 바로 원!</div>
     </div>
   </div>
 </div>
@@ -196,11 +230,11 @@ function draw(){
     cv.width = Math.round(w*dpr); cv.height = Math.round(h*dpr);
   }
   ctx.setTransform(dpr,0,0,dpr,0,0);
-  ctx.fillStyle = '#ffffff'; ctx.fillRect(0,0,w,h);
+  ctx.fillStyle = '#FBFBF5'; ctx.fillRect(0,0,w,h);
   const v = view();
   const xmax = (w/2)/v.s, ymax = (h/2)/v.s;
 
-  ctx.strokeStyle = '#eef2f7'; ctx.lineWidth = 1;
+  ctx.strokeStyle = '#E3E2D5'; ctx.lineWidth = 1;
   for(let i=Math.ceil(-xmax); i<=xmax; i++){
     if(i===0) continue;
     ctx.beginPath(); ctx.moveTo(X(v,i),0); ctx.lineTo(X(v,i),h); ctx.stroke();
@@ -210,62 +244,62 @@ function draw(){
     ctx.beginPath(); ctx.moveTo(0,Y(v,i)); ctx.lineTo(w,Y(v,i)); ctx.stroke();
   }
 
-  ctx.strokeStyle = '#334155'; ctx.lineWidth = 1.6;
+  ctx.strokeStyle = '#C7C5B6'; ctx.lineWidth = 1.6;
   ctx.beginPath(); ctx.moveTo(0,v.cy); ctx.lineTo(w,v.cy); ctx.stroke();
   ctx.beginPath(); ctx.moveTo(v.cx,0); ctx.lineTo(v.cx,h); ctx.stroke();
-  ctx.fillStyle = '#334155';
+  ctx.fillStyle = '#C7C5B6';
   ctx.beginPath(); ctx.moveTo(w-2,v.cy); ctx.lineTo(w-12,v.cy-5); ctx.lineTo(w-12,v.cy+5); ctx.fill();
   ctx.beginPath(); ctx.moveTo(v.cx,2); ctx.lineTo(v.cx-5,12); ctx.lineTo(v.cx+5,12); ctx.fill();
 
-  ctx.font = '12px sans-serif'; ctx.fillStyle = '#64748b'; ctx.textAlign = 'center';
+  ctx.font = '12px "IBM Plex Mono",ui-monospace,monospace'; ctx.fillStyle = '#8A897C'; ctx.textAlign = 'center';
   for(let i=Math.ceil(-xmax); i<=xmax; i++){
     if(i===0) continue;
     ctx.beginPath(); ctx.moveTo(X(v,i), v.cy-4); ctx.lineTo(X(v,i), v.cy+4);
-    ctx.strokeStyle='#334155'; ctx.lineWidth=1.2; ctx.stroke();
+    ctx.strokeStyle='#C7C5B6'; ctx.lineWidth=1.2; ctx.stroke();
     ctx.fillText(i, X(v,i), v.cy+18);
   }
   ctx.textAlign = 'right';
   for(let i=Math.ceil(-ymax); i<=ymax; i++){
     if(i===0) continue;
     ctx.beginPath(); ctx.moveTo(v.cx-4, Y(v,i)); ctx.lineTo(v.cx+4, Y(v,i));
-    ctx.strokeStyle='#334155'; ctx.lineWidth=1.2; ctx.stroke();
+    ctx.strokeStyle='#C7C5B6'; ctx.lineWidth=1.2; ctx.stroke();
     ctx.fillText(i, v.cx-8, Y(v,i)+4);
   }
   ctx.fillText('O', v.cx-7, v.cy+16);
-  ctx.font = 'italic bold 15px Georgia'; ctx.fillStyle='#334155'; ctx.textAlign='left';
+  ctx.font = 'italic bold 15px Georgia'; ctx.fillStyle='#C7C5B6'; ctx.textAlign='left';
   ctx.fillText('x', w-16, v.cy-10);
   ctx.fillText('y', v.cx+10, 16);
 
   const label = (text,color,x,y,align)=>{
     ctx.font = 'bold 15px Georgia,serif'; ctx.textAlign = align||'left';
-    ctx.lineJoin='round'; ctx.strokeStyle='rgba(255,255,255,.92)'; ctx.lineWidth=4;
+    ctx.lineJoin='round'; ctx.strokeStyle='rgba(251,251,245,.94)'; ctx.lineWidth=4;
     ctx.strokeText(text,x,y); ctx.fillStyle=color; ctx.fillText(text,x,y);
     ctx.textAlign='left';
   };
   const dot = (x,y,c,r)=>{
     ctx.beginPath(); ctx.arc(x,y,r||5.5,0,7); ctx.fillStyle=c; ctx.fill();
-    ctx.strokeStyle='#fff'; ctx.lineWidth=1.8; ctx.stroke();
+    ctx.strokeStyle='#FBFBF5'; ctx.lineWidth=1.8; ctx.stroke();
   };
 
   const focusX = A >= B;
   const c = Math.sqrt(Math.abs(A*A - B*B));
-  const col = focusX ? '#dc2626' : '#2563eb';
+  const col = focusX ? '#23241D' : '#2F45EC';
 
-  ctx.strokeStyle='#0e8ac2'; ctx.lineCap='round';
-  ctx.lineWidth = focusX ? 4.5 : 3;
+  ctx.strokeStyle='#2F45EC'; ctx.lineCap='round';
+  ctx.lineWidth = focusX ? 3.4 : 2.4;
   ctx.beginPath(); ctx.moveTo(X(v,-A),Y(v,0)); ctx.lineTo(X(v,A),Y(v,0)); ctx.stroke();
-  ctx.lineWidth = focusX ? 3 : 4.5;
+  ctx.lineWidth = focusX ? 2.4 : 3.4;
   ctx.beginPath(); ctx.moveTo(X(v,0),Y(v,-B)); ctx.lineTo(X(v,0),Y(v,B)); ctx.stroke();
 
-  ctx.strokeStyle = '#e8442e'; ctx.lineWidth = 3.2;
+  ctx.strokeStyle = '#23241D'; ctx.lineWidth = 3.2;
   ctx.beginPath();
   ctx.ellipse(v.cx, v.cy, A*v.s, B*v.s, 0, 0, Math.PI*2);
   ctx.stroke();
 
-  dot(X(v,A),Y(v,0),'#7c3aed',4.5);  label('A','#111', X(v,A)+9, Y(v,0)+20);
-  dot(X(v,-A),Y(v,0),'#7c3aed',4.5); label('A′','#111', X(v,-A)-9, Y(v,0)+20,'right');
-  dot(X(v,0),Y(v,B),'#7c3aed',4.5);  label('B','#111', X(v,0)+10, Y(v,B)-10);
-  dot(X(v,0),Y(v,-B),'#7c3aed',4.5); label('B′','#111', X(v,0)+10, Y(v,-B)+20);
+  dot(X(v,A),Y(v,0),'#2F45EC',4.5);  label('A','#23241D', X(v,A)+9, Y(v,0)+20);
+  dot(X(v,-A),Y(v,0),'#2F45EC',4.5); label('A′','#23241D', X(v,-A)-9, Y(v,0)+20,'right');
+  dot(X(v,0),Y(v,B),'#2F45EC',4.5);  label('B','#23241D', X(v,0)+10, Y(v,B)-10);
+  dot(X(v,0),Y(v,-B),'#2F45EC',4.5); label('B′','#23241D', X(v,0)+10, Y(v,-B)+20);
 
   if(c > 0.01){
     if(focusX){
@@ -276,8 +310,8 @@ function draw(){
       dot(X(v,0),Y(v,-c),col); label('F′(0, −'+fmt(c)+')',col, X(v,0)+12, Y(v,-c)+5);
     }
   } else {
-    dot(v.cx,v.cy,'#7c3aed');
-    label('F = F′ (중심)','#7c3aed', v.cx+12, v.cy-12);
+    dot(v.cx,v.cy,'#2F45EC');
+    label('F = F′ (중심)','#2F45EC', v.cx+12, v.cy-12);
   }
 }
 
@@ -294,11 +328,11 @@ function updateNow(){
   const isCirc = Math.abs(A-B) < 0.001;
   circNote.style.display = isCirc ? 'block' : 'none';
   if(isCirc){
-    nowLine.innerHTML = `현재: <b style="color:#7c3aed">${eq}</b> — <i>a</i> = <i>b</i>, 원! (초점이 중심에서 하나로)`;
+    nowLine.innerHTML = `현재: <b style="color:#2F45EC">${eq}</b> — <i>a</i> = <i>b</i>, 원! (초점이 중심에서 하나로)`;
   } else if(A > B){
-    nowLine.innerHTML = `현재: <b style="color:#dc2626">${eq}</b> · 초점 F(±${fmt(c)}, 0) — <i>x</i>축 위 · 장축 ${fmt(2*A)} · 단축 ${fmt(2*B)}`;
+    nowLine.innerHTML = `현재: <b style="color:#23241D">${eq}</b> · 초점 F(±${fmt(c)}, 0) — <i>x</i>축 위 · 장축 ${fmt(2*A)} · 단축 ${fmt(2*B)}`;
   } else {
-    nowLine.innerHTML = `현재: <b style="color:#2563eb">${eq}</b> · 초점 F(0, ±${fmt(c)}) — <i>y</i>축 위 · 장축 ${fmt(2*B)} · 단축 ${fmt(2*A)}`;
+    nowLine.innerHTML = `현재: <b style="color:#2F45EC">${eq}</b> · 초점 F(0, ±${fmt(c)}) — <i>y</i>축 위 · 장축 ${fmt(2*B)} · 단축 ${fmt(2*A)}`;
   }
 }
 aSlider.addEventListener('input', ()=>{ A=parseFloat(aSlider.value); updateNow(); dirty=true; });
