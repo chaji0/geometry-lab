@@ -190,7 +190,7 @@ const CARS = {
   }
 };
 /* 전구를 초점보다 살짝 뒤(−)에서 시작 → 학생이 슬라이더로 F를 찾는다 */
-const head = { car:'p911', hp:0.06, hh:0.05, off:-0.012, cap:'차광 캡', showCar:false, done:false };
+const head = { car:'p911', hp:0.06, hh:0.05, off:-0.012, cap:'차광 캡', showCar:true, done:false };
 let tab = 'solar';
 
 /* ── 물리: 집광률 (거울에 닿은 빛 중 냄비에 모인 비율, 광선 추적) ── */
@@ -1316,7 +1316,7 @@ function buildCtrl(){
 }
 function buildCars(){
   carRow.innerHTML=Object.keys(CARS).map(k=>`<button data-k="${k}" class="${k===head.car?'on':''}">${CARS[k].chip}</button>`).join('')
-    +`<button id="carBody" class="${head.showCar?'on':''}">🚘 차 ${head.showCar?'숨기기':'보이기'}</button>`;
+    +`<button id="carBody" class="${head.showCar?'':'on'}">전조등</button>`;
   carRow.querySelectorAll('button[data-k]').forEach(b=>b.addEventListener('click',()=>{
     head.car=b.dataset.k;
     buildCars(); rebuildHead(); if(T) applyHeadPreset(); updateHud();

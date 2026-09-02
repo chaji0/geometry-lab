@@ -83,16 +83,16 @@ if (localStorage.getItem('geoAppOk') !== '1') location.replace('index.html');
 <body>
 <header>
   <h1>타원 그리기</h1>
-  <span class="sub">두 초점으로부터 거리의 합이 일정한 점들의 자취 — 실·자취·종이접기 세 가지 방법으로 그려 봐요</span>
+  <span class="sub">두 초점으로부터 거리의 합이 일정한 점들의 자취 — 종이접기·자취·실 세 가지 방법으로 그려 봐요</span>
 </header>
 <div id="tabs">
-  <button id="tabMake" class="on">🧵 실로 그리기</button>
+  <button id="tabFold" class="on">📄 종이접기</button>
   <button id="tabTrace">🖥️ 자취로 그리기</button>
-  <button id="tabFold">📄 종이접기</button>
+  <button id="tabMake">🧵 실로 그리기</button>
 </div>
 
 <!-- ═══════ 탭 1: 실로 타원 만들기 ═══════ -->
-<div class="sec on" id="secMake">
+<div class="sec" id="secMake">
   <div class="stage">
     <canvas id="mkCv"></canvas>
     <div class="hint" id="mkHint">👇 판 위를 손가락으로 꾹 누른 채 <b style="color:#0e7fa8">한 바퀴 돌려</b> 보세요 (못도 끌어서 옮길 수 있어요)</div>
@@ -138,7 +138,7 @@ if (localStorage.getItem('geoAppOk') !== '1') location.replace('index.html');
 </div>
 
 <!-- ═══════ 탭 3: 종이접기로 타원 만들기 ═══════ -->
-<div class="sec" id="secFold">
+<div class="sec on" id="secFold">
   <div class="stage">
     <canvas id="fdCv"></canvas>
     <div class="step">
@@ -1089,6 +1089,8 @@ window.__fd={ get mode(){return mode;}, get n(){return creases.length;}, get R()
   get curve(){return showCurve;}, get why(){return showWhy;} };
 
 })();
+
+setTab('fold');                       /* 기본 탭 = 종이접기 */
 </script>
 <script>window.PAGE_ID="ellipse";</script>
 <script src="nav.js"></script>
