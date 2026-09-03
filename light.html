@@ -117,6 +117,11 @@ if (localStorage.getItem('geoAppOk') !== '1') location.replace('index.html');
   #telSteps button.on { background:var(--gold); border-color:var(--gold); color:#2B2410; }
   #telSteps button.on i { background:rgba(0,0,0,.22); color:#2B2410; }
   #telSteps button.nx { padding:0 15px; background:rgba(255,255,255,.90); color:#1B1C22; border-color:transparent; }
+  #telEye { position:absolute; left:16px; top:44px; width:170px; display:none; text-align:center; pointer-events:none; z-index:4; }
+  #telEye.on { display:block; }
+  #telEye canvas { width:170px !important; height:170px !important; min-height:0 !important; display:block; border-radius:50%; }
+  #telEye .eyeCap { display:block; margin-top:7px; font-size:11.5px; color:rgba(255,255,255,.62); }
+  @media (max-width:760px){ #telEye { width:118px; left:10px; top:40px; } #telEye canvas { width:118px; height:118px; } }
   #telSec { position:absolute; right:12px; bottom:12px; width:330px; border-radius:14px; overflow:hidden;
             background:rgba(10,11,15,.78); border:1px solid rgba(255,255,255,.16); backdrop-filter:blur(4px); }
   #telSec .secHead { display:flex; align-items:center; justify-content:space-between; padding:6px 8px 4px 12px; }
@@ -128,11 +133,57 @@ if (localStorage.getItem('geoAppOk') !== '1') location.replace('index.html');
   #telSec.min { width:auto; } #telSec.min canvas { display:none; } #telSec.min .secHead { padding:6px 8px 6px 12px; }
   @media (max-width:760px){ #telSec { width:210px; bottom:auto; top:46px; left:10px; right:auto; }
                             #telSec canvas { width:210px; height:130px; } }
-  #telEye { position:absolute; right:16px; top:58px; width:170px; display:none; text-align:center; }
-  #telEye.on { display:block; }
-  #telEye canvas { width:170px; height:170px; display:block; border-radius:50%; }
-  #telEye .eyeCap { display:block; margin-top:7px; font-size:11.5px; color:rgba(255,255,255,.62); }
-  @media (max-width:760px){ #telEye { width:118px; right:10px; top:52px; } #telEye canvas { width:118px; height:118px; } }
+  #telCtl { position:absolute; left:12px; bottom:12px; width:252px; display:none; z-index:6;
+    background:rgba(16,18,24,.78); border:1px solid rgba(255,255,255,.18); border-radius:14px;
+    padding:10px 12px; backdrop-filter:blur(4px); }
+  body.telPlaying #telCtl { display:block; }
+  body.telPlaying #telSteps { display:none; }
+  .tcTop { display:flex; gap:14px; justify-content:space-between; padding:2px 2px 8px; }
+  .tcDev { display:flex; flex-direction:column; align-items:center; gap:4px; }
+  .devLab { font-size:10.5px; color:rgba(255,255,255,.6); font-weight:700; }
+  .devVal { font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:#FFC24A; font-weight:600; }
+  .joy { width:66px; height:66px; border-radius:50%; position:relative; cursor:grab; touch-action:none;
+    background:radial-gradient(circle at 35% 30%, #3A4256, #1A1F2B 70%);
+    border:1.5px solid rgba(255,255,255,.22); box-shadow:inset 0 3px 9px rgba(0,0,0,.6); }
+  .joyStick { width:26px; height:26px; border-radius:50%; position:absolute; left:20px; top:20px;
+    background:radial-gradient(circle at 35% 30%, #8FA2C4, #47536B 75%);
+    border:1px solid rgba(255,255,255,.4); box-shadow:0 3px 6px rgba(0,0,0,.55); }
+  .leverSlot { width:30px; height:76px; border-radius:9px; position:relative; cursor:grab; touch-action:none;
+    background:linear-gradient(180deg,#151A24,#232B3B); border:1.5px solid rgba(255,255,255,.22);
+    box-shadow:inset 0 2px 8px rgba(0,0,0,.65); }
+  .leverTicks { position:absolute; left:50%; top:7px; bottom:7px; width:2px; margin-left:-1px;
+    background:repeating-linear-gradient(180deg, rgba(255,255,255,.35) 0 1.5px, transparent 1.5px 7px); }
+  .leverHandle { width:40px; height:15px; border-radius:6px; position:absolute; left:-5px; top:30px;
+    background:linear-gradient(180deg,#E8D9A8,#A98F4C); border:1px solid rgba(0,0,0,.45);
+    box-shadow:0 3px 5px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.5); }
+  .dial { width:62px; height:62px; border-radius:50%; position:relative; cursor:grab; touch-action:none;
+    border:1.5px solid rgba(255,255,255,.25); box-shadow:0 3px 8px rgba(0,0,0,.5); overflow:hidden; }
+  .dialFace { position:absolute; inset:0; border-radius:50%;
+    background:repeating-conic-gradient(#39415A 0deg 12deg, #232A3C 12deg 24deg); }
+  .dialFace::after { content:""; position:absolute; inset:14px; border-radius:50%;
+    background:radial-gradient(circle at 35% 30%, #55617E, #2A3143 75%); border:1px solid rgba(255,255,255,.25); }
+  .dialDot { position:absolute; left:50%; top:5px; width:6px; height:6px; margin-left:-3px; border-radius:50%;
+    background:#FFC24A; box-shadow:0 0 5px #FFC24A; pointer-events:none; }
+  #tcHelp { background:#FFC24A !important; border-color:#FFC24A !important; color:#2B2410 !important; font-weight:800; }
+  #tcHelp:active { transform:translateY(1px); }
+  #helpBub { position:absolute; left:12px; bottom:270px; max-width:250px; padding:10px 14px; border-radius:14px 14px 14px 4px;
+    background:#FFF6DC; color:#2B2410; font-size:12.5px; font-weight:700; line-height:1.55;
+    border:2px solid #FFC24A; box-shadow:0 6px 16px rgba(0,0,0,.35); opacity:0; pointer-events:none;
+    transition:opacity .2s, transform .2s; transform:translateY(6px); z-index:7; }
+  #helpBub.show { opacity:1; transform:translateY(0); }
+  #helpBub .who { display:block; font-size:10px; letter-spacing:.08em; color:#A97B12; font-family:'IBM Plex Mono',monospace; margin-bottom:2px; }
+  .tcRow { display:flex; align-items:center; gap:8px; margin:6px 0; }
+  .tcRow label { width:62px; flex:none; font-size:11.5px; color:rgba(255,255,255,.65); font-weight:600; }
+  .tcRow input[type=range] { flex:1; accent-color:#FFC24A; height:18px; }
+  .tcRow b { width:52px; text-align:right; font-family:'IBM Plex Mono',monospace; font-size:11px; color:#fff; font-weight:600; }
+  .tcBtns button { white-space:nowrap; flex:none; height:26px; padding:0 12px; border-radius:999px; border:1px solid rgba(255,255,255,.3);
+    background:transparent; color:rgba(255,255,255,.85); font-family:inherit; font-size:11.5px; font-weight:700; cursor:pointer; }
+  .tcBtns button:hover { border-color:#fff; }
+  #tcHint { font-size:10.5px; color:rgba(255,255,255,.5); }
+  .tcMis { display:flex; align-items:center; gap:7px; font-size:11.5px; color:rgba(255,255,255,.55); padding:3px 0; }
+  .tcMis i { font-style:normal; width:16px; height:16px; border-radius:50%; border:1px solid rgba(255,255,255,.35);
+    display:flex; align-items:center; justify-content:center; font-size:9.5px; font-family:'IBM Plex Mono',monospace; }
+  .tcMis.done { color:#7CE8B4; } .tcMis.done i { background:#12876A; border-color:#12876A; color:#fff; }
   #telCap { margin-top:11px; }
   #telCap .st { color:var(--acc); margin-right:6px; }
   #telCap .hint { color:var(--mute); font-size:12.5px; }
@@ -251,6 +302,19 @@ if (localStorage.getItem('geoAppOk') !== '1') location.replace('index.html');
         <button class="segBtn" data-m="new">뉴턴식</button>
       </div>
       <button class="prBtn" data-s="tel">원리</button>
+      <button class="prBtn" id="telPlay" style="right:96px">조작 모드</button>
+      <div id="helpBub"><span class="who">정렬 도우미</span><span id="helpTxt"></span></div>
+      <div id="telCtl">
+        <div class="tcTop">
+          <div class="tcDev"><div class="joy" id="joy"><div class="joyStick" id="joyStick"></div></div><span class="devLab">방향 미동</span><b class="devVal" id="joyVal">·</b></div>
+          <div class="tcDev"><div class="leverSlot" id="lever"><div class="leverTicks"></div><div class="leverHandle" id="leverHandle"></div></div><span class="devLab" id="leverLab">부경 레버</span><b class="devVal" id="leverVal">0 mm</b></div>
+          <div class="tcDev"><div class="dial" id="dial"><div class="dialFace" id="dialFace"></div><div class="dialDot"></div></div><span class="devLab">초점 노브</span><b class="devVal" id="dialVal">0 mm</b></div>
+        </div>
+        <div class="tcRow tcBtns"><button id="tcNew">새 미션</button><button id="tcHelp">도움!</button><span id="tcHint">스틱=조준 · 드래그=시점</span></div>
+        <div class="tcMis" id="tcM1"><i>1</i>달을 겨눠라 (오차 0.3° 이내)</div>
+        <div class="tcMis" id="tcM2"><i>2</i><span id="tcM2t">두 초점을 겹쳐라 (부경 1 mm 이내)</span></div>
+        <div class="tcMis" id="tcM3"><i>3</i>초점 노브로 상을 선명하게</div>
+      </div>
       <canvas id="cvTel"></canvas>
       <div id="telWait">3D 준비 중…</div>
       <div id="telEye"><canvas id="telEyeCv"></canvas><span class="eyeCap">접안부에서 보이는 달</span></div>
@@ -272,6 +336,7 @@ if (localStorage.getItem('geoAppOk') !== '1') location.replace('index.html');
       &nbsp;주경에서 모인 빛은 그 초점을 향해 가다가 부경에 반사되어, 쌍곡면의 <b>다른 초점</b>에 정확히 모입니다.
     </div>
   </div>
+
   <div class="pane full" data-p="litho">
     <iframe id="lithoBox" title="체외 충격파 쇄석기" allow="fullscreen" loading="lazy"></iframe>
   </div>
@@ -1232,7 +1297,7 @@ const NT = { para:'ntPara', ell:'ntEll', hyp:'ntHyp', tel:'ntTel' };
 Object.keys(SC).forEach(k=>{ SC[k].fit(); SC[k].run(); });
 window.addEventListener('resize', ()=>Object.keys(SC).forEach(k=>SC[k].fit()));
 
-document.querySelectorAll('.prBtn').forEach(function(b){
+document.querySelectorAll('.prBtn[data-s]').forEach(function(b){
   b.addEventListener('click', function(){
     const k = b.dataset.s, on = !b.classList.contains('on');
     if(SC[k]) SC[k].setPrin(on); else if(window.__telPrin) window.__telPrin(on);
@@ -1269,6 +1334,9 @@ let T=null, ren=null, scene=null, cam=null, ready=false, loading=false;
 let scope=null, optic=null, gMirror=null, gRay=null, gPrin=null, gLabel=null, moon=null, focusGlow=null;
 let rays=[], labels=[], envT=null, f1Glow=null;
 let mode='cas', prin=false, step=1, spin=false, tPrev=0, dragged=false;
+/* 조작 모드 */
+const MM3=50, KX=4;                 // 1 유닛 = 50 mm · KX = 초점 노브 지렛대(체감용)
+const PL={on:false, yaw:0, pitch:0, dSec:0, knob:0, flatA:45, m1:false,m2:false,m3:false, blur:0, err:0};
 
 /* ── 광학 상수(로컬 좌표: 광축 = z, 빛은 +z 로 진행) ── */
 const F=24, RM=4.0, RH=0.5, F1=-24, F2=2.0;
@@ -1281,22 +1349,70 @@ const MOUNT_Y=6.2, GROUND=-6.6;
 const zp = r => -r*r/(4*F);
 const zh = r => ZC - AA*Math.sqrt(1 + r*r/BB2);
 
-function hitSec(P){
+function hitSec(P,sh){
+  sh=sh||0;
   const D={x:-P.x,y:-P.y,z:F1-P.z}; let lo=0,hi=1;
-  const g=t=>{ const x=P.x+D.x*t,y=P.y+D.y*t,z=P.z+D.z*t; return z-zh(Math.hypot(x,y)); };
+  const g=t=>{ const x=P.x+D.x*t,y=P.y+D.y*t,z=P.z+D.z*t; return z-(zh(Math.hypot(x,y))+sh); };
   for(let i=0;i<60;i++){ const m=(lo+hi)/2; if(g(m)>0) lo=m; else hi=m; }
   const t=(lo+hi)/2; return {x:P.x+D.x*t,y:P.y+D.y*t,z:P.z+D.z*t};
 }
+/* 자오면(r,z)에서 어긋난 부경의 실제 반사 → 상면 z=zi 에서의 반지름 좌표 */
+function traceCas(r0){
+  const sh=PL.dSec/MM3, zi=F2+PL.knob*KX/MM3;
+  const P={r:r0,z:zp(r0)};
+  let D={r:-r0, z:F1-P.z}; const L0=Math.hypot(D.r,D.z); D={r:D.r/L0,z:D.z/L0};
+  const g=t=>{ const r=Math.abs(P.r+D.r*t), z=P.z+D.z*t; return z-(zh(r)+sh); };
+  let lo=0, hi=(F1-0.5-P.z)/D.z;
+  if(g(hi)>0) return null;
+  for(let i=0;i<60;i++){ const m=(lo+hi)/2; if(g(m)>0) lo=m; else hi=m; }
+  const t=(lo+hi)/2, rh=P.r+D.r*t, zhit=P.z+D.z*t;
+  if(Math.abs(rh)>RS*1.15) return null;
+  let n={r:-2*rh/BB2, z:2*(zhit-ZC-sh)/(AA*AA)};
+  const nl=Math.hypot(n.r,n.z); n={r:n.r/nl,z:n.z/nl};
+  const dn=D.r*n.r+D.z*n.z;
+  const R={r:D.r-2*dn*n.r, z:D.z-2*dn*n.z};
+  if(R.z<=0.02) return null;
+  const t2=(zi-zhit)/R.z;
+  return {rh:rh, zh:zhit, end:rh+R.r*t2, zi:zi};
+}
+function casBlur(){
+  const ends=[1.1,1.9,2.7,3.5].map(r=>traceCas(r)).filter(Boolean).map(o=>o.end);
+  if(!ends.length) return {blur:9,off:0};
+  const m=ends.reduce((a,b)=>a+b,0)/ends.length;
+  return {blur:Math.sqrt(ends.reduce((a,b)=>a+(b-m)*(b-m),0)/ends.length)+Math.abs(m)*0.25, off:m};
+}
 function hitFlat(P){
+  const b=(PL.on?PL.flatA:45)*Math.PI/180, n={y:Math.cos(b), z:Math.sin(b)};
   const D={x:-P.x,y:-P.y,z:F1-P.z};
-  const t=-(P.y+(P.z-ZN))/(D.y+D.z);
+  const den=D.y*n.y+D.z*n.z; if(Math.abs(den)<1e-9) return {x:P.x,y:P.y,z:ZN};
+  const t=(-(P.y*n.y+(P.z-ZN)*n.z))/den;
   return {x:P.x+D.x*t,y:P.y+D.y*t,z:P.z+D.z*t};
+}
+function flatEnd(H,P){                         /* 평면거울 반사 후 상면 y=yi 도달점 */
+  const b=(PL.on?PL.flatA:45)*Math.PI/180, n={x:0,y:Math.cos(b),z:Math.sin(b)};
+  let D={x:-P.x,y:-P.y,z:F1-P.z}; const L0=Math.hypot(D.x,D.y,D.z); D={x:D.x/L0,y:D.y/L0,z:D.z/L0};
+  const dn=D.y*n.y+D.z*n.z;
+  const R={x:D.x, y:D.y-2*dn*n.y, z:D.z-2*dn*n.z};
+  const yi=NFY+(PL.on?PL.knob*KX/MM3:0);
+  if(R.y<=0.02) return {x:H.x,y:yi,z:H.z};
+  const t=(yi-H.y)/R.y;
+  return {x:H.x+R.x*t, y:yi, z:H.z+R.z*t};
 }
 function pathOf(r0,phi){
   const P={x:r0*Math.cos(phi), y:r0*Math.sin(phi), z:zp(r0)};
   const A={x:P.x, y:P.y, z:ZSTART};
-  if(mode==='cas'){ return [A,P,hitSec(P),{x:0,y:0,z:F2}]; }
-  return [A,P,hitFlat(P),{x:0,y:NFY,z:ZN}];
+  if(mode==='cas'){
+    if(PL.on){
+      const o=traceCas(r0);
+      if(!o) return [A,P,hitSec(P,PL.dSec/MM3),{x:0,y:0,z:F2}];
+      return [A,P,{x:o.rh*Math.cos(phi),y:o.rh*Math.sin(phi),z:o.zh},
+                  {x:o.end*Math.cos(phi),y:o.end*Math.sin(phi),z:o.zi}];
+    }
+    return [A,P,hitSec(P),{x:0,y:0,z:F2}];
+  }
+  const H=hitFlat(P);
+  if(PL.on) return [A,P,H,flatEnd(H,P)];
+  return [A,P,H,{x:0,y:NFY,z:ZN}];
 }
 const FOCUS = () => mode==='cas' ? {x:0,y:0,z:F2} : {x:0,y:NFY,z:ZN};
 
@@ -1500,11 +1616,12 @@ function buildMirror(env){
       v.position.set(Math.cos(a)*(RS+TR)/2, Math.sin(a)*(RS+TR)/2, ZS-.1); v.rotation.z=a; gMirror.add(v); }
   } else {
     const d=new T.Mesh(new T.CylinderGeometry(RN,RN,.12,64), mMat);
-    d.rotation.x=Math.PI/4; d.position.set(0,0,ZN); gMirror.add(d);
+    d.rotation.x=(PL.on?PL.flatA:45)*Math.PI/180; d.position.set(0,0,ZN); gMirror.add(d);
     for(let k=0;k<3;k++){ const a=k*2*Math.PI/3+Math.PI/2;
       const v=new T.Mesh(new T.BoxGeometry(TR-RN+.3,.07,.45), hold);
       v.position.set(Math.cos(a)*(RN+TR)/2, Math.sin(a)*(RN+TR)/2, ZN-.15); v.rotation.z=a; gMirror.add(v); }
   }
+  if(mode==='cas') gMirror.position.z=PL.on?PL.dSec/MM3:0;
   optic.add(gMirror);
   if(EYES){ EYES.eyeCas.visible=(mode==='cas'); EYES.eyeNew.visible=(mode!=='cas'); }
 }
@@ -1614,6 +1731,13 @@ function applyStepLite(){
   document.getElementById('telCap').innerHTML='<b class="st">'+step+'. '+S.t+'</b> '+S.d;
 }
 function applyStep(){
+  if(PL.on){
+    rays.forEach(R=>{ R.segs.forEach(l=>l.visible=true); R.sp.visible=true; if(R.gh) R.gh.visible=false; });
+    labels.forEach(L=>{ L.sp.visible=false; });
+    if(f1Glow) f1Glow.visible=false;
+    document.getElementById('telEye').classList.add('on');
+    return;
+  }
   const vis = step===1?1 : step===2?1 : 3;
   rays.forEach(R=>{ R.segs.forEach((l,i)=>{ l.visible = i<vis; }); R.sp.visible=true;
                     if(R.gh) R.gh.visible = (step===2); });
@@ -1656,14 +1780,22 @@ function drawEye(now){
   x.setTransform(1,0,0,1,0,0); x.clearRect(0,0,W,H);
   x.fillStyle='#07080B'; x.beginPath(); x.arc(W/2,H/2,R,0,7); x.fill();
   const t=Math.min(1,(now-eyeT0)/1600);
-  const foc=t*t*(3-2*t);
+  let foc=t*t*(3-2*t), offX=0, offY=0, extraBlur=0, bright=1;
+  if(PL.on){
+    foc=1;
+    const K=R*1.05/Math.tan(1.2*Math.PI/180);          // 시야 ≈ ±1.2°
+    offX=Math.max(-R*2,Math.min(R*2,-PL.tanx*K));
+    offY=Math.max(-R*2,Math.min(R*2,-PL.tany*K));
+    extraBlur=Math.min(24,PL.blur*MM3*7);
+    bright=Math.max(0.06,Math.exp(-Math.pow(PL.err/1.2,2)))*(0.35+0.65*Math.exp(-PL.blur*3));
+  }
   x.save(); x.beginPath(); x.arc(W/2,H/2,R*.97,0,7); x.clip();
   x.translate(W/2,H/2); x.rotate(Math.PI);              // 반사망원경 → 상하좌우 반전
   const sc=(0.55+0.45*foc)*R*1.55/512;
-  x.globalAlpha=.25+.75*foc;
-  x.filter='blur('+((1-foc)*9).toFixed(1)+'px)';
+  x.globalAlpha=(.25+.75*foc)*(PL.on?bright:1);
+  x.filter='blur('+(((1-foc)*9)+extraBlur).toFixed(1)+'px)';
   const m=moonCanvas();
-  x.drawImage(m, 190,60,520,400, -520*sc/1, -400*sc/1, 1040*sc, 800*sc);
+  x.drawImage(m, 190,60,520,400, -520*sc+offX, -400*sc+offY, 1040*sc, 800*sc);
   x.filter='none'; x.restore();
   x.save(); x.beginPath(); x.arc(W/2,H/2,R*.97,0,7); x.clip();
   const ph=x.createLinearGradient(W/2-R,0,W/2+R*.45,0);
@@ -1700,9 +1832,9 @@ function tick(now){
     cam.lookAt(curTgt);
   }
   const t=now/1000;
-  const vis = step===1?1 : step===2?2 : 3;
+  const vis = PL.on?3 : (step===1?1 : step===2?2 : 3);
   rays.forEach(function(R){
-    const P = step===2 ? R.gp : R.pts, CU = step===2 ? R.gc : R.cum;
+    const P = (!PL.on&&step===2) ? R.gp : R.pts, CU = (!PL.on&&step===2) ? R.gc : R.cum;
     const L=CU[vis];
     const u=((t*0.11+R.ph)%1)*L;
     let i=0; while(i<vis-1 && CU[i+1]<u) i++;
@@ -1717,8 +1849,40 @@ function tick(now){
   if(moon) moon.rotation.y += dt*0.012;
   const lk=orb.r/20;
   scene.traverse(function(o){ if(o.isSprite && o.userData.bw) o.scale.set(o.userData.bw*lk, o.userData.bh*lk, 1); });
+  if(PL.on&&scope&&joyActive){
+    PL.yaw=Math.max(-0.14,Math.min(0.14,PL.yaw - joyVec[0]*dt*0.022));
+    PL.pitch=Math.max(-0.12,Math.min(0.12,PL.pitch - joyVec[1]*dt*0.018));
+    scope.rotation.order='YXZ'; scope.rotation.y=PL.yaw; scope.rotation.x=TILT+PL.pitch;
+    document.getElementById('joyVal').textContent='조준 중…';
+  }
+  if(PL.on&&scope&&moon){
+    const fw=new T.Vector3(0,0,-1).applyQuaternion(scope.quaternion);
+    const fr=worldOf(TZ0);
+    const md=moon.position.clone().sub(fr).normalize();
+    PL.err=fw.angleTo(md)*180/Math.PI;
+    const inv=scope.quaternion.clone().invert();
+    const lo=md.clone().applyQuaternion(inv);
+    PL.tanx=lo.x/Math.max(0.2,-lo.z); PL.tany=lo.y/Math.max(0.2,-lo.z);
+    if(mode==='cas'){ const b=casBlur(); PL.blur=b.blur; }
+    else PL.blur=0.17*Math.abs(PL.knob)*KX/MM3+Math.abs(PL.flatA-45)*0.002;
+    if(focusGlow){ const k=Math.max(0.4,2.6-PL.blur*10); focusGlow.scale.set(k,k,1);
+      focusGlow.visible=PL.err<1.6; }
+    const ok1=PL.err<=0.3;
+    const ok2=mode==='cas'?Math.abs(PL.dSec)<=1:Math.abs(PL.flatA-45)<=0.4;
+    const ok3=ok1&&ok2&&PL.blur*MM3<=0.9;
+    if(ok1&&!PL.m1&&typeof GEO_task==='function') GEO_task('tel-aim');
+    if(ok3&&!PL.m3&&typeof GEO_task==='function') GEO_task('tel-sharp');
+    PL.m1=ok1; PL.m2=ok2; PL.m3=ok3;
+    document.getElementById('tcM1').classList.toggle('done',ok1);
+    document.getElementById('tcM2').classList.toggle('done',ok2);
+    document.getElementById('tcM3').classList.toggle('done',ok3);
+    document.getElementById('telCap').innerHTML='<b class="st">조작 모드</b> 겨누기 오차 <b>'+PL.err.toFixed(2)+'°</b> · '
+      +(mode==='cas'?'두 초점 사이 <b>'+Math.abs(PL.dSec).toFixed(1)+' mm</b>':'거울각 <b>'+PL.flatA.toFixed(1)+'°</b>')
+      +' · 상의 흐림 <b>'+(PL.blur*MM3).toFixed(1)+' mm</b>'
+      +(ok3?' — <b style="color:#12876A">정렬 완료! 선명한 달입니다</b>':'');
+  }
   ren.render(scene,cam);
-  if(step===4) drawEye(now);
+  if(step===4||PL.on) drawEye(now);
 }
 
 async function init(){
@@ -1757,14 +1921,34 @@ const SEC_Y=[-0.85,-0.65,-0.45,0.45,0.65,0.85];
 function secPath(y0){
   const P={x:sPar(y0),y:y0}, A={x:(mode==='cas'?-1.85:-3.05),y:y0}, D={x:SF1.x-P.x,y:SF1.y-P.y};
   if(mode==='cas'){
-    let lo=0,hi=1; const g=t=>{const x=P.x+D.x*t,y=P.y+D.y*t; return x-sHyp(y);};
+    const SH=PL.on?PL.dSec/200:0;
+    let lo=0,hi=1; const g=t=>{const x=P.x+D.x*t,y=P.y+D.y*t; return x-(sHyp(y)+SH);};
+    if(g(1)>0) return [A,P,{x:P.x+D.x,y:P.y+D.y}];
     for(let i=0;i<50;i++){const m=(lo+hi)/2; if(g(m)>0) lo=m; else hi=m;}
-    const t=(lo+hi)/2; return [A,P,{x:P.x+D.x*t,y:P.y+D.y*t},SF2];
+    const t=(lo+hi)/2, Q={x:P.x+D.x*t,y:P.y+D.y*t};
+    if(!PL.on) return [A,P,Q,SF2];
+    const cx=HX0+SH; let nx=(Q.x-cx)/(HA*HA), ny=-Q.y/HB2;
+    const nl=Math.hypot(nx,ny); nx/=nl; ny/=nl;
+    const dn=D.x*nx+D.y*ny, Rx=D.x-2*dn*nx, Ry=D.y-2*dn*ny;
+    const xi=SD+PL.knob*KX/200;
+    if(Rx<=1e-6) return [A,P,Q];
+    const t2=(xi-Q.x)/Rx;
+    return [A,P,Q,{x:xi,y:Q.y+Ry*t2}];
+  }
+  if(PL.on){
+    const ar=PL.flatA*Math.PI/180, ux=Math.cos(ar), uy=-Math.sin(ar), nx=Math.sin(ar), ny=Math.cos(ar);
+    const den=D.x*nx+D.y*ny; if(Math.abs(den)<1e-9) return [A,P];
+    const t=((FLATX-P.x)*nx+(0-P.y)*ny)/den, Q={x:P.x+D.x*t,y:P.y+D.y*t};
+    const dn=D.x*nx+D.y*ny, Rx=D.x-2*dn*nx, Ry=D.y-2*dn*ny;
+    const yi=FLATX+2.4+PL.knob*KX/200;
+    if(Ry<=1e-6) return [A,P,Q];
+    const t2=(yi-Q.y)/Ry;
+    return [A,P,Q,{x:Q.x+Rx*t2,y:yi}];
   }
   const t=(FLATX-P.x-P.y)/(D.x+D.y);
   return [A,P,{x:P.x+D.x*t,y:P.y+D.y*t},SFN];
 }
-let secPaths=[], secMode=null;
+let secPaths=[], secKey=null;
 function secBuild(){
   SP = mode==='cas' ? 1.0 : 2.4; SF1={x:-SP,y:0};
   secPaths=SEC_Y.map(function(y0){
@@ -1772,7 +1956,6 @@ function secBuild(){
     for(let i=0;i<3;i++){ L+=Math.hypot(pts[i+1].x-pts[i].x,pts[i+1].y-pts[i].y); cum.push(L); }
     return {pts:pts,cum:cum,ph:(y0+1)*0.37};
   });
-  secMode=mode;
 }
 let secHidden=false;
 document.getElementById('secTgl').addEventListener('click',function(e){
@@ -1783,7 +1966,7 @@ function drawSecNow(){ drawSec(performance.now()); }
 function drawSec(now){
   if(!SEC || secHidden) return;
   const box=SEC.getBoundingClientRect(); if(!box.width) return;
-  if(secMode!==mode) secBuild();
+  { const k=mode+'|'+PL.on+'|'+PL.dSec+'|'+PL.knob+'|'+PL.flatA; if(secKey!==k){ secBuild(); secKey=k; } }
   const dpr=Math.min(2,window.devicePixelRatio||1);
   if(SEC.width!==Math.round(box.width*dpr)||SEC.height!==Math.round(box.height*dpr)){ SEC.width=Math.round(box.width*dpr); SEC.height=Math.round(box.height*dpr); }
   const x=SEC.getContext('2d'), W=box.width, H=box.height;
@@ -1793,7 +1976,7 @@ function drawSec(now){
   const sc=Math.min((W-16)/(XMAX-XMIN), (H-22)/(2*YR));
   const ox=8+(W-16-(XMAX-XMIN)*sc)/2 - XMIN*sc, oy=H/2+4;
   const X=p=>ox+p.x*sc, Y=p=>oy-p.y*sc;
-  const vis = step===1?1 : step===2?2 : 3;
+  const vis = PL.on?3 : (step===1?1 : step===2?2 : 3);
   const kor="600 11px 'IBM Plex Sans KR',system-ui,sans-serif", mth="italic 700 13px Georgia,serif";
   function txt(str,px,py,col,font,align){ x.font=font||kor; x.textAlign=align||'left'; x.textBaseline='middle';
     x.lineWidth=3; x.strokeStyle='rgba(10,11,15,.85)'; x.strokeText(str,px,py); x.fillStyle=col; x.fillText(str,px,py); }
@@ -1814,17 +1997,41 @@ function drawSec(now){
   txt('주경', X({x:sPar(RMIR)+0.02,y:0})+6, Y({x:0,y:RMIR})+15, 'rgba(255,255,255,.7)');
   /* 부경 */
   if(isCas){
-    const show=step>=3||prin;
-    curve(sHyp,-0.72,0.72,'rgba(127,216,255,'+(show?.35:.18)+')',1,[3,3]);
-    curve(sHyp,-0.42,0.42, show?'#7FD8FF':'rgba(127,216,255,.55)', show?3.2:2);
+    const show=step>=3||prin||PL.on, SH=PL.on?PL.dSec/200:0, hypS=y=>sHyp(y)+SH;
+    curve(hypS,-0.72,0.72,'rgba(127,216,255,'+(show?.35:.18)+')',1,[3,3]);
+    curve(hypS,-0.42,0.42, show?'#7FD8FF':'rgba(127,216,255,.55)', show?3.2:2);
+    if(PL.on){
+      const match=Math.abs(PL.dSec)<=1;
+      if(match){ x.fillStyle='#B78CFF'; x.beginPath(); x.arc(X(SF1),Y(SF1),4.5,0,7); x.fill();
+        txt('두 초점 겹침 ✓',X(SF1),Y(SF1)-11,'#B78CFF'); }
+      else { x.fillStyle='#7FD8FF'; x.beginPath(); x.arc(X(SF1),Y(SF1),3.4,0,7); x.fill();
+        x.fillStyle='#FF6A5A'; x.beginPath(); x.arc(X({x:SF1.x+SH,y:0}),Y(SF1),3.4,0,7); x.fill();
+        txt('포물선 초점',X(SF1),Y(SF1)-11,'#7FD8FF',kor,'center');
+        txt('쌍곡선 초점',X({x:SF1.x+SH,y:0}),Y(SF1)+13,'#FF6A5A',kor,'center'); }
+    }
     if(prin){ curve(sHyp2,-0.72,0.72,'rgba(127,216,255,.30)',1,[3,3]); txt('다른 가지',X({x:sHyp2(0.72),y:0})-2,Y({x:0,y:-0.72})+9,'rgba(157,182,200,.8)',kor,'right'); }
     if(show){ txt('쌍곡선', X({x:sHyp(0.42),y:0})-6, Y({x:0,y:0.42})-9, '#7FD8FF', kor, 'right');
               txt('부경', X({x:sHyp(0.42),y:0})-6, Y({x:0,y:0.42})+4, 'rgba(255,255,255,.7)', kor, 'right'); }
   } else {
-    const show=step>=3||prin, L=FLATL;
+    const show=step>=3||prin||PL.on, L=FLATL, FA=(PL.on?PL.flatA:45)*Math.PI/180;
     x.save(); x.strokeStyle= show?'#E8F0FF':'rgba(232,240,255,.5)'; x.lineWidth=show?3.2:2; x.lineCap='round';
-    x.beginPath(); x.moveTo(X({x:FLATX+L,y:-L}),Y({x:0,y:-L})); x.lineTo(X({x:FLATX-L,y:L}),Y({x:0,y:L})); x.stroke(); x.restore();
+    x.beginPath(); x.moveTo(X({x:FLATX+L*Math.cos(FA)*1.414,y:-L*Math.sin(FA)*1.414}),Y({x:0,y:-L*Math.sin(FA)*1.414}));
+    x.lineTo(X({x:FLATX-L*Math.cos(FA)*1.414,y:L*Math.sin(FA)*1.414}),Y({x:0,y:L*Math.sin(FA)*1.414})); x.stroke(); x.restore();
     if(show) txt('평면거울', X({x:FLATX-L,y:0})-6, Y({x:0,y:L})-8, '#E8F0FF', kor, 'right');
+  }
+  /* 접안부 (조작 모드: 노브 따라 이동) */
+  if(PL.on){
+    if(isCas){
+      const xi=SD+PL.knob*KX/200;
+      x.save(); x.strokeStyle='#FFD98A'; x.lineWidth=3; x.lineCap='round';
+      x.beginPath(); x.moveTo(X({x:xi,y:-0.15}),Y({x:0,y:-0.15})); x.lineTo(X({x:xi,y:0.15}),Y({x:0,y:0.15})); x.stroke(); x.restore();
+      txt('접안부',X({x:xi,y:0}),Y({x:0,y:0.15})-9,'#FFD98A');
+    } else {
+      const yi=FLATX+2.4+PL.knob*KX/200;
+      x.save(); x.strokeStyle='#FFD98A'; x.lineWidth=3; x.lineCap='round';
+      x.beginPath(); x.moveTo(X({x:FLATX-0.15,y:yi}),Y({x:0,y:yi})); x.lineTo(X({x:FLATX+0.15,y:yi}),Y({x:0,y:yi})); x.stroke(); x.restore();
+      txt('접안부',X({x:FLATX,y:yi})+30,Y({x:0,y:yi}),'#FFD98A');
+    }
   }
   /* 빛 */
   const t=now/1000;
@@ -1837,7 +2044,7 @@ function drawSec(now){
       g.addColorStop(1,['rgba(255,204,97,.8)','rgba(255,236,170,.85)','rgba(255,255,244,.9)'][i]);
       x.strokeStyle=g; x.lineWidth=1.4; x.beginPath(); x.moveTo(X(a),Y(a)); x.lineTo(X(b),Y(b)); x.stroke();
     }
-    if(step===1){ /* 화살표 */
+    if(step===1||PL.on){ /* 화살표 */
       const a=P[0], b=P[1], mx=X(a)+(X(b)-X(a))*0.55, my=Y(a);
       x.fillStyle='rgba(255,204,97,.9)'; x.beginPath(); x.moveTo(mx+5,my); x.lineTo(mx-3,my-3.5); x.lineTo(mx-3,my+3.5); x.closePath(); x.fill();
     }
@@ -1860,7 +2067,7 @@ function drawSec(now){
     x.fillStyle=col; x.beginPath(); x.arc(X(p),Y(p),3.2,0,7); x.fill();
     txt(label, X(p), Y(p)+dy, col, mth, 'center');
   }
-  focus(SF1, 'F', '#FF6A5A', -13, step===2);
+  if(!PL.on) focus(SF1, 'F', '#FF6A5A', -13, step===2);
   if(isCas){
     if(step>=3||prin) focus(SF2, 'F′', '#FF6A5A', 14, step>=4);
     if(step>=4) txt('상', X(SF2)+11, Y(SF2)-11, 'rgba(255,255,255,.85)');
@@ -1911,12 +2118,130 @@ document.querySelectorAll('.segBtn').forEach(function(b){
     mode=b.dataset.m;
     document.querySelectorAll('.segBtn').forEach(x=>x.classList.toggle('on',x===b));
     document.getElementById('telTag').textContent = mode==='cas'?'카세그레인식':'뉴턴식';
-    secBuild(); drawSecNow();
+    secBuild(); drawSecNow(); if(PL.on) playUIsync();
     if(ready){ buildMirror(envT); buildRays(); buildLabels(); buildPrin(); applyStep(); }
     if(typeof GEO_task==='function') GEO_task('tel-'+mode);
   });
 });
+function playRebuild(){ if(!ready) return; buildMirror(envT); buildRays(); eyeSync(); }
+function eyeSync(){ if(!EYES) return;
+  const d=PL.on?PL.knob*KX/MM3:0;
+  EYES.eyeCas.position.z=F2+.7+d;
+  EYES.eyeNew.position.y=NFY+.6+d;
+}
+/* ── 부경 레버 (뉴턴식에서는 거울각 레버) ── */
+const leverEl=document.getElementById('lever'), leverH=document.getElementById('leverHandle');
+function leverRange(){ return mode==='cas'?20:8; }
+function leverGet(){ return mode==='cas'?PL.dSec:PL.flatA-45; }
+function leverSet(v,silent){
+  const R=leverRange(); v=Math.max(-R,Math.min(R,v));
+  if(mode==='cas') PL.dSec=v; else PL.flatA=45+v;
+  const trackH=leverEl.clientHeight||76, t=1-(v+R)/(2*R);
+  leverH.style.top=(4+t*(trackH-15-8))+'px';
+  document.getElementById('leverVal').textContent=mode==='cas'?PL.dSec.toFixed(1)+' mm':PL.flatA.toFixed(1)+' °';
+  if(!silent) playRebuild();
+}
+let leverDrag=false;
+leverEl.addEventListener('pointerdown',e=>{ leverDrag=true; leverEl.setPointerCapture(e.pointerId); e.stopPropagation(); leverMove(e); });
+leverEl.addEventListener('pointermove',e=>{ if(leverDrag) leverMove(e); });
+['pointerup','pointercancel'].forEach(t=>leverEl.addEventListener(t,()=>leverDrag=false));
+function leverMove(e){
+  const r=leverEl.getBoundingClientRect(), R=leverRange();
+  const t=Math.max(0,Math.min(1,(e.clientY-r.top-8)/(r.height-16)));
+  leverSet((1-t)*2*R-R);
+}
+/* ── 초점 다이얼 (돌리는 노브) ── */
+const dialEl=document.getElementById('dial'), dialF=document.getElementById('dialFace');
+let dialAng=0, dialPrev=null;
+function dialShow(){ dialF.style.transform='rotate('+dialAng+'rad)';
+  document.getElementById('dialVal').textContent=PL.knob.toFixed(1)+' mm'; }
+function dialAdd(da,silent){ dialAng+=da; PL.knob=Math.max(-40,Math.min(40,PL.knob+da/(2*Math.PI)*10)); dialShow(); if(!silent) playRebuild(); }
+dialEl.addEventListener('pointerdown',e=>{ dialEl.setPointerCapture(e.pointerId); e.stopPropagation();
+  const r=dialEl.getBoundingClientRect(); dialPrev=Math.atan2(e.clientY-r.top-r.height/2, e.clientX-r.left-r.width/2); });
+dialEl.addEventListener('pointermove',e=>{ if(dialPrev===null) return;
+  const r=dialEl.getBoundingClientRect(), a=Math.atan2(e.clientY-r.top-r.height/2, e.clientX-r.left-r.width/2);
+  let d=a-dialPrev; while(d>Math.PI)d-=2*Math.PI; while(d<-Math.PI)d+=2*Math.PI;
+  dialPrev=a; dialAdd(d); });
+['pointerup','pointercancel'].forEach(t=>dialEl.addEventListener(t,()=>dialPrev=null));
+/* ── 방향 미동 조이스틱 ── */
+const joyEl=document.getElementById('joy'), joyS=document.getElementById('joyStick');
+let joyVec=[0,0], joyActive=false;
+function joyMove(e){
+  const r=joyEl.getBoundingClientRect();
+  let dx=e.clientX-r.left-r.width/2, dy=e.clientY-r.top-r.height/2;
+  const L=Math.hypot(dx,dy), M=20; if(L>M){ dx*=M/L; dy*=M/L; }
+  joyVec=[dx/M,dy/M];
+  joyS.style.left=(20+dx)+'px'; joyS.style.top=(20+dy)+'px';
+}
+joyEl.addEventListener('pointerdown',e=>{ joyActive=true; joyEl.setPointerCapture(e.pointerId); e.stopPropagation(); joyMove(e); });
+joyEl.addEventListener('pointermove',e=>{ if(joyActive) joyMove(e); });
+['pointerup','pointercancel'].forEach(t=>joyEl.addEventListener(t,()=>{ joyActive=false; joyVec=[0,0];
+  joyS.style.left='20px'; joyS.style.top='20px'; document.getElementById('joyVal').textContent='·'; }));
+function playUIsync(){
+  const isCas=mode==='cas';
+  document.getElementById('leverLab').textContent=isCas?'부경 레버':'거울각 레버';
+  leverSet(leverGet(),true); dialShow();
+  document.getElementById('tcM2t').textContent=isCas?'두 초점을 겹쳐라 (부경 1 mm 이내)':'평면거울을 45°로 (0.4° 이내)';
+}
+function playScatter(){
+  const r=(a,b)=>a+Math.random()*(b-a), sg=()=>Math.random()<0.5?-1:1;
+  PL.yaw=sg()*r(0.04,0.10); PL.pitch=sg()*r(0.03,0.08);
+  PL.dSec=sg()*r(6,16); PL.knob=sg()*r(5,16); PL.flatA=45+sg()*r(2,6);
+  if(scope){ scope.rotation.order='YXZ'; scope.rotation.y=PL.yaw; scope.rotation.x=TILT+PL.pitch; }
+  playUIsync(); playRebuild();
+}
+document.getElementById('tcNew').addEventListener('click',playScatter);
+function helpMsg(){
+  if(!scope||!moon) return '먼저 조작 모드를 켜 주세요!';
+  /* 달 방향 */
+  const fr=worldOf(TZ0), md=moon.position.clone().sub(fr).normalize();
+  const errNow=new T.Vector3(0,0,-1).applyQuaternion(scope.quaternion).angleTo(md)*180/Math.PI;
+  if(errNow>0.3){
+    const test=(dy,dp)=>{ const q=new T.Quaternion().setFromEuler(new T.Euler(TILT+PL.pitch+dp, PL.yaw+dy, 0, 'YXZ'));
+      return new T.Vector3(0,0,-1).applyQuaternion(q).angleTo(md); };
+    const base=test(0,0);
+    const dxBetter=test(-0.02,0)<base ? '오른쪽' : (test(0.02,0)<base ? '왼쪽' : '');
+    const dyBetter=test(0,-0.02)<base ? '아래' : (test(0,0.02)<base ? '위' : '');
+    const dir=[dxBetter,dyBetter].filter(Boolean).join(' ');
+    return '아직 달이 시야 밖이에요. 미동 스틱을 '+(dir||'조금씩')+' 쪽으로 밀어 봐요! (오차 '+errNow.toFixed(1)+'°)';
+  }
+  if(mode==='cas'&&Math.abs(PL.dSec)>1)
+    return '달은 겨눴어요! 이제 부경 레버를 '+(PL.dSec>0?'아래로 내려':'위로 올려')+' 봐요. 두 초점 사이가 '+Math.abs(PL.dSec).toFixed(1)+' mm 남았어요.';
+  if(mode!=='cas'&&Math.abs(PL.flatA-45)>0.4)
+    return '달은 겨눴어요! 거울각 레버를 '+(PL.flatA>45?'아래로':'위로')+' 움직여 45°에 맞춰 봐요. 지금 '+PL.flatA.toFixed(1)+'°예요.';
+  if(Math.abs(PL.knob)>4.5)
+    return '거의 다 왔어요! 초점 노브를 '+(PL.knob>0?'반시계':'시계')+' 방향으로 살살 돌려 봐요. ('+PL.knob.toFixed(1)+' mm)';
+  return '완벽해요! 두 초점이 겹치고 상이 선명합니다. 이게 바로 광축 정렬이에요.';
+}
+document.getElementById('tcHelp').addEventListener('click',function(){
+  const b=document.getElementById('helpBub');
+  document.getElementById('helpTxt').textContent=helpMsg();
+  b.classList.add('show');
+  clearTimeout(this._t); this._t=setTimeout(()=>b.classList.remove('show'),5000);
+  if(typeof GEO_task==='function') GEO_task('tel-help');
+});
+document.getElementById('telPlay').addEventListener('click',function(){
+  PL.on=!PL.on;
+  this.classList.toggle('on',PL.on);
+  document.body.classList.toggle('telPlaying',PL.on);
+  if(PL.on){
+    init();
+    document.getElementById('telEye').classList.add('on'); eyeT0=performance.now()-2000;
+    playScatter();
+    if(scope){ goalTgt=worldOf(-7); camGoal.r=48; camGoal.th=1.9; camGoal.ph=1.32; dragged=false;
+      orb.th=camGoal.th; orb.ph=camGoal.ph; }
+    document.getElementById('telCap').innerHTML='<b class="st">조작 모드</b> 미동 스틱으로 달을 겨누고, 레버와 노브로 정렬하세요. 화면 드래그는 보는 시점만 돌립니다.';
+    if(typeof GEO_task==='function') GEO_task('tel-play');
+  } else {
+    PL.yaw=PL.pitch=0; PL.dSec=0; PL.knob=0; PL.flatA=45;
+    if(scope){ scope.rotation.order='YXZ'; scope.rotation.y=0; scope.rotation.x=TILT; }
+    playRebuild(); eyeSync();
+    document.getElementById('telEye').classList.toggle('on',step===4);
+    if(ready) applyStep(); else applyStepLite();
+  }
+});
 window.__telShow=function(){ init(); setTimeout(resize,40); };
+window.__telPL=PL; window.__telAlign=function(){ PL.yaw=0; PL.pitch=0; if(scope){scope.rotation.order='YXZ'; scope.rotation.y=0; scope.rotation.x=TILT;} PL.dSec=0; PL.knob=0; PL.flatA=45; playUIsync(); playRebuild(); };
 window.__telPrin=function(v){ prin=v; if(gPrin) gPrin.visible=v; if(TUBE) TUBE.material.opacity=v?.09:.20; drawSecNow(); };
 window.addEventListener('resize',()=>{ if(ready) resize(); });
 })();
