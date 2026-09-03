@@ -61,6 +61,9 @@
   .msg.wait { background:#fef3c7; color:#92400e; }
   .msg.err  { background:#fee2e2; color:#b91c1c; }
   .msg.ok   { background:#dcfce7; color:#166534; }
+  .msg .sub { display:block; margin-top:5px; font-size:12.3px; opacity:.82; }
+  .msg .dots::after { content:''; animation:msgDots 1.2s steps(4,end) infinite; }
+  @keyframes msgDots { 0%{content:''} 25%{content:'·'} 50%{content:'··'} 75%{content:'···'} }
   .foot { text-align:center; font-size:11.5px; color:#94a3b8; margin-top:14px; line-height:1.7; }
 
   /* ── 승인 후 메뉴 ── */
@@ -227,7 +230,7 @@
   <img id="splashEmblem" src="splash-emblem.png" alt="">
   <div id="splashTitle">GEOMETRY</div>
   <div id="splashLine"></div>
-  <div id="splashSub">v1.47&ensp;·&ensp;제작 차지영선생님</div>
+  <div id="splashSub">v1.49&ensp;·&ensp;제작 차지영선생님</div>
   <!-- 버전 글자는 아래 스크립트가 GEO_CONFIG.VERSION 으로 자동으로 채운다 -->
 </div>
 <style>
@@ -556,6 +559,7 @@ function hardLogout(){
   localStorage.removeItem('geoSid'); localStorage.removeItem('geoName');
   localStorage.removeItem('geoBookmark'); localStorage.removeItem('geoDone');
   localStorage.removeItem('geoTeacher');
+  localStorage.removeItem('geoStrike');
   sessionStorage.removeItem('geoResumed');
   location.hash=''; location.reload();
 }
@@ -573,6 +577,73 @@ async function checkApproval(sid, name){
   } finally { clearTimeout(timer); }
 }
 
+/* ══════════════════════════════════════════════════════════
+   승인 자동 확인
+   — 예전에는 '대기 중'이 뜨면 학생이 직접 '입장하기'를 다시 눌러야 해서,
+     선생님이 승인해도 학생이 한참 뒤에야 들어왔다.
+     이제는 승인될 때까지 백그라운드에서 스스로 다시 확인하고 바로 입장한다.
+   ══════════════════════════════════════════════════════════ */
+let waitTm = null, waitEnd = 0, waitN = 0, waitWho = null;
+
+function stopWaiting(){
+  if(waitTm){ clearTimeout(waitTm); waitTm = null; }
+  waitWho = null;
+}
+/* 처음엔 자주, 나중엔 뜸하게. ±30% 흔들어 반 전체가 동시에 몰리지 않게 한다 */
+function waitGap(n){
+  const base = n <= 5 ? 4000 : (n <= 15 ? 8000 : 15000);
+  return Math.round(base * (0.7 + Math.random() * 0.6));
+}
+function waitMsg(extra){
+  showMsg('wait', '승인을 기다리는 중이에요<span class="dots"></span>'
+    + '<span class="sub">선생님이 승인하면 <b>자동으로</b> 들어갑니다. 이 화면을 그대로 두세요.'
+    + (extra || '') + '</span>');
+}
+function startWaiting(sid, name){
+  stopWaiting();
+  waitWho = sid + '\u0000' + name;
+  waitEnd = Date.now() + 20 * 60 * 1000;      // 20분까지 자동 확인
+  waitN = 0;
+  waitTm = setTimeout(waitTick, waitGap(0));
+}
+async function waitTick(){
+  waitTm = null;
+  if(!waitWho) return;
+  const [sid, name] = waitWho.split('\u0000');
+  if(Date.now() > waitEnd){
+    stopWaiting();
+    showMsg('wait','자동 확인을 잠시 멈췄어요.<span class="sub"><b>입장하기</b>를 다시 눌러 주세요.</span>');
+    return;
+  }
+  if(document.hidden){                         // 화면이 꺼져 있으면 쉬었다가
+    waitTm = setTimeout(waitTick, 4000); return;
+  }
+  waitN++;
+  try{
+    const r = await checkApproval(sid, name);
+    if(!waitWho) return;                       // 그새 학생이 입력을 바꿨으면 그만
+    if(r.status === 'approved'){
+      stopWaiting();
+      localStorage.setItem('geoSid', sid); localStorage.setItem('geoName', name);
+      hideMsg(); openMenu(name); return;
+    }
+  }catch(e){ /* 인터넷이 잠깐 끊겨도 멈추지 않고 계속 확인 */ }
+  if(!waitWho) return;
+  waitMsg(waitN >= 3 ? ' <span style="opacity:.7">(' + waitN + '번째 확인)</span>' : '');
+  waitTm = setTimeout(waitTick, waitGap(waitN));
+}
+/* 화면을 다시 켜거나 앱으로 돌아오면 곧바로 한 번 더 확인 */
+document.addEventListener('visibilitychange', ()=>{
+  if(!document.hidden && waitWho && !waitTm) waitTm = setTimeout(waitTick, 200);
+});
+window.addEventListener('focus', ()=>{
+  if(waitWho && waitTm){ clearTimeout(waitTm); waitTm = setTimeout(waitTick, 200); }
+});
+/* 학번·이름·선생님을 바꾸면 기다리던 것은 취소 */
+['sid','name','teacher'].forEach(id=>{
+  const el = $(id); if(el) el.addEventListener('input', stopWaiting);
+});
+
 async function tryEnter(silent){
   const sid = $('sid').value.trim(), name = $('name').value.trim();
   if(!sid || !name){ if(!silent) showMsg('err','학번과 이름을 모두 입력해 주세요.'); return; }
@@ -586,19 +657,22 @@ async function tryEnter(silent){
     localStorage.setItem('geoSid',sid); localStorage.setItem('geoName',name);
     openMenu(name); return;
   }
-  btn.disabled=true; if(!silent) showMsg('wait','승인 명단을 확인하는 중이에요…');
+  stopWaiting();
+  btn.disabled=true; if(!silent) showMsg('wait','승인 명단을 확인하는 중이에요<span class="dots"></span>');
   try{
     const r = await checkApproval(sid, name);
     if(r.status==='approved'){
       localStorage.setItem('geoSid',sid); localStorage.setItem('geoName',name);
       hideMsg(); openMenu(name);
     } else if(r.status==='new'){
-      showMsg('ok','✅ 입장 신청이 접수됐어요!<br>선생님이 승인하면 들어올 수 있어요. 잠시 후 다시 <b>입장하기</b>를 눌러 보세요.');
+      showMsg('ok','입장 신청이 접수됐어요.<span class="sub">선생님이 승인하면 <b>자동으로</b> 들어갑니다. 이 화면을 그대로 두세요.</span>');
+      startWaiting(sid, name);
     } else {
-      showMsg('wait','⏳ 아직 승인 대기 중이에요.<br>선생님이 승인하면 바로 입장할 수 있어요.');
+      waitMsg('');
+      startWaiting(sid, name);
     }
   }catch(e){
-    if(!silent) showMsg('err','승인 서버에 연결하지 못했어요. 인터넷 연결을 확인하고 다시 시도해 주세요.');
+    if(!silent) showMsg('err','승인 서버에 연결하지 못했어요.<span class="sub">인터넷을 확인하고 다시 눌러 주세요. 계속 안 되면 선생님께 말해 주세요.</span>');
   }
   btn.disabled=false;
 }
@@ -665,8 +739,18 @@ window.addEventListener('load', ()=>{
   if(localStorage.getItem('geoAppOk')==='1' && sid && name){
     openMenu(name);                                  // 기다리지 않고 바로 입장
     if(APPS_SCRIPT_URL){
-      checkApproval(sid, name).then(r=>{             // 승인 취소됐으면 내보내기
-        if(r.status && r.status!=='approved') hardLogout();
+      /* 승인이 취소됐는지 조용히 확인.
+         ★ 한 번 이상하다고 바로 내보내지 않는다.
+           시트에서 이름을 고쳤거나 서버가 잠깐 이상한 답을 준 것만으로
+           학생이 로그아웃돼 다시 승인을 받아야 하는 일이 있었다.
+           명단에서 확실히 빠진 것이 두 번 연속 확인될 때만 내보낸다. */
+      checkApproval(sid, name).then(r=>{
+        const st = r && r.status;
+        if(st === 'approved'){ localStorage.removeItem('geoStrike'); return; }
+        if(st !== 'pending' && st !== 'new') return;  // error·빈 답 등은 그냥 넘어감
+        const n = (parseInt(localStorage.getItem('geoStrike') || '0', 10) || 0) + 1;
+        if(n >= 2){ localStorage.removeItem('geoStrike'); hardLogout(); }
+        else localStorage.setItem('geoStrike', String(n));
       }).catch(()=>{});                              // 오프라인이면 그냥 통과
     }
   } else if(sid && name){
