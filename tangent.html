@@ -51,7 +51,7 @@ if (localStorage.getItem('geoAppOk') !== '1') location.replace('index.html');
   #tabs button.on { background:var(--acc); border-color:var(--acc); }
   #tabs button.on .no, #tabs button.on .nm { color:#fff; }
 
-  #main { flex:1; min-height:0; overflow-y:auto; padding:20px 24px 40px; }
+  #main { flex:1; min-height:0; overflow-y:auto; padding:20px 24px 72px; }
   .pane { display:none; max-width:1320px; margin:0 auto; }
   .pane.on { display:block; }
 
@@ -61,7 +61,7 @@ if (localStorage.getItem('geoAppOk') !== '1') location.replace('index.html');
   .lead { font-size:14.5px; line-height:1.95; color:var(--ink); }
   .lead .sm { color:var(--mute); }
 
-  .dm { font-family:Georgia,serif; font-size:17px; text-align:center; margin:11px 0; line-height:1.9; }
+  .dm { font-family:Georgia,serif; font-size:17px; text-align:center; margin:8px 0 7px; line-height:1.7; }
   .dm.hi { color:var(--acc); font-weight:700; }
   .sep2 { font-family:'IBM Plex Sans KR',sans-serif; font-size:13.5px; color:var(--mute); margin:0 7px; }
   .cond, .cond2 { font-family:'IBM Plex Sans KR',sans-serif; font-size:11.5px; color:var(--mute);
@@ -89,8 +89,11 @@ if (localStorage.getItem('geoAppOk') !== '1') location.replace('index.html');
   .split { display:flex; gap:18px; align-items:flex-start; }
   .split .left { flex:1.15; min-width:0; }
   .split .right { flex:1; min-width:0; position:sticky; top:0;
-                  max-height:calc(100vh - 150px); overflow-y:auto; overscroll-behavior:contain; }
-  @media (max-width:1000px){ .split { flex-direction:column; } .split .right { position:static; width:100%; } }
+                  /* 높이는 스크립트가 본문 높이에 맞춰 넣는다 (앱 상·하단 바까지 감안) */
+                  max-height:var(--rmax, calc(100vh - 220px));
+                  overflow-y:auto; overscroll-behavior:contain; padding-bottom:10px; }
+  @media (max-width:1000px){ .split { flex-direction:column; }
+    .split .right { position:static; width:100%; max-height:none; overflow:visible; } }
 
   table#tbl { border-collapse:collapse; width:100%; }
   table#tbl th, table#tbl td { border:1px solid var(--lnd); padding:11px 10px; text-align:center; vertical-align:middle; }
@@ -108,17 +111,17 @@ if (localStorage.getItem('geoAppOk') !== '1') location.replace('index.html');
   table#tbl td.f.sel { background:rgba(47,69,236,.13); box-shadow:inset 0 0 0 2px var(--acc); }
   .tHint { font-size:12.5px; color:var(--mute); margin-top:9px; line-height:1.7; }
 
-  #proof { border:1.5px solid var(--lnw); border-radius:16px; padding:18px 20px 20px; min-height:260px; }
+  #proof { border:1.5px solid var(--lnw); border-radius:16px; padding:18px 20px 30px; min-height:260px; }
   #proof.empty { display:flex; align-items:center; justify-content:center; text-align:center;
                  color:var(--mute); font-size:13.5px; line-height:1.9; }
-  .pvHead { display:flex; align-items:center; gap:9px; margin-bottom:11px; flex-wrap:wrap; }
+  .pvHead { display:flex; align-items:center; gap:9px; margin-bottom:8px; flex-wrap:wrap; }
   .pvTag { font-family:'IBM Plex Mono',monospace; font-size:10.5px; font-weight:600; letter-spacing:.1em;
            color:#fff; background:var(--acc); padding:3px 9px; border-radius:999px; }
   .pvTitle { font-size:15px; font-weight:700; }
-  .fig { display:block; margin:12px auto 4px; width:190px; height:auto; }
+  .fig { display:block; margin:5px auto 2px; width:172px; height:auto; }
 
-  ol.steps { list-style:none; display:flex; flex-direction:column; gap:13px; margin-top:12px; }
-  ol.steps > li { display:flex; gap:11px; align-items:flex-start; font-size:14px; line-height:1.95; }
+  ol.steps { list-style:none; display:flex; flex-direction:column; gap:9px; margin-top:9px; }
+  ol.steps > li { display:flex; gap:11px; align-items:flex-start; font-size:14px; line-height:1.8; }
   ol.steps .sn {
     flex:none; width:20px; height:20px; border-radius:50%; background:var(--acc); color:#fff;
     font-family:'IBM Plex Mono',monospace; font-size:11px; font-weight:600;
@@ -128,12 +131,63 @@ if (localStorage.getItem('geoAppOk') !== '1') location.replace('index.html');
           font-size:13.5px; margin-right:4px; }
   .tagno { font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:var(--mute);
            letter-spacing:.06em; margin-left:12px; vertical-align:middle; }
-  .why { margin-top:15px; padding:12px 15px; border-radius:12px; background:rgba(199,197,182,.22);
-         font-size:13px; line-height:1.9; color:#4E4D42; }
+  .why { margin-top:12px; padding:11px 14px; border-radius:12px; background:rgba(199,197,182,.22);
+         font-size:13px; line-height:1.8; color:#4E4D42; }
   .why b { color:var(--ink); }
   .split42 { display:flex; gap:24px; align-items:flex-start; flex-wrap:wrap; }
   .split42 .fig { width:150px; margin-top:2px; }
   .split42 ol.steps { flex:1; min-width:260px; }
+  /* 식 뒤에 붙는 '이다.' 같은 꼬리말 — 줄 하나를 더 잡아먹지 않게 */
+  .dm .tail { font-family:'IBM Plex Sans KR',sans-serif; font-size:13.5px; color:#6A695C;
+              margin-left:7px; vertical-align:baseline; }
+
+  /* 표의 (단, …) 조건 — 눌러서 따로 볼 수 있다 */
+  .condBtn { cursor:pointer; border-bottom:1.4px dotted var(--mute); padding-bottom:1px;
+             transition:color .12s, border-color .12s; }
+  .condBtn:hover, .condBtn:focus { color:var(--acc); border-bottom-color:var(--acc); outline:none; }
+  .condBtn.sel { color:var(--acc); border-bottom-color:var(--acc); font-weight:700; }
+
+  /* (단, …) 을 눌렀을 때 나오는 탐구 칸 */
+  .cdFig { position:relative; border:1.5px solid var(--lnw); border-radius:13px; background:#FBFBF5;
+           overflow:hidden; margin:12px 0 4px; }
+  .cdFig canvas { display:block; width:100%; height:236px; touch-action:none; }
+  .cdFig .tagm { position:absolute; left:12px; top:9px; font-family:'IBM Plex Mono',monospace;
+                 font-size:10.5px; letter-spacing:.08em; color:var(--mute); }
+  .cdFig .badge { position:absolute; right:12px; top:9px; padding:4px 11px; border-radius:999px;
+                  background:rgba(251,251,245,.94); border:1.5px solid var(--lnd);
+                  font-family:'IBM Plex Mono',monospace; font-size:12px; font-weight:600; color:var(--mute); }
+  .cdFig .badge.hit { border-color:#1F7A4C; color:#1F7A4C; background:#EAF5EF; }
+  .cdRow { display:flex; align-items:center; gap:10px; margin:9px 0 2px; }
+  .cdRow label { flex:none; width:66px; font-size:12.5px; color:var(--mute); }
+  .cdRow input[type=range] { flex:1; min-width:0; accent-color:var(--acc); height:22px; }
+  .cdRow .v { flex:none; width:52px; text-align:right; font-family:'IBM Plex Mono',monospace; font-size:12.5px; }
+  .cdBtns { display:flex; gap:6px; flex-wrap:wrap; margin:10px 0 2px; }
+  .cdBtns button { height:30px; padding:0 13px; border-radius:999px; border:1.5px solid var(--lnd);
+    background:transparent; font-family:inherit; font-size:12.5px; font-weight:700; color:var(--mute);
+    cursor:pointer; transition:all .12s; }
+  .cdBtns button:hover { border-color:var(--acc); color:var(--acc); }
+  .cdBtns button.on { border-color:var(--acc); color:var(--acc); background:#fff; }
+  .cdStat { margin-top:10px; padding:8px 12px; border-radius:10px; font-size:13px; font-weight:700;
+            text-align:center; font-family:'IBM Plex Mono',monospace; }
+  .cdStat.ok { background:#EAF5EF; color:#1F7A4C; }
+  .cdStat.no { background:#FBEDEC; color:#D9463F; }
+  .cdTalk { display:flex; gap:9px; margin:7px 0; align-items:flex-start; }
+  .cdTalk .who { flex:none; width:30px; padding-top:8px; text-align:right;
+    font-family:'IBM Plex Mono',monospace; font-size:10.5px; font-weight:600; color:var(--mute); }
+  .cdTalk .say { flex:1; min-width:0; background:#FBFBF5; border:1.5px solid var(--lnw);
+    border-radius:12px; padding:8px 12px; font-size:13px; line-height:1.75; }
+  .cdTalk.q .say { border-color:var(--acc); }
+  table.cdT { border-collapse:collapse; width:100%; font-size:12.8px; margin-top:8px; }
+  table.cdT th, table.cdT td { text-align:left; padding:7px 8px; border-bottom:1px solid var(--lnw); }
+  table.cdT th { font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.1em;
+                 color:var(--mute); font-weight:600; }
+  table.cdT td:first-child { white-space:nowrap; font-family:Georgia,serif; }
+  table.cdT tr:last-child td { border-bottom:0; }
+  .cdNote { font-size:12.5px; color:var(--mute); line-height:1.8; margin-top:9px; }
+  .cdNote b { color:var(--ink); }
+  .cdAns { font-size:12.5px; line-height:1.75; margin-top:8px; min-height:20px; color:var(--mute); }
+  .cdAns.ok { color:#1F7A4C; font-weight:600; }
+
   #foot { font-size:11.5px; color:var(--mute); text-align:center; padding:6px 0 0; }
 </style>
 </head>
@@ -190,7 +244,7 @@ if (localStorage.getItem('geoAppOk') !== '1') location.replace('index.html');
         <tr>
           <th class="rh" rowspan="2"><span class="cn">③</span>쌍곡선</th>
           <td class="eq"><span class="fr"><span class="nu"><i>x</i><sup>2</sup></span><span class="de"><i>a</i><sup>2</sup></span></span> − <span class="fr"><span class="nu"><i>y</i><sup>2</sup></span><span class="de"><i>b</i><sup>2</sup></span></span> = 1</td>
-          <td class="f" data-k="hyp-m" tabindex="0" role="button"><i>y</i> = <i>mx</i> ± <span class="rad">√<span class="rc"><i>a</i><sup>2</sup><i>m</i><sup>2</sup> − <i>b</i><sup>2</sup></span></span><span class="cond">(단, <i>a</i><sup>2</sup><i>m</i><sup>2</sup> &gt; <i>b</i><sup>2</sup>)</span></td>
+          <td class="f" data-k="hyp-m" tabindex="0" role="button"><i>y</i> = <i>mx</i> ± <span class="rad">√<span class="rc"><i>a</i><sup>2</sup><i>m</i><sup>2</sup> − <i>b</i><sup>2</sup></span></span><span class="cond condBtn" id="condHyp" tabindex="0" role="button" title="이 조건이 왜 붙을까">(단, <i>a</i><sup>2</sup><i>m</i><sup>2</sup> &gt; <i>b</i><sup>2</sup>)</span></td>
           <td class="f" data-k="hyp-p" tabindex="0" role="button"><span class="fr"><span class="nu"><i>x</i><sub>1</sub><i>x</i></span><span class="de"><i>a</i><sup>2</sup></span></span> − <span class="fr"><span class="nu"><i>y</i><sub>1</sub><i>y</i></span><span class="de"><i>b</i><sup>2</sup></span></span> = 1</td>
         </tr>
         <tr>
@@ -297,8 +351,7 @@ const PROOFS = {
           <li><span class="sn">1</span>
             <div>구하는 접선의 방정식을 <span class="mm"><i>y</i> = <i>mx</i> + <i>n</i></span>이라 하고,
               이 식을 <span class="mm"><i>y</i><sup>2</sup> = 4<i>px</i></span>에 대입하여 정리하면
-              <div class="dm"><i>m</i><sup>2</sup><i>x</i><sup>2</sup> + 2(<i>mn</i> − 2<i>p</i>)<i>x</i> + <i>n</i><sup>2</sup> = 0</div>
-              이다.</div></li>
+              <div class="dm"><i>m</i><sup>2</sup><i>x</i><sup>2</sup> + 2(<i>mn</i> − 2<i>p</i>)<i>x</i> + <i>n</i><sup>2</sup> = 0<span class="tail">이다.</span></div></div></li>
           <li><span class="sn">2</span>
             <div>이 이차방정식의 판별식을 <span class="mm"><i>D</i></span>라고 하면
               <div class="dm"><span class="fr"><span class="nu"><i>D</i></span><span class="de">4</span></span> = 4<i>p</i>(<i>p</i> − <i>mn</i>) = 0</div>
@@ -334,9 +387,9 @@ const PROOFS = {
 </svg>
         <ol class="steps">
           <li><span class="sn">1</span>
-            <div>구하는 접선의 방정식을 <span class="mm"><i>y</i> = <i>mx</i> + <i>n</i></span>이라 하고, 이 식을 <span class="mm"><span class="fr"><span class="nu"><i>x</i><sup>2</sup></span><span class="de"><i>a</i><sup>2</sup></span></span> + <span class="fr"><span class="nu"><i>y</i><sup>2</sup></span><span class="de"><i>b</i><sup>2</sup></span></span> = 1</span>에 대입하여 정리하면<div class="dm">(<i>a</i><sup>2</sup><i>m</i><sup>2</sup> + <i>b</i><sup>2</sup>)<i>x</i><sup>2</sup> + 2<i>a</i><sup>2</sup><i>mnx</i> + <i>a</i><sup>2</sup>(<i>n</i><sup>2</sup> − <i>b</i><sup>2</sup>) = 0</div>이다.</div></li>
+            <div>구하는 접선의 방정식을 <span class="mm"><i>y</i> = <i>mx</i> + <i>n</i></span>이라 하고, 이 식을 <span class="mm"><span class="fr"><span class="nu"><i>x</i><sup>2</sup></span><span class="de"><i>a</i><sup>2</sup></span></span> + <span class="fr"><span class="nu"><i>y</i><sup>2</sup></span><span class="de"><i>b</i><sup>2</sup></span></span> = 1</span>에 대입하여 정리하면<div class="dm">(<i>a</i><sup>2</sup><i>m</i><sup>2</sup> + <i>b</i><sup>2</sup>)<i>x</i><sup>2</sup> + 2<i>a</i><sup>2</sup><i>mnx</i> + <i>a</i><sup>2</sup>(<i>n</i><sup>2</sup> − <i>b</i><sup>2</sup>) = 0<span class="tail">이다.</span></div></div></li>
           <li><span class="sn">2</span>
-            <div>이 이차방정식의 판별식을 <span class="mm"><i>D</i></span>라고 하면<div class="dm"><span class="fr"><span class="nu"><i>D</i></span><span class="de">4</span></span> = <i>a</i><sup>2</sup><i>b</i><sup>2</sup>(<i>a</i><sup>2</sup><i>m</i><sup>2</sup> + <i>b</i><sup>2</sup> − <i>n</i><sup>2</sup>) = 0</div>이고, <span class="mm"><i>a</i> ≠ 0, <i>b</i> ≠ 0</span>이므로<div class="dm"><i>n</i><sup>2</sup> = <i>a</i><sup>2</sup><i>m</i><sup>2</sup> + <i>b</i><sup>2</sup></div>이다.</div></li>
+            <div>이 이차방정식의 판별식을 <span class="mm"><i>D</i></span>라고 하면<div class="dm"><span class="fr"><span class="nu"><i>D</i></span><span class="de">4</span></span> = <i>a</i><sup>2</sup><i>b</i><sup>2</sup>(<i>a</i><sup>2</sup><i>m</i><sup>2</sup> + <i>b</i><sup>2</sup> − <i>n</i><sup>2</sup>) = 0<span class="tail">이고,</span></div> <span class="mm"><i>a</i> ≠ 0, <i>b</i> ≠ 0</span>이므로<div class="dm"><i>n</i><sup>2</sup> = <i>a</i><sup>2</sup><i>m</i><sup>2</sup> + <i>b</i><sup>2</sup><span class="tail">이다.</span></div></div></li>
           <li><span class="sn">3</span>
             <div>따라서 <span class="mm"><i>n</i> = ±<span class="rad">√<span class="rc"><i>a</i><sup>2</sup><i>m</i><sup>2</sup> + <i>b</i><sup>2</sup></span></span></span>이므로 구하는 접선의 방정식은 다음과 같다.<div class="dm hi"><i>y</i> = <i>mx</i> ± <span class="rad">√<span class="rc"><i>a</i><sup>2</sup><i>m</i><sup>2</sup> + <i>b</i><sup>2</sup></span></span></div></div></li>
         </ol>
@@ -370,9 +423,9 @@ const PROOFS = {
 </svg>
         <ol class="steps">
           <li><span class="sn">1</span>
-            <div>구하는 접선의 방정식을 <span class="mm"><i>y</i> = <i>mx</i> + <i>n</i></span>이라 하고, 이 식을 <span class="mm"><span class="fr"><span class="nu"><i>x</i><sup>2</sup></span><span class="de"><i>a</i><sup>2</sup></span></span> − <span class="fr"><span class="nu"><i>y</i><sup>2</sup></span><span class="de"><i>b</i><sup>2</sup></span></span> = 1</span>에 대입하여 정리하면<div class="dm">(<i>a</i><sup>2</sup><i>m</i><sup>2</sup> − <i>b</i><sup>2</sup>)<i>x</i><sup>2</sup> + 2<i>a</i><sup>2</sup><i>mnx</i> + <i>a</i><sup>2</sup>(<i>n</i><sup>2</sup> + <i>b</i><sup>2</sup>) = 0</div>이다.</div></li>
+            <div>구하는 접선의 방정식을 <span class="mm"><i>y</i> = <i>mx</i> + <i>n</i></span>이라 하고, 이 식을 <span class="mm"><span class="fr"><span class="nu"><i>x</i><sup>2</sup></span><span class="de"><i>a</i><sup>2</sup></span></span> − <span class="fr"><span class="nu"><i>y</i><sup>2</sup></span><span class="de"><i>b</i><sup>2</sup></span></span> = 1</span>에 대입하여 정리하면<div class="dm">(<i>a</i><sup>2</sup><i>m</i><sup>2</sup> − <i>b</i><sup>2</sup>)<i>x</i><sup>2</sup> + 2<i>a</i><sup>2</sup><i>mnx</i> + <i>a</i><sup>2</sup>(<i>n</i><sup>2</sup> + <i>b</i><sup>2</sup>) = 0<span class="tail">이다.</span></div></div></li>
           <li><span class="sn">2</span>
-            <div>이 이차방정식의 판별식을 <span class="mm"><i>D</i></span>라고 하면<div class="dm"><span class="fr"><span class="nu"><i>D</i></span><span class="de">4</span></span> = −<i>a</i><sup>2</sup><i>b</i><sup>2</sup>(<i>a</i><sup>2</sup><i>m</i><sup>2</sup> − <i>b</i><sup>2</sup> − <i>n</i><sup>2</sup>) = 0</div>이고, <span class="mm"><i>a</i> ≠ 0, <i>b</i> ≠ 0</span>이므로<div class="dm"><i>n</i><sup>2</sup> = <i>a</i><sup>2</sup><i>m</i><sup>2</sup> − <i>b</i><sup>2</sup></div>이다.</div></li>
+            <div>이 이차방정식의 판별식을 <span class="mm"><i>D</i></span>라고 하면<div class="dm"><span class="fr"><span class="nu"><i>D</i></span><span class="de">4</span></span> = −<i>a</i><sup>2</sup><i>b</i><sup>2</sup>(<i>a</i><sup>2</sup><i>m</i><sup>2</sup> − <i>b</i><sup>2</sup> − <i>n</i><sup>2</sup>) = 0<span class="tail">이고,</span></div> <span class="mm"><i>a</i> ≠ 0, <i>b</i> ≠ 0</span>이므로<div class="dm"><i>n</i><sup>2</sup> = <i>a</i><sup>2</sup><i>m</i><sup>2</sup> − <i>b</i><sup>2</sup><span class="tail">이다.</span></div></div></li>
           <li><span class="sn">3</span>
             <div>따라서 <span class="mm"><i>n</i> = ±<span class="rad">√<span class="rc"><i>a</i><sup>2</sup><i>m</i><sup>2</sup> − <i>b</i><sup>2</sup></span></span></span>이므로 구하는 접선의 방정식은 다음과 같다.<div class="dm hi"><i>y</i> = <i>mx</i> ± <span class="rad">√<span class="rc"><i>a</i><sup>2</sup><i>m</i><sup>2</sup> − <i>b</i><sup>2</sup></span></span><span class="cond2">(단, <i>a</i><sup>2</sup><i>m</i><sup>2</sup> &gt; <i>b</i><sup>2</sup>)</span></div></div></li>
         </ol>
@@ -402,11 +455,11 @@ const PROOFS = {
 </svg>
         <ol class="steps">
           <li><span class="sn">1</span>
-            <div><span class="case">(i)</span> <span class="mm"><i>x</i><sub>1</sub> ≠ 0</span>일 때, 접선의 기울기를 <span class="mm"><i>m</i></span>이라 하면 접선은 점 <span class="mm"><span class="rm">P</span>(<i>x</i><sub>1</sub>, <i>y</i><sub>1</sub>)</span>를 지나므로<div class="dm"><i>y</i> = <i>m</i>(<i>x</i> − <i>x</i><sub>1</sub>) + <i>y</i><sub>1</sub><span class="tagno">①</span></div>이고, 앞에서 구한 기울기가 <span class="mm"><i>m</i></span>인 접선의 식에서<div class="dm"><i>y</i> = <i>mx</i> + <span class="fr"><span class="nu"><i>p</i></span><span class="de"><i>m</i></span></span><span class="tagno">②</span></div>이다.</div></li>
+            <div><span class="case">(i)</span> <span class="mm"><i>x</i><sub>1</sub> ≠ 0</span>일 때, 접선의 기울기를 <span class="mm"><i>m</i></span>이라 하면 접선은 점 <span class="mm"><span class="rm">P</span>(<i>x</i><sub>1</sub>, <i>y</i><sub>1</sub>)</span>를 지나므로<div class="dm"><i>y</i> = <i>m</i>(<i>x</i> − <i>x</i><sub>1</sub>) + <i>y</i><sub>1</sub><span class="tagno">①</span><span class="tail">이고,</span></div> 앞에서 구한 기울기가 <span class="mm"><i>m</i></span>인 접선의 식에서<div class="dm"><i>y</i> = <i>mx</i> + <span class="fr"><span class="nu"><i>p</i></span><span class="de"><i>m</i></span></span><span class="tagno">②</span><span class="tail">이다.</span></div></div></li>
           <li><span class="sn">2</span>
             <div>①, ②의 <span class="mm"><i>y</i></span>절편을 비교하면 <span class="mm">−<i>m</i><i>x</i><sub>1</sub> + <i>y</i><sub>1</sub> = <span class="fr"><span class="nu"><i>p</i></span><span class="de"><i>m</i></span></span></span>이므로<div class="dm"><i>x</i><sub>1</sub><i>m</i><sup>2</sup> − <i>y</i><sub>1</sub><i>m</i> + <i>p</i> = 0</div>이때 점 <span class="mm"><span class="rm">P</span>(<i>x</i><sub>1</sub>, <i>y</i><sub>1</sub>)</span>는 포물선 위의 점이므로 <span class="mm"><i>y</i><sub>1</sub><sup>2</sup> = 4<i>p</i><i>x</i><sub>1</sub></span>, 즉 이 이차방정식의 판별식이 <span class="mm"><i>y</i><sub>1</sub><sup>2</sup> − 4<i>p</i><i>x</i><sub>1</sub> = 0</span>이 되어 중근을 갖는다.</div></li>
           <li><span class="sn">3</span>
-            <div>따라서<div class="dm"><i>m</i> = <span class="fr"><span class="nu"><i>y</i><sub>1</sub></span><span class="de">2<i>x</i><sub>1</sub></span></span> = <span class="fr"><span class="nu">2<i>p</i></span><span class="de"><i>y</i><sub>1</sub></span></span></div>이고, 이것을 ①에 대입한 뒤 양변에 <span class="mm"><i>y</i><sub>1</sub></span>을 곱하면<div class="dm"><i>y</i><sub>1</sub><i>y</i> = 2<i>p</i>(<i>x</i> − <i>x</i><sub>1</sub>) + <i>y</i><sub>1</sub><sup>2</sup> = 2<i>p</i>(<i>x</i> + <i>x</i><sub>1</sub>)</div></div></li>
+            <div>따라서<div class="dm"><i>m</i> = <span class="fr"><span class="nu"><i>y</i><sub>1</sub></span><span class="de">2<i>x</i><sub>1</sub></span></span> = <span class="fr"><span class="nu">2<i>p</i></span><span class="de"><i>y</i><sub>1</sub></span></span><span class="tail">이고,</span></div> 이것을 ①에 대입한 뒤 양변에 <span class="mm"><i>y</i><sub>1</sub></span>을 곱하면<div class="dm"><i>y</i><sub>1</sub><i>y</i> = 2<i>p</i>(<i>x</i> − <i>x</i><sub>1</sub>) + <i>y</i><sub>1</sub><sup>2</sup> = 2<i>p</i>(<i>x</i> + <i>x</i><sub>1</sub>)</div></div></li>
           <li><span class="sn">4</span>
             <div><span class="case">(ii)</span> <span class="mm"><i>x</i><sub>1</sub> = 0</span>일 때는 <span class="mm"><i>y</i><sub>1</sub> = 0</span>이고 접선은 <span class="mm"><i>y</i></span>축, 즉 <span class="mm"><i>x</i> = 0</span>이므로 위 식에 <span class="mm"><i>x</i><sub>1</sub> = <i>y</i><sub>1</sub> = 0</span>을 넣은 결과와 일치한다.<div class="dm hi"><i>y</i><sub>1</sub><i>y</i> = 2<i>p</i>(<i>x</i> + <i>x</i><sub>1</sub>)</div></div></li>
         </ol>
@@ -502,9 +555,66 @@ const NAMES = {
   'hyp2-m': '쌍곡선(= −1) · 기울기가 m인 접선',
   'hyp2-p': '쌍곡선(= −1) · 곡선 위의 한 점에서의 접선'
 };
+const COND_HTML = `
+        <div class="pvHead">
+          <span class="pvTag">생각 키우기</span>
+          <span class="pvTitle">기울기가 <i>m</i>인 접선이 있을까</span>
+        </div>
+        <div class="cdTalk"><div class="who">민호</div><div class="say">
+          쌍곡선 <span class="mm"><i>x</i><sup>2</sup> − <i>y</i><sup>2</sup>/4 = 1</span>에
+          기울기가 1, 2, 3인 접선이 존재할까?</div></div>
+        <div class="cdTalk"><div class="who">지수</div><div class="say">
+          아니야, 구해 보니까 기울기가 1, 2인 접선은 존재하지 않아.</div></div>
+        <div class="cdTalk q"><div class="who">민호</div><div class="say">
+          그럼 기울기가 <i>m</i>인 접선이 <b>존재하지 않을 때</b>는 어떤 경우인 거지?</div></div>
+
+        <div class="cdFig">
+          <canvas id="cdCv"></canvas>
+          <span class="tagm" id="cdTag"></span>
+          <span class="badge" id="cdBadge">—</span>
+        </div>
+        <div class="cdBtns">
+          <button data-m="1"><i>m</i> = 1</button>
+          <button data-m="2"><i>m</i> = 2</button>
+          <button data-m="3"><i>m</i> = 3</button>
+        </div>
+        <div class="cdRow"><label>기울기 <i>m</i></label>
+          <input type="range" id="cdM" min="-5" max="5" step="0.1" value="1"><span class="v" id="cdMv"></span></div>
+        <div class="cdRow"><label>쌍곡선 <i>b</i></label>
+          <input type="range" id="cdB" min="1" max="4" step="0.1" value="2"><span class="v" id="cdBv"></span></div>
+        <div class="cdStat" id="cdStat">—</div>
+
+        <table class="cdT">
+          <tr><th>기울기</th><th><i>x</i><sup>2</sup>의 계수</th><th>결과</th></tr>
+          <tr><td><span class="mm">|<i>m</i>| &gt; <i>b</i>/<i>a</i></span></td><td><span class="mm">≠ 0</span></td>
+              <td><span class="mm"><i>n</i><sup>2</sup> = <i>a</i><sup>2</sup><i>m</i><sup>2</sup> − <i>b</i><sup>2</sup> &gt; 0</span> — 접선 <b>2개</b></td></tr>
+          <tr><td><span class="mm">|<i>m</i>| = <i>b</i>/<i>a</i></span></td><td><span class="mm">= 0</span></td>
+              <td>일차방정식 — 한 점에서 만나지만 <b>접선은 아님</b></td></tr>
+          <tr><td><span class="mm">|<i>m</i>| &lt; <i>b</i>/<i>a</i></span></td><td><span class="mm">≠ 0</span></td>
+              <td><span class="mm"><i>n</i><sup>2</sup> &lt; 0</span> — 그런 <i>n</i>이 <b>없음</b></td></tr>
+        </table>
+        <div class="cdNote"><b>|<i>m</i>| = <i>b</i>/<i>a</i></b>는 직선이 점근선과 나란한 경우입니다.
+          <span class="mm"><i>x</i><sup>2</sup></span>항이 사라져 일차방정식이 되므로 만나는 점이 하나뿐이지만,
+          곡선을 <b>뚫고 지나가므로</b> 접선이 아닙니다.</div>
+
+        <div class="why">
+          <b>그래서 표에 <span class="mm">(단, <i>a</i><sup>2</sup><i>m</i><sup>2</sup> &gt; <i>b</i><sup>2</sup>)</span>가 붙습니다.</b>
+          <div class="dm" style="margin:8px 0 4px">|<i>m</i>| <span id="cdSign" style="color:var(--acc)">⬜</span>
+            <span class="fr"><span class="nu"><i>b</i></span><span class="de"><i>a</i></span></span>
+            <span class="tail">이면 접선이 없다</span></div>
+          <div class="cdBtns" style="justify-content:center">
+            <button class="sg" data-s="&lt;">&lt;</button>
+            <button class="sg" data-s="≤">≤</button>
+            <button class="sg" data-s="&gt;">&gt;</button>
+            <button class="sg" data-s="≥">≥</button>
+          </div>
+          <div class="cdAns" id="cdAns">부등호를 골라 보세요.</div>
+        </div>
+`;
 const pv = document.getElementById('proof');
 function pick(td){
   document.querySelectorAll('#tbl td.f').forEach(x => x.classList.toggle('sel', x === td));
+  const cb = document.getElementById('condHyp'); if(cb) cb.classList.remove('sel');
   const k = td.dataset.k;
   if(PROOFS[k]){
     pv.classList.remove('empty');
@@ -522,11 +632,160 @@ document.querySelectorAll('#tbl td.f').forEach(td => {
   td.addEventListener('keydown', e => { if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); pick(td); } });
 });
 
+/* ── 오른쪽 증명 칸 높이를 본문에 맞춘다 (앱 상·하단 바까지 감안) ── */
+function fitRight(){
+  const main = document.getElementById('main');
+  const right = document.querySelector('.split .right');
+  if(!main || !right) return;
+  /* 지금 화면에서 오른쪽 칸의 윗선이 본문 위에서 얼마나 내려와 있는지 */
+  const off = Math.max(0, right.getBoundingClientRect().top - main.getBoundingClientRect().top);
+  /* 아래에 24px 여유를 남긴다 (앱 하단 바에 잘리지 않게) */
+  right.style.setProperty('--rmax', Math.max(240, main.clientHeight - off - 24) + 'px');
+}
+addEventListener('resize', fitRight);
+(function(){
+  const main = document.getElementById('main');
+  if(main) main.addEventListener('scroll', fitRight, { passive:true });
+})();
+fitRight(); setTimeout(fitRight, 120); setTimeout(fitRight, 500);
+
+/* ── (단, a²m² > b²) → 기울기가 m인 접선이 있을까 ── */
+const condEl = document.getElementById('condHyp');
+function initCond(){
+  const cv = document.getElementById('cdCv');
+  if(!cv) return;
+  const g = cv.getContext('2d');
+  const CC = { ink:'#23241D', mute:'#A8A79A', acc:'#2F45EC', red:'#D9463F', paper:'#FBFBF5' };
+  const f2 = (v,n)=> (Math.abs(v)<5e-4?0:v).toFixed(n===undefined?2:n);
+  const AA = 1;                                   /* a 는 1 로 고정 */
+  let M = 1, B = 2;
+  let W=0, H=0, k=1, ox=0, oy=0;
+  const X = x => ox + x*k, Y = y => oy - y*k;
+  const wx = px => (px-ox)/k;
+
+  function fit(){
+    const r = cv.getBoundingClientRect();
+    if(!r.width || !r.height) return false;
+    const dpr = Math.min(window.devicePixelRatio||1, 2);
+    W = r.width; H = r.height;
+    cv.width = Math.round(W*dpr); cv.height = Math.round(H*dpr);
+    g.setTransform(dpr,0,0,dpr,0,0);
+    k = Math.min(W/11.2, H/7.4); ox = W/2; oy = H/2;
+    return true;
+  }
+  function path(pts, col, w, dash){
+    if(pts.length<2) return;
+    g.save(); g.setLineDash(dash||[]); g.strokeStyle=col; g.lineWidth=w||2;
+    g.lineJoin='round'; g.lineCap='round'; g.beginPath();
+    g.moveTo(X(pts[0][0]), Y(pts[0][1]));
+    for(let i=1;i<pts.length;i++) g.lineTo(X(pts[i][0]), Y(pts[i][1]));
+    g.stroke(); g.restore();
+  }
+  const line = (m,c,col,w,dash)=>{ const x1=wx(0)-1, x2=wx(W)+1;
+    path([[x1,m*x1+c],[x2,m*x2+c]], col, w, dash); };
+  function dot(p, col, r){
+    g.save(); g.beginPath(); g.arc(X(p[0]), Y(p[1]), r||4.4, 0, 7);
+    g.fillStyle=col; g.fill(); g.lineWidth=2; g.strokeStyle=CC.paper; g.stroke(); g.restore();
+  }
+  function hyp(a,b,tmax){
+    const R=[], L=[];
+    for(let i=-90;i<=90;i++){ const t=tmax*i/90;
+      R.push([a*Math.cosh(t), b*Math.sinh(t)]); L.push([-a*Math.cosh(t), b*Math.sinh(t)]); }
+    return [R,L];
+  }
+
+  function draw(){
+    if(!fit()) return;
+    g.fillStyle=CC.paper; g.fillRect(0,0,W,H);
+    /* 눈금 */
+    g.save(); g.strokeStyle='rgba(220,218,205,.85)'; g.lineWidth=1;
+    for(let i=-10;i<=10;i++){ if(!i) continue;
+      g.beginPath(); g.moveTo(X(i),0); g.lineTo(X(i),H); g.stroke();
+      g.beginPath(); g.moveTo(0,Y(i)); g.lineTo(W,Y(i)); g.stroke(); }
+    g.strokeStyle='#B9B7A8'; g.lineWidth=1.3;
+    g.beginPath(); g.moveTo(0,Y(0)); g.lineTo(W,Y(0)); g.stroke();
+    g.beginPath(); g.moveTo(X(0),0); g.lineTo(X(0),H); g.stroke(); g.restore();
+
+    const a=AA, b=B, m=M, D = a*a*m*m - b*b, EPS = 1e-9;
+    line( b/a, 0, 'rgba(168,167,154,.9)', 1.5, [7,6]);
+    line(-b/a, 0, 'rgba(168,167,154,.9)', 1.5, [7,6]);
+    const HP = hyp(a, b, Math.acosh(Math.max(1.05, 6.2/a)));
+    path(HP[0], CC.ink, 2.2); path(HP[1], CC.ink, 2.2);
+
+    const st = document.getElementById('cdStat'), bd = document.getElementById('cdBadge');
+    if(D > EPS){
+      const c = Math.sqrt(D);
+      [c,-c].forEach(cc=>{ line(m, cc, CC.acc, 2.2); dot([a*a*m/cc, -b*b/cc], CC.acc, 4.8); });
+      bd.textContent='접선 2개'; bd.classList.add('hit');
+      st.className='cdStat ok';
+      st.innerHTML='접선 <span class="mm"><i>y</i> = '+f2(m,1)+'<i>x</i> ± '+f2(c,2)+'</span> — 두 개';
+    } else if(D > -EPS){
+      [1.2*b,-1.2*b].forEach(cc=>{ line(m, cc, CC.red, 2, [8,6]);
+        const x = -(cc*cc + b*b)/(2*m*cc); dot([x, m*x+cc], CC.red, 4.8); });
+      bd.textContent='한 점만'; bd.classList.remove('hit');
+      st.className='cdStat no';
+      st.innerHTML='점근선과 나란함 — 한 점에서 만나지만 <b>접선이 아님</b>';
+    } else {
+      [-1.9*b, 0, 1.9*b].forEach(cc=>{ line(m, cc, CC.red, 1.9, [8,6]);
+        const k1=b*b-a*a*m*m, k2=a*a*m*cc, k3=-a*a*(cc*cc+b*b), dd=k2*k2-k1*k3;
+        if(dd>=0){ const r=Math.sqrt(dd);
+          [(k2+r)/k1,(k2-r)/k1].forEach(x=>dot([x, m*x+cc], CC.red, 3.9)); } });
+      bd.textContent='접선 없음'; bd.classList.remove('hit');
+      st.className='cdStat no';
+      st.innerHTML='<span class="mm"><i>n</i><sup>2</sup> = '+f2(D,2)+' &lt; 0</span> — 접선이 <b>없음</b>';
+    }
+    dot([a,0], CC.ink, 3.2); dot([-a,0], CC.ink, 3.2);
+
+    document.getElementById('cdMv').textContent = f2(m,1);
+    document.getElementById('cdBv').textContent = f2(b,1);
+    document.getElementById('cdTag').innerHTML =
+      (Math.abs(b-2)<1e-9 ? 'x² − y²/4 = 1' : 'x² − y²/'+f2(b*b,2)+' = 1');
+    document.querySelectorAll('.cdBtns button[data-m]').forEach(x=>
+      x.classList.toggle('on', Math.abs(parseFloat(x.dataset.m)-m)<1e-9 && Math.abs(b-2)<1e-9));
+  }
+
+  document.getElementById('cdM').addEventListener('input', function(){ M=parseFloat(this.value); draw(); });
+  document.getElementById('cdB').addEventListener('input', function(){ B=parseFloat(this.value); draw(); });
+  document.querySelectorAll('.cdBtns button[data-m]').forEach(x=>x.addEventListener('click', ()=>{
+    M=parseFloat(x.dataset.m); B=2;
+    document.getElementById('cdM').value=M; document.getElementById('cdB').value=2; draw();
+  }));
+  document.querySelectorAll('.cdBtns button.sg').forEach(x=>x.addEventListener('click', ()=>{
+    const sgn=x.dataset.s, ok=(sgn==='≤');
+    document.querySelectorAll('.cdBtns button.sg').forEach(y=>y.classList.remove('on'));
+    x.classList.add('on');
+    const slot=document.getElementById('cdSign');
+    slot.textContent=sgn; slot.style.color = ok ? '#1F7A4C' : '#D9463F';
+    const n=document.getElementById('cdAns');
+    n.classList.toggle('ok', ok);
+    if(ok) n.innerHTML='맞았습니다. 등호가 들어가는 까닭은 <span class="mm">|<i>m</i>| = <i>b</i>/<i>a</i></span>일 때 한 점에서 만나기는 해도 <b>접하지는 않기</b> 때문입니다.';
+    else if(sgn==='<') n.innerHTML='<span class="mm">|<i>m</i>| = <i>b</i>/<i>a</i></span>인 경우를 확인해 보세요. <i>m</i> = 2 로 맞춰 보면 됩니다.';
+    else n.innerHTML='반대입니다. <span class="mm">|<i>m</i>|</span>이 클수록 가파른 직선이고, 가파른 직선은 접선이 <b>있습니다.</b>';
+  }));
+  draw(); setTimeout(draw, 60); setTimeout(draw, 240);
+  if(!initCond._rs){ initCond._rs = true; addEventListener('resize', ()=>{ if(document.getElementById('cdCv')) draw(); }); }
+}
+function showCond(){
+  document.querySelectorAll('#tbl td.f').forEach(x => x.classList.remove('sel'));
+  if(condEl) condEl.classList.add('sel');
+  pv.classList.remove('empty');
+  pv.innerHTML = COND_HTML;
+  fitRight(); initCond();
+  if(typeof GEO_task === 'function') GEO_task('proof');
+}
+if(condEl){
+  condEl.addEventListener('click', e => { e.stopPropagation(); showCond(); });
+  condEl.addEventListener('keydown', e => {
+    if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); e.stopPropagation(); showCond(); }
+  });
+}
+
 /* 탭 */
 document.querySelectorAll('#tabs button').forEach(b => b.addEventListener('click', () => {
   document.querySelectorAll('#tabs button').forEach(x => x.classList.toggle('on', x === b));
   document.querySelectorAll('.pane').forEach(p => p.classList.toggle('on', p.dataset.p === b.dataset.t));
   document.getElementById('main').scrollTop = 0;
+  fitRight();
   if(b.dataset.t === 'p42' && typeof GEO_task === 'function') GEO_task('p42');
 }));
 </script>
