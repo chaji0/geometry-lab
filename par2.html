@@ -161,6 +161,8 @@ textarea.proof:focus{border-color:var(--acc)}
 @keyframes rowFlash{0%,100%{background:transparent} 40%{background:rgba(242,162,46,.3)}}
 .kv.flash{animation:rowFlash 1.15s ease-out 2; border-radius:7px}
 .qfig svg{display:block}
+.sendRow{display:flex; align-items:center; gap:11px; margin-top:12px; flex-wrap:wrap}
+.sendMsg{font-size:12px; color:var(--dim); line-height:1.5}
 details.keychk #keys{margin-top:9px}
 details.keychk .note{margin-top:9px}
 /* 바깥 페이지에 머리글이 이미 있으므로 제목은 숨긴다 */
@@ -212,6 +214,7 @@ header h1{display:none} header{padding-top:10px} #tabs{margin-left:0}
   </aside>
 </div>
 <div id="pop"></div>
+<script src="nav.js"></script>
 <script>
 "use strict";
 const $=id=>document.getElementById(id);
@@ -337,6 +340,40 @@ addEventListener('keydown',e=>{ if(e.key==='Escape') closePop(); });
 addEventListener('resize',closePop);
 $('panel').addEventListener('scroll',closePop);
 
+/* ── 증명 제출하기 ── */
+function sendUI(){
+  const b=$('sendBtn'), m=$('sendMsg'); if(!b) return;
+  const at = store('sent-'+cur);
+  b.disabled=false;
+  if(at){ b.textContent='다시 제출하기'; m.style.color='var(--grn)'; m.textContent='제출함 · '+at; }
+  else  { b.textContent='증명 제출하기'; m.style.color='var(--dim)'; m.textContent=''; }
+}
+function stampNow(){
+  const d=new Date(), z=n=>String(n).padStart(2,'0');
+  return (d.getMonth()+1)+'/'+d.getDate()+' '+z(d.getHours())+':'+z(d.getMinutes());
+}
+async function sendProof(){
+  const b=$('sendBtn'), m=$('sendMsg'), text=$('ta').value.trim();
+  const bad=t=>{ m.style.color='var(--red)'; m.textContent=t; };
+  if(text.length < 10){ bad('증명을 조금 더 적은 뒤에 보내 주세요.'); return; }
+  const sid=localStorage.getItem('geoSid')||'', name=localStorage.getItem('geoName')||'';
+  if(typeof GEO_url!=='function' || !GEO_url() || !sid || !name){
+    bad('앱에 입장한 뒤에 제출할 수 있어요.'); return; }
+  b.disabled=true; b.textContent='보내는 중…'; m.style.color='var(--dim)'; m.textContent='';
+  try{
+    const res = await fetch(GEO_url(), { method:'POST', body: JSON.stringify({
+      action:'proof', sid, name, item: IT[cur].no, text: text.slice(0,1500) }) });
+    const r = await res.json();
+    if(!r || !r.ok) throw new Error('server');
+    const at = stampNow(); save('sent-'+cur, at);
+    sendUI(); m.style.color='var(--grn)'; m.textContent='제출했어요 ✅  '+at;
+    geoTask('par2-send');
+  }catch(e){
+    b.disabled=false; b.textContent='증명 제출하기';
+    bad('전송에 실패했어요. 인터넷을 확인하고 다시 눌러 주세요.');
+  }
+}
+
 /* ── 조건을 적으면 그림의 그 부분이 반짝 ── */
 const FX={
   ex1:[['A','B'],['G','L','M'],['L','M']],
@@ -384,13 +421,16 @@ function render(){
   }
   h+='<div class="qcard"><h2>나의 증명</h2>'
     +'<textarea class="proof" id="ta" placeholder="여기에 증명을 적으세요. alpha, beta, gamma, // 는 자동으로 기호가 됩니다."></textarea>'
-    +'<div class="pass" id="pass">핵심 키워드가 모두 들어갔어요 — 통과!</div></div>';
+    +'<div class="pass" id="pass">핵심 키워드가 모두 들어갔어요 — 통과!</div>'
+    +'<div class="sendRow"><button class="btn pri" id="sendBtn">증명 제출하기</button>'
+    +'<span class="sendMsg" id="sendMsg"></span></div></div>';
   h+='<details class="qcard keychk"><summary>키워드 채점</summary><div id="keys"></div>'
     +'<div class="note">표현이 달라도 좋아요 — 핵심 아이디어가 들어있는지만 봅니다. 기호('+PAR+')로 결론을 적어 보세요.</div></details>';
   if(it.kind==='q') h+='<details class="qcard"><summary>모범답안 보기</summary><p class="qtext" style="margin:8px 0 0">'+it.model+'</p></details>';
   $('main').innerHTML=h;
   const ta=$('ta'); ta.value=store(cur);
   ta.addEventListener('input',()=>{ fixTokens(ta); save(cur,ta.value); grade(); });
+  sendUI(); $('sendBtn').onclick = sendProof;
   if(it.kind==='ex') $('nextStep').onclick=()=>{
     if(STEP[cur]>=it.steps.length) STEP[cur]=1; else STEP[cur]++;
     render(); geoTask('par2-'+cur+'-step'); };
