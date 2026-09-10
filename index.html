@@ -177,6 +177,19 @@
   }
   .stage.reached .node { border-color:var(--acc); }
 
+  /* 큰 제목(1. 공간도형) + 그 아래 한 줄 — 테두리 없이 글씨에 밑줄만 */
+  .sec + .sec { margin-top:34px; }
+  .secT { margin:0 0 16px; }
+  .secT span {
+    display:inline-block; font-size:15.5px; font-weight:800; color:var(--ink);
+    letter-spacing:-.2px; padding-bottom:4px; border-bottom:2px solid var(--ink);
+  }
+  .secRow { position:relative; display:flex; flex-direction:column; }
+  .secRow::before {
+    content:''; position:absolute; left:15px; top:8px; bottom:8px; width:1.5px;
+    background:var(--lnw);
+  }
+
   /* 넓은 화면 — 가로로 꺾이는 레일 */
   @media (min-width:1040px){
     #tlWrap { padding:34px 48px 26px; }
@@ -191,6 +204,10 @@
     .stage { padding-left:0; padding-bottom:0; }
     .items { margin-top:20px; }
     #tl { margin-top:40px; }
+    .secRow { flex-direction:row; gap:26px; align-items:flex-start; padding-right:96px; }
+    .secRow > .stage { flex:1; min-width:0; }
+    .secRow::before { left:0; right:96px; top:16px; bottom:auto; width:auto; height:1.5px; }
+    .sec + .sec { margin-top:42px; }
   }
   /* ── 단원 목차 ── */
   .unit {
@@ -232,7 +249,7 @@
   <img id="splashEmblem" src="splash-emblem.png" alt="">
   <div id="splashTitle">GEOMETRY</div>
   <div id="splashLine"></div>
-  <div id="splashSub">v1.53&ensp;·&ensp;제작 수학과</div>
+  <div id="splashSub">v1.54&ensp;·&ensp;제작 수학과</div>
   <!-- 버전 글자는 아래 스크립트가 GEO_CONFIG.VERSION 으로 자동으로 채운다 -->
 </div>
 <style>
@@ -332,6 +349,7 @@
           <span class="rail"></span><span class="railOn" id="tlRailOn"></span>
           <div id="tlRow1"></div>
           <div id="tlRow2"></div>
+          <div id="tlSecs"></div>
         </div>
         <div id="tlFoot">
           <span class="sg"><img src="splash-emblem.png" alt="">
@@ -436,12 +454,16 @@ function renderActs(){
   $('tlBar').style.width = total ? Math.round(nDone / total * 100) + '%' : '0%';
 
   let reached = true;
+  const secNo = {};
   const html = groups.map((g, gi) => {
+    const sk = g.sec || '';
+    secNo[sk] = (secNo[sk] || 0) + 1;
+    const no = secNo[sk];
     const kids = acts.filter(a => a.grp === g.key);
     const real = kids.filter(k => !k.soon);
     const soon = g.soon || [];
     const allDone = real.length > 0 && real.every(k => done.includes(k.id));
-    const isSoon = real.length === 0 && (soon.length > 0 || kids.length > 0);
+    const isSoon = real.length === 0;
     const hasNow = real.some(k => k.id === nowId);
     const rows = kids.map(k => {
       const head = k.sub ? '<div class="subhead">' + esc2(k.sub) + '</div>' : '';
@@ -460,12 +482,37 @@ function renderActs(){
     return '<div class="' + cls + '" data-g="' + g.key + '">'
          + '<span class="node"></span>'
          + '<button class="chip" data-g="' + g.key + '">'
-         +   '<span class="no">' + String(gi + 1).padStart(2, '0') + '</span>'
+         +   '<span class="no">' + String(no).padStart(2, '0') + '</span>'
          +   '<span class="nm">' + esc2(g.title) + '</span>'
          +   (isSoon ? '<span class="tag">준비 중</span>' : '') + CARET
          + '</button>'
          + '<div class="items">' + rows + '</div></div>';
   });
+
+  /* ── 큰 제목(sec)이 있는 단원: 제목마다 한 줄씩 ── */
+  if(groups.some(g => g.sec)){
+    const order = [];
+    groups.forEach(g => { if(order.indexOf(g.sec) < 0) order.push(g.sec); });
+    $('tlSecs').innerHTML = order.map(secName =>
+        '<div class="sec"><div class="secT"><span>' + esc2(secName) + '</span></div>'
+      + '<div class="secRow">'
+      + groups.map((g, gi) => g.sec === secName ? html[gi] : '').join('')
+      + '</div></div>').join('');
+    $('tlRow1').innerHTML = ''; $('tlRow2').innerHTML = '';
+    $('tlRow1').style.display = 'none'; $('tlRow2').style.display = 'none';
+    $('tlSecs').style.display = '';
+    const rl = document.querySelector('#tl > .rail'), ro = $('tlRailOn');
+    if(rl) rl.style.display = 'none';
+    if(ro) ro.style.display = 'none';
+    if($('tlSvg')) $('tlSvg').style.display = 'none';
+    bindChips();
+    return;
+  }
+  $('tlSecs').innerHTML = ''; $('tlSecs').style.display = 'none';
+  $('tlRow1').style.display = ''; 
+  if($('tlSvg')) $('tlSvg').style.display = '';
+  const rl0 = document.querySelector('#tl > .rail'), ro0 = $('tlRailOn');
+  if(rl0) rl0.style.display = ''; if(ro0) ro0.style.display = '';
 
   /* 윗줄 4개, 아랫줄은 오른쪽에서 왼쪽으로 (S자 순서) */
   $('tlRow1').innerHTML = html.slice(0, 4).join('');
@@ -474,6 +521,10 @@ function renderActs(){
   $('tlRow2').innerHTML = r2.length ? ('<div class="spacer"></div>'.repeat(padN) + r2.join('')) : '';
   $('tlRow2').style.display = r2.length ? '' : 'none';
 
+  bindChips();
+}
+
+function bindChips(){
   document.querySelectorAll('#tl .chip').forEach(btn => {
     btn.addEventListener('click', () => {
       const key = btn.dataset.g;

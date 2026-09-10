@@ -6,7 +6,7 @@
      먼저 선언한 뒤 이 파일을 불러오면 하단 바가 자동으로 생깁니다.
    ════════════════════════════════════════════════════════════ */
 window.GEO_CONFIG = {
-  VERSION: "v1.53",                 // ★ 1단원=v1.x, 2단원=v2.x, 3단원=v3.x — 업로드마다 뒷자리 +1 (v1.11, v1.12, …)
+  VERSION: "v1.54",                 // ★ 1단원=v1.x, 2단원=v2.x, 3단원=v3.x — 업로드마다 뒷자리 +1 (v1.11, v1.12, …)
   APPS_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbx3Ay-gudjjSoRlngyu54umJ9uYRAKhINuwcv229UZUN9_oIQfm9vwAxM32FOPR9wV1/exec",
   /* ── 담당 선생님 ───────────────────────────────────────────────
      선생님마다 '자기 구글 시트 + 자기 드라이브'를 씁니다.
@@ -64,14 +64,10 @@ window.GEO_CONFIG = {
 
     /* ══ 2단원 · 공간도형과 공간좌표 (unit:2) ══
        soon:true 는 아직 안 만든 자리 — 홈에 '준비 중'으로만 뜨고 진도에서 빠집니다. */
-    { id:'pdet', unit:2, href:'pos-det.html', short:'결정조건', grp:'space',
-      sub:'01 직선과 평면의 위치 관계', curve:'평면의 결정조건', title:'평면의 결정조건' },
-    { id:'prel', unit:2, href:'pos-rel.html', short:'위치관계', grp:'space',
-      curve:'직선과 평면의 위치 관계', title:'직선과 평면의 위치 관계' },
-    { id:'x-perp3', unit:2, soon:true, grp:'space', sub:'02 삼수선의 정리',   curve:'준비 중' },
-    { id:'x-proj',  unit:2, soon:true, grp:'space', sub:'03 정사영',          curve:'준비 중' },
-    { id:'x-spt',   unit:2, soon:true, grp:'coord', sub:'01 공간에서 점의 좌표', curve:'준비 중' },
-    { id:'x-sph',   unit:2, soon:true, grp:'coord', sub:'02 구의 방정식',      curve:'준비 중' }
+    { id:'pdet', unit:2, href:'pos-det.html', short:'결정조건', grp:'g-rel',
+      curve:'평면의 결정조건', title:'평면의 결정조건' },
+    { id:'prel', unit:2, href:'pos-rel.html', short:'위치관계', grp:'g-rel',
+      curve:'직선과 평면의 위치 관계', title:'직선과 평면의 위치 관계' }
   ],
   /* 홈 화면 묶음 — 큰 제목 4개 (하위 메뉴는 grp로 자동 수집) */
   /* 홈 타임라인의 묶음 — soon 은 아직 안 만든(준비 중) 활동 이름 */
@@ -82,10 +78,14 @@ window.GEO_CONFIG = {
     { key:'apply',   title:'이차곡선 활용' },
     { key:'tangent', title:'이차곡선의 접선' }
   ],
-  /* 2단원 홈 묶음 */
+  /* 2단원 홈 묶음 — sec 가 같은 것끼리 한 줄(큰 제목 아래)로 묶인다.
+     활동이 하나도 없는 묶음은 자동으로 '준비 중' 으로 뜬다. */
   HOME_GROUPS2: [
-    { key:'space', title:'공간도형' },
-    { key:'coord', title:'공간좌표' }
+    { key:'g-rel',  sec:'1. 공간도형', title:'직선과 평면의 위치 관계' },
+    { key:'g-perp', sec:'1. 공간도형', title:'삼수선의 정리' },
+    { key:'g-proj', sec:'1. 공간도형', title:'정사영' },
+    { key:'g-pt',   sec:'2. 공간좌표', title:'공간에서 점의 좌표' },
+    { key:'g-sph',  sec:'2. 공간좌표', title:'구의 방정식' }
   ],
   /* 대단원 — 홈 화면 제목과 주소 */
   UNITS: [
