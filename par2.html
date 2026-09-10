@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>평행에 관한 증명</title>
+<link rel="stylesheet" media="print" onload="this.media='all'"
+  href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap">
+<style>
+:root{ --paper:#EFEFE3; --ink:#23241D; --dim:#A8A79A; --line:#DCDACD; --line2:#C7C5B6;
+  --acc:#2F45EC; --acc2:#1B2FC4; --card:#F5F5EC; --org:#E0891A; --grn:#12876A; --red:#D9463F; --vio:#7A3FB5; }
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;overflow:hidden}
+body{font-family:'IBM Plex Sans KR','Apple SD Gothic Neo','Malgun Gothic',system-ui,sans-serif;
+  background:var(--paper); color:var(--ink); font-size:14.5px; line-height:1.55; display:flex; flex-direction:column; height:100dvh}
+header{padding:12px 22px 10px; border-bottom:1px solid var(--line); display:flex; align-items:flex-end; gap:18px; flex-wrap:wrap; flex:none}
+h1{font-size:17.5px; margin:0; letter-spacing:-.3px; font-weight:700}
+.sub{font-size:12px; color:var(--dim); margin-top:3px}
+#tabs{display:flex; gap:6px; margin-left:auto; flex-wrap:wrap}
+#tabs button{height:34px; padding:0 13px; border-radius:999px; border:1.5px solid var(--line2); background:transparent;
+  font:inherit; font-size:12.5px; font-weight:700; color:var(--ink); cursor:pointer; display:flex; align-items:center; gap:7px}
+#tabs button .no{font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:11px; color:var(--acc); font-weight:600}
+#tabs button.on{background:var(--acc); border-color:var(--acc); color:#fff} #tabs button.on .no{color:#fff}
+#app{display:flex; flex:1; min-height:0}
+#stage{flex:1; position:relative; min-width:0}
+canvas{display:block; width:100%; height:100%; touch-action:none}
+#panel{width:392px; flex:none; border-left:1px solid var(--line); overflow-y:auto; overscroll-behavior:contain; padding:16px 18px 80px}
+@media (max-width:940px){ #app{flex-direction:column} #stage{flex:0 0 46%; min-height:220px} #panel{width:auto; flex:1; border-left:0; border-top:1px solid var(--line); padding:12px 14px 80px} }
+i.m,.eq i,.m{font-family:Georgia,'Times New Roman',serif; font-style:italic; font-size:1.05em}
+.rm{font-family:Georgia,'Times New Roman',serif; font-style:normal}
+.ov{text-decoration:overline}
+.eq{font-family:Georgia,'Times New Roman',serif; font-size:15.5px; line-height:1.8}
+.card{border:1px solid var(--line); border-radius:12px; padding:12px 13px 14px; margin-bottom:12px; background:var(--card)}
+.card h2{font-size:12px; margin:0 0 9px; letter-spacing:.06em; color:var(--dim); font-family:'IBM Plex Mono',ui-monospace,monospace; text-transform:uppercase; font-weight:600; display:flex; align-items:center}
+.pane{display:none} .pane.on{display:block}
+.stmt{font-size:13.5px; line-height:1.8; padding:10px 13px; border-left:3px solid var(--acc); background:#E9E9DC; border-radius:0 10px 10px 0; margin-bottom:12px}
+.stmt b{color:var(--acc)}
+.step{font-size:13.5px; line-height:1.8; min-height:60px}
+.step b{color:var(--acc)} .step .hint,.hint{color:var(--dim); font-size:12.5px}
+.btnrow{display:flex; gap:7px; align-items:center; margin-top:10px; flex-wrap:wrap}
+.btn{border:1.5px solid var(--line2); background:transparent; color:var(--dim); font:inherit; font-size:12px; font-weight:700; padding:0 14px; height:32px; border-radius:999px; cursor:pointer}
+.btn:hover{border-color:var(--acc); color:var(--acc)} .btn.pri{background:var(--acc); border-color:var(--acc); color:#fff}
+.btn.pri:hover{background:var(--acc2); border-color:var(--acc2); color:#fff}
+.btn.sm{height:28px; padding:0 11px; font-size:11.5px}
+.no{margin-left:auto; font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:11.5px; color:var(--dim)}
+.row{display:flex; align-items:center; gap:10px; margin:9px 0}
+.row label{width:118px; flex:none; font-size:12px; color:var(--dim)}
+.row input[type=range]{flex:1; accent-color:var(--acc); height:20px; min-width:0}
+.row .num{width:62px; text-align:right; font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:12px; flex:none}
+.kv{display:flex; justify-content:space-between; gap:10px; font-size:12.5px; padding:6px 0; border-bottom:1px solid var(--line); align-items:center}
+.kv:last-child{border-bottom:0} .kv b{font-family:'IBM Plex Mono',ui-monospace,monospace; font-weight:600; white-space:nowrap}
+.kv .ok{color:var(--grn)} .kv .lim{color:var(--org)} .kv .bad{color:var(--red)}
+.toggles{display:flex; flex-wrap:wrap; gap:6px}
+.toggles label{display:inline-flex; align-items:center; gap:5px; border:1px solid var(--line2); border-radius:999px; padding:5px 10px; font-size:12px; cursor:pointer; user-select:none; color:var(--dim)}
+.toggles label:has(input:checked){color:var(--acc); border-color:var(--acc)} .toggles input{accent-color:var(--acc); margin:0}
+details{border:1px solid var(--line); border-radius:12px; padding:10px 13px; margin-bottom:10px; background:var(--card)}
+details summary{cursor:pointer; font-weight:600; font-size:13px; list-style:none}
+details summary::-webkit-details-marker{display:none}
+details summary::before{content:"+ "; color:var(--acc); font-family:'IBM Plex Mono',monospace} details[open] summary::before{content:"− "}
+details p,details li{font-size:12.5px; line-height:1.8} details ol,details ul{margin:8px 0 2px; padding-left:19px}
+.note{font-size:11.5px; color:var(--dim); line-height:1.6; margin-top:8px}
+#hud{position:absolute; left:12px; bottom:12px; display:flex; flex-wrap:wrap; gap:6px; max-width:calc(100% - 24px); pointer-events:none}
+.chip{background:rgba(239,239,227,.9); border:1px solid var(--line); border-radius:999px; padding:4px 11px; font-size:11.5px; font-family:'IBM Plex Mono',ui-monospace,monospace}
+.chip i{font-style:normal; color:var(--dim); margin-right:4px}
+#tip{position:absolute; left:12px; top:12px; font-size:11.5px; color:var(--dim); background:rgba(239,239,227,.86); border:1px solid var(--line); border-radius:999px; padding:5px 12px; max-width:calc(100% - 130px); pointer-events:none}
+#tools{position:absolute; right:12px; top:12px; display:flex; gap:6px}
+#tools .btn{background:rgba(239,239,227,.9); height:30px; padding:0 12px; display:flex; align-items:center; gap:5px}
+.foot{font-size:11px; color:var(--dim); text-align:center; margin-top:14px; font-family:'IBM Plex Mono',ui-monospace,monospace}
+.tag{display:inline-block; font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:10.5px; letter-spacing:.06em; color:var(--acc); border:1px solid var(--acc); border-radius:999px; padding:1px 8px; margin-right:6px; vertical-align:2px}
+.tag.dim{color:var(--dim); border-color:var(--line2)}
+.seg{display:flex; gap:5px; background:#E4E3D6; padding:3px; border-radius:999px; margin-bottom:10px}
+.seg button{flex:1; height:28px; border:0; border-radius:999px; background:transparent; font:inherit; font-size:12px; font-weight:700; color:var(--dim); cursor:pointer}
+.seg button.on{background:#fff; color:var(--acc); box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.plist button{display:flex; align-items:center; gap:9px; width:100%; text-align:left; height:40px; padding:0 10px; border:0;
+  border-bottom:1px solid var(--line); background:transparent; font:inherit; font-size:13px; color:var(--ink); cursor:pointer}
+.plist button:last-child{border-bottom:0}
+.plist button .k{font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:11px; color:var(--dim); width:18px; flex:none}
+.plist button.on{color:var(--acc); font-weight:700} .plist button.on .k{color:var(--acc)}
+
+/* 문제 팝업 */
+#ov{position:fixed; inset:0; background:rgba(35,36,29,.38); display:none; align-items:center; justify-content:center; z-index:50; padding:18px}
+#ov.on{display:flex}
+.mcard{background:var(--paper); border:1px solid var(--line2); border-radius:16px; width:min(660px,100%);
+  max-height:calc(100dvh - 36px); overflow:auto; padding:18px 20px 20px; box-shadow:0 18px 60px rgba(0,0,0,.25)}
+.mhead{display:flex; align-items:center; gap:10px; margin-bottom:6px}
+.mhead h3{margin:0; font-size:15.5px; flex:1}
+.mx{border:1.5px solid var(--line2); background:transparent; border-radius:999px; width:30px; height:30px; font:inherit; font-weight:700; color:var(--dim); cursor:pointer}
+.mq{font-size:13px; line-height:1.7; margin:6px 0 10px}
+#mc,#mc2{width:100%; height:300px; border:1px solid var(--line); border-radius:12px; background:var(--card); touch-action:none; display:block}
+.opts{display:grid; grid-template-columns:1fr 1fr; gap:7px; margin-top:10px}
+.opts button{border:1.5px solid var(--line2); background:transparent; border-radius:10px; min-height:38px; padding:7px 10px;
+  font:inherit; font-size:12.5px; text-align:left; cursor:pointer; color:var(--ink); line-height:1.45}
+.opts button.on{border-color:var(--acc); color:var(--acc); font-weight:700; background:#fff}
+.verdict{margin-top:10px; font-size:12.5px; line-height:1.65; border-left:3px solid var(--acc); padding:2px 0 2px 10px; min-height:20px; color:var(--ink)}
+.verdict.bad{border-left-color:var(--red)}
+.verdict:empty{border-left-color:var(--line); color:var(--dim)}
+/* 준비물 */
+.tray{display:flex; gap:7px; flex-wrap:wrap}
+.tray button{border:1.5px solid var(--line2); background:#fff; border-radius:12px; padding:9px 13px; font:inherit; font-size:12.5px;
+  font-weight:700; cursor:pointer; display:flex; align-items:center; gap:8px; color:var(--ink)}
+.tray button:disabled{opacity:.35; cursor:default}
+.tray .cnt{font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:11px; color:var(--acc); border:1px solid var(--acc); border-radius:999px; padding:0 7px}
+.tray .glyph{font-family:Georgia,serif; font-size:15px}
+.cklist .kv b{font-family:'IBM Plex Mono',ui-monospace,monospace}
+.big{font-size:13px; font-weight:700}
+
+/* 증명 쓰기 페이지 전용 */
+#main{flex:1; min-width:0; overflow-y:auto; padding:18px 20px 90px}
+.qcard{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:15px 16px; margin-bottom:14px; max-width:860px}
+.qcard h2{margin:0 0 9px; font-size:12px; letter-spacing:.08em; color:var(--dim); font-weight:700}
+.qtext{font-size:14px; line-height:1.85}
+.qwrap{display:flex; gap:16px; align-items:flex-start; flex-wrap:wrap}
+.qwrap .qtext{flex:1; min-width:240px}
+.qfig{flex:none; background:#fff; border:1px solid var(--line); border-radius:10px; padding:6px}
+.m{font-family:Georgia,'Times New Roman',serif; font-style:italic; font-weight:600}
+.rm{font-family:Georgia,'Times New Roman',serif; font-weight:600}
+textarea.proof{width:100%; min-height:170px; resize:vertical; border:1.5px solid var(--line2); border-radius:12px;
+  background:#fff; color:var(--ink); padding:12px 14px; font-family:'IBM Plex Sans KR',Georgia,serif;
+  font-size:14.5px; line-height:1.95; outline:none}
+textarea.proof:focus{border-color:var(--acc)}
+.proofsteps{border-left:3px solid var(--acc); padding:2px 0 2px 12px; margin:10px 0 4px; font-size:13.5px; line-height:2.0}
+.proofsteps .hidden-step{display:none}
+.keychk .kv b{font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:12px}
+.pass{margin-top:10px; border:1.5px solid var(--grn); color:var(--grn); border-radius:10px; padding:8px 12px;
+  font-size:13px; font-weight:700; display:none}
+.pass.on{display:block}
+.helpkeys{display:flex; flex-wrap:wrap; gap:5px; margin-top:8px}
+.helpkeys span{border:1px solid var(--line2); border-radius:8px; padding:3px 8px; font-size:11.5px;
+  font-family:'IBM Plex Mono',ui-monospace,monospace; color:var(--dim)}
+.helpkeys b{font-family:Georgia,serif; color:var(--ink)}
+
+/* ── 참고 카드 → 교과서 그림 말주머니 ── */
+.card h2.figs{cursor:pointer}
+.card h2 .figbtn{margin-left:auto; font-family:'IBM Plex Sans KR',sans-serif; font-size:10.5px;
+  letter-spacing:0; color:var(--acc); border:1px solid var(--acc); border-radius:999px;
+  padding:1px 8px; text-transform:none; font-weight:700}
+.card h2.figs:hover .figbtn,.card h2.figs.on .figbtn{background:var(--acc); color:#fff}
+#pop{position:fixed; z-index:60; display:none; width:min(384px,calc(100vw - 20px));
+  background:var(--paper); border:1.5px solid var(--line2); border-radius:14px;
+  box-shadow:0 14px 44px rgba(0,0,0,.22); padding:12px 14px 12px}
+#pop.on{display:block}
+#pop .ttl{font-size:12.5px; font-weight:700; margin-bottom:9px}
+#pop .row{display:flex; gap:8px; align-items:flex-start}
+#pop .cell{flex:1; min-width:0}
+#pop .cap{font-size:10.8px; line-height:1.3; margin-bottom:2px; display:flex; gap:4px; align-items:center}
+#pop .cap i{font-style:normal; width:13px; height:13px; border-radius:50%; background:var(--acc); color:#fff;
+  font-size:9px; display:inline-flex; align-items:center; justify-content:center;
+  font-family:'IBM Plex Mono',monospace; flex:none}
+#pop svg{width:100%; height:auto; display:block}
+#pop .pnote{font-size:11px; color:var(--dim); line-height:1.65; margin-top:8px;
+  border-top:1px solid var(--line); padding-top:7px}
+#pop .pnote b{color:var(--ink)}
+#pop .tail{position:absolute; width:11px; height:11px; background:var(--paper);
+  border-right:1.5px solid var(--line2); border-top:1.5px solid var(--line2)}
+#pop[data-side="left"] .tail{right:-7px; top:16px; transform:rotate(45deg)}
+#pop[data-side="below"] .tail{left:20px; top:-7px; transform:rotate(-45deg)}
+/* ── 조건을 적으면 그림이 반짝 ── */
+@keyframes fxGlow{0%,100%{filter:none} 45%{filter:drop-shadow(0 0 4px #F2A22E) drop-shadow(0 0 11px rgba(242,162,46,.9))}}
+.fxHit{animation:fxGlow 1.3s ease-in-out 2}
+.fxOn{filter:drop-shadow(0 0 2px rgba(242,162,46,.85))}
+@keyframes rowFlash{0%,100%{background:transparent} 40%{background:rgba(242,162,46,.3)}}
+.kv.flash{animation:rowFlash 1.15s ease-out 2; border-radius:7px}
+.qfig svg{display:block}
+details.keychk #keys{margin-top:9px}
+details.keychk .note{margin-top:9px}
+/* 바깥 페이지에 머리글이 이미 있으므로 제목은 숨긴다 */
+header h1{display:none} header{padding-top:10px} #tabs{margin-left:0}
+</style>
+</head>
+<body>
+<svg id="gdefs" width="0" height="0" aria-hidden="true" style="position:absolute"><defs><linearGradient id="gA" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#D3E6F7"/><stop offset="1" stop-color="#FBFDFF"/></linearGradient><linearGradient id="gB" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FADCC7"/><stop offset="1" stop-color="#FFFBF8"/></linearGradient><linearGradient id="gV" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#DFDCEF"/><stop offset="1" stop-color="#FBFBFE"/></linearGradient><linearGradient id="gG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#D8EEE4"/><stop offset="1" stop-color="#FDFEFD"/></linearGradient><linearGradient id="gS" x1="0.1" y1="0" x2="0.9" y2="1"><stop offset="0" stop-color="#DFDCEF"/><stop offset="0.45" stop-color="#FFFFFF"/><stop offset="1" stop-color="#E3E0F1"/></linearGradient></defs></svg>
+<header>
+  <div><h1>평행에 관한 증명</h1></div>
+  <div id="tabs">
+    <button data-t="ex1" class="on"><span class="no">예제</span>1</button>
+    <button data-t="p04"><span class="no">문제</span>04</button>
+    <button data-t="ex2"><span class="no">예제</span>2</button>
+    <button data-t="p05"><span class="no">문제</span>05</button>
+  </div>
+</header>
+<div id="app">
+  <div id="main"></div>
+  <aside id="panel">
+    <div class="card">
+      <h2 class="figs" data-pop="line2" tabindex="0" role="button">참고 — 두 직선의 위치 관계<span class="figbtn">교과서 그림</span></h2>
+      <div class="kv"><span>한 점에서 만난다</span><b>한 평면 위</b></div>
+      <div class="kv"><span>평행하다</span><b>한 평면 위</b></div>
+      <div class="kv"><span>꼬인 위치에 있다</span><b>한 평면 위에 없음</b></div>
+      <div class="note"><b>만나지 않는 두 직선</b>은 평행하거나 꼬인 위치. 그런데 둘이 <b>한 평면 위</b>에 있다면? — 남는 것은 <b>평행</b>뿐!</div>
+    </div>
+    <div class="card">
+      <h2 class="figs" data-pop="lp" tabindex="0" role="button">참고 — 직선과 평면의 위치 관계<span class="figbtn">교과서 그림</span></h2>
+      <div class="kv"><span>포함된다</span><b>만난다</b></div>
+      <div class="kv"><span>한 점에서 만난다</span><b>만난다</b></div>
+      <div class="kv"><span>평행하다</span><b>만나지 않는다</b></div>
+      <div class="note">직선 <i class="m">l</i>과 평면 <i class="m">α</i>가 평행하면(<i class="m">l</i> ∥ <i class="m">α</i>) 둘은 만나지 않으므로, <i class="m">l</i>은 <i class="m">α</i> 안의 <b>어떤 직선과도 만나지 않는다</b>.</div>
+    </div>
+    <div class="card">
+      <h2 class="figs" data-pop="pp" tabindex="0" role="button">참고 — 두 평면의 위치 관계<span class="figbtn">교과서 그림</span></h2>
+      <div class="kv"><span>만난다</span><b>교선을 공유</b></div>
+      <div class="kv"><span>평행하다</span><b>만나지 않는다</b></div>
+      <div class="note">평행한 두 평면은 만나지 않으므로, 한쪽 평면 안의 직선은 <b>다른 평면과 만나지 않는다</b>.</div>
+    </div>
+    <div class="card">
+      <h2>기호 입력법</h2>
+      <div class="helpkeys">
+        <span>alpha → <b>α</b></span><span>beta → <b>β</b></span><span>gamma → <b>γ</b></span>
+        <span>delta → <b>δ</b></span><span>// → <b>∥</b></span><span>perp → <b>⊥</b></span>
+      </div>
+      <div class="note">증명 칸에 영어로 적으면 자동으로 기호가 됩니다. 직선은 <i class="m">l</i>, <i class="m">m</i>, <i class="m">n</i>, 점은 P처럼 그대로 적으세요.</div>
+    </div>
+  </aside>
+</div>
+<div id="pop"></div>
+<script>
+"use strict";
+const $=id=>document.getElementById(id);
+const im=s=>'<i class="m">'+s+'</i>';
+const PAR='∥';
+function geoTask(k){ if(typeof GEO_task==='function') GEO_task(k); }
+/* ── 그림·말주머니 (mk_par2.py 가 만든 SVG) ── */
+const FIGS={
+  ex1:`<svg width="206" height="196" viewBox="0 0 248 236" role="img"><polygon points="193.2,129.0 228.7,164.9 191.7,224.9 156.2,189.0" fill="url(#gV)" data-fx="G"/><polyline points="193.2,129.0 228.7,164.9 191.7,224.9 156.2,189.0" fill="none" stroke="#4B4B44" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" data-fx="G"/><polygon points="8.0,189.0 197.0,189.0 238.0,129.0 50.0,129.0" fill="url(#gB)" stroke="#4B4B44" stroke-width="1.4" stroke-linejoin="round" data-fx="B"/><polygon points="119.0,54.0 193.2,129.0 156.2,189.0 82.0,114.0" fill="url(#gV)" data-fx="G"/><polyline points="119.0,54.0 193.2,129.0" fill="none" stroke="#4B4B44" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" data-fx="G"/><polyline points="82.0,114.0 156.2,189.0" fill="none" stroke="#4B4B44" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" data-fx="G"/><polyline points="97.0,129.0 193.2,129.0" fill="none" stroke="#4B4B44" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="9 3.4 1.8 3.4" data-fx="B"/><polyline points="193.2,129.0 219.8,155.7" fill="none" stroke="#4B4B44" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="9 3.4 1.8 3.4" data-fx="G"/><polygon points="8.0,114.0 197.0,114.0 238.0,54.0 50.0,54.0" fill="url(#gA)" stroke="#4B4B44" stroke-width="1.4" stroke-linejoin="round" data-fx="A"/><polygon points="73.5,8.0 119.0,54.0 82.0,114.0 36.5,68.0" fill="url(#gV)" data-fx="G"/><polyline points="82.0,114.0 36.5,68.0 73.5,8.0 119.0,54.0" fill="none" stroke="#4B4B44" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" data-fx="G"/><polyline points="50.0,54.0 119.0,54.0" fill="none" stroke="#4B4B44" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="2 3.2" data-fx="A"/><polyline points="50.0,54.0 38.7,70.2" fill="none" stroke="#4B4B44" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="2 3.2" data-fx="A"/><polyline points="119.0,54.0 178.6,114.0" fill="none" stroke="#4B4B44" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="5.5 4" data-fx="G"/><polyline points="119.0,54.0 82.0,114.0" fill="none" stroke="#E8452F" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" data-fx="L"/><polyline points="193.2,129.0 156.2,189.0" fill="none" stroke="#E8452F" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" data-fx="M"/><text x="35.0" y="105.0" font-family="Georgia,serif" font-size="15" font-style="italic" fill="#B4661F" text-anchor="start" font-weight="600" data-fx="A">α</text><text x="37.0" y="170.0" font-family="Georgia,serif" font-size="15" font-style="italic" fill="#B4661F" text-anchor="start" font-weight="600" data-fx="B">β</text><text x="69.0" y="32.0" font-family="Georgia,serif" font-size="15" font-style="italic" fill="#B4661F" text-anchor="start" font-weight="600" data-fx="G">γ</text><text x="74.0" y="99.0" font-family="Georgia,serif" font-size="15" font-style="italic" fill="#B4661F" text-anchor="start" font-weight="600" data-fx="L">l</text><text x="143.0" y="161.0" font-family="Georgia,serif" font-size="15" font-style="italic" fill="#B4661F" text-anchor="start" font-weight="600" data-fx="M">m</text></svg>`,
+  p04:`<svg width="216" height="160" viewBox="0 0 248 184" role="img"><polygon points="52.6,91.6 194.2,91.6 165.4,173.3 23.2,175.1" fill="url(#gG)" data-fx="B"/><polyline points="52.6,91.6 23.2,175.1 165.4,173.3 194.2,91.6" fill="none" stroke="#4B4B44" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" data-fx="B"/><polygon points="7.0,136.2 152.1,136.2 239.2,43.7 94.1,43.7" fill="url(#gA)" stroke="#4B4B44" stroke-width="1.4" stroke-linejoin="round" data-fx="A"/><polygon points="81.5,9.5 224.0,7.0 194.2,91.6 52.6,91.6" fill="url(#gG)" data-fx="B"/><polyline points="52.6,91.6 81.5,9.5 224.0,7.0 194.2,91.6" fill="none" stroke="#4B4B44" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" data-fx="B"/><polyline points="52.6,91.6 94.1,43.7" fill="none" stroke="#4B4B44" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="2 3.2" data-fx="A"/><polyline points="94.1,43.7 211.1,43.7" fill="none" stroke="#4B4B44" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="2 3.2" data-fx="A"/><polyline points="52.6,91.6 36.9,136.2" fill="none" stroke="#4B4B44" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="2 3.2" data-fx="B"/><polyline points="88.0,25.7 199.6,25.7" fill="none" stroke="#E8452F" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" data-fx="L"/><polyline points="52.6,91.6 194.2,91.6" fill="none" stroke="#E8452F" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" data-fx="M"/><text x="27.0" y="131.0" font-family="Georgia,serif" font-size="15" font-style="italic" fill="#B4661F" text-anchor="start" font-weight="600" data-fx="A">α</text><text x="39.0" y="159.0" font-family="Georgia,serif" font-size="15" font-style="italic" fill="#B4661F" text-anchor="start" font-weight="600" data-fx="B">β</text><text x="204.0" y="30.0" font-family="Georgia,serif" font-size="15" font-style="italic" fill="#B4661F" text-anchor="start" font-weight="600" data-fx="L">l</text><text x="160.0" y="105.0" font-family="Georgia,serif" font-size="15" font-style="italic" fill="#B4661F" text-anchor="start" font-weight="600" data-fx="M">m</text></svg>`,
+  ex2:`<svg width="218" height="142" viewBox="0 0 252 164" role="img"><polygon points="6.0,156.3 202.2,156.3 244.0,87.3 47.8,87.3" fill="url(#gB)" stroke="#4B4B44" stroke-width="1.4" stroke-linejoin="round" data-fx="A"/><path d="M144.7,8.4 C188.9,6.7 212,30.5 211,86.6 L170.2,153.6 L170.2,153.6 C171.2,97.5 148.1,73.7 103.9,75.4 Z" fill="url(#gS)" data-fx="B"/><path d="M144.7,8.4 C188.9,6.7 212,30.5 211,86.6" fill="none" stroke="#4B4B44" stroke-width="1.4" stroke-dasharray="2 3.2" data-fx="B"/><path d="M170.2,153.6 C171.2,97.5 148.1,73.7 103.9,75.4" fill="none" stroke="#4B4B44" stroke-width="1.4" stroke-dasharray="2 3.2" data-fx="B"/><polyline points="211.0,86.6 170.2,153.6" fill="none" stroke="#E8452F" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" data-fx="N"/><polyline points="140.0,87.3 211.0,87.0" fill="none" stroke="#4B4B44" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="9 3.4 1.8 3.4" data-fx="A"/><polygon points="48.8,8.4 144.7,8.4 104.0,74.7 8.0,74.7" fill="url(#gV)" data-fx="B"/><polyline points="144.7,8.4 48.8,8.4 8.0,74.7 104.0,74.7" fill="none" stroke="#4B4B44" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" data-fx="B"/><polyline points="52.9,20.3 105.6,66.2" fill="none" stroke="#E8452F" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" data-fx="L"/><polyline points="35.9,67.2 127.7,20.3" fill="none" stroke="#E8452F" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" data-fx="M"/><circle cx="80.6" cy="44.4" r="3.4" fill="#23241D" data-fx="P"/><text x="71.0" y="34.0" font-family="Georgia,serif" font-size="14"  fill="#23241D" text-anchor="start" font-weight="600" data-fx="P">P</text><text x="20.0" y="68.0" font-family="Georgia,serif" font-size="15" font-style="italic" fill="#B4661F" text-anchor="start" font-weight="600" data-fx="B">β</text><text x="24.0" y="150.0" font-family="Georgia,serif" font-size="15" font-style="italic" fill="#B4661F" text-anchor="start" font-weight="600" data-fx="A">α</text><text x="176.0" y="120.0" font-family="Georgia,serif" font-size="15" font-style="italic" fill="#B4661F" text-anchor="start" font-weight="600" data-fx="N">n</text><text x="109.0" y="72.0" font-family="Georgia,serif" font-size="15" font-style="italic" fill="#B4661F" text-anchor="start" font-weight="600" data-fx="L">l</text><text x="131.0" y="19.0" font-family="Georgia,serif" font-size="15" font-style="italic" fill="#B4661F" text-anchor="start" font-weight="600" data-fx="M">m</text></svg>`,
+  p05:`<svg width="202" height="162" viewBox="0 0 224 180" role="img"><polygon points="14.0,54.0 164.0,54.0 210.0,14.0 60.0,14.0" fill="url(#gA)" stroke="#4B4B44" stroke-width="1.4" stroke-linejoin="round" data-fx="A"/><polyline points="58.0,48.0 152.0,22.0" fill="none" stroke="#E8452F" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" data-fx="L"/><polyline points="76.0,20.0 134.0,50.0" fill="none" stroke="#E8452F" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" data-fx="M"/><circle cx="105.0" cy="35.0" r="3.0" fill="#23241D" data-fx="L"/><text x="157.0" y="21.0" font-family="Georgia,serif" font-size="15" font-style="italic" fill="#B4661F" text-anchor="start" font-weight="600" data-fx="L">l</text><text x="136.0" y="60.0" font-family="Georgia,serif" font-size="15" font-style="italic" fill="#B4661F" text-anchor="start" font-weight="600" data-fx="M">m</text><polygon points="14.0,112.0 164.0,112.0 210.0,72.0 60.0,72.0" fill="url(#gV)" stroke="#4B4B44" stroke-width="1.4" stroke-linejoin="round" data-fx="B"/><polygon points="14.0,170.0 164.0,170.0 210.0,130.0 60.0,130.0" fill="url(#gB)" stroke="#4B4B44" stroke-width="1.4" stroke-linejoin="round" data-fx="G"/><text x="26.0" y="48.0" font-family="Georgia,serif" font-size="15" font-style="italic" fill="#B4661F" text-anchor="start" font-weight="600" data-fx="A">α</text><text x="26.0" y="106.0" font-family="Georgia,serif" font-size="15" font-style="italic" fill="#B4661F" text-anchor="start" font-weight="600" data-fx="B">β</text><text x="26.0" y="164.0" font-family="Georgia,serif" font-size="15" font-style="italic" fill="#B4661F" text-anchor="start" font-weight="600" data-fx="G">γ</text></svg>`
+};
+const POP={
+  line2:`<span class="tail"></span><div class="ttl">두 직선의 위치 관계</div><div class="row"><div class="cell"><div class="cap"><i>1</i>한 점에서 만난다</div><svg viewBox="0 0 108 86" role="img"><polygon points="8.0,66.0 72.0,66.0 94.0,22.0 30.0,22.0" fill="url(#gG)" stroke="#4B4B44" stroke-width="1.4" stroke-linejoin="round"/><polyline points="22.0,58.0 84.0,28.0" fill="none" stroke="#4B4B44" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><text x="93.0" y="29.0" font-family="Georgia,serif" font-size="12" font-style="italic" fill="#4B4B44" text-anchor="start" font-weight="600">l</text><polyline points="36.0,24.0 72.0,62.0" fill="none" stroke="#4B4B44" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><text x="76.0" y="72.0" font-family="Georgia,serif" font-size="12" font-style="italic" fill="#4B4B44" text-anchor="start" font-weight="600">m</text></svg></div><div class="cell"><div class="cap"><i>2</i>평행하다</div><svg viewBox="0 0 108 86" role="img"><polygon points="8.0,66.0 72.0,66.0 94.0,22.0 30.0,22.0" fill="url(#gG)" stroke="#4B4B44" stroke-width="1.4" stroke-linejoin="round"/><polyline points="34.0,34.0 82.0,34.0" fill="none" stroke="#4B4B44" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><text x="90.0" y="37.0" font-family="Georgia,serif" font-size="12" font-style="italic" fill="#4B4B44" text-anchor="start" font-weight="600">l</text><polyline points="16.0,58.0 64.0,58.0" fill="none" stroke="#4B4B44" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><text x="70.0" y="63.0" font-family="Georgia,serif" font-size="12" font-style="italic" fill="#4B4B44" text-anchor="start" font-weight="600">m</text></svg></div><div class="cell"><div class="cap"><i>3</i>꼬인 위치에 있다</div><svg viewBox="0 0 108 86" role="img"><polygon points="8.0,66.0 72.0,66.0 94.0,22.0 30.0,22.0" fill="url(#gG)" stroke="#4B4B44" stroke-width="1.4" stroke-linejoin="round"/><polyline points="24.0,30.0 74.0,58.0" fill="none" stroke="#4B4B44" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><text x="80.0" y="66.0" font-family="Georgia,serif" font-size="12" font-style="italic" fill="#4B4B44" text-anchor="start" font-weight="600">m</text><polyline points="84.0,6.0 68.0,36.0" fill="none" stroke="#4B4B44" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="68.0" cy="36.0" r="2.8" fill="#23241D"/><polyline points="68.0,36.0 54.0,62.0" fill="none" stroke="#4B4B44" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="2 3.2"/><text x="88.0" y="10.0" font-family="Georgia,serif" font-size="12" font-style="italic" fill="#4B4B44" text-anchor="start" font-weight="600">l</text></svg></div></div><div class="pnote">①②는 두 직선이 <b>한 평면 위</b>에 있고, ③만 한 평면 위에 없다.</div>`,
+  lp:`<span class="tail"></span><div class="ttl">직선과 평면의 위치 관계</div><div class="row"><div class="cell"><div class="cap"><i>1</i>포함된다</div><svg viewBox="0 0 108 86" role="img"><polygon points="8.0,66.0 72.0,66.0 94.0,22.0 30.0,22.0" fill="url(#gG)" stroke="#4B4B44" stroke-width="1.4" stroke-linejoin="round"/><polyline points="24.0,46.0 76.0,46.0" fill="none" stroke="#4B4B44" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><text x="83.0" y="49.0" font-family="Georgia,serif" font-size="12" font-style="italic" fill="#4B4B44" text-anchor="start" font-weight="600">l</text></svg></div><div class="cell"><div class="cap"><i>2</i>한 점에서 만난다</div><svg viewBox="0 0 108 86" role="img"><polygon points="8.0,66.0 72.0,66.0 94.0,22.0 30.0,22.0" fill="url(#gG)" stroke="#4B4B44" stroke-width="1.4" stroke-linejoin="round"/><polyline points="44.0,6.0 62.0,44.0" fill="none" stroke="#4B4B44" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="62.0" cy="44.0" r="2.8" fill="#23241D"/><polyline points="62.0,44.0 76.0,74.0" fill="none" stroke="#4B4B44" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="2 3.2"/><text x="36.0" y="10.0" font-family="Georgia,serif" font-size="12" font-style="italic" fill="#4B4B44" text-anchor="start" font-weight="600">l</text></svg></div><div class="cell"><div class="cap"><i>3</i>평행하다</div><svg viewBox="0 0 108 86" role="img"><polygon points="8.0,66.0 72.0,66.0 94.0,22.0 30.0,22.0" fill="url(#gG)" stroke="#4B4B44" stroke-width="1.4" stroke-linejoin="round"/><polyline points="22.0,10.0 82.0,10.0" fill="none" stroke="#4B4B44" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><text x="89.0" y="13.0" font-family="Georgia,serif" font-size="12" font-style="italic" fill="#4B4B44" text-anchor="start" font-weight="600">l</text></svg></div></div><div class="pnote">①②는 직선과 평면이 <b>만나고</b>, ③만 만나지 않는다.</div>`,
+  pp:`<span class="tail"></span><div class="ttl">두 평면의 위치 관계</div><div class="row"><div class="cell"><div class="cap"><i>1</i>만난다</div><svg viewBox="0 0 200 124" role="img"><polygon points="70.0,20.0 182.0,20.0 130.0,100.0 18.0,100.0" fill="url(#gB)" stroke="#4B4B44" stroke-width="1.4" stroke-linejoin="round"/><polygon points="18.0,20.0 130.0,20.0 182.0,100.0 70.0,100.0" fill="url(#gV)" fill-opacity="0.82" stroke="#4B4B44" stroke-width="1.4" stroke-linejoin="round"/><polyline points="44.0,60.0 156.0,60.0" fill="none" stroke="#2F45EC" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><rect x="74" y="66" width="52" height="18" rx="5" fill="#DCE7F8" stroke="#8FA9E8" stroke-width="1"/><text x="100.0" y="79.0" font-family="'IBM Plex Sans KR',sans-serif" font-size="11"  fill="#2F45EC" text-anchor="middle" font-weight="600">교선</text><text x="26.0" y="38.0" font-family="Georgia,serif" font-size="15" font-style="italic" fill="#B4661F" text-anchor="start" font-weight="600">α</text><text x="26.0" y="96.0" font-family="Georgia,serif" font-size="15" font-style="italic" fill="#B4661F" text-anchor="start" font-weight="600">β</text></svg></div><div class="cell"><div class="cap"><i>2</i>평행하다</div><svg viewBox="0 0 200 124" role="img"><polygon points="20.0,52.0 130.0,52.0 170.0,14.0 60.0,14.0" fill="url(#gV)" stroke="#4B4B44" stroke-width="1.4" stroke-linejoin="round"/><polygon points="20.0,108.0 130.0,108.0 170.0,70.0 60.0,70.0" fill="url(#gB)" stroke="#4B4B44" stroke-width="1.4" stroke-linejoin="round"/><text x="30.0" y="46.0" font-family="Georgia,serif" font-size="15" font-style="italic" fill="#B4661F" text-anchor="start" font-weight="600">α</text><text x="30.0" y="102.0" font-family="Georgia,serif" font-size="15" font-style="italic" fill="#B4661F" text-anchor="start" font-weight="600">β</text></svg></div></div><div class="pnote">①은 <b>교선</b>을 공유하며 만나고, ②는 만나지 않는다.</div>`
+};
+/* ── 문항 데이터 ── */
+const IT={
+ ex1:{ no:'예제 1', kind:'ex',
+  q:'평행한 두 평면 '+im('α')+', '+im('β')+'가 다른 평면 '+im('γ')+'와 만나서 생기는 교선을 각각 '
+    +im('l')+', '+im('m')+'이라고 할 때, '+im('l')+' '+PAR+' '+im('m')+'임을 증명하시오.',
+  steps:['두 평면 '+im('α')+', '+im('β')+'는 평행하므로 만나지 않는다.',
+    '따라서 평면 '+im('α')+'에 포함된 직선 '+im('l')+'과 평면 '+im('β')+'에 포함된 직선 '+im('m')+'도 만나지 않는다.',
+    '그런데 두 직선 '+im('l')+', '+im('m')+'은 모두 한 평면 '+im('γ')+' 위에 있으므로 '+im('l')+' '+PAR+' '+im('m')+'이다.'],
+  keys:[{label:'평행하므로 만나지 않는다',alts:['만나지않']},
+        {label:'l, m이 한 평면(γ) 위에 있다',alts:['한평면','같은평면','γ위에']},
+        {label:'결론  l '+PAR+' m',alts:['l∥m','m∥l']}] },
+ p04:{ no:'문제 04', kind:'q',
+  q:'직선 '+im('l')+'과 평면 '+im('α')+'가 평행할 때, 직선 '+im('l')+'을 포함하는 평면 '+im('β')
+    +'와 평면 '+im('α')+'의 교선을 '+im('m')+'이라고 하면 '+im('l')+' '+PAR+' '+im('m')+'임을 증명하시오.',
+  model:'직선 '+im('l')+'과 평면 '+im('α')+'는 평행하므로 만나지 않는다. 직선 '+im('m')+'은 평면 '+im('α')
+    +'에 포함되므로 직선 '+im('l')+'은 '+im('m')+'과도 만나지 않는다. 그런데 두 직선 '+im('l')+', '+im('m')
+    +'은 모두 한 평면 '+im('β')+' 위에 있으므로 '+im('l')+' '+PAR+' '+im('m')+'이다.',
+  keys:[{label:'l '+PAR+' α 이므로 만나지 않는다',alts:['만나지않']},
+        {label:'m은 평면 α에 포함(α 위의 직선)',alts:['α에포함','α위','α안에']},
+        {label:'l, m이 한 평면 β 위에 있다',alts:['한평면','같은평면','β위에']},
+        {label:'결론  l '+PAR+' m',alts:['l∥m','m∥l']}] },
+ ex2:{ no:'예제 2', kind:'ex',
+  q:'평면 '+im('α')+' 위에 있지 않은 한 점 P를 지나고 평면 '+im('α')+'에 평행한 서로 다른 두 직선 '
+    +im('l')+', '+im('m')+'을 포함하는 평면 '+im('β')+'에 대하여 '+im('α')+' '+PAR+' '+im('β')+'임을 증명하시오. <b>(귀류법)</b>',
+  steps:['두 평면 '+im('α')+', '+im('β')+'가 평행하지 않다고 가정하고, 두 평면 '+im('α')+', '+im('β')+'의 교선을 '+im('n')+'이라고 하자.',
+    '직선 '+im('n')+'은 평면 '+im('α')+' 위에 있고 '+im('l')+' '+PAR+' '+im('α')+', '+im('m')+' '+PAR+' '+im('α')
+      +'이므로, 직선 '+im('n')+'은 두 직선 '+im('l')+', '+im('m')+'과 만나지 않는다.',
+    '그런데 세 직선 '+im('l')+', '+im('m')+', '+im('n')+'은 모두 평면 '+im('β')+' 위에 있으므로 '
+      +im('l')+' '+PAR+' '+im('n')+', '+im('m')+' '+PAR+' '+im('n')+'. 즉 '+im('l')+' '+PAR+' '+im('m')+'.',
+    '이것은 두 직선 '+im('l')+', '+im('m')+'이 한 점 P를 지난다는 조건에 모순이다.',
+    '따라서 '+im('α')+' '+PAR+' '+im('β')+'이다.'],
+  keys:[{label:'귀류법 — 평행하지 않다고 가정',alts:['않다고가정','아니라고가정','가정하']},
+        {label:'교선 n',alts:['교선']},
+        {label:'n은 l, m과 만나지 않는다',alts:['만나지않']},
+        {label:'l '+PAR+' n, m '+PAR+' n (한 평면 β 위)',alts:['l∥n','n∥l','m∥n','n∥m']},
+        {label:'모순',alts:['모순']},
+        {label:'결론  α '+PAR+' β',alts:['α∥β','β∥α']}] },
+ p05:{ no:'문제 05', kind:'q',
+  q:'서로 다른 세 평면 '+im('α')+', '+im('β')+', '+im('γ')+'에 대하여 '+im('α')+' '+PAR+' '+im('β')+', '
+    +im('β')+' '+PAR+' '+im('γ')+'이면 '+im('α')+' '+PAR+' '+im('γ')+'임을 증명하시오.',
+  model:'평면 '+im('α')+' 위에 있고 한 점에서 만나는 서로 다른 두 직선을 '+im('l')+', '+im('m')+'이라고 하자.<br>'
+    +im('α')+' '+PAR+' '+im('β')+'이므로&ensp;'+im('l')+' '+PAR+' '+im('β')+', '+im('m')+' '+PAR+' '+im('β')+'&ensp;&hellip;&hellip; ①<br>'
+    +'그런데 '+im('β')+' '+PAR+' '+im('γ')+'이므로 두 직선 '+im('l')+', '+im('m')+'이 평면 '+im('γ')+'와 만난다고 가정하면 '
+    +'두 직선 '+im('l')+', '+im('m')+'은 평면 '+im('β')+'와도 만난다.<br>'
+    +'이것은 ①에 모순이므로&ensp;'+im('l')+' '+PAR+' '+im('γ')+', '+im('m')+' '+PAR+' '+im('γ')+'<br>'
+    +'따라서 <b>[예제 2]</b>에 의하여&ensp;'+im('α')+' '+PAR+' '+im('γ')+'',
+  keys:[{label:'α 위에서 한 점에서 만나는 두 직선 l, m',alts:['한점에서만나']},
+        {label:'α '+PAR+' β 이므로  l '+PAR+' β, m '+PAR+' β',alts:['l∥β','m∥β','β∥l','β∥m']},
+        {label:'l, m 이 γ 와 만난다고 가정',alts:['가정','만난다고']},
+        {label:'① 에 모순',alts:['모순']},
+        {label:'l '+PAR+' γ, m '+PAR+' γ',alts:['l∥γ','m∥γ','γ∥l','γ∥m']},
+        {label:'[예제 2]에 의하여  α '+PAR+' γ',alts:['α∥γ','γ∥α']}] }
+};
+/* ── 상태 ── */
+let cur='ex1'; const STEP={ex1:1,ex2:1}; const DONE={};
+const store=k=>{ try{ return localStorage.getItem('par2-'+k)||''; }catch(e){ return ''; } };
+const save=(k,v)=>{ try{ localStorage.setItem('par2-'+k,v); }catch(e){} };
+/* ── 토큰 자동 변환 ── */
+const TOK=[['alpha','α'],['beta','β'],['gamma','γ'],['delta','δ'],['theta','θ'],['perp','⊥'],['//','∥']];
+function fixTokens(ta){
+  let v=ta.value, pos=ta.selectionStart, changed=false;
+  for(const [w,ch] of TOK){
+    let i;
+    while((i=v.indexOf(w))>=0){ v=v.slice(0,i)+ch+v.slice(i+w.length);
+      if(i+w.length<=pos) pos-=w.length-ch.length; else if(i<pos) pos=i+ch.length;
+      changed=true; }
+  }
+  if(changed){ ta.value=v; ta.setSelectionRange(pos,pos); }
+}
+/* ── 채점 ── */
+function grade(){
+  const it=IT[cur], txt=$('ta').value.replace(/\s+/g,'');
+  const hits=it.keys.map(k=>k.alts.some(a=>txt.includes(a)));
+  $('keys').innerHTML=it.keys.map((k,i)=>
+    '<div class="kv"><span>'+k.label+'</span><b class="'+(hits[i]?'ok':'')+'"'
+    +(hits[i]?'':' style="color:var(--dim)"')+'>'+(hits[i]?'포함 ✓':'아직')+'</b></div>').join('');
+  const all=hits.every(Boolean)&&it.keys.length>0;
+  $('pass').classList.toggle('on',all);
+  applyFx(hits); flashNew(hits);
+  if(all&&!DONE[cur]){ DONE[cur]=true; geoTask('par2-'+cur); }
+}
+/* ── 교과서 그림 말주머니 ── */
+const pop=$('pop'); let popKey=null;
+function closePop(){ pop.classList.remove('on'); popKey=null;
+  document.querySelectorAll('.card h2.figs').forEach(h=>h.classList.remove('on')); }
+function openPop(h2){
+  const k=h2.dataset.pop;
+  if(popKey===k){ closePop(); return; }
+  closePop();
+  pop.innerHTML=POP[k]; pop.classList.add('on'); popKey=k; h2.classList.add('on');
+  const r=h2.closest('.card').getBoundingClientRect();
+  const pw=pop.offsetWidth, ph=pop.offsetHeight, W=innerWidth, H=innerHeight;
+  let left=r.left-pw-14, top=r.top-4, side='left';
+  if(left<8){ side='below'; left=Math.max(8,Math.min(W-pw-8,r.left)); top=r.bottom+10;
+    if(top+ph>H-8) top=Math.max(8,r.top-ph-10); }
+  else top=Math.max(8,Math.min(top,H-ph-8));
+  pop.dataset.side=side; pop.style.left=left+'px'; pop.style.top=top+'px';
+}
+document.querySelectorAll('.card h2.figs').forEach(h=>{
+  h.addEventListener('click',e=>{ e.stopPropagation(); openPop(h); });
+  h.addEventListener('keydown',e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); openPop(h); } });
+});
+document.addEventListener('click',e=>{ if(pop.classList.contains('on')&&!pop.contains(e.target)) closePop(); });
+addEventListener('keydown',e=>{ if(e.key==='Escape') closePop(); });
+addEventListener('resize',closePop);
+$('panel').addEventListener('scroll',closePop);
+
+/* ── 조건을 적으면 그림의 그 부분이 반짝 ── */
+const FX={
+  ex1:[['A','B'],['G','L','M'],['L','M']],
+  p04:[['L','A'],['M','A'],['B'],['L','M']],
+  ex2:[['A','B'],['N'],['N','L','M'],['L','M','N'],['P'],['A','B']],
+  p05:[['A','L','M'],['B','L','M'],['G','L','M'],['B','L','M'],['G','L','M'],['A','G']]
+};
+let PREV=null;
+function fxEls(k){ return document.querySelectorAll('#fig [data-fx~="'+k+'"]'); }
+function applyFx(hits){
+  const fig=$('fig'); if(!fig) return;
+  const F=FX[cur]||[], on=new Set();
+  hits.forEach((h,i)=>{ if(h&&F[i]) F[i].forEach(k=>on.add(k)); });
+  fig.querySelectorAll('[data-fx]').forEach(el=>
+    el.classList.toggle('fxOn',
+      (el.getAttribute('data-fx')||'').split(/\s+/).some(k=>on.has(k))));
+}
+function flashNew(hits){
+  if(!PREV){ PREV=hits.slice(); return; }
+  const F=FX[cur]||[];
+  hits.forEach((h,i)=>{
+    if(h&&!PREV[i]){
+      (F[i]||[]).forEach(k=>fxEls(k).forEach(el=>{
+        el.classList.remove('fxHit'); void el.getBoundingClientRect(); el.classList.add('fxHit');
+        setTimeout(()=>el.classList.remove('fxHit'),2800);
+      }));
+      const row=document.querySelectorAll('#keys .kv')[i];
+      if(row){ row.classList.add('flash'); setTimeout(()=>row.classList.remove('flash'),2400); }
+    }
+  });
+  PREV=hits.slice();
+}
+
+/* ── 렌더 ── */
+function render(){
+  const it=IT[cur]; PREV=null;
+  let h='<div class="qcard"><h2>'+it.no+'</h2><div class="qwrap"><div class="qtext">'+it.q+'</div>'
+    +'<div class="qfig" id="fig">'+FIGS[cur]+'</div></div></div>';
+  if(it.kind==='ex'){
+    h+='<div class="qcard"><h2>증명 — 선생님과 함께</h2><div class="proofsteps" id="steps">'
+      +it.steps.map((s,i)=>'<div'+(i<STEP[cur]?'':' class="hidden-step"')+'>'+s+'</div>').join('')
+      +'</div><button class="btn" id="nextStep" style="margin-top:8px">'
+      +(STEP[cur]>=it.steps.length?'처음부터':'다음 문장')+'</button>'
+      +'<div class="note">화면의 문장을 아래 칸에 직접 따라 적어 보세요. 기호도 키보드로!</div></div>';
+  }
+  h+='<div class="qcard"><h2>나의 증명</h2>'
+    +'<textarea class="proof" id="ta" placeholder="여기에 증명을 적으세요. alpha, beta, gamma, // 는 자동으로 기호가 됩니다."></textarea>'
+    +'<div class="pass" id="pass">핵심 키워드가 모두 들어갔어요 — 통과!</div></div>';
+  h+='<details class="qcard keychk"><summary>키워드 채점</summary><div id="keys"></div>'
+    +'<div class="note">표현이 달라도 좋아요 — 핵심 아이디어가 들어있는지만 봅니다. 기호('+PAR+')로 결론을 적어 보세요.</div></details>';
+  if(it.kind==='q') h+='<details class="qcard"><summary>모범답안 보기</summary><p class="qtext" style="margin:8px 0 0">'+it.model+'</p></details>';
+  $('main').innerHTML=h;
+  const ta=$('ta'); ta.value=store(cur);
+  ta.addEventListener('input',()=>{ fixTokens(ta); save(cur,ta.value); grade(); });
+  if(it.kind==='ex') $('nextStep').onclick=()=>{
+    if(STEP[cur]>=it.steps.length) STEP[cur]=1; else STEP[cur]++;
+    render(); geoTask('par2-'+cur+'-step'); };
+  grade();
+}
+document.querySelectorAll('#tabs button').forEach(b=>b.onclick=()=>{
+  cur=b.dataset.t;
+  document.querySelectorAll('#tabs button').forEach(x=>x.classList.toggle('on',x===b));
+  $('panel').scrollTop=0; $('main').scrollTop=0;
+  render(); geoTask('par2-tab-'+cur);
+});
+render();
+window.__par2={IT,get cur(){return cur;}};
+</script>
+</body>
+</html>

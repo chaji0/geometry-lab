@@ -6,7 +6,7 @@
      먼저 선언한 뒤 이 파일을 불러오면 하단 바가 자동으로 생깁니다.
    ════════════════════════════════════════════════════════════ */
 window.GEO_CONFIG = {
-  VERSION: "v1.52",                 // ★ 1단원=v1.x, 2단원=v2.x, 3단원=v3.x — 업로드마다 뒷자리 +1 (v1.11, v1.12, …)
+  VERSION: "v1.53",                 // ★ 1단원=v1.x, 2단원=v2.x, 3단원=v3.x — 업로드마다 뒷자리 +1 (v1.11, v1.12, …)
   APPS_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbx3Ay-gudjjSoRlngyu54umJ9uYRAKhINuwcv229UZUN9_oIQfm9vwAxM32FOPR9wV1/exec",
   /* ── 담당 선생님 ───────────────────────────────────────────────
      선생님마다 '자기 구글 시트 + 자기 드라이브'를 씁니다.
@@ -60,7 +60,18 @@ window.GEO_CONFIG = {
     { id:'light',    href:'light.html',    short:'빛', grp:'tangent', curve:'이차곡선과 빛의 관계',
       title:'이차곡선과 빛의 관계' },
     { id:'geogebra', href:'geogebra.html', icon:'📐', short:'지오지브라',  grp:'tool',
-      title:'지오지브라' }
+      title:'지오지브라' },
+
+    /* ══ 2단원 · 공간도형과 공간좌표 (unit:2) ══
+       soon:true 는 아직 안 만든 자리 — 홈에 '준비 중'으로만 뜨고 진도에서 빠집니다. */
+    { id:'pdet', unit:2, href:'pos-det.html', short:'결정조건', grp:'space',
+      sub:'01 직선과 평면의 위치 관계', curve:'평면의 결정조건', title:'평면의 결정조건' },
+    { id:'prel', unit:2, href:'pos-rel.html', short:'위치관계', grp:'space',
+      curve:'직선과 평면의 위치 관계', title:'직선과 평면의 위치 관계' },
+    { id:'x-perp3', unit:2, soon:true, grp:'space', sub:'02 삼수선의 정리',   curve:'준비 중' },
+    { id:'x-proj',  unit:2, soon:true, grp:'space', sub:'03 정사영',          curve:'준비 중' },
+    { id:'x-spt',   unit:2, soon:true, grp:'coord', sub:'01 공간에서 점의 좌표', curve:'준비 중' },
+    { id:'x-sph',   unit:2, soon:true, grp:'coord', sub:'02 구의 방정식',      curve:'준비 중' }
   ],
   /* 홈 화면 묶음 — 큰 제목 4개 (하위 메뉴는 grp로 자동 수집) */
   /* 홈 타임라인의 묶음 — soon 은 아직 안 만든(준비 중) 활동 이름 */
@@ -70,8 +81,25 @@ window.GEO_CONFIG = {
     { key:'concept', title:'이차곡선 방정식' },
     { key:'apply',   title:'이차곡선 활용' },
     { key:'tangent', title:'이차곡선의 접선' }
+  ],
+  /* 2단원 홈 묶음 */
+  HOME_GROUPS2: [
+    { key:'space', title:'공간도형' },
+    { key:'coord', title:'공간좌표' }
+  ],
+  /* 대단원 — 홈 화면 제목과 주소 */
+  UNITS: [
+    { n:1, title:'1. 이차곡선',            hash:'#home'  },
+    { n:2, title:'2. 공간도형과 공간좌표', hash:'#home2' }
   ]
 };
+
+/* 이 활동이 몇 단원인지 / 그 단원의 홈 주소 */
+window.GEO_unitOf = function(pageId){
+  const a = (window.GEO_CONFIG.ACTIVITIES || []).find(x => x.id === pageId);
+  return (a && a.unit) || 1;
+};
+window.GEO_homeHref = function(u){ return (u === 2) ? 'index.html#home2' : 'index.html#home'; };
 
 /* ════════════════════════════════════════════════════════════
    이 학생의 담당 선생님 주소
@@ -396,7 +424,10 @@ window.GEO_TASKS = {
   locus:    ['see-ell','see-hyp','ggb'],               // 타원·쌍곡선 탭 + 실전 연습 열기
   locustest:['pick','start'],                          // 곡선 뽑기 + 타이머 시작
   tangent:  ['proof','p42'],                           // 증명 하나 펼치기 + 교과서 42p 탭
-  light:    ['see-ell','see-hyp','see-tel','see-litho'] // 타원·쌍곡선·반사 망원경·쇄석기 탭
+  light:    ['see-ell','see-hyp','see-tel','see-litho'],// 타원·쌍곡선·반사 망원경·쇄석기 탭
+  /* 2단원 */
+  pdet:     ['pos2-det-1','pos2-q1-open'],             // 결정조건 하나 찾기 + 문제 01 열기
+  prel:     ['pos2-tab-lp','pos2-q2-open']             // 직선과 평면 탭 + 문제 02 열기
 };
 window.GEO_task = function(key){
   const page = window.PAGE_ID;
@@ -1087,12 +1118,15 @@ window.GEO_openSubmit = function(){
   const idx = acts.findIndex(a => a.id === window.PAGE_ID);
   if(idx < 0) return;
   const me = acts[idx];
-  /* 지오지브라(grp:'tool')는 오른쪽 위 G 버튼으로만 — 이전/다음 순서에서 뺀다 */
-  const navActs = acts.filter(a => a.grp !== 'tool');
+  /* 지오지브라(grp:'tool')는 오른쪽 위 G 버튼으로만 — 이전/다음 순서에서 뺀다.
+     이전·다음·홈은 모두 '그 활동이 속한 단원' 안에서만 움직인다. */
+  const myUnit = me.unit || 1;
+  const homeHref = window.GEO_homeHref(myUnit);
+  const navActs = acts.filter(a => a.grp !== 'tool' && !a.soon && (a.unit || 1) === myUnit);
   const nIdx = navActs.findIndex(a => a.id === window.PAGE_ID);
-  const prevHref = (nIdx > 0) ? navActs[nIdx-1].href : 'index.html#home';
+  const prevHref = (nIdx > 0) ? navActs[nIdx-1].href : homeHref;
   const lastOne = (nIdx >= 0 && nIdx === navActs.length - 1);
-  const nextHref = (nIdx >= 0 && !lastOne) ? navActs[nIdx+1].href : 'index.html#home';
+  const nextHref = (nIdx >= 0 && !lastOne) ? navActs[nIdx+1].href : homeHref;
 
   /* ── 스타일 ── */
   const css = document.createElement('style');
@@ -1135,7 +1169,7 @@ window.GEO_openSubmit = function(){
   bar.id = 'gnav';
   bar.innerHTML = `
     <a href="${prevHref}" id="gnavPrev">‹ 이전</a>
-    <a href="index.html#home" id="gnavHome">홈</a>
+    <a href="${homeHref}" id="gnavHome">홈</a>
     <div id="gnavRight">
       <button id="gnavMark" title="오늘 여기까지 (책갈피)" aria-label="책갈피">
         <svg width="15" height="19" viewBox="0 0 16 20" style="display:block">

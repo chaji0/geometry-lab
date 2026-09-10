@@ -232,7 +232,7 @@
   <img id="splashEmblem" src="splash-emblem.png" alt="">
   <div id="splashTitle">GEOMETRY</div>
   <div id="splashLine"></div>
-  <div id="splashSub">v1.52&ensp;·&ensp;제작 수학과</div>
+  <div id="splashSub">v1.53&ensp;·&ensp;제작 수학과</div>
   <!-- 버전 글자는 아래 스크립트가 GEO_CONFIG.VERSION 으로 자동으로 채운다 -->
 </div>
 <style>
@@ -304,11 +304,11 @@
           <span class="dd">원뿔을 자르면 나타나는 네 가지 곡선 — 포물선·타원·쌍곡선.</span></span>
         <span class="tag">›</span>
       </button>
-      <button class="unit soon">
+      <button class="unit" id="unit2">
         <span class="no" style="background:#f0a25f">2</span>
         <span><span class="tt">공간도형과 공간좌표</span><br>
           <span class="dd">삼수선의 정리, 정사영, 그리고 좌표공간.</span></span>
-        <span class="tag">추후 공개</span>
+        <span class="tag">›</span>
       </button>
       <button class="unit soon">
         <span class="no" style="background:#6ecb8f">3</span>
@@ -322,7 +322,7 @@
         <div id="tlTop">
           <div>
             <div class="eyebrow">GEOMETRY LAB</div>
-            <h2>1. 이차곡선</h2>
+            <h2 id="tlTitle">1. 이차곡선</h2>
             <div class="who2" id="tlWho"></div>
           </div>
         </div>
@@ -416,31 +416,39 @@ function esc2(t){ return String(t).replace(/[&<>"]/g, m => ({'&':'&amp;','<':'&l
 
 function renderActs(){
   const done = doneList();
-  const acts = GEO_CONFIG.ACTIVITIES;
+  const U = CURUNIT || 1;
+  const unitInfo = (GEO_CONFIG.UNITS || []).find(u => u.n === U);
+  if($('tlTitle') && unitInfo) $('tlTitle').textContent = unitInfo.title;
+  /* 이 단원의 활동만 */
+  const acts = GEO_CONFIG.ACTIVITIES.filter(a => (a.unit || 1) === U);
+  const groups = (U === 2 ? GEO_CONFIG.HOME_GROUPS2 : GEO_CONFIG.HOME_GROUPS) || [];
   const closed = closedSet();
-  /* 홈 묶음에 속한 활동만 셈 (지오지브라 바로가기는 제외) */
-  const keys = GEO_CONFIG.HOME_GROUPS.map(g => g.key);
-  const listed = acts.filter(a => keys.indexOf(a.grp) >= 0);
+  /* 홈 묶음에 속한 활동만 셈 (지오지브라 바로가기·준비 중 자리는 제외) */
+  const keys = groups.map(g => g.key);
+  const listed = acts.filter(a => keys.indexOf(a.grp) >= 0 && !a.soon);
   const total = listed.length;
   const nDone = listed.filter(a => done.includes(a.id)).length;
   const nowId = (listed.find(a => !done.includes(a.id)) || {}).id;
 
   $('tlWho').textContent = (localStorage.getItem('geoName') || '') + '님, 순서대로 따라가 보세요.';
-  $('tlNext').href = acts.length ? acts[0].href : 'index.html#home';   // 첫 활동으로
+  $('tlNext').href = listed.length ? listed[0].href : '#';             // 첫 활동으로
   $('tlNum').textContent = nDone + ' / ' + total + ' 완료';
-  $('tlBar').style.width = Math.round(nDone / total * 100) + '%';
+  $('tlBar').style.width = total ? Math.round(nDone / total * 100) + '%' : '0%';
 
-  const groups = GEO_CONFIG.HOME_GROUPS;
   let reached = true;
   const html = groups.map((g, gi) => {
     const kids = acts.filter(a => a.grp === g.key);
+    const real = kids.filter(k => !k.soon);
     const soon = g.soon || [];
-    const allDone = kids.length > 0 && kids.every(k => done.includes(k.id));
-    const isSoon = kids.length === 0 && soon.length > 0;
-    const hasNow = kids.some(k => k.id === nowId);
+    const allDone = real.length > 0 && real.every(k => done.includes(k.id));
+    const isSoon = real.length === 0 && (soon.length > 0 || kids.length > 0);
+    const hasNow = real.some(k => k.id === nowId);
     const rows = kids.map(k => {
+      const head = k.sub ? '<div class="subhead">' + esc2(k.sub) + '</div>' : '';
+      if(k.soon) return head + '<span class="it dead todo">' + MARK.todo
+           + '<span>' + esc2(k.curve || k.title) + '</span></span>';
       const st = done.includes(k.id) ? 'done' : (k.id === nowId ? 'now' : 'todo');
-      return (k.sub ? '<div class="subhead">' + esc2(k.sub) + '</div>' : '')
+      return head
            + '<a class="it ' + st + '" href="' + k.href + '">' + MARK[st]
            + '<span>' + esc2(k.curve || k.title) + '</span></a>';
     }).concat(soon.map(t =>
@@ -463,7 +471,8 @@ function renderActs(){
   $('tlRow1').innerHTML = html.slice(0, 4).join('');
   const r2 = html.slice(4).reverse();
   const padN = Math.max(0, 4 - r2.length);
-  $('tlRow2').innerHTML = '<div class="spacer"></div>'.repeat(padN) + r2.join('');
+  $('tlRow2').innerHTML = r2.length ? ('<div class="spacer"></div>'.repeat(padN) + r2.join('')) : '';
+  $('tlRow2').style.display = r2.length ? '' : 'none';
 
   document.querySelectorAll('#tl .chip').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -505,8 +514,24 @@ function drawRail(){
   }
   drawRail._n = 0;
   const y1 = c1.getBoundingClientRect().top - base.top + 17;
-  const y2 = s5 ? (s5.getBoundingClientRect().top - base.top + 17) : y1;
   const row1 = $('tlRow1').getBoundingClientRect();
+  if(!s5){                                   /* 묶음이 한 줄뿐이면 곧은 레일 하나 */
+    const chips1 = [...$('tlRow1').querySelectorAll('.stage .chip')];
+    const last1 = chips1[chips1.length - 1];
+    const xLast = last1 ? (last1.getBoundingClientRect().right - base.left) : 0;
+    const reached1 = [...$('tlRow1').querySelectorAll('.stage.reached .chip')].pop();
+    const xOn1 = reached1 ? (reached1.getBoundingClientRect().right - base.left) : 0;
+    const w1 = Math.max(base.width, xLast + 110), h1 = y1 + 30;
+    svg.setAttribute('width', w1); svg.setAttribute('height', h1);
+    svg.setAttribute('viewBox', '0 0 ' + w1 + ' ' + h1);
+    svg.innerHTML =
+        '<path d="M 0 ' + y1 + ' H ' + xLast + '" stroke="#DCDACD" stroke-width="1.6" stroke-linecap="round"/>'
+      + '<path d="M ' + xLast + ' ' + y1 + ' H ' + (xLast + 88) + '" stroke="#DCDACD" stroke-width="1.6" '
+      + 'stroke-linecap="round" stroke-dasharray="2 7"/>'
+      + '<path d="M 0 ' + y1 + ' H ' + xOn1 + '" stroke="#2F45EC" stroke-width="1.6" stroke-linecap="round"/>';
+    return;
+  }
+  const y2 = s5.getBoundingClientRect().top - base.top + 17;
   const xEnd = row1.right - base.left - 96;    // 꺾이는 자리(오른쪽 여백) 앞
   const bulge = xEnd + 94;
   const w = Math.max(base.width, bulge + 10);
@@ -526,8 +551,11 @@ function drawRail(){
 let railTm = null;
 window.addEventListener('resize', () => { clearTimeout(railTm); railTm = setTimeout(drawRail, 120); });
 
+let CURUNIT = 1;
 function showView(){
-  const home = location.hash === '#home';
+  const h = location.hash;
+  const home = (h === '#home' || h === '#home2');
+  CURUNIT = (h === '#home2') ? 2 : 1;
   $('tocView').style.display  = home ? 'none' : 'block';
   $('homeView').style.display = home ? 'block' : 'none';
   document.body.classList.toggle('homeMode', home);
@@ -683,6 +711,7 @@ btn.addEventListener('click', ()=>tryEnter(false));
 [$('sid'),$('name')].forEach(el=>el.addEventListener('keydown',e=>{ if(e.key==='Enter') tryEnter(false); }));
 
 $('unit1').addEventListener('click', ()=>{ location.hash = '#home'; });
+$('unit2').addEventListener('click', ()=>{ location.hash = '#home2'; });
 $('backToc').addEventListener('click', ()=>{ location.hash = '#toc'; });
 
 $('logout').addEventListener('click', hardLogout);
