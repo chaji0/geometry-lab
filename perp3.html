@@ -322,6 +322,32 @@ details.keychk #keys{margin-top:9px} details.keychk .note{margin-top:9px}
       <div class="qfig c3wrap"><canvas id="fb"></canvas><div class="c3bar"><span>끌어서 돌려 보세요</span><button class="btn sm" id="fbreset">시점 초기화</button></div></div>
     </div>
   </div>
+  <div class="qcard">
+    <h2><span class="badge">추론</span>정사면체와 무게중심</h2>
+    <div class="qwrap">
+      <div class="qtext">정사면체 <span class="rm">ABCD</span>의 꼭짓점 <span class="rm">D</span>에서 밑면 <span class="rm">ABC</span>에 내린 수선의 발을 <span class="rm">E</span>라고 하자.
+        점 <span class="rm">E</span>가 삼각형 <span class="rm">ABC</span>의 무게중심임을 증명하시오.
+        <div class="note" style="margin-top:8px">힌트 — 선분 <span class="rm">AB</span>의 중점 <span class="rm">M</span>과 두 꼭짓점 <span class="rm">C</span>, <span class="rm">D</span>를 연결해 보세요. 삼수선의 정리가 보입니다.</div>
+      </div>
+      <div class="qfig c3wrap"><canvas id="ft"></canvas><div class="c3bar"><span>끌어서 돌려 보세요</span><button class="btn sm" id="ftreset">시점 초기화</button></div></div>
+    </div>
+
+  <div class="qcard">
+    <h2>나의 증명</h2>
+    <textarea class="proof" id="tag" placeholder="점 E 가 무게중심임을 증명하세요. perp 는 ⊥ 로 바뀝니다."></textarea>
+    <div class="pass" id="passg">핵심 키워드가 모두 들어갔어요 — 통과!</div>
+    <div class="sendRow"><button class="btn pri" id="sendBtng">증명 제출하기</button><span class="sendMsg" id="sendMsgg"></span></div>
+    <div class="helpkeys">
+      <span>alpha → <b>α</b></span><span>perp → <b>⊥</b></span><span>tri → <b>△</b></span>
+      <span>== → <b>≡</b></span><span>angle → <b>∠</b></span><span>' → <b>′</b></span>
+    </div>
+  </div>
+  <details class="qcard keychk"><summary>키워드 채점</summary>
+    <div id="keysg"></div>
+    <div class="note">표현이 달라도 좋아요 — 핵심 아이디어가 들어있는지만 봅니다.</div>
+  </details>
+
+  </div>
 </div>
 
 <script>
@@ -633,12 +659,44 @@ document.querySelectorAll('#tabs button[data-t]').forEach(b=>b.onclick=()=>{ tab
   document.querySelectorAll('.pane2').forEach(p=>p.classList.toggle('on',p.id==='pane'+tab.slice(1)));
   requestAnimationFrame(()=>{ Object.values(V).forEach(v=>v.resize()); VP.resize(); VE.resize(); VB.resize(); });
   geoTask('perp3-tab-'+tab); });
+
+/* ── 03 추론 : 정사면체 무게중심 ── */
+const VT=mkView('ft',{az:-0.75,el:0.36,dist:10.5,target:[0,0,1.1],fov:38}); $('ftreset').onclick=()=>VT.reset();
+const TT=(()=>{ const s=3.0, r=s/R3, h=s*Math.sqrt(2/3);
+  const A=[r*Math.cos(Math.PI*7/6),r*Math.sin(Math.PI*7/6),0], B=[r*Math.cos(-Math.PI/6),r*Math.sin(-Math.PI/6),0], C=[0,r,0], D=[0,0,h], E=[0,0,0];
+  return {A,B,C,D,E, M:mul(add(A,B),0.5), N:mul(add(B,C),0.5)}; })();
+function drawTet(){ VT.use(); if(!W||!H) return; setCam(VT.cam); ctx.fillStyle=PAPER; ctx.fillRect(0,0,W,H);
+  const {A,B,C,D,E,M,N}=TT;
+  F3([A,B,C],'rgba(224,137,26,.10)',null); F3([A,B,D],'rgba(90,110,200,.10)',null); F3([B,C,D],'rgba(90,110,200,.08)',null); F3([C,A,D],'rgba(90,110,200,.06)',null);
+  const cam=VT.cam, eye=[cam.target[0]+cam.dist*Math.cos(cam.el)*Math.cos(cam.az), cam.target[1]+cam.dist*Math.cos(cam.el)*Math.sin(cam.az), cam.target[2]+cam.dist*Math.sin(cam.el)];
+  const vis=(f)=>{ const n=cross(sub(f[1],f[0]),sub(f[2],f[0])); return dot(n,sub(eye,f[0]))>0; };
+  const faces=[[A,B,C],[A,D,B],[B,D,C],[C,D,A]];
+  const edges=[[A,B,0,1],[B,C,0,2],[C,A,0,3],[A,D,1,3],[B,D,1,2],[C,D,2,3]];
+  for(const [p,q,i,j] of edges){ const on=vis(faces[i])||vis(faces[j]); L3(p,q,INK,on?2.0:1.4,on?null:[5,4]); }
+  L3(D,E,RED,2.2,[5,4]); L3(C,M,BLU,1.8,[5,4]); L3(D,M,BLU,1.8,[5,4]); L3(A,N,'#7A8A3A',1.5,[3,4]);
+  rmark(E,norm(sub(D,E)),norm(sub(M,E)),0.26,RED); rmark(M,norm(sub(D,M)),norm(sub(B,M)),0.26,BLU);
+  for(const q of [A,B,C,D]) P3(q,INK,3.6,PAPER); P3(E,RED,3.6,PAPER); P3(M,BLU,3.2,PAPER); P3(N,'#7A8A3A',3.0,PAPER);
+  flush();
+  const R=(p,s,dx,dy,c)=>label3(p,s,c||INK,dx,dy,false,14.5);
+  R(A,'A',-13,6); R(B,'B',13,6); R(C,'C',13,-2); R(D,'D',0,-14); R(E,'E',10,10,RED); R(M,'M',-4,15,BLU); R(N,'N',13,4,'#7A8A3A');
+}
+function TPL(seg){ const out=[]; for(const p of ['ABC','ACB','BAC','BCA','CAB','CBA']){ for(const pl of ['평면'+p,p]){ out.push(seg+'⊥'+pl); out.push(pl+'⊥'+seg); } } return out; }
+const GK=[
+  {label:'CM ⊥ AB  (정삼각형 ABC 의 중선)', alts:['CM⊥AB','AB⊥CM','MC⊥AB','AB⊥MC']},
+  {label:'DM ⊥ AB  (정삼각형 ABD 의 중선)', alts:['DM⊥AB','AB⊥DM','MD⊥AB','AB⊥MD']},
+  {label:'DE ⊥ (평면 ABC)',                alts:TPL('DE').concat(TPL('ED'),['DE⊥밑면','밑면⊥DE'])},
+  {label:'삼수선의 정리에 의하여 EM ⊥ AB',   alts:['EM⊥AB','AB⊥EM','ME⊥AB','AB⊥ME']},
+  {label:'따라서 점 E 는 CM 위에 있다',      alts:['CM위에','CM위','선분CM위','직선CM위','MC위']},
+  {label:'같은 방법으로 점 E 는 AN 위에 있다', alts:['같은방법','마찬가지','AN위','NA위','BL위','BC의중점']},
+  {label:'결론  E 는 두 중선의 교점 → 무게중심', alts:['교점','무게중심']}
+];
+makeProof({sfx:'g', keys:GK, store:'g', item:'정사면체 무게중심 증명', task:'perp3-g'});
 for(const k of [1,2,3]) thmText(k);
 let t0=performance.now();
 function loop(t){ const dt=Math.max(0,Math.min(0.05,(t-t0)/1000)); t0=t; T+=dt; DT=dt;
   if(tab==='t1'){ for(const k of [1,2,3]) drawThm(k); }
   else if(tab==='t2') drawFull();
-  else { drawEx(); drawBox(); }
+  else { drawEx(); drawBox(); drawTet(); }
   requestAnimationFrame(loop);
 }
 requestAnimationFrame(loop);
