@@ -821,7 +821,7 @@ function resize7(){ const r=c7.getBoundingClientRect(); if(r.width<2) return;
   W7=Math.round(r.width); H7=Math.round(r.height);
   c7.width=Math.round(W7*DPR); c7.height=Math.round(H7*DPR); ctx7.setTransform(DPR,0,0,DPR,0,0); }
 function use7(){ ctx=ctx7; W=W7; H=H7; }
-const E7={ hi:new Set(), hitT:{}, cam:{az:-0.95, el:0.30, dist:8.6, target:[0,0,0.6], fov:38} };
+const E7={ hi:new Set(), hitT:{}, cam:{az:-0.95, el:0.30, dist:7.6, target:[0,0,0.7], fov:38} };
 const T7=(function(){ const s=2.4, h=s*Math.sqrt(2/3), r=s/Math.sqrt(3);
   const B=[-s/2,-r/2,0], C=[s/2,-r/2,0], D=[0,r,0], A=[0,0,h]; return {A,B,C,D,M:mul(add(B,C),0.5)}; })();
 function glow7(key){ if(!E7.hi.has(key)) return 0; const h=E7.hitT[key]; const dt=h==null?9:(T-h);
@@ -831,27 +831,26 @@ function drawQ7(){
   setCam(E7.cam); ctx.fillStyle=PAPER; ctx.fillRect(0,0,W,H);
   const {A,B,C,D,M}=T7;
   const g=k=>glow7(k);
-  /* 면 */
-  F3([B,C,D],'rgba(224,137,26,.10)',null); F3([A,B,C],'rgba(224,137,26,.16)',null);
-  F3([A,C,D],'rgba(224,137,26,.13)',null); F3([A,B,D],'rgba(224,137,26,.13)',null);
-  /* 평면 AMD (삼각형) */
-  const gp=g('PLN'); F3([A,M,D], gp?ORGA+(0.25+0.3*gp)+')':'rgba(122,63,181,.14)', gp?ORGA+'.9)':'rgba(122,63,181,.6)',1.3);
+  /* 바닥 참고 (문제 06 과 같은 그림체) */
+  F3([[-3.6,-3.2,0],[3.6,-3.2,0],[3.6,3.2,0],[-3.6,3.2,0]],'rgba(35,36,29,.02)','rgba(35,36,29,.1)',1);
+  /* 평면 AMD — 연한 색만 */
+  const gp=g('PLN'); F3([A,M,D], gp?ORGA+(0.10+0.18*gp)+')':'rgba(47,69,236,.07)', gp?ORGA+'.8)':'rgba(47,69,236,.35)',1.1);
   /* 모서리 */
-  const E='#4B4B44';
-  for(const [p,q] of [[A,B],[A,C],[A,D],[B,D],[C,D]]) L3(p,q,E,1.5);
-  const gb=g('BC'); if(gb) L3(B,C,ORGA+gb+')',8); L3(B,C,BLU,2.6);
-  const ga=g('AM'); if(ga) L3(A,M,ORGA+ga+')',8); L3(A,M,VIO,2.2);
-  const gm=g('MD'); if(gm) L3(M,D,ORGA+gm+')',8); L3(M,D,VIO,2.2);
-  const gd=g('AD'); if(gd) L3(A,D,ORGA+gd+')',8); if(gd) L3(A,D,RED,2.6);
+  const E='rgba(35,36,29,.55)';
+  for(const [p,q] of [[A,B],[A,C],[A,D],[B,D],[C,D]]) L3(p,q,E,1.6);
+  const gb=g('BC'); if(gb) L3(B,C,ORGA+gb+')',8); L3(B,C,gb?BLU:'rgba(47,69,236,.7)',gb?2.4:1.8);
+  const ga=g('AM'); if(ga) L3(A,M,ORGA+ga+')',8); L3(A,M,'rgba(35,36,29,.6)',1.6,ga?null:[5,4]);
+  const gm=g('MD'); if(gm) L3(M,D,ORGA+gm+')',8); L3(M,D,'rgba(35,36,29,.6)',1.6,gm?null:[5,4]);
+  const gd=g('AD'); if(gd){ L3(A,D,ORGA+gd+')',8); L3(A,D,RED,2.2); }
   /* 직각 표시 · 같은 길이 표시 */
   const u=norm(sub(C,B));
-  rmark(M,u,norm(sub(A,M)),0.3,VIO); rmark(M,u,norm(sub(D,M)),0.3,VIO);
+  rmark(M,u,norm(sub(A,M)),0.3,INK); rmark(M,u,norm(sub(D,M)),0.3,INK);
   tick(B,M,1,INK); tick(M,C,1,INK);
+  for(const q of [A,B,C,D]) P3(q,INK,4.2,PAPER);
   P3(M,INK,3.6,PAPER);
   flush();
   const R=(p,s,dx,dy)=>label3(p,s,INK,dx,dy,false,14.5);
   R(A,'A',0,-14); R(B,'B',-12,4); R(C,'C',10,10); R(D,'D',12,-2); R(M,'M',0,16);
-  mixedC(W/2,16,[['정사면체 · ',0],['M',0],[' 은 ',0],['BC',0],[' 의 중점 · 보라 삼각형이 평면 AMD',0]],DIM);
 }
 let l7=null;
 c7.addEventListener('pointerdown',ev=>{ c7.setPointerCapture(ev.pointerId); l7=lp(c7,ev); });

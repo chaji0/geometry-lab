@@ -528,23 +528,23 @@ function tick(a,b,n,col){ const mid=mul(add(a,b),0.5), u=norm(sub(b,a)); let v=c
 /* ══════════ 공통 도형 : 삼수선 (P, O, H, l, α) ══════════ */
 const S={ H:[0,0,0], O:[0,-1.6,0], P:[0,-1.6,2.3], dl:[1,0,0] };
 const ORGA='rgba(242,162,46,';
-function drawPlane(ext){ F3([[-ext[0],-ext[1],0],[ext[0],-ext[1],0],[ext[0],ext[1],0],[-ext[0],ext[1],0]],'rgba(224,137,26,.12)','rgba(120,90,60,.7)',1.3); }
-function lineL(col,w){ L3(add(S.H,mul(S.dl,-2.6)),add(S.H,mul(S.dl,2.6)),col||'#3A3A34',w||1.8); }
+function drawPlane(ext){ F3([[-ext[0],-ext[1],0],[ext[0],-ext[1],0],[ext[0],ext[1],0],[-ext[0],ext[1],0]],'rgba(35,36,29,.025)','rgba(35,36,29,.28)',1.1); }
+function lineL(col,w){ L3(add(S.H,mul(S.dl,-2.6)),add(S.H,mul(S.dl,2.6)),col||'rgba(35,36,29,.65)',w||1.5); }
 /* have : 보이는 요소 집합, spark : 반짝일 요소 집합 */
 function drawTri(have, spark, cap){
   const {P,O,H,dl}=S; const has=k=>have.has(k); const sp=k=>spark.has(k)?(0.45+0.5*pulse(5)):0;
   drawPlane([3.2,2.4]);
   if(has('l')){ lineL(); }
-  if(has('P')&&has('O')&&has('H')) F3([P,H,O],'rgba(232,69,47,.16)',null);
+  if(has('P')&&has('O')&&has('H')) F3([P,H,O],'rgba(232,69,47,.07)',null);
   const seg=(a,b,key,col,w)=>{ const g=sp(key); if(g) L3(a,b,ORGA+g+')',w+7); L3(a,b,col,w); };
-  if(has('PO')) seg(P,O,'PO',INK,2.0);
-  if(has('OH')) seg(O,H,'OH',INK,2.0);
-  if(has('PH')) seg(P,H,'PH',RED,2.4);
+  if(has('PO')) seg(P,O,'PO','rgba(35,36,29,.75)',1.6);
+  if(has('OH')) seg(O,H,'OH','rgba(35,36,29,.75)',1.6);
+  if(has('PH')) seg(P,H,'PH',RED,1.9);
   const mk=(o,u,v,key)=>{ const g=sp(key); rmark(o,u,v,0.3, g?'#E0891A':INK); if(g) rmark(o,u,v,0.34,ORGA+g+')'); };
   if(has('mPO')) mk(O,norm(sub(P,O)),norm(sub(H,O)),'mPO');
   if(has('mOH')) mk(H,norm(sub(O,H)),dl,'mOH');
   if(has('mPH')) mk(H,norm(sub(P,H)),dl,'mPH');
-  if(has('P')) P3(P,INK,3.8,PAPER); if(has('O')) P3(O,INK,3.8,PAPER); if(has('H')) P3(H,INK,3.8,PAPER);
+  if(has('P')) P3(P,INK,4.0,PAPER); if(has('O')) P3(O,INK,4.0,PAPER); if(has('H')) P3(H,INK,4.0,PAPER);
   flush();
   const R=(p,s,dx,dy)=>label3(p,s,INK,dx,dy,false,14.5);
   if(has('P')) R(P,'P',0,-14); if(has('O')) R(O,'O',13,6); if(has('H')) R(H,'H',-12,10);
@@ -610,11 +610,12 @@ const VE=mkView('fe',{az:-1.0,el:0.40,dist:9.4,target:[-0.4,-0.7,0.9],fov:38}); 
 const EX={ O:[0,0,0], P:[0,0,2.5], H:[0,-1.5,0], A:[-2,-1.5,0], B:[1.2,-1.5,0] };
 function drawEx(){ VE.use(); if(!W||!H) return; setCam(VE.cam); ctx.fillStyle=PAPER; ctx.fillRect(0,0,W,H);
   const {O,P,A,B}=EX, Hp=EX.H;
-  F3([[-3.2,-2.6,0],[2.6,-2.6,0],[2.6,1.4,0],[-3.2,1.4,0]],'rgba(47,69,236,.08)','rgba(80,90,140,.6)',1.3);
-  F3([P,A,Hp],'rgba(232,69,47,.18)',null); F3([P,Hp,O],'rgba(232,69,47,.10)',null);
-  L3(A,B,INK,2.0); L3(P,O,INK,1.8); L3(O,Hp,INK,1.8); L3(P,Hp,RED,2.2); L3(P,A,RED,2.4);
+  F3([[-3.2,-2.6,0],[2.6,-2.6,0],[2.6,1.4,0],[-3.2,1.4,0]],'rgba(35,36,29,.025)','rgba(35,36,29,.28)',1.1);
+  F3([P,A,Hp],'rgba(232,69,47,.07)',null);
+  const EK='rgba(35,36,29,.7)';
+  L3(A,B,EK,1.6); L3(P,O,EK,1.6); L3(O,Hp,EK,1.6); L3(P,Hp,RED,1.8); L3(P,A,RED,2.0);
   rmark(O,norm(sub(P,O)),norm(sub(Hp,O)),0.28,INK); rmark(Hp,norm(sub(O,Hp)),norm(sub(B,Hp)),0.28,INK); rmark(Hp,norm(sub(P,Hp)),norm(sub(A,Hp)),0.28,RED);
-  for(const q of [P,O,Hp,A,B]) P3(q,INK,3.6,PAPER);
+  for(const q of [P,O,Hp,A,B]) P3(q,INK,4.0,PAPER);
   flush();
   const R=(p,s,dx,dy,c)=>label3(p,s,c||INK,dx,dy,false,14.5);
   R(P,'P',0,-14); R(O,'O',13,6); R(Hp,'H',-4,15); R(A,'A',-13,4); R(B,'B',12,6);
@@ -631,13 +632,13 @@ function drawBox(){ VB.use(); if(!W||!H) return; setCam(VB.cam); ctx.fillStyle=P
   const front=f=>{ const c=mul(f.reduce((a,p)=>add(a,p),[0,0,0]),0.25); let n=norm(cross(sub(f[1],f[0]),sub(f[2],f[0])));
     if(dot(n,sub(c,CTR))<0) n=mul(n,-1); return dot(n,sub(EYE,c))>0; };
   const vis=FS.map(front);
-  FS.forEach((f,i)=>{ if(vis[i]) F3(f,'rgba(224,137,26,.12)',null); });
+  FS.forEach((f,i)=>{ if(vis[i]) F3(f,'rgba(35,36,29,.02)',null); });
   const ED=[[E,F,0,2],[F,G,0,3],[G,Hb,0,4],[Hb,E,0,5],[A,B,1,2],[B,C,1,3],[C,D,1,4],[D,A,1,5],[A,E,2,5],[B,F,2,3],[C,G,3,4],[D,Hb,4,5]];
   for(const [p,q,i,j] of ED){ const hid=!vis[i]&&!vis[j]; push(hid?60:20,()=>{ const a=proj(p),b=proj(q); if(!a||!b) return;
-    ctx.save(); ctx.strokeStyle='#5A584E'; ctx.lineWidth=hid?1.2:1.5; ctx.setLineDash(hid?[5,4]:[]); ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke(); ctx.restore(); }); }
-  L3(F,Hb,BLU,2.2); L3(E,I,'#3A3A34',1.6,[5,4]); L3(A,I,RED,2.6);
+    ctx.save(); ctx.strokeStyle=hid?'rgba(35,36,29,.45)':'rgba(35,36,29,.65)'; ctx.lineWidth=hid?1.2:1.6; ctx.setLineDash(hid?[5,4]:[]); ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke(); ctx.restore(); }); }
+  L3(F,Hb,'rgba(47,69,236,.75)',1.7); L3(E,I,'rgba(35,36,29,.6)',1.4,[5,4]); L3(A,I,RED,2.0);
   rmark(I,norm(sub(E,I)),norm(sub(Hb,I)),0.28,INK); rmark(I,norm(sub(A,I)),norm(sub(Hb,I)),0.3,RED);
-  for(const q of [A,E,I]) P3(q,INK,3.6,PAPER);
+  for(const q of [A,E,I]) P3(q,INK,4.0,PAPER);
   flush();
   const R=(p,s,dx,dy,c)=>label3(p,s,c||INK,dx,dy,false,14);
   R(A,'A',-12,-6); R(B,'B',12,-6); R(C,'C',12,-4); R(D,'D',-12,-6); R(E,'E',-12,6); R(F,'F',12,8); R(G,'G',12,8); R(Hb,'H',-12,6); R(I,'I',6,16,RED);
@@ -667,15 +668,15 @@ const TT=(()=>{ const s=3.0, r=s/R3, h=s*Math.sqrt(2/3);
   return {A,B,C,D,E, M:mul(add(A,B),0.5), N:mul(add(B,C),0.5)}; })();
 function drawTet(){ VT.use(); if(!W||!H) return; setCam(VT.cam); ctx.fillStyle=PAPER; ctx.fillRect(0,0,W,H);
   const {A,B,C,D,E,M,N}=TT;
-  F3([A,B,C],'rgba(224,137,26,.10)',null); F3([A,B,D],'rgba(90,110,200,.10)',null); F3([B,C,D],'rgba(90,110,200,.08)',null); F3([C,A,D],'rgba(90,110,200,.06)',null);
+  F3([[-3.4,-3.0,0],[3.4,-3.0,0],[3.4,3.0,0],[-3.4,3.0,0]],'rgba(35,36,29,.02)','rgba(35,36,29,.1)',1);
   const cam=VT.cam, eye=[cam.target[0]+cam.dist*Math.cos(cam.el)*Math.cos(cam.az), cam.target[1]+cam.dist*Math.cos(cam.el)*Math.sin(cam.az), cam.target[2]+cam.dist*Math.sin(cam.el)];
   const vis=(f)=>{ const n=cross(sub(f[1],f[0]),sub(f[2],f[0])); return dot(n,sub(eye,f[0]))>0; };
   const faces=[[A,B,C],[A,D,B],[B,D,C],[C,D,A]];
   const edges=[[A,B,0,1],[B,C,0,2],[C,A,0,3],[A,D,1,3],[B,D,1,2],[C,D,2,3]];
-  for(const [p,q,i,j] of edges){ const on=vis(faces[i])||vis(faces[j]); L3(p,q,INK,on?2.0:1.4,on?null:[5,4]); }
-  L3(D,E,RED,2.2,[5,4]); L3(C,M,BLU,1.8,[5,4]); L3(D,M,BLU,1.8,[5,4]); L3(A,N,'#7A8A3A',1.5,[3,4]);
+  for(const [p,q,i,j] of edges){ const on=vis(faces[i])||vis(faces[j]); L3(p,q,on?'rgba(35,36,29,.6)':'rgba(35,36,29,.4)',on?1.6:1.3,on?null:[5,4]); }
+  L3(D,E,RED,1.8,[5,4]); L3(C,M,'rgba(47,69,236,.7)',1.5,[5,4]); L3(D,M,'rgba(47,69,236,.7)',1.5,[5,4]); L3(A,N,'rgba(90,110,60,.6)',1.3,[3,4]);
   rmark(E,norm(sub(D,E)),norm(sub(M,E)),0.26,RED); rmark(M,norm(sub(D,M)),norm(sub(B,M)),0.26,BLU);
-  for(const q of [A,B,C,D]) P3(q,INK,3.6,PAPER); P3(E,RED,3.6,PAPER); P3(M,BLU,3.2,PAPER); P3(N,'#7A8A3A',3.0,PAPER);
+  for(const q of [A,B,C,D]) P3(q,INK,4.0,PAPER); P3(E,RED,3.8,PAPER); P3(M,BLU,3.4,PAPER); P3(N,'#7A8A3A',3.2,PAPER);
   flush();
   const R=(p,s,dx,dy,c)=>label3(p,s,c||INK,dx,dy,false,14.5);
   R(A,'A',-13,6); R(B,'B',13,6); R(C,'C',13,-2); R(D,'D',0,-14); R(E,'E',10,10,RED); R(M,'M',-4,15,BLU); R(N,'N',13,4,'#7A8A3A');
