@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<script>
+/* 입장 가드 */
+if (localStorage.getItem('geoAppOk') !== '1') location.replace('index.html');
+</script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="icon" type="image/svg+xml" href="icon.svg">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="apple-mobile-web-app-title" content="기하">
+<meta name="theme-color" content="#B32017">
+<title>삼수선의 정리</title>
+<link rel="stylesheet" media="print" onload="this.media='all'"
+  href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap">
+<style>
+:root{ --paper:#EFEFE3; --ink:#23241D; --dim:#A8A79A; --line:#DCDACD; --line2:#C7C5B6;
+  --acc:#2F45EC; --acc2:#1B2FC4; --card:#F5F5EC; --org:#E0891A; --grn:#12876A; --red:#D9463F; --vio:#7A3FB5; }
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;overflow:hidden}
+body{font-family:'IBM Plex Sans KR','Apple SD Gothic Neo','Malgun Gothic',system-ui,sans-serif;
+  background:var(--paper); color:var(--ink); font-size:14.5px; line-height:1.55; display:flex; flex-direction:column; height:100dvh}
+header{padding:12px 22px 10px; border-bottom:1px solid var(--line); display:flex; align-items:flex-end; gap:18px; flex-wrap:wrap; flex:none}
+h1{font-size:17.5px; margin:0; letter-spacing:-.3px; font-weight:700}
+.sub{font-size:12px; color:var(--dim); margin-top:3px}
+#tabs{display:flex; gap:6px; margin-left:auto; flex-wrap:wrap}
+#tabs button{height:34px; padding:0 13px; border-radius:999px; border:1.5px solid var(--line2); background:transparent;
+  font:inherit; font-size:12.5px; font-weight:700; color:var(--ink); cursor:pointer; display:flex; align-items:center; gap:7px}
+#tabs button .no{font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:11px; color:var(--acc); font-weight:600}
+#tabs button.on{background:var(--acc); border-color:var(--acc); color:#fff} #tabs button.on .no{color:#fff}
+#app{display:flex; flex:1; min-height:0}
+#stage{flex:1; position:relative; min-width:0}
+canvas{display:block; width:100%; height:100%; touch-action:none}
+#panel{width:392px; flex:none; border-left:1px solid var(--line); overflow-y:auto; overscroll-behavior:contain; padding:16px 18px 80px}
+@media (max-width:940px){ #app{flex-direction:column} #stage{flex:0 0 46%; min-height:220px} #panel{width:auto; flex:1; border-left:0; border-top:1px solid var(--line); padding:12px 14px 80px} }
+i.m,.eq i,.m{font-family:Georgia,'Times New Roman',serif; font-style:italic; font-size:1.05em}
+.rm{font-family:Georgia,'Times New Roman',serif; font-style:normal}
+.ov{text-decoration:overline}
+.eq{font-family:Georgia,'Times New Roman',serif; font-size:15.5px; line-height:1.8}
+.card{border:1px solid var(--line); border-radius:12px; padding:12px 13px 14px; margin-bottom:12px; background:var(--card)}
+.card h2{font-size:12px; margin:0 0 9px; letter-spacing:.06em; color:var(--dim); font-family:'IBM Plex Mono',ui-monospace,monospace; text-transform:uppercase; font-weight:600; display:flex; align-items:center}
+.pane{display:none} .pane.on{display:block}
+.stmt{font-size:13.5px; line-height:1.8; padding:10px 13px; border-left:3px solid var(--acc); background:#E9E9DC; border-radius:0 10px 10px 0; margin-bottom:12px}
+.stmt b{color:var(--acc)}
+.step{font-size:13.5px; line-height:1.8; min-height:60px}
+.step b{color:var(--acc)} .step .hint,.hint{color:var(--dim); font-size:12.5px}
+.btnrow{display:flex; gap:7px; align-items:center; margin-top:10px; flex-wrap:wrap}
+.btn{border:1.5px solid var(--line2); background:transparent; color:var(--dim); font:inherit; font-size:12px; font-weight:700; padding:0 14px; height:32px; border-radius:999px; cursor:pointer}
+.btn:hover{border-color:var(--acc); color:var(--acc)} .btn.pri{background:var(--acc); border-color:var(--acc); color:#fff}
+.btn.pri:hover{background:var(--acc2); border-color:var(--acc2); color:#fff}
+.btn.sm{height:28px; padding:0 11px; font-size:11.5px}
+.no{margin-left:auto; font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:11.5px; color:var(--dim)}
+.row{display:flex; align-items:center; gap:10px; margin:9px 0}
+.row label{width:118px; flex:none; font-size:12px; color:var(--dim)}
+.row input[type=range]{flex:1; accent-color:var(--acc); height:20px; min-width:0}
+.row .num{width:62px; text-align:right; font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:12px; flex:none}
+.kv{display:flex; justify-content:space-between; gap:10px; font-size:12.5px; padding:6px 0; border-bottom:1px solid var(--line); align-items:center}
+.kv:last-child{border-bottom:0} .kv b{font-family:'IBM Plex Mono',ui-monospace,monospace; font-weight:600; white-space:nowrap}
+.kv .ok{color:var(--grn)} .kv .lim{color:var(--org)} .kv .bad{color:var(--red)}
+.toggles{display:flex; flex-wrap:wrap; gap:6px}
+.toggles label{display:inline-flex; align-items:center; gap:5px; border:1px solid var(--line2); border-radius:999px; padding:5px 10px; font-size:12px; cursor:pointer; user-select:none; color:var(--dim)}
+.toggles label:has(input:checked){color:var(--acc); border-color:var(--acc)} .toggles input{accent-color:var(--acc); margin:0}
+details{border:1px solid var(--line); border-radius:12px; padding:10px 13px; margin-bottom:10px; background:var(--card)}
+details summary{cursor:pointer; font-weight:600; font-size:13px; list-style:none}
+details summary::-webkit-details-marker{display:none}
+details summary::before{content:"+ "; color:var(--acc); font-family:'IBM Plex Mono',monospace} details[open] summary::before{content:"− "}
+details p,details li{font-size:12.5px; line-height:1.8} details ol,details ul{margin:8px 0 2px; padding-left:19px}
+.note{font-size:11.5px; color:var(--dim); line-height:1.6; margin-top:8px}
+#hud{position:absolute; left:12px; bottom:12px; display:flex; flex-wrap:wrap; gap:6px; max-width:calc(100% - 24px); pointer-events:none}
+.chip{background:rgba(239,239,227,.9); border:1px solid var(--line); border-radius:999px; padding:4px 11px; font-size:11.5px; font-family:'IBM Plex Mono',ui-monospace,monospace}
+.chip i{font-style:normal; color:var(--dim); margin-right:4px}
+#tip{position:absolute; left:12px; top:12px; font-size:11.5px; color:var(--dim); background:rgba(239,239,227,.86); border:1px solid var(--line); border-radius:999px; padding:5px 12px; max-width:calc(100% - 130px); pointer-events:none}
+#tools{position:absolute; right:12px; top:12px; display:flex; gap:6px}
+#tools .btn{background:rgba(239,239,227,.9); height:30px; padding:0 12px; display:flex; align-items:center; gap:5px}
+.foot{font-size:11px; color:var(--dim); text-align:center; margin-top:14px; font-family:'IBM Plex Mono',ui-monospace,monospace}
+.tag{display:inline-block; font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:10.5px; letter-spacing:.06em; color:var(--acc); border:1px solid var(--acc); border-radius:999px; padding:1px 8px; margin-right:6px; vertical-align:2px}
+.tag.dim{color:var(--dim); border-color:var(--line2)}
+.seg{display:flex; gap:5px; background:#E4E3D6; padding:3px; border-radius:999px; margin-bottom:10px}
+.seg button{flex:1; height:28px; border:0; border-radius:999px; background:transparent; font:inherit; font-size:12px; font-weight:700; color:var(--dim); cursor:pointer}
+.seg button.on{background:#fff; color:var(--acc); box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.plist button{display:flex; align-items:center; gap:9px; width:100%; text-align:left; height:40px; padding:0 10px; border:0;
+  border-bottom:1px solid var(--line); background:transparent; font:inherit; font-size:13px; color:var(--ink); cursor:pointer}
+.plist button:last-child{border-bottom:0}
+.plist button .k{font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:11px; color:var(--dim); width:18px; flex:none}
+.plist button.on{color:var(--acc); font-weight:700} .plist button.on .k{color:var(--acc)}
+
+/* 문제 팝업 */
+#ov{position:fixed; inset:0; background:rgba(35,36,29,.38); display:none; align-items:center; justify-content:center; z-index:50; padding:18px}
+#ov.on{display:flex}
+.mcard{background:var(--paper); border:1px solid var(--line2); border-radius:16px; width:min(660px,100%);
+  max-height:calc(100dvh - 36px); overflow:auto; padding:18px 20px 20px; box-shadow:0 18px 60px rgba(0,0,0,.25)}
+.mhead{display:flex; align-items:center; gap:10px; margin-bottom:6px}
+.mhead h3{margin:0; font-size:15.5px; flex:1}
+.mx{border:1.5px solid var(--line2); background:transparent; border-radius:999px; width:30px; height:30px; font:inherit; font-weight:700; color:var(--dim); cursor:pointer}
+.mq{font-size:13px; line-height:1.7; margin:6px 0 10px}
+#mc,#mc2{width:100%; height:300px; border:1px solid var(--line); border-radius:12px; background:var(--card); touch-action:none; display:block}
+.opts{display:grid; grid-template-columns:1fr 1fr; gap:7px; margin-top:10px}
+.opts button{border:1.5px solid var(--line2); background:transparent; border-radius:10px; min-height:38px; padding:7px 10px;
+  font:inherit; font-size:12.5px; text-align:left; cursor:pointer; color:var(--ink); line-height:1.45}
+.opts button.on{border-color:var(--acc); color:var(--acc); font-weight:700; background:#fff}
+.verdict{margin-top:10px; font-size:12.5px; line-height:1.65; border-left:3px solid var(--acc); padding:2px 0 2px 10px; min-height:20px; color:var(--ink)}
+.verdict.bad{border-left-color:var(--red)}
+.verdict:empty{border-left-color:var(--line); color:var(--dim)}
+/* 준비물 */
+.tray{display:flex; gap:7px; flex-wrap:wrap}
+.tray button{border:1.5px solid var(--line2); background:#fff; border-radius:12px; padding:9px 13px; font:inherit; font-size:12.5px;
+  font-weight:700; cursor:pointer; display:flex; align-items:center; gap:8px; color:var(--ink)}
+.tray button:disabled{opacity:.35; cursor:default}
+.tray .cnt{font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:11px; color:var(--acc); border:1px solid var(--acc); border-radius:999px; padding:0 7px}
+.tray .glyph{font-family:Georgia,serif; font-size:15px}
+.cklist .kv b{font-family:'IBM Plex Mono',ui-monospace,monospace}
+.big{font-size:13px; font-weight:700}
+
+.qcard{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:15px 16px; margin:0 auto 14px; max-width:920px}
+.qcard h2{margin:0 0 9px; font-size:12px; letter-spacing:.08em; color:var(--dim); font-weight:700}
+.qtext{font-size:14px; line-height:1.85}
+.qwrap{display:flex; gap:16px; align-items:flex-start; flex-wrap:wrap}
+.qwrap .qtext{flex:1; min-width:240px}
+.qfig{flex:none; background:#fff; border:1px solid var(--line); border-radius:10px; padding:6px}
+.m{font-family:Georgia,'Times New Roman',serif; font-style:italic; font-weight:600}
+.rm{font-family:Georgia,'Times New Roman',serif; font-weight:600}
+.ov{text-decoration:overline}
+.badge{display:inline-block; font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:10.5px; letter-spacing:.06em;
+  color:#fff; background:var(--acc); border-radius:999px; padding:2px 9px; margin-right:8px; vertical-align:2px}
+.defbox{border-left:3px solid var(--acc); background:#E9E9DC; border-radius:0 10px 10px 0; padding:10px 13px; font-size:13.5px; line-height:1.85; margin-top:8px}
+.defbox b{color:var(--acc)}
+textarea.proof{width:100%; min-height:150px; resize:vertical; border:1.5px solid var(--line2); border-radius:12px;
+  background:#fff; color:var(--ink); padding:12px 14px; font-family:'IBM Plex Sans KR',Georgia,serif; font-size:14.5px; line-height:1.95; outline:none}
+textarea.proof:focus{border-color:var(--acc)}
+.proofsteps{border-left:3px solid var(--acc); padding:2px 0 2px 12px; margin:10px 0 4px; font-size:13.5px; line-height:2.0}
+.proofsteps .hidden-step{display:none}
+.pass{margin-top:10px; border:1.5px solid var(--grn); color:var(--grn); border-radius:10px; padding:8px 12px; font-size:13px; font-weight:700; display:none}
+.pass.on{display:block}
+.sendRow{display:flex; align-items:center; gap:11px; margin-top:12px; flex-wrap:wrap}
+.sendMsg{font-size:12px; color:var(--dim); line-height:1.5}
+.helpkeys{display:flex; flex-wrap:wrap; gap:5px; margin-top:8px}
+.helpkeys span{border:1px solid var(--line2); border-radius:8px; padding:3px 8px; font-size:11.5px; font-family:'IBM Plex Mono',ui-monospace,monospace; color:var(--dim)}
+.helpkeys b{font-family:Georgia,serif; color:var(--ink)}
+details.qcard{padding:12px 16px} details.qcard summary{font-weight:600; font-size:13px; cursor:pointer; list-style:none}
+details.qcard summary::-webkit-details-marker{display:none}
+details.qcard summary::before{content:"+ "; color:var(--acc); font-family:'IBM Plex Mono',monospace} details.qcard[open] summary::before{content:"− "}
+details.keychk #keys{margin-top:9px} details.keychk .note{margin-top:9px}
+.keychk .kv b{font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:12px}
+@keyframes rowFlash{0%,100%{background:transparent} 40%{background:rgba(242,162,46,.3)}}
+.kv.flash{animation:rowFlash 1.15s ease-out 2; border-radius:7px}
+.c3wrap{padding:0; overflow:hidden; width:min(440px,100%)} .c3wrap canvas{display:block; width:100%; height:320px; touch-action:none}
+.c3bar{display:flex; align-items:center; gap:6px; padding:6px 8px; border-top:1px solid var(--line); font-size:11px; color:var(--dim)}
+.c3bar span{flex:1}
+
+.pane2{display:none; flex:1; min-width:0; overflow-y:auto; padding:18px 20px 96px}
+.pane2.on{display:block}
+/* 정리 상자 */
+.thm{max-width:920px; margin:0 auto 14px; background:var(--card); border:1px solid var(--line); border-radius:14px; padding:15px 16px}
+.thm .lead{font-size:14px; line-height:1.9}
+.thm .rows{margin-top:10px; display:flex; flex-direction:column; gap:6px}
+.thm .row2{display:flex; align-items:center; gap:10px; min-height:40px; font-size:14.5px; font-family:Georgia,'Times New Roman',serif}
+.thm .nb{flex:none; width:30px; height:30px; border-radius:50%; border:0; background:var(--acc); color:#fff; font:inherit; font-weight:700;
+  font-family:'IBM Plex Mono',monospace; font-size:13px; cursor:pointer; display:inline-flex; align-items:center; justify-content:center}
+.thm .nb:hover{background:var(--acc2)} .thm .nb.done{background:var(--grn)}
+.thm .txt{flex:1; min-height:24px; letter-spacing:.01em}
+.thm .txt .hint{font-family:'IBM Plex Sans KR',sans-serif; font-size:12px; color:var(--dim)}
+.thm .txt .kor{font-family:'IBM Plex Sans KR',sans-serif}
+.spark{color:var(--acc); animation:sparkTxt .9s ease-in-out infinite alternate}
+@keyframes sparkTxt{from{text-shadow:0 0 0 rgba(242,162,46,0)} to{text-shadow:0 0 8px rgba(242,162,46,.95), 0 0 16px rgba(242,162,46,.6); color:#E0891A}}
+.figs{display:grid; grid-template-columns:repeat(3,1fr); gap:12px; max-width:920px; margin:0 auto 14px}
+@media (max-width:900px){ .figs{grid-template-columns:1fr} }
+.figs .fig{background:#fff; border:1px solid var(--line); border-radius:12px; overflow:hidden}
+.figs canvas{display:block; width:100%; height:230px; touch-action:none}
+.figs .cap{display:flex; align-items:center; gap:6px; padding:5px 8px; border-top:1px solid var(--line); font-size:11px; color:var(--dim)}
+.figs .cap span{flex:1}
+.seg2{display:flex; gap:5px; background:#E4E3D6; padding:3px; border-radius:999px; margin:0 auto 12px; max-width:920px}
+.seg2 button{flex:1; height:30px; border:0; border-radius:999px; background:transparent; font:inherit; font-size:12.5px; font-weight:700; color:var(--dim); cursor:pointer}
+.seg2 button.on{background:#fff; color:var(--acc); box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.pset{display:none} .pset.on{display:block}
+.ansrow{display:flex; align-items:center; gap:8px; margin-top:12px; flex-wrap:wrap}
+.ansrow input{height:34px; border:1.5px solid var(--line2); border-radius:10px; padding:0 12px; font:inherit; font-size:14px; width:150px; background:#fff}
+.ansrow input:focus{outline:none; border-color:var(--acc)}
+.ansmsg{font-size:12.5px; color:var(--dim)} .ansmsg.ok{color:var(--grn); font-weight:700} .ansmsg.bad{color:var(--red)}
+.eq{font-family:Georgia,'Times New Roman',serif; font-size:15px}
+</style>
+</head>
+<body>
+<canvas id="c" style="display:none"></canvas>
+<header>
+  <div><h1>삼수선의 정리</h1></div>
+  <div id="tabs">
+    <button data-t="t1" class="on"><span class="no">01</span>삼수선의 정리</button>
+    <button data-t="t2"><span class="no">02</span>증명</button>
+    <button data-t="t3"><span class="no">03</span>예제 1 · 문제 02</button>
+  </div>
+</header>
+
+<div id="pane1" class="pane2 on">
+  <div class="thm">
+    <h2 style="margin:0 0 8px; font-size:12px; letter-spacing:.08em; color:var(--dim)">삼수선의 정리</h2>
+    <div class="lead">평면 <i class="m">α</i> 위에 있지 않은 한 점 <span class="rm">P</span>와 평면 <i class="m">α</i> 위의 직선 <i class="m">l</i>,
+      직선 <i class="m">l</i> 위의 한 점 <span class="rm">H</span>, 평면 <i class="m">α</i> 위에 있으면서 직선 <i class="m">l</i> 위에 있지 않은 한 점 <span class="rm">O</span>에 대하여</div>
+    <div class="rows"><div class="row2"><button class="nb" data-k="1">1</button><div class="txt" id="thm1"><span class="hint">눌러 보세요</span></div></div><div class="row2"><button class="nb" data-k="2">2</button><div class="txt" id="thm2"><span class="hint">눌러 보세요</span></div></div><div class="row2"><button class="nb" data-k="3">3</button><div class="txt" id="thm3"><span class="hint">눌러 보세요</span></div></div></div>
+    <div class="note">번호를 누를 때마다 조건이 하나씩 나오고, 그림도 같이 그려집니다. 마지막에 나오는 것이 결론이에요. 그림은 끌어서 돌려 볼 수 있어요.</div>
+  </div>
+  <div class="figs">
+    <div class="fig"><canvas id="f1"></canvas><div class="cap"><span>① 그림</span><button class="btn sm" data-reset="1">시점</button></div></div>
+    <div class="fig"><canvas id="f2"></canvas><div class="cap"><span>② 그림</span><button class="btn sm" data-reset="2">시점</button></div></div>
+    <div class="fig"><canvas id="f3"></canvas><div class="cap"><span>③ 그림</span><button class="btn sm" data-reset="3">시점</button></div></div>
+  </div>
+  <div class="qcard">
+    <h2>왜 '삼수선'일까</h2>
+    <div class="qtext"><span class="rm ov">PO</span>, <span class="rm ov">OH</span>, <span class="rm ov">PH</span> — <b>세 개의 수선</b>이 등장해서 삼수선(三垂線)의 정리입니다.
+      셋 중 둘이 수직이면 나머지 하나도 수직이 된다는 뜻이에요. 직각을 <b>어디에</b> 세우는지가 핵심입니다.</div>
+  </div>
+</div>
+
+<div id="pane2" class="pane2">
+  <div class="qcard">
+    <h2>그림 (끌어서 돌려 보세요)</h2>
+    <div class="qwrap">
+      <div class="qtext"><span class="rm">P</span>는 평면 밖의 점, <i class="m">l</i>은 평면 위의 직선, <span class="rm">H</span>는 <i class="m">l</i> 위의 점, <span class="rm">O</span>는 평면 위 · <i class="m">l</i> 밖의 점.
+        세 수선 <span class="rm ov">PO</span>, <span class="rm ov">OH</span>, <span class="rm ov">PH</span>가 삼각형 <span class="rm">PHO</span>를 만듭니다.
+        <div class="defbox">증명의 열쇠는 늘 <b>평면 <span class="rm">PHO</span></b>입니다 — 직선 <i class="m">l</i>이 이 평면 위의 <b>두 직선</b>과 수직이면
+          (예제 3) 평면 <span class="rm">PHO</span> 위의 <b>모든</b> 직선과 수직이니까요.</div></div>
+      <div class="qfig c3wrap"><canvas id="fp"></canvas><div class="c3bar"><span>끌어서 돌려 보세요</span><button class="btn sm" id="fpreset">시점 초기화</button></div></div>
+    </div>
+  </div>
+  <div class="seg2" id="pseg">
+    <button data-p="1" class="on">정리 ① 증명</button><button data-p="2">정리 ② 증명</button><button data-p="3">정리 ③ 증명</button>
+  </div>
+
+  <div class="pset on" data-ps="1">
+    <div class="qcard">
+      <h2><span class="badge">정리 ①</span><span class="rm ov">PO</span> ⊥ <i class="m">α</i>, <span class="rm ov">OH</span> ⊥ <i class="m">l</i> 이면 <span class="rm ov">PH</span> ⊥ <i class="m">l</i></h2>
+      <div class="proofsteps" id="steps1"><div><span class="rm ov">PO</span> ⊥ <i class="m">α</i>이고 직선 <i class="m">l</i>이 평면 <i class="m">α</i> 위에 있으므로 <span class="rm ov">PO</span> ⊥ <i class="m">l</i>이다.</div><div class="hidden-step">또 <span class="rm ov">OH</span> ⊥ <i class="m">l</i>이므로 직선 <i class="m">l</i>은 <span class="rm ov">PO</span>와 <span class="rm ov">OH</span>를 포함하는 <b>평면 <span class="rm">PHO</span>와 수직</b>이다.</div><div class="hidden-step">따라서 <span class="rm ov">PH</span>는 평면 <span class="rm">PHO</span> 위에 있으므로 <span class="rm ov">PH</span> ⊥ <i class="m">l</i>이다.</div></div>
+      <button class="btn" id="next1" style="margin-top:8px">다음 문장</button>
+      <div class="note">화면의 문장을 아래 칸에 직접 따라 적어 보세요. 기호도 키보드로!</div>
+    </div>
+
+  <div class="qcard">
+    <h2>나의 증명</h2>
+    <textarea class="proof" id="tap1" placeholder="정리 ① 의 증명을 적으세요. perp 는 ⊥ 로 바뀝니다."></textarea>
+    <div class="pass" id="passp1">핵심 키워드가 모두 들어갔어요 — 통과!</div>
+    <div class="sendRow"><button class="btn pri" id="sendBtnp1">증명 제출하기</button><span class="sendMsg" id="sendMsgp1"></span></div>
+    <div class="helpkeys">
+      <span>alpha → <b>α</b></span><span>perp → <b>⊥</b></span><span>tri → <b>△</b></span>
+      <span>== → <b>≡</b></span><span>angle → <b>∠</b></span><span>' → <b>′</b></span>
+    </div>
+  </div>
+  <details class="qcard keychk"><summary>키워드 채점</summary>
+    <div id="keysp1"></div>
+    <div class="note">표현이 달라도 좋아요 — 핵심 아이디어가 들어있는지만 봅니다.</div>
+  </details>
+  </div>
+  <div class="pset" data-ps="2">
+    <div class="qcard">
+      <h2><span class="badge">정리 ②</span><span class="rm ov">PO</span> ⊥ <i class="m">α</i>, <span class="rm ov">PH</span> ⊥ <i class="m">l</i> 이면 <span class="rm ov">OH</span> ⊥ <i class="m">l</i></h2>
+      <div class="proofsteps" id="steps2"><div><span class="rm ov">PO</span> ⊥ <i class="m">α</i>이고 직선 <i class="m">l</i>이 평면 <i class="m">α</i> 위에 있으므로 <span class="rm ov">PO</span> ⊥ <i class="m">l</i>이다.</div><div class="hidden-step">또 <span class="rm ov">PH</span> ⊥ <i class="m">l</i>이므로 직선 <i class="m">l</i>은 <span class="rm ov">PO</span>와 <span class="rm ov">PH</span>를 포함하는 <b>평면 <span class="rm">PHO</span>와 수직</b>이고,</div><div class="hidden-step"><span class="rm ov">OH</span>는 평면 <span class="rm">PHO</span> 위에 있으므로 <span class="rm ov">OH</span> ⊥ <i class="m">l</i>이다.</div></div>
+      <button class="btn" id="next2" style="margin-top:8px">다음 문장</button>
+      <div class="note">화면의 문장을 아래 칸에 직접 따라 적어 보세요. 기호도 키보드로!</div>
+    </div>
+
+  <div class="qcard">
+    <h2>나의 증명</h2>
+    <textarea class="proof" id="tap2" placeholder="정리 ② 의 증명을 적으세요. perp 는 ⊥ 로 바뀝니다."></textarea>
+    <div class="pass" id="passp2">핵심 키워드가 모두 들어갔어요 — 통과!</div>
+    <div class="sendRow"><button class="btn pri" id="sendBtnp2">증명 제출하기</button><span class="sendMsg" id="sendMsgp2"></span></div>
+    <div class="helpkeys">
+      <span>alpha → <b>α</b></span><span>perp → <b>⊥</b></span><span>tri → <b>△</b></span>
+      <span>== → <b>≡</b></span><span>angle → <b>∠</b></span><span>' → <b>′</b></span>
+    </div>
+  </div>
+  <details class="qcard keychk"><summary>키워드 채점</summary>
+    <div id="keysp2"></div>
+    <div class="note">표현이 달라도 좋아요 — 핵심 아이디어가 들어있는지만 봅니다.</div>
+  </details>
+  </div>
+  <div class="pset" data-ps="3">
+    <div class="qcard">
+      <h2><span class="badge">정리 ③</span><span class="rm ov">PH</span> ⊥ <i class="m">l</i>, <span class="rm ov">OH</span> ⊥ <i class="m">l</i>, <span class="rm ov">PO</span> ⊥ <span class="rm ov">OH</span> 이면 <span class="rm ov">PO</span> ⊥ <i class="m">α</i></h2>
+      <div class="proofsteps" id="steps3"><div><span class="rm ov">PH</span> ⊥ <i class="m">l</i>, <span class="rm ov">OH</span> ⊥ <i class="m">l</i>이므로 직선 <i class="m">l</i>은 <b>평면 <span class="rm">PHO</span>와 수직</b>이다.</div><div class="hidden-step">이때 <span class="rm ov">PO</span>는 평면 <span class="rm">PHO</span> 위에 있으므로 <span class="rm ov">PO</span> ⊥ <i class="m">l</i>이다.</div><div class="hidden-step">또 <span class="rm ov">PO</span> ⊥ <span class="rm ov">OH</span>이므로 <span class="rm ov">PO</span>는 <span class="rm ov">OH</span>와 직선 <i class="m">l</i>을 포함하는 <b>평면 <i class="m">α</i>와 수직</b>이다.</div><div class="hidden-step">즉, <span class="rm ov">PO</span> ⊥ <i class="m">α</i>이다.</div></div>
+      <button class="btn" id="next3" style="margin-top:8px">다음 문장</button>
+      <div class="note">화면의 문장을 아래 칸에 직접 따라 적어 보세요. 기호도 키보드로!</div>
+    </div>
+
+  <div class="qcard">
+    <h2>나의 증명</h2>
+    <textarea class="proof" id="tap3" placeholder="정리 ③ 의 증명을 적으세요. perp 는 ⊥ 로 바뀝니다."></textarea>
+    <div class="pass" id="passp3">핵심 키워드가 모두 들어갔어요 — 통과!</div>
+    <div class="sendRow"><button class="btn pri" id="sendBtnp3">증명 제출하기</button><span class="sendMsg" id="sendMsgp3"></span></div>
+    <div class="helpkeys">
+      <span>alpha → <b>α</b></span><span>perp → <b>⊥</b></span><span>tri → <b>△</b></span>
+      <span>== → <b>≡</b></span><span>angle → <b>∠</b></span><span>' → <b>′</b></span>
+    </div>
+  </div>
+  <details class="qcard keychk"><summary>키워드 채점</summary>
+    <div id="keysp3"></div>
+    <div class="note">표현이 달라도 좋아요 — 핵심 아이디어가 들어있는지만 봅니다.</div>
+  </details>
+  </div>
+</div>
+
+<div id="pane3" class="pane2">
+  <div class="qcard">
+    <h2><span class="badge">예제 1</span>삼수선의 정리로 길이 구하기</h2>
+    <div class="qwrap">
+      <div class="qtext">오른쪽 그림과 같이 평면 <i class="m">α</i> 위에 있지 않은 한 점 <span class="rm">P</span>에서 평면 <i class="m">α</i>에 내린 수선의 발을 <span class="rm">O</span>,
+        점 <span class="rm">O</span>에서 평면 <i class="m">α</i> 위의 선분 <span class="rm">AB</span>에 내린 수선의 발을 <span class="rm">H</span>라고 하자.
+        <span class="rm ov">PO</span> = 5, <span class="rm ov">OH</span> = 3, <span class="rm ov">AH</span> = 4일 때, 선분 <span class="rm">PA</span>의 길이를 구하시오.
+        <div class="ansrow"><span class="eq"><span class="rm ov">PA</span> =</span><input id="ans1" placeholder="예) 5√2"><button class="btn pri sm" id="chk1">확인</button><span class="ansmsg" id="msg1"></span></div>
+      </div>
+      <div class="qfig c3wrap"><canvas id="fe"></canvas><div class="c3bar"><span>끌어서 돌려 보세요</span><button class="btn sm" id="fereset">시점 초기화</button></div></div>
+    </div>
+  </div>
+  <div class="qcard">
+    <h2><span class="badge">문제 02</span>직육면체에서</h2>
+    <div class="qwrap">
+      <div class="qtext">오른쪽 그림의 직육면체에서 <span class="rm ov">AB</span> = <span class="rm ov">BF</span> = 2, <span class="rm ov">AD</span> = 2√3이다.
+        꼭짓점 <span class="rm">A</span>에서 <span class="rm ov">FH</span>에 내린 수선의 발을 <span class="rm">I</span>라고 할 때, 선분 <span class="rm">AI</span>의 길이를 구하시오.
+        <div class="note" style="margin-top:8px">힌트 — <span class="rm ov">AE</span>가 밑면과 수직이니, <span class="rm">E</span>에서 <span class="rm ov">FH</span>에 수선을 내리면 삼수선의 정리 ①이 보입니다.</div>
+        <div class="ansrow"><span class="eq"><span class="rm ov">AI</span> =</span><input id="ans2" placeholder="예) √7"><button class="btn pri sm" id="chk2">확인</button><span class="ansmsg" id="msg2"></span></div>
+      </div>
+      <div class="qfig c3wrap"><canvas id="fb"></canvas><div class="c3bar"><span>끌어서 돌려 보세요</span><button class="btn sm" id="fbreset">시점 초기화</button></div></div>
+    </div>
+  </div>
+</div>
+
+<script>
+"use strict";
+const $=id=>document.getElementById(id);
+const DEG=Math.PI/180, TAU=Math.PI*2;
+const clamp=(x,a,b)=>x<a?a:(x>b?b:x);
+const fmt=(x,n=1)=>(Math.abs(x)<5e-4?0:x).toFixed(n);
+/* ── 3D 벡터 ── */
+const add=(a,b)=>[a[0]+b[0],a[1]+b[1],a[2]+b[2]];
+const sub=(a,b)=>[a[0]-b[0],a[1]-b[1],a[2]-b[2]];
+const mul=(a,k)=>[a[0]*k,a[1]*k,a[2]*k];
+const dot=(a,b)=>a[0]*b[0]+a[1]*b[1]+a[2]*b[2];
+const cross=(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]];
+const len=a=>Math.hypot(a[0],a[1],a[2]);
+const norm=a=>{const l=len(a)||1;return [a[0]/l,a[1]/l,a[2]/l];};
+const rotAB=(a,b)=>{ /* a→b 회전행렬 (로드리게스) */
+  a=norm(a); b=norm(b); const v=cross(a,b), c=dot(a,b), s=len(v);
+  if(s<1e-8) return c>0? (x=>x) : (x=>mul(x,-1));
+  const k=norm(v), K=x=>cross(k,x);
+  return x=>add(add(mul(x,c),mul(K(x),s)),mul(k,dot(k,x)*(1-c)));
+};
+/* ── 캔버스 ── */
+const cv=$('c'); let ctx=cv.getContext('2d');
+let W=0,H=0,DPR=1, tab='det', T=0, DT=0;
+function resize(){ DPR=Math.min(window.devicePixelRatio||1,2.5); const r=cv.getBoundingClientRect();
+  W=Math.max(1,Math.round(r.width)); H=Math.max(1,Math.round(r.height));
+  cv.width=Math.round(W*DPR); cv.height=Math.round(H*DPR); cv.getContext('2d').setTransform(DPR,0,0,DPR,0,0); }
+const INK='#23241D', BLU='#2F45EC', DIM='#A8A79A', ORG='#E0891A', GRN='#12876A', RED='#D9463F', VIO='#7A3FB5', PAPER='#EFEFE3';
+const KOR="'IBM Plex Sans KR',system-ui,sans-serif";
+/* ── 3D 카메라 · 프림 ── */
+let EYE=[0,0,0],FW=[1,0,0],RT=[0,1,0],UPv=[0,0,1],FOC=1,CX=0,CY=0;
+function setCam(cm,cx,cy,foch){
+  CX=cx===undefined?W/2:cx; CY=cy===undefined?H/2:cy;
+  EYE=[cm.target[0]+cm.dist*Math.cos(cm.el)*Math.cos(cm.az),
+       cm.target[1]+cm.dist*Math.cos(cm.el)*Math.sin(cm.az),
+       cm.target[2]+cm.dist*Math.sin(cm.el)];
+  FW=norm(sub(cm.target,EYE)); RT=norm(cross(FW,[0,0,1])); UPv=cross(RT,FW);
+  FOC=((foch||H)/2)/Math.tan((cm.fov||40)*DEG/2);
+}
+function proj(p){ const v=sub(p,EYE), z=dot(v,FW); if(z<0.2) return null;
+  return {x:CX+dot(v,RT)*FOC/z, y:CY-dot(v,UPv)*FOC/z, z:z}; }
+let prims=[];
+function push(z,fn){prims.push({z,fn});}
+const dep=p=>len(sub(p,EYE));
+function L3(a,b,col,w,dash){ push((dep(a)+dep(b))/2,()=>{ const p=proj(a),q=proj(b); if(!p||!q)return;
+  ctx.save(); ctx.strokeStyle=col; ctx.lineWidth=w||1.4; ctx.setLineDash(dash||[]); ctx.lineCap='round';
+  ctx.beginPath(); ctx.moveTo(p.x,p.y); ctx.lineTo(q.x,q.y); ctx.stroke(); ctx.restore(); }); }
+function P3(p,col,r,ring){ push(dep(p)-0.35,()=>{ const q=proj(p); if(!q)return;
+  ctx.beginPath(); ctx.arc(q.x,q.y,r||5,0,TAU); ctx.fillStyle=col; ctx.fill();
+  if(ring){ctx.lineWidth=1.8;ctx.strokeStyle=ring;ctx.stroke();} }); }
+function F3(pts,fill,edge,w,dash){ /* 다각형 채우기 */
+  let zc=0; for(const p of pts) zc+=dep(p); zc/=pts.length;
+  push(zc+0.6,()=>{ const q=pts.map(proj); if(q.some(x=>!x)) return;
+    ctx.save(); ctx.beginPath(); ctx.moveTo(q[0].x,q[0].y);
+    for(let i=1;i<q.length;i++) ctx.lineTo(q[i].x,q[i].y); ctx.closePath();
+    if(fill){ ctx.fillStyle=fill; ctx.fill(); }
+    if(edge){ ctx.strokeStyle=edge; ctx.lineWidth=w||1.4; ctx.setLineDash(dash||[]); ctx.lineJoin='round'; ctx.stroke(); }
+    ctx.restore(); }); }
+function flush(){ prims.sort((a,b)=>b.z-a.z); for(const p of prims) p.fn(); prims=[]; }
+function label3(p,s,col,dx,dy,italic,size){ const q=proj(p); if(!q) return;
+  ctx.save(); ctx.font=(italic?"italic ":"")+"700 "+(size||15)+"px Georgia,'Times New Roman',serif";
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.lineWidth=4; ctx.strokeStyle='rgba(239,239,227,.92)'; ctx.lineJoin='round';
+  ctx.strokeText(s,q.x+(dx||0),q.y+(dy||0)); ctx.fillStyle=col; ctx.fillText(s,q.x+(dx||0),q.y+(dy||0)); ctx.restore(); }
+function klabel(p,s,col,dx,dy,size){ const q=proj(p); if(!q) return;
+  ctx.save(); ctx.font="700 "+(size||12.5)+"px "+KOR; ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.lineWidth=4; ctx.strokeStyle='rgba(239,239,227,.92)'; ctx.lineJoin='round';
+  ctx.strokeText(s,q.x+(dx||0),q.y+(dy||0)); ctx.fillStyle=col; ctx.fillText(s,q.x+(dx||0),q.y+(dy||0)); ctx.restore(); }
+function bigText(s,col,alpha){ if(alpha<=0) return;
+  ctx.save(); ctx.globalAlpha=clamp(alpha,0,1); ctx.font="800 21px "+KOR;
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.lineWidth=7; ctx.strokeStyle='rgba(239,239,227,.95)'; ctx.lineJoin='round';
+  ctx.strokeText(s,W/2,44); ctx.fillStyle=col; ctx.fillText(s,W/2,44); ctx.restore(); }
+function ray2(px,py){ const d=norm(add(add(mul(RT,(px-CX)/FOC),mul(UPv,-(py-CY)/FOC)),FW)); return {o:EYE,d}; }
+function rayZ(r,z){ const t=(z-r.o[2])/r.d[2]; return [r.o[0]+r.d[0]*t, r.o[1]+r.d[1]*t, z]; }
+function raySphere(r,c,R){ const o=sub(r.o,c), b=2*dot(o,r.d), cc=dot(o,o)-R*R, D=b*b-4*cc;
+  if(D<0){ const t=-dot(o,r.d); return add(c,norm(add(o,mul(r.d,Math.max(t,0)))).map((v,i)=>v*R)); }
+  return add(r.o,mul(r.d,(-b-Math.sqrt(D))/2)); }
+const hud=$('hud'), tip=$('tip');
+const chip=(k,v,ok)=>'<div class="chip"'+(ok?' style="border-color:var(--grn);color:var(--grn)"':'')+'><i>'+k+'</i>'+v+'</div>';
+const kvRow=(k,v,cls)=>'<div class="kv"><span>'+k+'</span><b class="'+(cls||'')+'">'+v+'</b></div>';
+function geoTask(k){ if(typeof GEO_task==='function') GEO_task(k); }
+const pulse=f=>0.5+0.5*Math.sin(T*(f||5));
+/* ══════════ 공통 도형 도우미 ══════════ */
+const ease=k=>k*k*(3-2*k);
+function arc3(P,u1,u2,r,col,w){ const cosA=clamp(dot(u1,u2),-1,1), A=Math.acos(cosA);
+  const e2=norm(sub(u2,mul(u1,cosA)));
+  let prev=null;
+  for(let i=0;i<=26;i++){ const t=A*i/26;
+    const p=add(P,mul(add(mul(u1,Math.cos(t)),mul(e2,Math.sin(t))),r));
+    if(prev) L3(prev,p,col,w||2.2); prev=p; }
+  return A/DEG; }
+function rmark(P,u1,u2,s,col){ const p1=add(P,mul(u1,s)), p2=add(P,mul(u2,s)), p3=add(P,add(mul(u1,s),mul(u2,s)));
+  L3(p1,p3,col,1.8); L3(p2,p3,col,1.8); }
+const STORE_PFX='perp3-';
+
+/* ══════════ 증명 쓰기 카드 ══════════ */
+const PTOK=[['alpha','α'],['perp','⊥'],['tri','△'],['angle','∠'],['==','≡'],["'",'′']];
+function pFixTokens(ta){
+  let v=ta.value, pos=ta.selectionStart, changed=false;
+  for(const [w,ch] of PTOK){ let i;
+    while((i=v.indexOf(w))>=0){ v=v.slice(0,i)+ch+v.slice(i+w.length);
+      if(i+w.length<=pos) pos-=w.length-ch.length; else if(i<pos) pos=i+ch.length; changed=true; } }
+  if(changed){ ta.value=v; ta.setSelectionRange(pos,pos); }
+}
+const pStore=k=>{ try{ return localStorage.getItem(STORE_PFX+k)||''; }catch(e){ return ''; } };
+const pSave=(k,v)=>{ try{ localStorage.setItem(STORE_PFX+k,v); }catch(e){} };
+function stampNow(){ const d=new Date(), z=n=>String(n).padStart(2,'0');
+  return (d.getMonth()+1)+'/'+d.getDate()+' '+z(d.getHours())+':'+z(d.getMinutes()); }
+function makeProof(cfg){
+  const ta=$('ta'+cfg.sfx), keysEl=$('keys'+cfg.sfx), pass=$('pass'+cfg.sfx), b=$('sendBtn'+cfg.sfx), m=$('sendMsg'+cfg.sfx);
+  if(!ta) return;
+  let prev=null, done=false;
+  const nz=t=>t.replace(/\s+/g,'').replace(/'/g,'′').replace(/\(|\)/g,'').replace(/평면/g,'평면');
+  function grade(){
+    const txt=nz(ta.value);
+    const hits=cfg.keys.map(k=>k.alts.some(a=>txt.includes(nz(a))));
+    keysEl.innerHTML=cfg.keys.map((k,i)=>'<div class="kv"><span>'+k.label+'</span><b class="'+(hits[i]?'ok':'')+'"'
+      +(hits[i]?'':' style="color:var(--dim)"')+'>'+(hits[i]?'포함 ✓':'아직')+'</b></div>').join('');
+    const all=hits.every(Boolean); pass.classList.toggle('on',all);
+    if(all&&!done){ done=true; geoTask(cfg.task+'-pass'); }
+    const fresh=hits.map((h,i)=>h&&prev&&!prev[i]);
+    if(cfg.onHits) cfg.onHits(hits,fresh);
+    fresh.forEach((f,i)=>{ if(!f) return; const row=keysEl.querySelectorAll('.kv')[i];
+      if(row){ row.classList.add('flash'); setTimeout(()=>row.classList.remove('flash'),2400); } });
+    prev=hits.slice();
+  }
+  ta.value=pStore(cfg.store+'-ta');
+  ta.addEventListener('input',()=>{ pFixTokens(ta); pSave(cfg.store+'-ta',ta.value); grade(); });
+  grade();
+  function sendUI(){ const at=pStore(cfg.store+'-sent'); b.disabled=false;
+    if(at){ b.textContent='다시 제출하기'; m.style.color='var(--grn)'; m.textContent='제출함 · '+at; }
+    else  { b.textContent='증명 제출하기'; m.style.color='var(--dim)'; m.textContent=''; } }
+  sendUI();
+  b.onclick=async()=>{
+    const text=ta.value.trim(); const bad=t=>{ m.style.color='var(--red)'; m.textContent=t; };
+    if(text.length<10){ bad('증명을 조금 더 적은 뒤에 보내 주세요.'); return; }
+    const sid=localStorage.getItem('geoSid')||'', name=localStorage.getItem('geoName')||'';
+    if(typeof GEO_url!=='function'||!GEO_url()||!sid||!name){ bad('앱에 입장한 뒤에 제출할 수 있어요.'); return; }
+    b.disabled=true; b.textContent='보내는 중…'; m.style.color='var(--dim)'; m.textContent='';
+    try{
+      const res=await fetch(GEO_url(),{method:'POST',body:JSON.stringify({action:'proof',sid,name,item:cfg.item,text:text.slice(0,1500)})});
+      const r=await res.json(); if(!r||!r.ok) throw new Error('server');
+      const at=stampNow(); pSave(cfg.store+'-sent',at); sendUI(); m.style.color='var(--grn)'; m.textContent='제출했어요 ✅  '+at;
+      geoTask(cfg.task+'-send');
+    }catch(e){ b.disabled=false; b.textContent='증명 제출하기'; bad('전송에 실패했어요. 인터넷을 확인하고 다시 눌러 주세요.'); }
+  };
+}
+/* 돌려 볼 수 있는 캔버스 하나 */
+const lp=(el,ev)=>{const r=el.getBoundingClientRect(); return [ev.clientX-r.left, ev.clientY-r.top];};
+function mkView(id, cam){
+  const cv=$(id), cx=cv.getContext('2d'); const v={cv,cx,W:0,H:0,cam,az0:cam.az,el0:cam.el,d0:cam.dist};
+  v.resize=()=>{ const r=cv.getBoundingClientRect(); if(r.width<2) return; v.W=Math.round(r.width); v.H=Math.round(r.height);
+    cv.width=Math.round(v.W*DPR); cv.height=Math.round(v.H*DPR); cx.setTransform(DPR,0,0,DPR,0,0); };
+  v.use=()=>{ ctx=cx; W=v.W; H=v.H; };
+  v.reset=()=>{ cam.az=v.az0; cam.el=v.el0; cam.dist=v.d0; };
+  let last=null;
+  cv.addEventListener('pointerdown',ev=>{ cv.setPointerCapture(ev.pointerId); last=lp(cv,ev); });
+  cv.addEventListener('pointermove',ev=>{ if(!last) return; if(ev.pointerType==='mouse'&&ev.buttons===0){ last=lp(cv,ev); return; }
+    const p=lp(cv,ev); cam.az-=(p[0]-last[0])*0.008; cam.el=clamp(cam.el+(p[1]-last[1])*0.006,-0.5,1.45); last=p; });
+  ['pointerup','pointercancel'].forEach(t=>cv.addEventListener(t,()=>{ last=null; }));
+  cv.addEventListener('wheel',e=>{ e.preventDefault(); cam.dist=clamp(cam.dist*(1+Math.sign(e.deltaY)*0.09),4,40); },{passive:false});
+  new ResizeObserver(v.resize).observe(cv);
+  return v;
+}
+function mixedC(cx,y,parts,col,size){
+  ctx.save(); const fk="700 "+(size||12.5)+"px "+KOR, fm="italic 700 "+((size||12.5)+1.5)+"px Georgia,'Times New Roman',serif";
+  let w=0; parts.forEach(p=>{ ctx.font=p[1]?fm:fk; w+=ctx.measureText(p[0]).width; });
+  ctx.textBaseline='middle'; ctx.textAlign='left'; ctx.lineWidth=5; ctx.strokeStyle='rgba(239,239,227,.95)'; ctx.lineJoin='round';
+  let x=cx-w/2; parts.forEach(p=>{ ctx.font=p[1]?fm:fk; ctx.strokeText(p[0],x,y); x+=ctx.measureText(p[0]).width; });
+  x=cx-w/2; ctx.fillStyle=col; parts.forEach(p=>{ ctx.font=p[1]?fm:fk; ctx.fillText(p[0],x,y); x+=ctx.measureText(p[0]).width; });
+  ctx.restore();
+}
+function tick(a,b,n,col){ const mid=mul(add(a,b),0.5), u=norm(sub(b,a)); let v=cross(u,[0,0,1]); if(len(v)<0.3) v=cross(u,[0,1,0]); v=norm(v);
+  for(let i=0;i<n;i++){ const c=add(mid,mul(u,(i-(n-1)/2)*0.14)); L3(sub(c,mul(v,0.13)),add(c,mul(v,0.13)),col,1.8); } }
+
+/* ══════════ 공통 도형 : 삼수선 (P, O, H, l, α) ══════════ */
+const S={ H:[0,0,0], O:[0,-1.6,0], P:[0,-1.6,2.3], dl:[1,0,0] };
+const ORGA='rgba(242,162,46,';
+function drawPlane(ext){ F3([[-ext[0],-ext[1],0],[ext[0],-ext[1],0],[ext[0],ext[1],0],[-ext[0],ext[1],0]],'rgba(224,137,26,.12)','rgba(120,90,60,.7)',1.3); }
+function lineL(col,w){ L3(add(S.H,mul(S.dl,-2.6)),add(S.H,mul(S.dl,2.6)),col||'#3A3A34',w||1.8); }
+/* have : 보이는 요소 집합, spark : 반짝일 요소 집합 */
+function drawTri(have, spark, cap){
+  const {P,O,H,dl}=S; const has=k=>have.has(k); const sp=k=>spark.has(k)?(0.45+0.5*pulse(5)):0;
+  drawPlane([3.2,2.4]);
+  if(has('l')){ lineL(); }
+  if(has('P')&&has('O')&&has('H')) F3([P,H,O],'rgba(232,69,47,.16)',null);
+  const seg=(a,b,key,col,w)=>{ const g=sp(key); if(g) L3(a,b,ORGA+g+')',w+7); L3(a,b,col,w); };
+  if(has('PO')) seg(P,O,'PO',INK,2.0);
+  if(has('OH')) seg(O,H,'OH',INK,2.0);
+  if(has('PH')) seg(P,H,'PH',RED,2.4);
+  const mk=(o,u,v,key)=>{ const g=sp(key); rmark(o,u,v,0.3, g?'#E0891A':INK); if(g) rmark(o,u,v,0.34,ORGA+g+')'); };
+  if(has('mPO')) mk(O,norm(sub(P,O)),norm(sub(H,O)),'mPO');
+  if(has('mOH')) mk(H,norm(sub(O,H)),dl,'mOH');
+  if(has('mPH')) mk(H,norm(sub(P,H)),dl,'mPH');
+  if(has('P')) P3(P,INK,3.8,PAPER); if(has('O')) P3(O,INK,3.8,PAPER); if(has('H')) P3(H,INK,3.8,PAPER);
+  flush();
+  const R=(p,s,dx,dy)=>label3(p,s,INK,dx,dy,false,14.5);
+  if(has('P')) R(P,'P',0,-14); if(has('O')) R(O,'O',13,6); if(has('H')) R(H,'H',-12,10);
+  if(has('l')) label3(add(S.H,mul(dl,-2.6)),'l',INK,-8,-8,true,15);
+  klabel([-2.9,-2.1,0],'α','#B4661F',0,0,14);
+  if(cap) mixedC(W/2,14,cap,DIM,11.5);
+}
+/* 절(clause) → 그림 요소 */
+const NEED={ PO:['P','O','PO','mPO'], OH:['O','H','l','OH','mOH'], PH:['P','H','l','PH','mPH'], POOH:['P','O','H','PO','OH','mPO'] };
+const SPARK={ 'PH*':['PH','mPH'], 'OH*':['OH','mOH'], 'PO*':['PO','mPO'] };
+const CL={1:['PO','OH','PH*'],2:['PO','PH','OH*'],3:['PH','OH','POOH','PO*']};
+const CLT={"1": ["<span class=\"rm ov\">PO</span> ⊥ <i class=\"m\">α</i>", "<span class=\"rm ov\">OH</span> ⊥ <i class=\"m\">l</i>", "<span class=\"rm ov\">PH</span> ⊥ <i class=\"m\">l</i>"], "2": ["<span class=\"rm ov\">PO</span> ⊥ <i class=\"m\">α</i>", "<span class=\"rm ov\">PH</span> ⊥ <i class=\"m\">l</i>", "<span class=\"rm ov\">OH</span> ⊥ <i class=\"m\">l</i>"], "3": ["<span class=\"rm ov\">PH</span> ⊥ <i class=\"m\">l</i>", "<span class=\"rm ov\">OH</span> ⊥ <i class=\"m\">l</i>", "<span class=\"rm ov\">PO</span> ⊥ <span class=\"rm ov\">OH</span>", "<span class=\"rm ov\">PO</span> ⊥ <i class=\"m\">α</i>"]};
+const STG={1:0,2:0,3:0};
+const V={};
+for(const k of [1,2,3]) V[k]=mkView('f'+k,{az:-1.05,el:0.42,dist:9.5,target:[0,-0.6,0.6],fov:38});
+function thmText(k){
+  const n=STG[k], cl=CL[k], el=$('thm'+k);
+  if(n===0){ el.innerHTML='<span class="hint">눌러 보세요</span>'; return; }
+  let h=''; for(let i=0;i<n;i++){ const isC=(i===cl.length-1);
+    if(isC) h+=' <span class="kor">이면</span>&ensp;<span class="spark">'+CLT[k][i]+'</span>';
+    else h+=(i?', ':'')+CLT[k][i]; }
+  el.innerHTML=h;
+  $('pane1').querySelector('.nb[data-k="'+k+'"]').classList.toggle('done',n>=cl.length);
+}
+document.querySelectorAll('#pane1 .nb').forEach(b=>b.onclick=()=>{ const k=+b.dataset.k;
+  STG[k]=(STG[k]>=CL[k].length)?0:STG[k]+1; thmText(k); geoTask('perp3-thm'+k+'-'+STG[k]); });
+document.querySelectorAll('#pane1 [data-reset]').forEach(b=>b.onclick=()=>V[+b.dataset.reset].reset());
+function drawThm(k){ const v=V[k]; v.use(); if(!W||!H) return; setCam(v.cam); ctx.fillStyle=PAPER; ctx.fillRect(0,0,W,H);
+  const have=new Set(), spark=new Set(); const cl=CL[k];
+  for(let i=0;i<STG[k];i++){ const c=cl[i].replace('*',''); (NEED[c]||[]).forEach(x=>have.add(x));
+    if(cl[i].endsWith('*')) SPARK[cl[i]].forEach(x=>spark.add(x)); }
+  drawTri(have,spark,null); }
+/* ── 02 증명 : 완성된 그림 (움직임 없음) ── */
+const VP=mkView('fp',{az:-1.05,el:0.42,dist:9.0,target:[0,-0.6,0.7],fov:38}); $('fpreset').onclick=()=>VP.reset();
+const ALL=new Set(['P','O','H','l','PO','OH','PH','mPO','mOH','mPH']);
+let pcur=1; const PS={1:1,2:1,3:1};
+function drawFull(){ VP.use(); if(!W||!H) return; setCam(VP.cam); ctx.fillStyle=PAPER; ctx.fillRect(0,0,W,H);
+  const cap={1:[['① ',0],['PO⊥α, OH⊥l  ⇒  PH⊥l',0]],2:[['② ',0],['PO⊥α, PH⊥l  ⇒  OH⊥l',0]],3:[['③ ',0],['PH⊥l, OH⊥l, PO⊥OH  ⇒  PO⊥α',0]]}[pcur];
+  drawTri(ALL,new Set(),cap); }
+function renderP(k){ const st=$('steps'+k), n=st.children.length;
+  [...st.children].forEach((d,i)=>d.classList.toggle('hidden-step',i>=PS[k])); $('next'+k).textContent=PS[k]>=n?'처음부터':'다음 문장'; }
+for(const k of [1,2,3]){ renderP(k); $('next'+k).onclick=()=>{ const n=$('steps'+k).children.length; PS[k]=PS[k]>=n?1:PS[k]+1; renderP(k); geoTask('perp3-p'+k+'-step'); }; }
+document.querySelectorAll('#pseg button').forEach(b=>b.onclick=()=>{ pcur=+b.dataset.p;
+  document.querySelectorAll('#pseg button').forEach(x=>x.classList.toggle('on',x===b));
+  document.querySelectorAll('.pset').forEach(x=>x.classList.toggle('on',+x.dataset.ps===pcur)); });
+const PK={
+ 1:[{label:'PO ⊥ α 이고 l 이 α 위에 있으므로 PO ⊥ l',alts:['PO⊥l','l⊥PO']},
+    {label:'OH ⊥ l 이므로 l 은 평면 PHO 와 수직',alts:['평면PHO와수직','평면PHO에수직','l⊥평면PHO','평면OHP','평면HOP','평면POH']},
+    {label:'PH 는 평면 PHO 위에 있다',alts:['PH는평면','PH가평면','PH도평면']},
+    {label:'결론  PH ⊥ l',alts:['PH⊥l','l⊥PH']}],
+ 2:[{label:'PO ⊥ α 이고 l 이 α 위에 있으므로 PO ⊥ l',alts:['PO⊥l','l⊥PO']},
+    {label:'PH ⊥ l 이므로 l 은 평면 PHO 와 수직',alts:['평면PHO와수직','평면PHO에수직','l⊥평면PHO','평면OHP','평면HOP','평면POH']},
+    {label:'OH 는 평면 PHO 위에 있다',alts:['OH는평면','OH가평면','OH도평면']},
+    {label:'결론  OH ⊥ l',alts:['OH⊥l','l⊥OH']}],
+ 3:[{label:'PH ⊥ l, OH ⊥ l 이므로 l 은 평면 PHO 와 수직',alts:['평면PHO와수직','평면PHO에수직','l⊥평면PHO','평면OHP','평면HOP','평면POH']},
+    {label:'PO 는 평면 PHO 위 → PO ⊥ l',alts:['PO⊥l','l⊥PO']},
+    {label:'PO ⊥ OH 이므로 PO 는 OH 와 l 을 포함하는 평면 α 와 수직',alts:['포함하는평면','OH와l을포함','l과OH를포함','OH와직선l']},
+    {label:'결론  PO ⊥ α',alts:['PO⊥α','α⊥PO']}]
+};
+for(const k of [1,2,3]) makeProof({sfx:'p'+k, keys:PK[k], store:'p'+k, item:'삼수선의 정리 '+'①②③'[k-1]+' 증명', task:'perp3-p'+k});
+/* ── 03 예제 1 ── */
+const VE=mkView('fe',{az:-1.0,el:0.40,dist:9.4,target:[-0.4,-0.7,0.9],fov:38}); $('fereset').onclick=()=>VE.reset();
+const EX={ O:[0,0,0], P:[0,0,2.5], H:[0,-1.5,0], A:[-2,-1.5,0], B:[1.2,-1.5,0] };
+function drawEx(){ VE.use(); if(!W||!H) return; setCam(VE.cam); ctx.fillStyle=PAPER; ctx.fillRect(0,0,W,H);
+  const {O,P,A,B}=EX, Hp=EX.H;
+  F3([[-3.2,-2.6,0],[2.6,-2.6,0],[2.6,1.4,0],[-3.2,1.4,0]],'rgba(47,69,236,.08)','rgba(80,90,140,.6)',1.3);
+  F3([P,A,Hp],'rgba(232,69,47,.18)',null); F3([P,Hp,O],'rgba(232,69,47,.10)',null);
+  L3(A,B,INK,2.0); L3(P,O,INK,1.8); L3(O,Hp,INK,1.8); L3(P,Hp,RED,2.2); L3(P,A,RED,2.4);
+  rmark(O,norm(sub(P,O)),norm(sub(Hp,O)),0.28,INK); rmark(Hp,norm(sub(O,Hp)),norm(sub(B,Hp)),0.28,INK); rmark(Hp,norm(sub(P,Hp)),norm(sub(A,Hp)),0.28,RED);
+  for(const q of [P,O,Hp,A,B]) P3(q,INK,3.6,PAPER);
+  flush();
+  const R=(p,s,dx,dy,c)=>label3(p,s,c||INK,dx,dy,false,14.5);
+  R(P,'P',0,-14); R(O,'O',13,6); R(Hp,'H',-4,15); R(A,'A',-13,4); R(B,'B',12,6);
+  R(mul(add(P,O),0.5),'5',13,0,BLU); R(mul(add(O,Hp),0.5),'3',12,10,BLU); R(mul(add(A,Hp),0.5),'4',0,15,BLU);
+  klabel([-2.9,-2.3,0],'α','#B4661F',0,0,14);
+}
+/* ── 03 문제 02 ── */
+const VB=mkView('fb',{az:0.95,el:0.30,dist:11.0,target:[1,1.7,0.9],fov:38}); $('fbreset').onclick=()=>VB.reset();
+const R3=Math.sqrt(3);
+const BX={ E:[0,0,0], F:[2,0,0], G:[2,2*R3,0], H:[0,2*R3,0], A:[0,0,2], B:[2,0,2], C:[2,2*R3,2], D:[0,2*R3,2], I:[1.5,R3/2,0] };
+function drawBox(){ VB.use(); if(!W||!H) return; setCam(VB.cam); ctx.fillStyle=PAPER; ctx.fillRect(0,0,W,H);
+  const {E,F,G,A,B,C,D,I}=BX, Hb=BX.H;
+  const FS=[[E,F,G,Hb],[A,B,C,D],[A,B,F,E],[B,C,G,F],[C,D,Hb,G],[D,A,E,Hb]], CTR=[1,R3,1];
+  const front=f=>{ const c=mul(f.reduce((a,p)=>add(a,p),[0,0,0]),0.25); let n=norm(cross(sub(f[1],f[0]),sub(f[2],f[0])));
+    if(dot(n,sub(c,CTR))<0) n=mul(n,-1); return dot(n,sub(EYE,c))>0; };
+  const vis=FS.map(front);
+  FS.forEach((f,i)=>{ if(vis[i]) F3(f,'rgba(224,137,26,.12)',null); });
+  const ED=[[E,F,0,2],[F,G,0,3],[G,Hb,0,4],[Hb,E,0,5],[A,B,1,2],[B,C,1,3],[C,D,1,4],[D,A,1,5],[A,E,2,5],[B,F,2,3],[C,G,3,4],[D,Hb,4,5]];
+  for(const [p,q,i,j] of ED){ const hid=!vis[i]&&!vis[j]; push(hid?60:20,()=>{ const a=proj(p),b=proj(q); if(!a||!b) return;
+    ctx.save(); ctx.strokeStyle='#5A584E'; ctx.lineWidth=hid?1.2:1.5; ctx.setLineDash(hid?[5,4]:[]); ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke(); ctx.restore(); }); }
+  L3(F,Hb,BLU,2.2); L3(E,I,'#3A3A34',1.6,[5,4]); L3(A,I,RED,2.6);
+  rmark(I,norm(sub(E,I)),norm(sub(Hb,I)),0.28,INK); rmark(I,norm(sub(A,I)),norm(sub(Hb,I)),0.3,RED);
+  for(const q of [A,E,I]) P3(q,INK,3.6,PAPER);
+  flush();
+  const R=(p,s,dx,dy,c)=>label3(p,s,c||INK,dx,dy,false,14);
+  R(A,'A',-12,-6); R(B,'B',12,-6); R(C,'C',12,-4); R(D,'D',-12,-6); R(E,'E',-12,6); R(F,'F',12,8); R(G,'G',12,8); R(Hb,'H',-12,6); R(I,'I',6,16,RED);
+  R(mul(add(A,B),0.5),'2',-14,6,BLU); R(mul(add(B,F),0.5),'2',-13,0,BLU); R(mul(add(A,D),0.5),'2√3',0,-13,BLU);
+}
+/* 답 확인 */
+function normAns(s){ return s.replace(/\s+/g,'').replace(/루트|root|sqrt/gi,'√').replace(/\*/g,'').toLowerCase(); }
+function chk(id,ok,msgId,task){ const v=normAns($(id).value); const m=$(msgId);
+  if(!v){ m.className='ansmsg'; m.textContent='답을 적어 주세요.'; return; }
+  const good=ok.some(o=>v===o); m.className='ansmsg '+(good?'ok':'bad'); m.textContent=good?'정답! ✓':'다시 생각해 보세요 — 삼수선의 정리 ①을 어디에 쓸까요?';
+  if(good) geoTask(task); }
+$('chk1').onclick=()=>chk('ans1',['5√2','√50','5√(2)','√2*5','5*√2'.replace('*','')],'msg1','perp3-ex1-ok');
+$('chk2').onclick=()=>chk('ans2',['√7','√(7)'],'msg2','perp3-q2-ok');
+['ans1','ans2'].forEach((id,i)=>$(id).addEventListener('keydown',e=>{ if(e.key==='Enter') $(['chk1','chk2'][i]).click(); }));
+/* ── 탭 · 루프 ── */
+tab='t1';
+document.querySelectorAll('#tabs button[data-t]').forEach(b=>b.onclick=()=>{ tab=b.dataset.t;
+  document.querySelectorAll('#tabs button[data-t]').forEach(x=>x.classList.toggle('on',x===b));
+  document.querySelectorAll('.pane2').forEach(p=>p.classList.toggle('on',p.id==='pane'+tab.slice(1)));
+  requestAnimationFrame(()=>{ Object.values(V).forEach(v=>v.resize()); VP.resize(); VE.resize(); VB.resize(); });
+  geoTask('perp3-tab-'+tab); });
+for(const k of [1,2,3]) thmText(k);
+let t0=performance.now();
+function loop(t){ const dt=Math.max(0,Math.min(0.05,(t-t0)/1000)); t0=t; T+=dt; DT=dt;
+  if(tab==='t1'){ for(const k of [1,2,3]) drawThm(k); }
+  else if(tab==='t2') drawFull();
+  else { drawEx(); drawBox(); }
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+window.__perp3={STG,PS,V};
+</script>
+<script>window.PAGE_ID="pperp";</script>
+<script src="nav.js"></script>
+</body>
+</html>

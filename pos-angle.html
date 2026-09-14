@@ -1,0 +1,972 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<script>
+/* 입장 가드 */
+if (localStorage.getItem('geoAppOk') !== '1') location.replace('index.html');
+</script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="icon" type="image/svg+xml" href="icon.svg">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="apple-mobile-web-app-title" content="기하">
+<meta name="theme-color" content="#B32017">
+<title>공간에서 두 직선이 이루는 각</title>
+<link rel="stylesheet" media="print" onload="this.media='all'"
+  href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap">
+<style>
+:root{ --paper:#EFEFE3; --ink:#23241D; --dim:#A8A79A; --line:#DCDACD; --line2:#C7C5B6;
+  --acc:#2F45EC; --acc2:#1B2FC4; --card:#F5F5EC; --org:#E0891A; --grn:#12876A; --red:#D9463F; --vio:#7A3FB5; }
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;overflow:hidden}
+body{font-family:'IBM Plex Sans KR','Apple SD Gothic Neo','Malgun Gothic',system-ui,sans-serif;
+  background:var(--paper); color:var(--ink); font-size:14.5px; line-height:1.55; display:flex; flex-direction:column; height:100dvh}
+header{padding:12px 22px 10px; border-bottom:1px solid var(--line); display:flex; align-items:flex-end; gap:18px; flex-wrap:wrap; flex:none}
+h1{font-size:17.5px; margin:0; letter-spacing:-.3px; font-weight:700}
+.sub{font-size:12px; color:var(--dim); margin-top:3px}
+#tabs{display:flex; gap:6px; margin-left:auto; flex-wrap:wrap}
+#tabs button{height:34px; padding:0 13px; border-radius:999px; border:1.5px solid var(--line2); background:transparent;
+  font:inherit; font-size:12.5px; font-weight:700; color:var(--ink); cursor:pointer; display:flex; align-items:center; gap:7px}
+#tabs button .no{font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:11px; color:var(--acc); font-weight:600}
+#tabs button.on{background:var(--acc); border-color:var(--acc); color:#fff} #tabs button.on .no{color:#fff}
+#app{display:flex; flex:1; min-height:0}
+#stage{flex:1; position:relative; min-width:0}
+canvas{display:block; width:100%; height:100%; touch-action:none}
+#panel{width:392px; flex:none; border-left:1px solid var(--line); overflow-y:auto; overscroll-behavior:contain; padding:16px 18px 80px}
+@media (max-width:940px){ #app{flex-direction:column} #stage{flex:0 0 46%; min-height:220px} #panel{width:auto; flex:1; border-left:0; border-top:1px solid var(--line); padding:12px 14px 80px} }
+i.m,.eq i,.m{font-family:Georgia,'Times New Roman',serif; font-style:italic; font-size:1.05em}
+.rm{font-family:Georgia,'Times New Roman',serif; font-style:normal}
+.ov{text-decoration:overline}
+.eq{font-family:Georgia,'Times New Roman',serif; font-size:15.5px; line-height:1.8}
+.card{border:1px solid var(--line); border-radius:12px; padding:12px 13px 14px; margin-bottom:12px; background:var(--card)}
+.card h2{font-size:12px; margin:0 0 9px; letter-spacing:.06em; color:var(--dim); font-family:'IBM Plex Mono',ui-monospace,monospace; text-transform:uppercase; font-weight:600; display:flex; align-items:center}
+.pane{display:none} .pane.on{display:block}
+.stmt{font-size:13.5px; line-height:1.8; padding:10px 13px; border-left:3px solid var(--acc); background:#E9E9DC; border-radius:0 10px 10px 0; margin-bottom:12px}
+.stmt b{color:var(--acc)}
+.step{font-size:13.5px; line-height:1.8; min-height:60px}
+.step b{color:var(--acc)} .step .hint,.hint{color:var(--dim); font-size:12.5px}
+.btnrow{display:flex; gap:7px; align-items:center; margin-top:10px; flex-wrap:wrap}
+.btn{border:1.5px solid var(--line2); background:transparent; color:var(--dim); font:inherit; font-size:12px; font-weight:700; padding:0 14px; height:32px; border-radius:999px; cursor:pointer}
+.btn:hover{border-color:var(--acc); color:var(--acc)} .btn.pri{background:var(--acc); border-color:var(--acc); color:#fff}
+.btn.pri:hover{background:var(--acc2); border-color:var(--acc2); color:#fff}
+.btn.sm{height:28px; padding:0 11px; font-size:11.5px}
+.no{margin-left:auto; font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:11.5px; color:var(--dim)}
+.row{display:flex; align-items:center; gap:10px; margin:9px 0}
+.row label{width:118px; flex:none; font-size:12px; color:var(--dim)}
+.row input[type=range]{flex:1; accent-color:var(--acc); height:20px; min-width:0}
+.row .num{width:62px; text-align:right; font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:12px; flex:none}
+.kv{display:flex; justify-content:space-between; gap:10px; font-size:12.5px; padding:6px 0; border-bottom:1px solid var(--line); align-items:center}
+.kv:last-child{border-bottom:0} .kv b{font-family:'IBM Plex Mono',ui-monospace,monospace; font-weight:600; white-space:nowrap}
+.kv .ok{color:var(--grn)} .kv .lim{color:var(--org)} .kv .bad{color:var(--red)}
+.toggles{display:flex; flex-wrap:wrap; gap:6px}
+.toggles label{display:inline-flex; align-items:center; gap:5px; border:1px solid var(--line2); border-radius:999px; padding:5px 10px; font-size:12px; cursor:pointer; user-select:none; color:var(--dim)}
+.toggles label:has(input:checked){color:var(--acc); border-color:var(--acc)} .toggles input{accent-color:var(--acc); margin:0}
+details{border:1px solid var(--line); border-radius:12px; padding:10px 13px; margin-bottom:10px; background:var(--card)}
+details summary{cursor:pointer; font-weight:600; font-size:13px; list-style:none}
+details summary::-webkit-details-marker{display:none}
+details summary::before{content:"+ "; color:var(--acc); font-family:'IBM Plex Mono',monospace} details[open] summary::before{content:"− "}
+details p,details li{font-size:12.5px; line-height:1.8} details ol,details ul{margin:8px 0 2px; padding-left:19px}
+.note{font-size:11.5px; color:var(--dim); line-height:1.6; margin-top:8px}
+#hud{position:absolute; left:12px; bottom:12px; display:flex; flex-wrap:wrap; gap:6px; max-width:calc(100% - 24px); pointer-events:none}
+.chip{background:rgba(239,239,227,.9); border:1px solid var(--line); border-radius:999px; padding:4px 11px; font-size:11.5px; font-family:'IBM Plex Mono',ui-monospace,monospace}
+.chip i{font-style:normal; color:var(--dim); margin-right:4px}
+#tip{position:absolute; left:12px; top:12px; font-size:11.5px; color:var(--dim); background:rgba(239,239,227,.86); border:1px solid var(--line); border-radius:999px; padding:5px 12px; max-width:calc(100% - 130px); pointer-events:none}
+#tools{position:absolute; right:12px; top:12px; display:flex; gap:6px}
+#tools .btn{background:rgba(239,239,227,.9); height:30px; padding:0 12px; display:flex; align-items:center; gap:5px}
+.foot{font-size:11px; color:var(--dim); text-align:center; margin-top:14px; font-family:'IBM Plex Mono',ui-monospace,monospace}
+.tag{display:inline-block; font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:10.5px; letter-spacing:.06em; color:var(--acc); border:1px solid var(--acc); border-radius:999px; padding:1px 8px; margin-right:6px; vertical-align:2px}
+.tag.dim{color:var(--dim); border-color:var(--line2)}
+.seg{display:flex; gap:5px; background:#E4E3D6; padding:3px; border-radius:999px; margin-bottom:10px}
+.seg button{flex:1; height:28px; border:0; border-radius:999px; background:transparent; font:inherit; font-size:12px; font-weight:700; color:var(--dim); cursor:pointer}
+.seg button.on{background:#fff; color:var(--acc); box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.plist button{display:flex; align-items:center; gap:9px; width:100%; text-align:left; height:40px; padding:0 10px; border:0;
+  border-bottom:1px solid var(--line); background:transparent; font:inherit; font-size:13px; color:var(--ink); cursor:pointer}
+.plist button:last-child{border-bottom:0}
+.plist button .k{font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:11px; color:var(--dim); width:18px; flex:none}
+.plist button.on{color:var(--acc); font-weight:700} .plist button.on .k{color:var(--acc)}
+
+/* 문제 팝업 */
+#ov{position:fixed; inset:0; background:rgba(35,36,29,.38); display:none; align-items:center; justify-content:center; z-index:50; padding:18px}
+#ov.on{display:flex}
+.mcard{background:var(--paper); border:1px solid var(--line2); border-radius:16px; width:min(660px,100%);
+  max-height:calc(100dvh - 36px); overflow:auto; padding:18px 20px 20px; box-shadow:0 18px 60px rgba(0,0,0,.25)}
+.mhead{display:flex; align-items:center; gap:10px; margin-bottom:6px}
+.mhead h3{margin:0; font-size:15.5px; flex:1}
+.mx{border:1.5px solid var(--line2); background:transparent; border-radius:999px; width:30px; height:30px; font:inherit; font-weight:700; color:var(--dim); cursor:pointer}
+.mq{font-size:13px; line-height:1.7; margin:6px 0 10px}
+#mc,#mc2{width:100%; height:332px; border:1px solid var(--line); border-radius:12px; background:var(--card); touch-action:none; display:block}
+.opts{display:grid; grid-template-columns:1fr 1fr; gap:7px; margin-top:10px}
+.opts button{border:1.5px solid var(--line2); background:transparent; border-radius:10px; min-height:38px; padding:7px 10px;
+  font:inherit; font-size:12.5px; text-align:left; cursor:pointer; color:var(--ink); line-height:1.45}
+.opts button.on{border-color:var(--acc); color:var(--acc); font-weight:700; background:#fff}
+.verdict{margin-top:10px; font-size:12.5px; line-height:1.65; border-left:3px solid var(--acc); padding:2px 0 2px 10px; min-height:20px; color:var(--ink)}
+.verdict.bad{border-left-color:var(--red)}
+.verdict:empty{border-left-color:var(--line); color:var(--dim)}
+/* 준비물 */
+.tray{display:flex; gap:7px; flex-wrap:wrap}
+.tray button{border:1.5px solid var(--line2); background:#fff; border-radius:12px; padding:9px 13px; font:inherit; font-size:12.5px;
+  font-weight:700; cursor:pointer; display:flex; align-items:center; gap:8px; color:var(--ink)}
+.tray button:disabled{opacity:.35; cursor:default}
+.tray .cnt{font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:11px; color:var(--acc); border:1px solid var(--acc); border-radius:999px; padding:0 7px}
+.tray .glyph{font-family:Georgia,serif; font-size:15px}
+.cklist .kv b{font-family:'IBM Plex Mono',ui-monospace,monospace}
+.big{font-size:13px; font-weight:700}
+
+/* ── 02 수직인 경우 (증명 쓰기) ── */
+#main2{display:none; flex:1; min-width:0; overflow-y:auto; padding:18px 20px 96px}
+#main2.on,#main3.on{display:block} #app.off{display:none}
+#main3{display:none; flex:1; min-width:0; overflow-y:auto; padding:18px 20px 96px}
+.c3wrap{padding:0; overflow:hidden; width:min(440px,100%)} .c3wrap canvas{display:block; width:100%; height:330px; touch-action:none}
+.c3bar{display:flex; align-items:center; gap:6px; padding:6px 8px; border-top:1px solid var(--line); font-size:11px; color:var(--dim)}
+.c3bar span{flex:1}
+.c3wrap{position:relative} .playbar{position:absolute; right:8px; bottom:8px; display:flex; gap:6px} .playbar .btn:disabled{opacity:.4; cursor:default}
+.qcard{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:15px 16px; margin:0 auto 14px; max-width:900px}
+.qcard h2{margin:0 0 9px; font-size:12px; letter-spacing:.08em; color:var(--dim); font-weight:700}
+.qtext{font-size:14px; line-height:1.85}
+.qwrap{display:flex; gap:16px; align-items:flex-start; flex-wrap:wrap}
+.qwrap .qtext{flex:1; min-width:240px}
+.qfig{flex:none; background:#fff; border:1px solid var(--line); border-radius:10px; padding:6px}
+.qfig svg{display:block}
+.m{font-family:Georgia,'Times New Roman',serif; font-style:italic; font-weight:600}
+.rm{font-family:Georgia,'Times New Roman',serif; font-weight:600}
+.ov{text-decoration:overline}
+.ex3{display:inline-block; font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:10.5px; letter-spacing:.06em;
+  color:#fff; background:var(--acc); border-radius:999px; padding:2px 9px; margin-right:8px; vertical-align:2px}
+.defbox{border-left:3px solid var(--acc); background:#E9E9DC; border-radius:0 10px 10px 0; padding:10px 13px; font-size:13.5px; line-height:1.85; margin-top:8px}
+.defbox b{color:var(--acc)}
+textarea.proof{width:100%; min-height:170px; resize:vertical; border:1.5px solid var(--line2); border-radius:12px;
+  background:#fff; color:var(--ink); padding:12px 14px; font-family:'IBM Plex Sans KR',Georgia,serif; font-size:14.5px; line-height:1.95; outline:none}
+textarea.proof:focus{border-color:var(--acc)}
+.proofsteps{border-left:3px solid var(--acc); padding:2px 0 2px 12px; margin:10px 0 4px; font-size:13.5px; line-height:2.0}
+.proofsteps .hidden-step{display:none}
+.pass{margin-top:10px; border:1.5px solid var(--grn); color:var(--grn); border-radius:10px; padding:8px 12px; font-size:13px; font-weight:700; display:none}
+.pass.on{display:block}
+.sendRow{display:flex; align-items:center; gap:11px; margin-top:12px; flex-wrap:wrap}
+.sendMsg{font-size:12px; color:var(--dim); line-height:1.5}
+.helpkeys{display:flex; flex-wrap:wrap; gap:5px; margin-top:8px}
+.helpkeys span{border:1px solid var(--line2); border-radius:8px; padding:3px 8px; font-size:11.5px; font-family:'IBM Plex Mono',ui-monospace,monospace; color:var(--dim)}
+.helpkeys b{font-family:Georgia,serif; color:var(--ink)}
+details.qcard{padding:12px 16px} details.qcard summary{font-weight:600; font-size:13px; cursor:pointer; list-style:none}
+details.qcard summary::-webkit-details-marker{display:none}
+details.qcard summary::before{content:"+ "; color:var(--acc); font-family:'IBM Plex Mono',monospace} details.qcard[open] summary::before{content:"− "}
+details.keychk #keys{margin-top:9px} details.keychk .note{margin-top:9px}
+.keychk .kv b{font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:12px}
+@keyframes fxGlow{0%,100%{filter:none} 45%{filter:drop-shadow(0 0 4px #F2A22E) drop-shadow(0 0 11px rgba(242,162,46,.9))}}
+.fxHit{animation:fxGlow 1.3s ease-in-out 2}
+.fxOn{filter:drop-shadow(0 0 2px rgba(242,162,46,.85))}
+@keyframes rowFlash{0%,100%{background:transparent} 40%{background:rgba(242,162,46,.3)}}
+.kv.flash{animation:rowFlash 1.15s ease-out 2; border-radius:7px}
+</style>
+</head>
+<body>
+<header>
+  <div><h1>공간에서 두 직선이 이루는 각</h1></div>
+  <div id="tabs">
+    <button data-t="ang" class="on"><span class="no">01</span>이루는 각</button>
+    <button data-t="perp"><span class="no">02</span>수직인 경우</button>
+    <button data-t="q7"><span class="no">03</span>문제 07</button>
+  </div>
+</header>
+<div id="app">
+  <div id="stage">
+    <canvas id="c"></canvas>
+    <div id="tools"><button class="btn" id="btnReset">시점 초기화</button></div>
+    <div id="tip">직선 <i>l</i> 을 끌어 보세요 — 양 끝은 <b>회전</b>, 가운데는 <b>이동</b></div>
+    <div id="hud"></div>
+  </div>
+  <aside id="panel">
+    <div class="card">
+      <h2>꼬인 위치의 두 직선</h2>
+      <div class="qtext" style="font-size:13.5px; line-height:1.8">두 직선 <i class="m">l</i>, <i class="m">m</i>이 꼬인 위치에 있으면
+        한 평면 위에 있지 않아, 각을 바로 잴 수 없습니다. 그렇다면?</div>
+      <button class="btn pri" id="btnDef" style="width:100%; margin-top:10px">두 직선이 이루는 각은?</button>
+    </div>
+    <div class="card">
+      <h2>직접 움직여 보기</h2>
+      <div class="kv"><span>양 끝을 끌면</span><b>방향이 돌아감</b></div>
+      <div class="kv"><span>가운데를 끌면</span><b>자리가 옮겨감</b></div>
+      <div class="note">직선 <i class="m">l</i> 의 <b>높이는 그대로</b>라서 <i class="m">m</i> 과 늘 꼬인 위치입니다.
+        어떻게 움직여도 평행이동해서 재면 각이 하나로 정해져요.</div>
+    </div>
+    <div class="card">
+      <h2>정의</h2>
+      <div class="kv"><span>이루는 각의 크기 <i class="m">θ</i></span><b>0° &lt; <i class="m">θ</i> ≤ 90°</b></div>
+      <div class="kv"><span>이루는 각이 직각이면</span><b><i class="m">l</i> ⊥ <i class="m">m</i> (서로 수직)</b></div>
+      <div class="note">직선 <i class="m">l</i>에 평행하면서 직선 <i class="m">m</i>과 한 점에서 만나는 직선 <i class="m">l</i>′을 그으면,
+        두 직선 <i class="m">l</i>′, <i class="m">m</i>은 <b>한 평면을 결정</b>합니다. 이때 <i class="m">l</i>′, <i class="m">m</i>이 이루는 각을
+        <b>두 직선 <i class="m">l</i>, <i class="m">m</i>이 이루는 각</b>이라고 합니다. 평행이동해도 방향은 그대로이기 때문이죠.</div>
+    </div>
+    <div class="card">
+      <h2>연습</h2>
+      <button class="btn" id="btnQ6b" style="width:100%">문제 06 풀어 보기</button>
+      <div id="q6kv" style="margin-top:8px"></div>
+    </div>
+  </aside>
+</div>
+<svg width="0" height="0" aria-hidden="true" style="position:absolute"><defs><linearGradient id="gB" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FADCC7"/><stop offset="1" stop-color="#FFFBF8"/></linearGradient></defs></svg>
+<div id="main2">
+  <div class="qcard">
+    <h2>공간에서 직선과 평면의 수직</h2>
+    <div class="qwrap">
+      <div class="qtext">공간에서 직선 <i class="m">l</i>과 평면 <i class="m">α</i> 위의 <b>모든 직선</b>이 수직일 때, 직선 <i class="m">l</i>은 평면 <i class="m">α</i>와
+        <b>수직</b>이라 하고, 기호로&ensp;<i class="m">l</i> ⊥ <i class="m">α</i>&ensp;와 같이 나타냅니다.
+        <div class="defbox">이때 직선 <i class="m">l</i>을 평면 <i class="m">α</i>의 <b>수선</b>이라 하고, 직선 <i class="m">l</i>과 평면 <i class="m">α</i>가 만나는 점
+          <span class="rm">O</span>를 <b>수선의 발</b>이라고 합니다.</div>
+
+      </div>
+      <div class="qfig"><svg width="206" height="160" viewBox="0 0 220 168" role="img"><polygon points="14.0,122.0 154.0,122.0 210.0,60.0 70.0,60.0" fill="url(#gB)" stroke="#4B4B44" stroke-width="1.4" stroke-linejoin="round" data-fx="PL"/><line x1="34.0" y1="110.0" x2="190.0" y2="72.0" stroke="#3A3A34" stroke-width="1.3" stroke-linecap="round" data-fx="PL"/><line x1="60.0" y1="66.0" x2="164.0" y2="116.0" stroke="#3A3A34" stroke-width="1.3" stroke-linecap="round" data-fx="PL"/><line x1="84.0" y1="120.0" x2="140.0" y2="62.0" stroke="#3A3A34" stroke-width="1.3" stroke-linecap="round" data-fx="PL"/><line x1="28.0" y1="86.0" x2="196.0" y2="96.0" stroke="#3A3A34" stroke-width="1.3" stroke-linecap="round" data-fx="PL"/><line x1="112.0" y1="10.0" x2="112.0" y2="160.0" stroke="#E8452F" stroke-width="2.2" stroke-linecap="round" data-fx="L"/><polyline points="112.0,84.0 118.8,82.3 118.8,89.3" fill="none" stroke="#4B4B44" stroke-width="1.3" data-fx="L"/><circle cx="112.0" cy="91.0" r="3.2" fill="#23241D" data-fx="L"/><text x="118.0" y="17.0" font-family="Georgia,serif" font-size="15" font-style="italic" fill="#E8452F" text-anchor="start" font-weight="600" data-fx="L">l</text><text x="119.0" y="102.0" font-family="Georgia,serif" font-size="14"  fill="#23241D" text-anchor="start" font-weight="600">O</text><text x="22.0" y="114.0" font-family="Georgia,serif" font-size="15" font-style="italic" fill="#B4661F" text-anchor="start" font-weight="600">α</text></svg></div>
+    </div>
+  </div>
+
+  <div class="qcard">
+    <h2><span class="ex3">예제 3</span>직선과 평면이 수직일 조건</h2>
+    <div class="qwrap">
+      <div class="qtext">직선 <i class="m">l</i>이 평면 <i class="m">α</i> 위의 서로 다른 두 직선 <i class="m">m</i>, <i class="m">n</i>의 교점 <span class="rm">O</span>를 지나고
+        <i class="m">m</i>, <i class="m">n</i>과 각각 수직이면 <i class="m">l</i> ⊥ <i class="m">α</i>임을 증명하시오.
+        <div class="note" style="margin-top:10px">직선 <i class="m">l</i>이 평면 <i class="m">α</i> 위의 <b>임의의 직선 <i class="m">k</i></b>과 수직임을 보이면 됩니다.</div>
+      </div>
+      <div class="qfig c3wrap"><canvas id="c3"></canvas>
+        <div class="playbar"><button class="btn sm" id="c3prev">◀ 이전 모션</button><button class="btn pri sm" id="c3play">▶ 재생</button></div></div>
+    </div>
+  </div>
+
+  <div class="qcard">
+    <h2>증명 — 선생님과 함께</h2>
+    <div class="proofsteps" id="steps"><div>평면 <i class="m">α</i> 위의 임의의 직선 <i class="m">k</i>에 대하여 점 <span class="rm">O</span>를 지나면서 직선 <i class="m">k</i>에 평행한 직선을 <i class="m">k′</i>이라 하고, 평면 <i class="m">α</i> 위에서 세 직선 <i class="m">m</i>, <i class="m">n</i>, <i class="m">k′</i>과 점 <span class="rm">O</span> 이외의 점에서 만나는 직선을 그어 그 교점을 차례로 <span class="rm">A</span>, <span class="rm">B</span>, <span class="rm">C</span>라고 하자.</div><div class="hidden-step">직선 <i class="m">l</i> 위에 <span class="rm ov">OP</span> = <span class="rm ov">OP′</span>인 서로 다른 두 점 <span class="rm">P</span>, <span class="rm">P′</span>을 잡으면 두 직선 <i class="m">m</i>, <i class="m">n</i>은 모두 선분 <span class="rm">PP′</span>의 <b>수직이등분선</b>이므로&ensp;<span class="rm ov">AP</span> = <span class="rm ov">AP′</span>, <span class="rm ov">BP</span> = <span class="rm ov">BP′</span></div><div class="hidden-step">또 <span class="rm ov">AB</span>는 공통이므로&ensp;△<span class="rm">PAB</span> ≡ △<span class="rm">P′AB</span>&ensp;따라서&ensp;∠<span class="rm">PAC</span> = ∠<span class="rm">P′AC</span></div><div class="hidden-step"><span class="rm ov">AC</span>는 공통이므로&ensp;△<span class="rm">PAC</span> ≡ △<span class="rm">P′AC</span>&ensp;따라서&ensp;<span class="rm ov">CP</span> = <span class="rm ov">CP′</span></div><div class="hidden-step">즉, 삼각형 <span class="rm">PCP′</span>은 <b>이등변삼각형</b>이고 점 <span class="rm">O</span>는 <span class="rm ov">PP′</span>의 중점이다.&ensp;<span class="rm ov">PP′</span> ⊥ <span class="rm ov">OC</span>, 즉 <i class="m">l</i> ⊥ <i class="m">k′</i>이므로&ensp;<i class="m">l</i> ⊥ <i class="m">k</i></div><div class="hidden-step">따라서 <i class="m">l</i> ⊥ <i class="m">α</i>이다.</div></div>
+    <button class="btn" id="nextStep" style="margin-top:8px">다음 문장</button>
+    <div class="note">화면의 문장을 아래 칸에 직접 따라 적어 보세요. 기호도 키보드로!</div>
+  </div>
+
+
+  <div class="qcard">
+    <h2>나의 증명</h2>
+    <textarea class="proof" id="ta" placeholder="여기에 증명을 적으세요. alpha, perp, tri, ' 는 자동으로 기호가 됩니다."></textarea>
+    <div class="pass" id="pass">핵심 키워드가 모두 들어갔어요 — 통과!</div>
+    <div class="sendRow"><button class="btn pri" id="sendBtn">증명 제출하기</button><span class="sendMsg" id="sendMsg"></span></div>
+    <div class="helpkeys">
+      <span>alpha → <b>α</b></span><span>perp → <b>⊥</b></span><span>tri → <b>△</b></span>
+      <span>== → <b>≡</b></span><span>angle → <b>∠</b></span><span>' → <b>′</b></span>
+    </div>
+  </div>
+  <details class="qcard keychk"><summary>키워드 채점</summary>
+    <div id="keys"></div>
+    <div class="note">표현이 달라도 좋아요 — 핵심 아이디어가 들어있는지만 봅니다.</div>
+  </details>
+
+</div>
+
+<div id="main3">
+  <div class="qcard">
+    <h2><span class="ex3">문제 07</span>정사면체에서 수직 찾기</h2>
+    <div class="qwrap">
+      <div class="qtext">오른쪽 그림의 정사면체 <span class="rm">ABCD</span>에서 모서리 <span class="rm">BC</span>의 중점을 <span class="rm">M</span>이라고 할 때, 다음이 성립함을 증명하시오.
+        <div class="defbox" style="background:#F2F2E6">(1) <span class="rm ov">BC</span> ⊥ (평면 <span class="rm">AMD</span>)<br>(2) <span class="rm ov">BC</span> ⊥ <span class="rm ov">AD</span></div>
+        <div class="note" style="margin-top:10px">힌트 — 예제 3 을 그대로 씁니다. <span class="rm">BC</span>가 평면 <span class="rm">AMD</span> 위의 <b>두 직선</b>과 수직이면 충분해요.
+          정삼각형에서 꼭짓점과 밑변의 중점을 이은 선은 밑변과 수직이지요.</div>
+      </div>
+      <div class="qfig c3wrap"><canvas id="c7"></canvas></div>
+    </div>
+  </div>
+
+  <div class="qcard">
+    <h2>나의 증명</h2>
+    <textarea class="proof" id="ta7" placeholder="(1)과 (2)를 차례로 적으세요. perp 는 ⊥ 로 바뀝니다."></textarea>
+    <div class="pass" id="pass7">핵심 키워드가 모두 들어갔어요 — 통과!</div>
+    <div class="sendRow"><button class="btn pri" id="sendBtn7">증명 제출하기</button><span class="sendMsg" id="sendMsg7"></span></div>
+    <div class="helpkeys">
+      <span>alpha → <b>α</b></span><span>perp → <b>⊥</b></span><span>tri → <b>△</b></span>
+      <span>== → <b>≡</b></span><span>angle → <b>∠</b></span><span>' → <b>′</b></span>
+    </div>
+  </div>
+  <details class="qcard keychk"><summary>키워드 채점</summary>
+    <div id="keys7"></div>
+    <div class="note">표현이 달라도 좋아요 — 핵심 아이디어가 들어있는지만 봅니다.</div>
+  </details>
+
+  <details class="qcard"><summary>모범답안 보기</summary>
+    <p class="qtext" style="margin:8px 0 0">(1) 정삼각형의 성질에 의하여&ensp;<span class="rm ov">BC</span> ⊥ <span class="rm ov">AM</span>, <span class="rm ov">BC</span> ⊥ <span class="rm ov">MD</span><br>
+      따라서 <b>[예제 3]</b>에 의하여&ensp;<span class="rm ov">BC</span> ⊥ (평면 <span class="rm">AMD</span>)<br>
+      (2) (1)에서 <span class="rm ov">BC</span> ⊥ (평면 <span class="rm">AMD</span>)이고, <span class="rm ov">AD</span>는 평면 <span class="rm">AMD</span> 위에 있으므로&ensp;<span class="rm ov">BC</span> ⊥ <span class="rm ov">AD</span></p>
+  </details>
+</div>
+
+<div id="ov">
+  <div class="mcard">
+    <div class="mhead"><span class="tag">문제 06</span><h3>두 직선이 이루는 각</h3>
+      <button class="mx" id="mClose">✕</button></div>
+    <div class="mq">그림과 같이 모든 모서리의 길이가 같은 사각뿔 <span class="rm">A</span>–<span class="rm">BCDE</span> 가 있다.
+      꼭짓점 <span class="rm">A</span> 에서 직선 <span class="rm">DE</span> 에 내린 수선의 발을 <span class="rm">H</span> 라고 할 때,
+      다음 두 직선이 이루는 각의 크기를 구하시오.</div>
+    <canvas id="mc"></canvas>
+    <div class="opts">
+      <button id="q6a">(1) 직선 <span class="rm">AC</span>, 직선 <span class="rm">BE</span></button>
+      <button id="q6b">(2) 직선 <span class="rm">AH</span>, 직선 <span class="rm">BC</span></button>
+    </div>
+    <div class="verdict" id="mVer"></div>
+  </div>
+</div>
+
+<script>
+"use strict";
+const $=id=>document.getElementById(id);
+const DEG=Math.PI/180, TAU=Math.PI*2;
+const clamp=(x,a,b)=>x<a?a:(x>b?b:x);
+const fmt=(x,n=1)=>(Math.abs(x)<5e-4?0:x).toFixed(n);
+/* ── 3D 벡터 ── */
+const add=(a,b)=>[a[0]+b[0],a[1]+b[1],a[2]+b[2]];
+const sub=(a,b)=>[a[0]-b[0],a[1]-b[1],a[2]-b[2]];
+const mul=(a,k)=>[a[0]*k,a[1]*k,a[2]*k];
+const dot=(a,b)=>a[0]*b[0]+a[1]*b[1]+a[2]*b[2];
+const cross=(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]];
+const len=a=>Math.hypot(a[0],a[1],a[2]);
+const norm=a=>{const l=len(a)||1;return [a[0]/l,a[1]/l,a[2]/l];};
+const rotAB=(a,b)=>{ /* a→b 회전행렬 (로드리게스) */
+  a=norm(a); b=norm(b); const v=cross(a,b), c=dot(a,b), s=len(v);
+  if(s<1e-8) return c>0? (x=>x) : (x=>mul(x,-1));
+  const k=norm(v), K=x=>cross(k,x);
+  return x=>add(add(mul(x,c),mul(K(x),s)),mul(k,dot(k,x)*(1-c)));
+};
+/* ── 캔버스 ── */
+const cv=$('c'); let ctx=cv.getContext('2d');
+let W=0,H=0,DPR=1, tab='det', T=0, DT=0;
+function resize(){ DPR=Math.min(window.devicePixelRatio||1,2.5); const r=cv.getBoundingClientRect();
+  W=Math.max(1,Math.round(r.width)); H=Math.max(1,Math.round(r.height));
+  cv.width=Math.round(W*DPR); cv.height=Math.round(H*DPR); cv.getContext('2d').setTransform(DPR,0,0,DPR,0,0); }
+const INK='#23241D', BLU='#2F45EC', DIM='#A8A79A', ORG='#E0891A', GRN='#12876A', RED='#D9463F', VIO='#7A3FB5', PAPER='#EFEFE3';
+const KOR="'IBM Plex Sans KR',system-ui,sans-serif";
+/* ── 3D 카메라 · 프림 ── */
+let EYE=[0,0,0],FW=[1,0,0],RT=[0,1,0],UPv=[0,0,1],FOC=1,CX=0,CY=0;
+function setCam(cm,cx,cy,foch){
+  CX=cx===undefined?W/2:cx; CY=cy===undefined?H/2:cy;
+  EYE=[cm.target[0]+cm.dist*Math.cos(cm.el)*Math.cos(cm.az),
+       cm.target[1]+cm.dist*Math.cos(cm.el)*Math.sin(cm.az),
+       cm.target[2]+cm.dist*Math.sin(cm.el)];
+  FW=norm(sub(cm.target,EYE)); RT=norm(cross(FW,[0,0,1])); UPv=cross(RT,FW);
+  FOC=((foch||H)/2)/Math.tan((cm.fov||40)*DEG/2);
+}
+function proj(p){ const v=sub(p,EYE), z=dot(v,FW); if(z<0.2) return null;
+  return {x:CX+dot(v,RT)*FOC/z, y:CY-dot(v,UPv)*FOC/z, z:z}; }
+let prims=[];
+function push(z,fn){prims.push({z,fn});}
+const dep=p=>len(sub(p,EYE));
+function L3(a,b,col,w,dash){ push((dep(a)+dep(b))/2,()=>{ const p=proj(a),q=proj(b); if(!p||!q)return;
+  ctx.save(); ctx.strokeStyle=col; ctx.lineWidth=w||1.4; ctx.setLineDash(dash||[]); ctx.lineCap='round';
+  ctx.beginPath(); ctx.moveTo(p.x,p.y); ctx.lineTo(q.x,q.y); ctx.stroke(); ctx.restore(); }); }
+function P3(p,col,r,ring){ push(dep(p)-0.35,()=>{ const q=proj(p); if(!q)return;
+  ctx.beginPath(); ctx.arc(q.x,q.y,r||5,0,TAU); ctx.fillStyle=col; ctx.fill();
+  if(ring){ctx.lineWidth=1.8;ctx.strokeStyle=ring;ctx.stroke();} }); }
+function F3(pts,fill,edge,w,dash){ /* 다각형 채우기 */
+  let zc=0; for(const p of pts) zc+=dep(p); zc/=pts.length;
+  push(zc+0.6,()=>{ const q=pts.map(proj); if(q.some(x=>!x)) return;
+    ctx.save(); ctx.beginPath(); ctx.moveTo(q[0].x,q[0].y);
+    for(let i=1;i<q.length;i++) ctx.lineTo(q[i].x,q[i].y); ctx.closePath();
+    if(fill){ ctx.fillStyle=fill; ctx.fill(); }
+    if(edge){ ctx.strokeStyle=edge; ctx.lineWidth=w||1.4; ctx.setLineDash(dash||[]); ctx.lineJoin='round'; ctx.stroke(); }
+    ctx.restore(); }); }
+function flush(){ prims.sort((a,b)=>b.z-a.z); for(const p of prims) p.fn(); prims=[]; }
+function label3(p,s,col,dx,dy,italic,size){ const q=proj(p); if(!q) return;
+  ctx.save(); ctx.font=(italic?"italic ":"")+"700 "+(size||15)+"px Georgia,'Times New Roman',serif";
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.lineWidth=4; ctx.strokeStyle='rgba(239,239,227,.92)'; ctx.lineJoin='round';
+  ctx.strokeText(s,q.x+(dx||0),q.y+(dy||0)); ctx.fillStyle=col; ctx.fillText(s,q.x+(dx||0),q.y+(dy||0)); ctx.restore(); }
+function klabel(p,s,col,dx,dy,size){ const q=proj(p); if(!q) return;
+  ctx.save(); ctx.font="700 "+(size||12.5)+"px "+KOR; ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.lineWidth=4; ctx.strokeStyle='rgba(239,239,227,.92)'; ctx.lineJoin='round';
+  ctx.strokeText(s,q.x+(dx||0),q.y+(dy||0)); ctx.fillStyle=col; ctx.fillText(s,q.x+(dx||0),q.y+(dy||0)); ctx.restore(); }
+function bigText(s,col,alpha){ if(alpha<=0) return;
+  ctx.save(); ctx.globalAlpha=clamp(alpha,0,1); ctx.font="800 21px "+KOR;
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.lineWidth=7; ctx.strokeStyle='rgba(239,239,227,.95)'; ctx.lineJoin='round';
+  ctx.strokeText(s,W/2,44); ctx.fillStyle=col; ctx.fillText(s,W/2,44); ctx.restore(); }
+function ray2(px,py){ const d=norm(add(add(mul(RT,(px-CX)/FOC),mul(UPv,-(py-CY)/FOC)),FW)); return {o:EYE,d}; }
+function rayZ(r,z){ const t=(z-r.o[2])/r.d[2]; return [r.o[0]+r.d[0]*t, r.o[1]+r.d[1]*t, z]; }
+function raySphere(r,c,R){ const o=sub(r.o,c), b=2*dot(o,r.d), cc=dot(o,o)-R*R, D=b*b-4*cc;
+  if(D<0){ const t=-dot(o,r.d); return add(c,norm(add(o,mul(r.d,Math.max(t,0)))).map((v,i)=>v*R)); }
+  return add(r.o,mul(r.d,(-b-Math.sqrt(D))/2)); }
+const hud=$('hud'), tip=$('tip');
+const chip=(k,v,ok)=>'<div class="chip"'+(ok?' style="border-color:var(--grn);color:var(--grn)"':'')+'><i>'+k+'</i>'+v+'</div>';
+const kvRow=(k,v,cls)=>'<div class="kv"><span>'+k+'</span><b class="'+(cls||'')+'">'+v+'</b></div>';
+function geoTask(k){ if(typeof GEO_task==='function') GEO_task(k); }
+const pulse=f=>0.5+0.5*Math.sin(T*(f||5));
+/* ══════════ 공통 도형 도우미 ══════════ */
+const ease=k=>k*k*(3-2*k);
+function arc3(P,u1,u2,r,col,w){ const cosA=clamp(dot(u1,u2),-1,1), A=Math.acos(cosA);
+  const e2=norm(sub(u2,mul(u1,cosA)));
+  let prev=null;
+  for(let i=0;i<=26;i++){ const t=A*i/26;
+    const p=add(P,mul(add(mul(u1,Math.cos(t)),mul(e2,Math.sin(t))),r));
+    if(prev) L3(prev,p,col,w||2.2); prev=p; }
+  return A/DEG; }
+function rmark(P,u1,u2,s,col){ const p1=add(P,mul(u1,s)), p2=add(P,mul(u2,s)), p3=add(P,add(mul(u1,s),mul(u2,s)));
+  L3(p1,p3,col,1.8); L3(p2,p3,col,1.8); }
+/* 본 화면 / 팝업 화면을 오갈 수 있게 크기를 따로 둔다 */
+const mcv=$('mc'); const mctx=mcv.getContext('2d');
+let MAINW=0, MAINH=0, MW=0, MH=0;
+function resize(){ DPR=Math.min(window.devicePixelRatio||1,2.5); const r=cv.getBoundingClientRect();
+  MAINW=Math.max(1,Math.round(r.width)); MAINH=Math.max(1,Math.round(r.height));
+  cv.width=Math.round(MAINW*DPR); cv.height=Math.round(MAINH*DPR);
+  cv.getContext('2d').setTransform(DPR,0,0,DPR,0,0); }
+function mresize(){ const r=mcv.getBoundingClientRect();
+  MW=Math.max(1,Math.round(r.width)); MH=Math.max(1,Math.round(r.height));
+  mcv.width=Math.round(MW*DPR); mcv.height=Math.round(MH*DPR);
+  mctx.setTransform(DPR,0,0,DPR,0,0); }
+const mainCtx=cv.getContext('2d');
+function useMain(){ ctx=mainCtx; W=MAINW; H=MAINH; }
+function useModal(){ ctx=mctx; W=MW; H=MH; }
+
+/* ══════════ 이루는 각의 정의 ══════════ */
+const DEF={ t:0, target:0,
+  dm:norm([1,0.18,0]),
+  c0:[-0.6,1.7,2.4], len:7.0, PX:6.6, PY:4.6,
+  cam:{az:-1.05, el:0.48, dist:21, target:[0,0,1], fov:40} };
+DEF.dl=(()=>{ const b=Math.atan2(DEF.dm[1],DEF.dm[0])+48*DEG; return [Math.cos(b),Math.sin(b),0]; })();
+
+const AMIN=15*DEG;                       /* m 과 이만큼은 벌어져 있어야 (평행하면 꼬인 위치가 아님) */
+function setDl(v){
+  let d=[v[0],v[1],0]; if(len(d)<1e-9) return; d=norm(d);
+  const a=Math.acos(clamp(dot(d,DEF.dm),-1,1));
+  if(a<AMIN || a>Math.PI-AMIN){
+    const base=(a<AMIN)?DEF.dm:mul(DEF.dm,-1);
+    const sgn=(cross(DEF.dm,d)[2]>=0)?1:-1;
+    const ang=Math.atan2(base[1],base[0])+sgn*AMIN;
+    d=[Math.cos(ang),Math.sin(ang),0];
+  }
+  DEF.dl=d;
+}
+function meetPoint(){                    /* l 을 수직으로 내린 l′ 이 m 과 만나는 점 */
+  const px=DEF.c0[0], py=DEF.c0[1], dl=DEF.dl, dm=DEF.dm;
+  const det=-dl[0]*dm[1]+dm[0]*dl[1];
+  if(Math.abs(det)<1e-9) return [0,0,0];
+  const s=(px*dm[1]-dm[0]*py)/det;
+  return [px+dl[0]*s, py+dl[1]*s, 0];
+}
+function angDeg(){
+  let a=Math.acos(clamp(Math.abs(dot(DEF.dl,DEF.dm)),-1,1))/DEG;
+  return Math.round(a);
+}
+function drawDef(){
+  useMain(); setCam(DEF.cam); ctx.fillStyle=PAPER; ctx.fillRect(0,0,W,H);
+  DEF.t+=(DEF.target-DEF.t)*Math.min(1,DT*2.4);
+  const k=ease(clamp(DEF.t,0,1)), done=k>0.97;
+  const P=meetPoint();
+  const reach=Math.max(len(P)+2.6, 5.0);
+  F3([[-DEF.PX,-DEF.PY,0],[DEF.PX,-DEF.PY,0],[DEF.PX,DEF.PY,0],[-DEF.PX,DEF.PY,0]],
+     'rgba(18,135,106,.07)','rgba(18,135,106,.5)',1.6);
+  klabel([-DEF.PX+0.9,-DEF.PY+0.8,0],'α',GRN,0,0,15);
+  /* m */
+  const m0=mul(DEF.dm,-reach), m1=mul(DEF.dm,reach);
+  L3(m0,m1,INK,2.6);
+  /* l (제자리) 와 l′ (내려오는 사본) */
+  const o0=add(DEF.c0,mul(DEF.dl,-DEF.len/2)), o1=add(DEF.c0,mul(DEF.dl,DEF.len/2));
+  const cc=[DEF.c0[0],DEF.c0[1],DEF.c0[2]*(1-k)];
+  const half=Math.max(DEF.len/2, len(sub(P,[cc[0],cc[1],0]))+1.8);
+  const e0=add(cc,mul(DEF.dl,-half)), e1=add(cc,mul(DEF.dl,half));
+  L3(o0,[o0[0],o0[1],0],'rgba(35,36,29,.28)',1.1,[3,4]);
+  L3(o1,[o1[0],o1[1],0],'rgba(35,36,29,.28)',1.1,[3,4]);
+  if(k>0.02) L3(e0,e1,RED,2.8);
+  L3(o0,o1,RED,2.8);
+  /* 끌 수 있다는 표시 */
+  P3(o0,'#fff',5.5,RED); P3(o1,'#fff',5.5,RED); P3(DEF.c0,RED,4.2,'#fff');
+  if(done){ arc3(P,DEF.dl,DEF.dm,1.05,ORG,2.4); P3(P,INK,4,PAPER); }
+  flush();
+  label3(add(m1,mul(DEF.dm,0.35)),'m',INK,0,-12,true,17);
+  label3(add(o1,mul(DEF.dl,0.35)),'l',RED,0,-12,true,17);
+  if(k>0.5) label3(add(e1,mul(DEF.dl,0.35)),"l′",RED,0,15,true,17);
+  if(done){
+    const bis=norm(add(DEF.dl,DEF.dm));
+    label3(add(P,mul(bis,1.5)),'θ',ORG,0,0,true,15);
+    const q=proj(add(P,mul(bis,1.5)));
+    if(q) mixed(q.x+26,q.y-26,[['두 직선 ',0],['l',1],[', ',0],['m',1],[' 이 이루는 각 ',0],
+                               [angDeg()+'°',0]],ORG);
+  }
+  hud.innerHTML = done
+    ? chip('정의','l ∥ l′ 로 옮겨 한 평면 위에서 잰다',true)+chip('이루는 각',angDeg()+'°',true)
+    : (k>0.02 ? chip('이동 중','l 을 평행이동…')
+              : chip('상태','l, m 은 꼬인 위치 — 각을 잴 평면이 없다'));
+}
+function mixed(x,y,parts,col){
+  ctx.save(); ctx.textBaseline='middle'; ctx.textAlign='left';
+  const fk="700 13px "+KOR, fm="italic 700 15px Georgia,'Times New Roman',serif";
+  ctx.lineWidth=5; ctx.strokeStyle='rgba(239,239,227,.95)'; ctx.lineJoin='round';
+  let cx=x; parts.forEach(p=>{ ctx.font=p[1]?fm:fk; ctx.strokeText(p[0],cx,y); cx+=ctx.measureText(p[0]).width; });
+  cx=x; ctx.fillStyle=col;
+  parts.forEach(p=>{ ctx.font=p[1]?fm:fk; ctx.fillText(p[0],cx,y); cx+=ctx.measureText(p[0]).width; });
+  ctx.restore();
+}
+$('btnDef').onclick=()=>{ DEF.target=DEF.target?0:1;
+  $('btnDef').textContent=DEF.target?'되돌리기':'두 직선이 이루는 각은?';
+  if(DEF.target) geoTask('ang2-def-play'); };
+
+/* ── 직선 l 끌기 ── */
+let grab=null, gPrev=null;
+function planeHit(px,py,z){ const r=ray2(px,py);
+  if(Math.abs(r.d[2])<1e-6) return null; return rayZ(r,z); }
+function pickL(px,py){
+  useMain(); setCam(DEF.cam);
+  const o0=add(DEF.c0,mul(DEF.dl,-DEF.len/2)), o1=add(DEF.c0,mul(DEF.dl,DEF.len/2));
+  const q0=proj(o0), q1=proj(o1);
+  const dd=(q)=>q?Math.hypot(q.x-px,q.y-py):1e9;
+  if(dd(q0)<30) return 'r0';
+  if(dd(q1)<30) return 'r1';
+  if(q0&&q1){
+    const vx=q1.x-q0.x, vy=q1.y-q0.y, L2=vx*vx+vy*vy||1;
+    let t=clamp(((px-q0.x)*vx+(py-q0.y)*vy)/L2,0,1);
+    if(Math.hypot(q0.x+vx*t-px, q0.y+vy*t-py)<26) return 'move';
+  }
+  return null;
+}
+function dragL(px,py){
+  useMain(); setCam(DEF.cam);
+  const h=planeHit(px,py,DEF.c0[2]); if(!h) return;
+  if(grab==='move'){
+    if(gPrev){
+      DEF.c0=[clamp(DEF.c0[0]+h[0]-gPrev[0],-2.6,2.6),
+              clamp(DEF.c0[1]+h[1]-gPrev[1],-2.6,2.6), DEF.c0[2]];
+    }
+    gPrev=h;
+  } else {
+    const v=sub(h,DEF.c0);
+    setDl(grab==='r0'?mul(v,-1):v);
+  }
+  geoTask('ang2-drag');
+}
+
+/* ══════════ 문제 06 (팝업) ══════════ */
+const QA=3.8;
+const PY={ B:[-QA/2, QA/2,0], C:[-QA/2,-QA/2,0], D:[QA/2,-QA/2,0], E:[QA/2, QA/2,0],
+  A:[0,0,QA/Math.SQRT2], H:[QA/2,0,0] };
+const PYE=[['B','C'],['C','D'],['D','E'],['E','B'],['A','B'],['A','C'],['A','D'],['A','E']];
+const Q6={ on:false, mode:0, t:0, ans:{}, azT:-1.6,
+  cam:{az:-1.6, el:0.35, dist:12.6, target:[0,0,1.05], fov:40} };
+const WAIT=1.0;                                  /* 두 직선을 먼저 1초 보여 준다 */
+function q6kvUI(){
+  $('q6kv').innerHTML=(Q6.ans[1]?kvRow('(1) 직선 AC, 직선 BE','60°','ok'):'')
+    +(Q6.ans[2]?kvRow('(2) 직선 AH, 직선 BC','90°','ok'):'');
+}
+function drawQ6(){
+  useModal(); if(!W||!H) return;
+  if(!Q6.drag){ const d=Q6.azT-Q6.cam.az; Q6.cam.az+=d*Math.min(1,DT*2.5); }
+  setCam(Q6.cam); ctx.fillStyle=PAPER; ctx.fillRect(0,0,W,H);
+  if(Q6.mode) Q6.t=Math.min(1,Q6.t+DT*0.9); else Q6.t=-WAIT;
+  const k=ease(clamp(Q6.t,0,1)), done=Q6.t>0.97, waiting=Q6.t<0;
+  F3([[-4.6,-4.2,0],[4.6,-4.2,0],[4.6,4.2,0],[-4.6,4.2,0]],'rgba(35,36,29,.02)','rgba(35,36,29,.1)',1);
+  if(Q6.mode===1&&done) F3([PY.A,PY.C,PY.D],'rgba(224,137,26,.14)','rgba(224,137,26,.5)',1.4);
+  for(const [a,b] of PYE){
+    let col='rgba(35,36,29,.55)', w=1.6;
+    if(Q6.mode===1&&done&&((a==='A'&&b==='C')||(a==='C'&&b==='D'))){ col=ORG; w=3; }
+    if(Q6.mode===2&&done&&a==='D'&&b==='E'){ col=ORG; w=3; }
+    L3(PY[a],PY[b],col,w);
+  }
+  if(Q6.mode===1) L3(PY.A,PY.C,BLU,3.2);          /* 먼저 보여 줄 직선 */
+  L3(PY.A,PY.H,Q6.mode===2?BLU:'rgba(47,69,236,.45)',Q6.mode===2?3.2:1.6,
+     Q6.mode===2?null:[5,4]);
+  if(Q6.mode===1){
+    const off=mul(sub(PY.C,PY.B),k);
+    L3(PY.B,PY.E,waiting?RED:'rgba(217,70,63,.4)',waiting?3.2:2,waiting?null:[6,5]);
+    if(!waiting) L3(add(PY.B,off),add(PY.E,off),RED,3);
+    if(k>0.03&&k<0.97){ L3(PY.B,add(PY.B,off),'rgba(35,36,29,.3)',1,[3,4]);
+                        L3(PY.E,add(PY.E,off),'rgba(35,36,29,.3)',1,[3,4]); }
+    if(done){ arc3(PY.C,norm(sub(PY.A,PY.C)),norm(sub(PY.D,PY.C)),0.85,RED,2.4);
+      if(!Q6.ans[1]){ Q6.ans[1]=true; q6kvUI(); geoTask('ang2-q6-1');
+        $('mVer').innerHTML='<b>60°</b> — 밑면이 정사각형이라 <span class="rm">BE</span> ∥ <span class="rm">CD</span>. '
+          +'옮기면 <span class="rm">C</span> 에서 만나고, 모든 모서리가 같으므로 삼각형 '
+          +'<span class="rm">ACD</span> 는 정삼각형입니다.'; } }
+  }
+  if(Q6.mode===2){
+    const off=mul(sub(PY.D,PY.C),k);
+    L3(PY.B,PY.C,waiting?RED:'rgba(217,70,63,.4)',waiting?3.2:2,waiting?null:[6,5]);
+    if(!waiting) L3(add(PY.B,off),add(PY.C,off),RED,3);
+    if(k>0.03&&k<0.97){ L3(PY.B,add(PY.B,off),'rgba(35,36,29,.3)',1,[3,4]);
+                        L3(PY.C,add(PY.C,off),'rgba(35,36,29,.3)',1,[3,4]); }
+    if(done){ rmark(PY.H,norm(sub(PY.A,PY.H)),norm(sub(PY.D,PY.H)),0.42,RED);
+      if(!Q6.ans[2]){ Q6.ans[2]=true; q6kvUI(); geoTask('ang2-q6-2');
+        $('mVer').innerHTML='<b>90°</b> — <span class="rm">BC</span> ∥ <span class="rm">DE</span> 이고 '
+          +'<span class="rm">H</span> 는 <span class="rm">A</span> 에서 <span class="rm">DE</span> 에 내린 수선의 발이므로 '
+          +'<span class="rm">AH</span> ⊥ <span class="rm">DE</span> 입니다.'; } }
+  }
+  for(const key of ['A','B','C','D','E']) P3(PY[key],INK,4.2,PAPER);
+  P3(PY.H,Q6.mode===2?RED:INK,Q6.mode===2?5:3.6,PAPER);
+  flush();
+  const LOFF={A:[0,-15],B:[-4,-14],C:[-15,8],D:[4,16],E:[16,-4],H:[13,12]};
+  for(const key in LOFF) label3(PY[key],key,key==='H'&&Q6.mode===2?RED:INK,LOFF[key][0],LOFF[key][1],false,14.5);
+  if(Q6.mode===1&&done) label3(add(PY.C,[0.95,0.15,0.55]),'60°',RED,10,-6,false,14);
+  if(Q6.mode===2&&done) label3(add(PY.H,[0.55,-0.4,0.75]),'90°',RED,14,0,false,14);
+  if(Q6.mode&&waiting)
+    bigText(Q6.mode===1?'직선 AC, 직선 BE — 꼬인 위치':'직선 AH, 직선 BC — 꼬인 위치',INK,1);
+  else if(Q6.mode&&!done)
+    bigText(Q6.mode===1?'BE 를 CD 로 평행이동':'BC 를 DE 로 평행이동',ORG,1);
+  else if(Q6.mode&&done)
+    bigText(Q6.mode===1?'정삼각형 ACD 에서 잰다 — 60°':'AH ⊥ DE — 90°',ORG,1);
+}
+function setQ6(m){
+  Q6.mode=Q6.mode===m?0:m; Q6.t=-WAIT;
+  Q6.azT=Q6.mode===2?-1.02:(Q6.mode===1?-1.72:-1.6);
+  $('q6a').classList.toggle('on',Q6.mode===1);
+  $('q6b').classList.toggle('on',Q6.mode===2);
+  $('mVer').innerHTML = Q6.mode ? '두 직선을 먼저 보고 있어요…' : '';
+}
+$('q6a').onclick=()=>setQ6(1);
+$('q6b').onclick=()=>setQ6(2);
+function openQ6(){ Q6.on=true; $('ov').classList.add('on');
+  requestAnimationFrame(()=>{ mresize(); }); geoTask('ang2-q6-open'); }
+function closeQ6(){ Q6.on=false; $('ov').classList.remove('on'); }
+$('btnQ6b').onclick=openQ6;
+$('mClose').onclick=closeQ6;
+$('ov').addEventListener('click',e=>{ if(e.target===$('ov')) closeQ6(); });
+addEventListener('keydown',e=>{ if(e.key==='Escape'&&Q6.on) closeQ6(); });
+
+
+/* ══════════ 증명 쓰기 카드 (예제 3 · 문제 07 공용) ══════════ */
+const PTOK=[['alpha','α'],['perp','⊥'],['tri','△'],['angle','∠'],['==','≡'],["'",'′']];
+function pFixTokens(ta){
+  let v=ta.value, pos=ta.selectionStart, changed=false;
+  for(const [w,ch] of PTOK){ let i;
+    while((i=v.indexOf(w))>=0){ v=v.slice(0,i)+ch+v.slice(i+w.length);
+      if(i+w.length<=pos) pos-=w.length-ch.length; else if(i<pos) pos=i+ch.length; changed=true; } }
+  if(changed){ ta.value=v; ta.setSelectionRange(pos,pos); }
+}
+const pStore=k=>{ try{ return localStorage.getItem('ang2-'+k)||''; }catch(e){ return ''; } };
+const pSave=(k,v)=>{ try{ localStorage.setItem('ang2-'+k,v); }catch(e){} };
+function stampNow(){ const d=new Date(), z=n=>String(n).padStart(2,'0');
+  return (d.getMonth()+1)+'/'+d.getDate()+' '+z(d.getHours())+':'+z(d.getMinutes()); }
+function makeProof(cfg){            /* cfg: sfx, keys[{label,alts,fx}], store, item, task, onHits(hits,newHits) */
+  const ta=$('ta'+cfg.sfx), keysEl=$('keys'+cfg.sfx), pass=$('pass'+cfg.sfx), b=$('sendBtn'+cfg.sfx), m=$('sendMsg'+cfg.sfx);
+  if(!ta) return;
+  let prev=null, done=false;
+  const norm7=t=>t.replace(/\s+/g,'').replace(/'/g,'′').replace(/\(|\)/g,'');
+  function grade(){
+    const txt=norm7(ta.value);
+    const hits=cfg.keys.map(k=>k.alts.some(a=>txt.includes(norm7(a))));
+    keysEl.innerHTML=cfg.keys.map((k,i)=>'<div class="kv"><span>'+k.label+'</span><b class="'+(hits[i]?'ok':'')+'"'
+      +(hits[i]?'':' style="color:var(--dim)"')+'>'+(hits[i]?'포함 ✓':'아직')+'</b></div>').join('');
+    const all=hits.every(Boolean); pass.classList.toggle('on',all);
+    if(all&&!done){ done=true; geoTask(cfg.task+'-pass'); }
+    const fresh=hits.map((h,i)=>h&&prev&&!prev[i]);
+    if(cfg.onHits) cfg.onHits(hits,fresh);
+    fresh.forEach((f,i)=>{ if(!f) return; const row=keysEl.querySelectorAll('.kv')[i];
+      if(row){ row.classList.add('flash'); setTimeout(()=>row.classList.remove('flash'),2400); } });
+    prev=hits.slice();
+  }
+  ta.value=pStore(cfg.store+'-ta');
+  ta.addEventListener('input',()=>{ pFixTokens(ta); pSave(cfg.store+'-ta',ta.value); grade(); });
+  grade();
+  function sendUI(){ const at=pStore(cfg.store+'-sent'); b.disabled=false;
+    if(at){ b.textContent='다시 제출하기'; m.style.color='var(--grn)'; m.textContent='제출함 · '+at; }
+    else  { b.textContent='증명 제출하기'; m.style.color='var(--dim)'; m.textContent=''; } }
+  sendUI();
+  b.onclick=async()=>{
+    const text=ta.value.trim(); const bad=t=>{ m.style.color='var(--red)'; m.textContent=t; };
+    if(text.length<10){ bad('증명을 조금 더 적은 뒤에 보내 주세요.'); return; }
+    const sid=localStorage.getItem('geoSid')||'', name=localStorage.getItem('geoName')||'';
+    if(typeof GEO_url!=='function'||!GEO_url()||!sid||!name){ bad('앱에 입장한 뒤에 제출할 수 있어요.'); return; }
+    b.disabled=true; b.textContent='보내는 중…'; m.style.color='var(--dim)'; m.textContent='';
+    try{
+      const res=await fetch(GEO_url(),{method:'POST',body:JSON.stringify({action:'proof',sid,name,item:cfg.item,text:text.slice(0,1500)})});
+      const r=await res.json(); if(!r||!r.ok) throw new Error('server');
+      const at=stampNow(); pSave(cfg.store+'-sent',at); sendUI(); m.style.color='var(--grn)'; m.textContent='제출했어요 ✅  '+at;
+      geoTask(cfg.task+'-send');
+    }catch(e){ b.disabled=false; b.textContent='증명 제출하기'; bad('전송에 실패했어요. 인터넷을 확인하고 다시 눌러 주세요.'); }
+  };
+}
+
+/* ══════════ 예제 3 — 돌려 볼 수 있는 3D 그림 + 문장별 움직임 ══════════ */
+const c3=$('c3'); const ctx3=c3.getContext('2d'); let W3=0,H3=0;
+function resize3(){ const r=c3.getBoundingClientRect(); if(r.width<2) return;
+  W3=Math.round(r.width); H3=Math.round(r.height);
+  c3.width=Math.round(W3*DPR); c3.height=Math.round(H3*DPR); ctx3.setTransform(DPR,0,0,DPR,0,0); }
+function use3(){ ctx=ctx3; W=W3; H=H3; }
+const D2R=Math.PI/180;
+const E3={ phase:0, t:0, hi:new Set(), hitT:{},
+  cam:{az:-1.18, el:0.40, dist:12.4, target:[0.3,0,0.05], fov:38} };
+const G={ O:[0,0,0], P:[0,0,2.2], Pp:[0,0,-2.2],
+  dm:[Math.cos(25*D2R),Math.sin(25*D2R),0], dn:[Math.cos(-8*D2R),Math.sin(-8*D2R),0],
+  dk:[Math.cos(-35*D2R),Math.sin(-35*D2R),0] };           /* 교과서처럼 A – C – B 순서가 되도록 k′ 이 m 과 n 사이 */
+G.pk=[-G.dk[1],G.dk[0],0]; G.Kc=mul(G.pk,1.5);
+G.A=mul(G.dm,-2.4); G.B=mul(G.dn,3.2);
+(function(){ const A=G.A,B=G.B,d=sub(B,A),k=G.dk;
+  const det=d[0]*(-k[1])-d[1]*(-k[0]); const s=(A[0]*k[1]-A[1]*k[0])/det; G.C=add(A,mul(d,s)); })();
+G.tdir=norm(sub(G.B,G.A));
+const ORGA='rgba(242,162,46,';
+function glow(key){ if(!E3.hi.has(key)) return 0; const h=E3.hitT[key]; const dt=h==null?9:(T-h);
+  return dt<2.8 ? 0.55+0.45*Math.abs(Math.sin(dt*4.2)) : 0.35; }
+function GL(a,b,key,col,w,dash){ const g=glow(key); if(g) L3(a,b,ORGA+g+')',(w||1.5)+6); L3(a,b,col,w,dash); }
+function GP(p,key,col,r){ const g=glow(key); if(g) P3(p,ORGA+g+')',(r||4)+5); P3(p,col,r,PAPER); }
+function GF(pts,key,fill,edge,w){ const g=glow(key); if(g) F3(pts,ORGA+(g*0.35)+')',null); F3(pts,fill,edge,w); }
+function rotAxis(p,a,b,ang){ const u=norm(sub(b,a)), v=sub(p,a), c=Math.cos(ang), s=Math.sin(ang);
+  return add(a, add(add(mul(v,c),mul(cross(u,v),s)),mul(u,dot(u,v)*(1-c)))); }
+function foldAngle(p,q,a,b){ const u=norm(sub(b,a)); const f=add(a,mul(u,dot(u,sub(p,a))));
+  const r1=sub(p,f), r2=sub(q,f); return Math.atan2(dot(cross(r1,r2),u),dot(r1,r2)); }
+function tick(a,b,n,col){ /* 같은 길이 표시 */
+  const mid=mul(add(a,b),0.5), u=norm(sub(b,a)); let v=cross(u,[0,0,1]); if(len(v)<0.3) v=cross(u,[0,1,0]); v=norm(v);
+  for(let i=0;i<n;i++){ const c=add(mid,mul(u,(i-(n-1)/2)*0.14)); L3(sub(c,mul(v,0.13)),add(c,mul(v,0.13)),col,1.8); } }
+function drawEx3(){
+  use3(); if(!W||!H) return;
+  setCam(E3.cam); ctx.fillStyle=PAPER; ctx.fillRect(0,0,W,H);
+  const ph=E3.phase, t=E3.t;
+  const pr=(p,a,b)=> ph>p?1:(ph<p?0:clamp((t-a)/(b-a),0,1));
+  const es=k=>k*k*(3-2*k);
+  const {O,P,Pp,dm,dn,dk,Kc,A,B,C,tdir}=G;
+  const BL='#3B6FD6', DK='#3A3A34';
+  /* 평면 */
+  const plg = ph>=6 ? 0.25+0.2*pulse(3) : 0;
+  GF([[-4.2,-2.7,0],[4.8,-2.7,0],[4.8,2.8,0],[-4.2,2.8,0]],'PL',
+     plg?ORGA+plg+')':'rgba(224,137,26,.12)','rgba(120,90,60,.7)',1.3);
+  /* m, n */
+  GL(mul(dm,-3.3),mul(dm,4.0),'M',BL,1.6); GL(mul(dn,-3.3),mul(dn,4.0),'N',BL,1.6);
+  /* l */
+  const lg = ph>=6 ? 3.2 : 2.0;
+  GL([0,0,3.3],O,'L',RED,lg); GL(O,[0,0,-3.3],'L',RED,lg,[5,4]);
+  /* 1 : k → k′ 평행이동, 가로지르는 직선, A B C */
+  const k1=es(pr(1,0,0.6));
+  if(k1>0){ GL(add(Kc,mul(dk,-3.4*k1)),add(Kc,mul(dk,4.2*k1)),'K',BL,1.6); }
+  const k2=es(pr(1,0.7,1.8));
+  if(k2>0){ const c=mul(Kc,1-k2); GL(add(c,mul(dk,-3.4)),add(c,mul(dk,4.2)),'K2',BL,1.6);
+    if(k2<1){ L3(Kc,c,'rgba(58,58,52,.35)',1,[3,3]); } }
+  const k3=es(pr(1,1.9,2.7));
+  if(k3>0){ const s0=add(A,mul(tdir,-0.7)), s1=add(B,mul(tdir,0.8)); GL(s0,add(s0,mul(sub(s1,s0),k3)),'T',DK,1.5);
+    const LAC=len(sub(B,A)); const at=q=>(0.7+dot(sub(q,A),tdir))/(LAC+1.5);
+    if(k3>=at(A)) GP(A,'A',INK,3.6); if(k3>=at(B)) GP(B,'B',INK,3.6); if(k3>=at(C)) GP(C,'C',INK,3.6); }
+  /* 2 : O → P, P′ / m ⊥ l, n ⊥ l / AP=AP′, BP=BP′ */
+  const q1=es(pr(2,0,1.0));
+  if(q1>0){ L3(O,mul(P,q1),ORG,3.2); L3(O,mul(Pp,q1),ORG,3.2,[5,4]);
+    if(q1>0.98){ GP(P,'P',INK,4); GP(Pp,'P',INK,4); tick(O,P,1,ORG); tick(O,Pp,1,ORG); } }
+  const q2=pr(2,1.1,1.8);
+  if(q2>0){ const a=0.5+0.5*Math.min(1,q2)*(ph===2?pulse(6):1); const col='rgba(217,70,63,'+(0.5+0.5*a)+')';
+    rmark(O,[0,0,1],dm,0.32,col); rmark(O,[0,0,1],dn,0.32,col); rmark(O,[0,0,-1],dm,0.32,col); rmark(O,[0,0,-1],dn,0.32,col); }
+  const q3=es(pr(2,1.9,2.8));
+  if(q3>0){ for(const [X,key,nt] of [[A,'PA',1],[B,'PB',2]]){
+      GL(P,add(P,mul(sub(X,P),q3)),key,DK,1.4); GL(Pp,add(Pp,mul(sub(X,Pp),q3)),key,DK,1.4,[4,3]);
+      if(q3>0.98){ tick(P,X,nt,GRN); tick(Pp,X,nt,GRN); } } }
+  /* 3 : △PAB ≡ △P′AB  (AB 를 축으로 접어 올리기) → ∠PAC = ∠P′AC */
+  if(ph>=3){
+    const f=es(pr(3,0,0.5));
+    F3([P,A,B],'rgba(47,69,236,'+0.22*f+')','rgba(47,69,236,.6)',1.2);
+    const r=es(pr(3,0.6,2.0)); const Q=rotAxis(Pp,A,B,foldAngle(Pp,P,A,B)*r);
+    F3([Q,A,B],'rgba(18,135,106,'+0.26*f+')','rgba(18,135,106,.7)',1.3);
+    if(r>0&&r<1){ P3(Q,GRN,3.5,PAPER); }
+    const g=pr(3,2.1,2.8);
+    if(g>0){ arc3(A,norm(sub(P,A)),norm(sub(C,A)),0.55,RED,2); arc3(A,norm(sub(Pp,A)),norm(sub(C,A)),0.55,RED,2); }
+  }
+  /* 4 : △PAC ≡ △P′AC → CP = CP′ */
+  if(ph>=4){
+    const f=es(pr(4,0,0.5));
+    F3([P,A,C],'rgba(47,69,236,'+0.2*f+')','rgba(47,69,236,.6)',1.2);
+    const r=es(pr(4,0.6,2.0)); const Q=rotAxis(Pp,A,C,foldAngle(Pp,P,A,C)*r);
+    F3([Q,A,C],'rgba(18,135,106,'+0.24*f+')','rgba(18,135,106,.7)',1.3);
+    if(r>0&&r<1){ P3(Q,GRN,3.5,PAPER); }
+    const g=es(pr(4,2.1,2.8));
+    if(g>0){ GL(P,add(P,mul(sub(C,P),g)),'PC',DK,1.5); GL(Pp,add(Pp,mul(sub(C,Pp),g)),'PC',DK,1.5,[4,3]);
+      if(g>0.98){ tick(P,C,3,RED); tick(Pp,C,3,RED); } }
+  }
+  /* 5 : PCP′ 이등변 → PP′ ⊥ OC → l ⊥ k′ → l ⊥ k */
+  if(ph>=5){
+    const f=es(pr(5,0,0.6));
+    F3([P,C,Pp],'rgba(122,63,181,'+0.2*f+')','rgba(122,63,181,.7)',1.3);
+    const o=es(pr(5,0.7,1.4));
+    if(o>0){ L3(O,add(O,mul(sub(C,O),o)),VIO,3);
+      if(o>0.98){ rmark(O,[0,0,1],norm(sub(C,O)),0.36,VIO); rmark(O,[0,0,-1],norm(sub(C,O)),0.36,VIO); } }
+    const kk=pr(5,1.6,2.4);
+    if(kk>0){ L3(mul(dk,-3.4),mul(dk,4.2),'rgba(122,63,181,'+0.85*kk+')',3.2);
+      L3(add(Kc,mul(dk,-3.4)),add(Kc,mul(dk,4.2)),'rgba(122,63,181,'+0.85*es(pr(5,2.2,2.9))+')',3.2); }
+  }
+  /* 키워드를 맞히면 그 삼각형이 단계와 상관없이 나타난다 */
+  if(ph<3&&E3.hi.has('T1')){ GF([P,A,B],'T1','rgba(47,69,236,.18)','rgba(47,69,236,.6)',1.2); GF([Pp,A,B],'T1','rgba(18,135,106,.2)','rgba(18,135,106,.7)',1.2); }
+  if(ph<4&&E3.hi.has('T2')){ GF([P,A,C],'T2','rgba(47,69,236,.16)','rgba(47,69,236,.6)',1.2); GF([Pp,A,C],'T2','rgba(18,135,106,.18)','rgba(18,135,106,.7)',1.2); }
+  if(ph<5&&E3.hi.has('T3')){ GF([P,C,Pp],'T3','rgba(122,63,181,.18)','rgba(122,63,181,.7)',1.3); }
+  flush();
+  /* 이름표 */
+  const R=(p,s,dx,dy,col)=>label3(p,s,col||INK,dx,dy,false,14);
+  label3([0,0,3.3],'l',RED,10,-2,true,16); R(O,'O',12,6);
+  if(ph>=2){ R(P,'P',12,-4); R(Pp,'P′',14,4); }
+  if(pr(1,1.9,2.7)>0.5){ R(A,'A',-11,10); R(C,'C',4,14); R(B,'B',12,-6); }
+  label3(mul(dm,4.0),'m',BL,10,-6,true,15); label3(mul(dn,4.0),'n',BL,10,8,true,15);
+  if(pr(1,0,0.6)>0.5) label3(add(Kc,mul(dk,-3.4)),'k',BL,-12,-6,true,15);
+  if(pr(1,0.7,1.8)>0.98) label3(mul(dk,4.2),'k′',BL,12,4,true,15);
+  klabel([-4.0,-2.55,0],'α',LBL3,0,0,14);
+  /* 설명 */
+  const CAP={1:[['평면 위 아무 직선 ',0],['k',1],[' 를 ',0],['O',0],[' 를 지나게 평행이동 → ',0],['k′',1],[' , 그리고 A, B, C',0]],
+    2:[['OP = OP′ 인 두 점 · ',0],['m',1],[' ⊥ ',0],['l',1],[', ',0],['n',1],[' ⊥ ',0],['l',1],['  →  AP = AP′, BP = BP′',0]],
+    3:[['AB 가 공통  →  △PAB ≡ △P′AB  →  ∠PAC = ∠P′AC',0]],
+    4:[['AC 가 공통  →  △PAC ≡ △P′AC  →  CP = CP′',0]],
+    5:[['PCP′ 은 이등변, O 는 중점  →  PP′ ⊥ OC  →  ',0],['l',1],[' ⊥ ',0],['k′',1],[' , 즉 ',0],['l',1],[' ⊥ ',0],['k',1]],
+    6:[['임의의 ',0],['k',1],[' 와 수직이므로  ',0],['l',1],[' ⊥ ',0],['α',1]],
+    0:[['▶ 재생을 누르면 증명이 한 단계씩 움직여요 · 끌어서 돌려 보세요',0]]};
+  const cap=CAP[ph]||CAP[0]; mixedC(W/2,16,cap, ph?INK:DIM);
+}
+const LBL3='#B4661F';
+function mixedC(cx,y,parts,col){ /* 가운데 정렬 mixed */
+  ctx.save(); const fk="700 12.5px "+KOR, fm="italic 700 14px Georgia,'Times New Roman',serif";
+  let w=0; parts.forEach(p=>{ ctx.font=p[1]?fm:fk; w+=ctx.measureText(p[0]).width; }); ctx.restore();
+  mixed(cx-w/2,y,parts,col);
+}
+/* 끌어서 돌리기 */
+let l3=null;
+c3.addEventListener('pointerdown',ev=>{ c3.setPointerCapture(ev.pointerId); l3=lp(c3,ev); });
+c3.addEventListener('pointermove',ev=>{ if(!l3) return; if(ev.pointerType==='mouse'&&ev.buttons===0){ l3=lp(c3,ev); return; }
+  const p=lp(c3,ev); E3.cam.az-=(p[0]-l3[0])*0.008; E3.cam.el=clamp(E3.cam.el+(p[1]-l3[1])*0.006,-0.6,1.45); l3=p; });
+['pointerup','pointercancel'].forEach(t=>c3.addEventListener(t,()=>{ l3=null; }));
+c3.addEventListener('wheel',e=>{ e.preventDefault(); E3.cam.dist=clamp(E3.cam.dist*(1+Math.sign(e.deltaY)*0.09),7,30); },{passive:false});
+function playUI(){ $('c3play').textContent = E3.phase>=6 ? '▶ 처음부터' : '▶ 다음 모션 ('+E3.phase+'/6)';
+  $('c3prev').disabled = E3.phase<=1; }
+$('c3play').onclick=()=>{ E3.phase = E3.phase>=6 ? 1 : E3.phase+1; E3.t=0; geoTask('ang2-perp-play-'+E3.phase); playUI(); };
+$('c3prev').onclick=()=>{ if(E3.phase>1){ E3.phase--; E3.t=0; playUI(); } };
+playUI();
+new ResizeObserver(resize3).observe(c3);
+
+/* ══════════ 문제 07 — 정사면체 ABCD, M 은 BC 의 중점 ══════════ */
+const c7=$('c7'); const ctx7=c7.getContext('2d'); let W7=0,H7=0;
+function resize7(){ const r=c7.getBoundingClientRect(); if(r.width<2) return;
+  W7=Math.round(r.width); H7=Math.round(r.height);
+  c7.width=Math.round(W7*DPR); c7.height=Math.round(H7*DPR); ctx7.setTransform(DPR,0,0,DPR,0,0); }
+function use7(){ ctx=ctx7; W=W7; H=H7; }
+const E7={ hi:new Set(), hitT:{}, cam:{az:-0.95, el:0.30, dist:8.6, target:[0,0,0.6], fov:38} };
+const T7=(function(){ const s=2.4, h=s*Math.sqrt(2/3), r=s/Math.sqrt(3);
+  const B=[-s/2,-r/2,0], C=[s/2,-r/2,0], D=[0,r,0], A=[0,0,h]; return {A,B,C,D,M:mul(add(B,C),0.5)}; })();
+function glow7(key){ if(!E7.hi.has(key)) return 0; const h=E7.hitT[key]; const dt=h==null?9:(T-h);
+  return dt<2.8 ? 0.55+0.45*Math.abs(Math.sin(dt*4.2)) : 0.35; }
+function drawQ7(){
+  use7(); if(!W||!H) return;
+  setCam(E7.cam); ctx.fillStyle=PAPER; ctx.fillRect(0,0,W,H);
+  const {A,B,C,D,M}=T7;
+  const g=k=>glow7(k);
+  /* 면 */
+  F3([B,C,D],'rgba(224,137,26,.10)',null); F3([A,B,C],'rgba(224,137,26,.16)',null);
+  F3([A,C,D],'rgba(224,137,26,.13)',null); F3([A,B,D],'rgba(224,137,26,.13)',null);
+  /* 평면 AMD (삼각형) */
+  const gp=g('PLN'); F3([A,M,D], gp?ORGA+(0.25+0.3*gp)+')':'rgba(122,63,181,.14)', gp?ORGA+'.9)':'rgba(122,63,181,.6)',1.3);
+  /* 모서리 */
+  const E='#4B4B44';
+  for(const [p,q] of [[A,B],[A,C],[A,D],[B,D],[C,D]]) L3(p,q,E,1.5);
+  const gb=g('BC'); if(gb) L3(B,C,ORGA+gb+')',8); L3(B,C,BLU,2.6);
+  const ga=g('AM'); if(ga) L3(A,M,ORGA+ga+')',8); L3(A,M,VIO,2.2);
+  const gm=g('MD'); if(gm) L3(M,D,ORGA+gm+')',8); L3(M,D,VIO,2.2);
+  const gd=g('AD'); if(gd) L3(A,D,ORGA+gd+')',8); if(gd) L3(A,D,RED,2.6);
+  /* 직각 표시 · 같은 길이 표시 */
+  const u=norm(sub(C,B));
+  rmark(M,u,norm(sub(A,M)),0.3,VIO); rmark(M,u,norm(sub(D,M)),0.3,VIO);
+  tick(B,M,1,INK); tick(M,C,1,INK);
+  P3(M,INK,3.6,PAPER);
+  flush();
+  const R=(p,s,dx,dy)=>label3(p,s,INK,dx,dy,false,14.5);
+  R(A,'A',0,-14); R(B,'B',-12,4); R(C,'C',10,10); R(D,'D',12,-2); R(M,'M',0,16);
+  mixedC(W/2,16,[['정사면체 · ',0],['M',0],[' 은 ',0],['BC',0],[' 의 중점 · 보라 삼각형이 평면 AMD',0]],DIM);
+}
+let l7=null;
+c7.addEventListener('pointerdown',ev=>{ c7.setPointerCapture(ev.pointerId); l7=lp(c7,ev); });
+c7.addEventListener('pointermove',ev=>{ if(!l7) return; if(ev.pointerType==='mouse'&&ev.buttons===0){ l7=lp(c7,ev); return; }
+  const p=lp(c7,ev); E7.cam.az-=(p[0]-l7[0])*0.008; E7.cam.el=clamp(E7.cam.el+(p[1]-l7[1])*0.006,-0.6,1.45); l7=p; });
+['pointerup','pointercancel'].forEach(t=>c7.addEventListener(t,()=>{ l7=null; }));
+c7.addEventListener('wheel',e=>{ e.preventDefault(); E7.cam.dist=clamp(E7.cam.dist*(1+Math.sign(e.deltaY)*0.09),5,25); },{passive:false});
+new ResizeObserver(resize7).observe(c7);
+
+/* ── 예제 3 : 문장 공개 + 그림 움직임 ── */
+const PERP_KEYS=[
+  {label:'k 에 평행한 직선 k′ (O 를 지나는)', alts:['k′','평행한직선','평행인직선'], fx:['K','K2']},
+  {label:'m, n 은 PP′ 의 수직이등분선',        alts:['수직이등분'],                 fx:['L','M','N','P']},
+  {label:'AP = AP′, BP = BP′',                 alts:['AP=AP','BP=BP'],               fx:['PA','PB','A','B']},
+  {label:'△PAB ≡ △P′AB (합동)',                alts:['합동','≡'],                    fx:['T1','PA','PB','A','B']},
+  {label:'CP = CP′',                           alts:['CP=CP'],                       fx:['T2','PC','C']},
+  {label:'삼각형 PCP′ 은 이등변삼각형',         alts:['이등변'],                      fx:['T3','PC','P','L']},
+  {label:'l ⊥ k′ 이므로 l ⊥ k',                alts:['l⊥k','k⊥l'],                  fx:['L','K2','K']},
+  {label:'결론  l ⊥ α',                        alts:['l⊥α','α⊥l'],                  fx:['L','PL']}
+];
+makeProof({sfx:'', keys:PERP_KEYS, store:'perp', item:'예제 3 (직선과 평면의 수직)', task:'ang2-perp',
+  onHits:(hits,fresh)=>{ const on=new Set(); hits.forEach((h,i)=>{ if(h) PERP_KEYS[i].fx.forEach(k=>on.add(k)); });
+    E3.hi=on; fresh.forEach((f,i)=>{ if(f) PERP_KEYS[i].fx.forEach(k=>{ E3.hitT[k]=T; }); }); }});
+const PSTEPS=$('steps').children.length; let pStep=1;
+function pRenderSteps(){
+  [...$('steps').children].forEach((d,i)=>d.classList.toggle('hidden-step',i>=pStep));
+  $('nextStep').textContent = pStep>=PSTEPS ? '처음부터' : '다음 문장';
+}
+pRenderSteps();
+$('nextStep').onclick=()=>{ if(pStep>=PSTEPS) pStep=1; else pStep++; pRenderSteps(); geoTask('ang2-perp-step'); };
+
+/* ── 문제 07 ── */
+/* 평면 AMD 는 ADM, MAD … 어떤 순서로 써도, '평면' 을 빼도 인정 */
+function PLN_ALTS(seg){ const out=[]; for(const p of ['AMD','ADM','MAD','MDA','DAM','DMA']){
+  for(const pl of ['평면'+p, p]){ out.push(seg+'⊥'+pl); out.push(pl+'⊥'+seg); } } return out; }
+const Q7_KEYS=[
+  {label:'정삼각형의 성질 (꼭짓점–중점 선은 밑변과 수직)', alts:['정삼각형'],           fx:['AM','MD','BC']},
+  {label:'BC ⊥ AM',                                    alts:['BC⊥AM','AM⊥BC'],      fx:['AM','BC']},
+  {label:'BC ⊥ MD',                                    alts:['BC⊥MD','MD⊥BC','BC⊥DM','DM⊥BC'], fx:['MD','BC']},
+  {label:'(1)  BC ⊥ (평면 AMD)',                        alts:PLN_ALTS('BC'),           fx:['PLN','BC']},
+  {label:'AD 는 평면 AMD 위에 있다',                     alts:['AD는평면','AD가평면','AD도평면','평면위','위에있'], fx:['AD','PLN']},
+  {label:'(2)  BC ⊥ AD',                                alts:['BC⊥AD','AD⊥BC'],      fx:['AD','BC']}
+];
+makeProof({sfx:'7', keys:Q7_KEYS, store:'q7', item:'문제 07 (정사면체)', task:'ang2-q7',
+  onHits:(hits,fresh)=>{ const on=new Set(); hits.forEach((h,i)=>{ if(h) Q7_KEYS[i].fx.forEach(k=>on.add(k)); });
+    E7.hi=on; fresh.forEach((f,i)=>{ if(f) Q7_KEYS[i].fx.forEach(k=>{ E7.hitT[k]=T; }); }); }});
+
+/* 탭 */
+let tab2='ang';
+document.querySelectorAll('#tabs button[data-t]').forEach(b=>b.onclick=()=>{
+  tab2=b.dataset.t;
+  document.querySelectorAll('#tabs button[data-t]').forEach(x=>x.classList.toggle('on',x===b));
+  $('app').classList.toggle('off',tab2!=='ang');
+  $('main2').classList.toggle('on',tab2==='perp');
+  $('main3').classList.toggle('on',tab2==='q7');
+  requestAnimationFrame(()=>{ resize(); resize3(); resize7(); });
+  geoTask('ang2-tab-'+tab2);
+});
+
+/* ══════════ 본 화면 입력 ══════════ */
+let last=null; const touches=new Map(); let pinch=null;
+const lp=(el,ev)=>{const r=el.getBoundingClientRect(); return [ev.clientX-r.left, ev.clientY-r.top];};
+cv.addEventListener('pointerdown',ev=>{ cv.setPointerCapture(ev.pointerId);
+  const p=lp(cv,ev); last=p; touches.set(ev.pointerId,p);
+  if(touches.size===1){ grab=pickL(p[0],p[1]); gPrev=null;
+    if(grab) { useMain(); setCam(DEF.cam); gPrev=planeHit(p[0],p[1],DEF.c0[2]); } }
+});
+cv.addEventListener('pointermove',ev=>{
+  const p=lp(cv,ev);
+  if(touches.has(ev.pointerId)) touches.set(ev.pointerId,p);
+  if(touches.size===2){ const v=[...touches.values()], d=Math.hypot(v[0][0]-v[1][0],v[0][1]-v[1][1]);
+    if(pinch) DEF.cam.dist=clamp(DEF.cam.dist*pinch/d,7,45); pinch=d; last=null; return; }
+  if(ev.pointerType==='mouse'&&ev.buttons===0){ last=p;
+    cv.style.cursor = pickL(p[0],p[1]) ? 'grab' : 'default'; return; }
+  if(!last) return;
+  if(grab){ cv.style.cursor='grabbing'; dragL(p[0],p[1]); last=p; return; }
+  DEF.cam.az-=(p[0]-last[0])*0.008;
+  DEF.cam.el=clamp(DEF.cam.el+(p[1]-last[1])*0.006,0.06,1.45);
+  last=p;
+});
+['pointerup','pointercancel'].forEach(t=>cv.addEventListener(t,ev=>{
+  touches.delete(ev.pointerId); if(touches.size<2) pinch=null;
+  last=null; grab=null; gPrev=null; cv.style.cursor='default'; }));
+cv.addEventListener('wheel',e=>{ e.preventDefault();
+  DEF.cam.dist=clamp(DEF.cam.dist*(1+Math.sign(e.deltaY)*0.09),7,45); },{passive:false});
+
+/* ══════════ 팝업 입력 ══════════ */
+let mlast=null;
+mcv.addEventListener('pointerdown',ev=>{ mcv.setPointerCapture(ev.pointerId);
+  mlast=lp(mcv,ev); Q6.drag=true; });
+mcv.addEventListener('pointermove',ev=>{ if(!mlast) return;
+  if(ev.pointerType==='mouse'&&ev.buttons===0){ mlast=lp(mcv,ev); return; }
+  const p=lp(mcv,ev);
+  Q6.cam.az-=(p[0]-mlast[0])*0.008;
+  Q6.cam.el=clamp(Q6.cam.el+(p[1]-mlast[1])*0.006,0.06,1.45);
+  Q6.azT=Q6.cam.az; mlast=p; });
+['pointerup','pointercancel'].forEach(t=>mcv.addEventListener(t,()=>{ mlast=null; Q6.drag=false; }));
+
+$('btnReset').onclick=()=>{ DEF.cam.az=-1.05; DEF.cam.el=0.48; DEF.cam.dist=21; };
+
+let t0=performance.now();
+function loop(t){ const dt=Math.max(0,Math.min(0.05,(t-t0)/1000)); t0=t; T+=dt; DT=dt;
+  if(tab2==='ang') drawDef();
+  else if(tab2==='perp'){ E3.t+=dt; drawEx3(); }
+  else if(tab2==='q7') drawQ7();
+  if(Q6.on) drawQ6();
+  requestAnimationFrame(loop);
+}
+new ResizeObserver(resize).observe($('stage'));
+new ResizeObserver(mresize).observe(mcv);
+resize(); mresize(); q6kvUI();
+requestAnimationFrame(loop);
+window.__ang={DEF,Q6};
+</script>
+<script>window.PAGE_ID="pang";</script>
+<script src="nav.js"></script>
+</body>
+</html>

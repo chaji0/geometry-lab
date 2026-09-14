@@ -6,7 +6,7 @@
      먼저 선언한 뒤 이 파일을 불러오면 하단 바가 자동으로 생깁니다.
    ════════════════════════════════════════════════════════════ */
 window.GEO_CONFIG = {
-  VERSION: "v1.55",                 // ★ 1단원=v1.x, 2단원=v2.x, 3단원=v3.x — 업로드마다 뒷자리 +1 (v1.11, v1.12, …)
+  VERSION: "v1.56",                 // ★ 1단원=v1.x, 2단원=v2.x, 3단원=v3.x — 업로드마다 뒷자리 +1 (v1.11, v1.12, …)
   APPS_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbx3Ay-gudjjSoRlngyu54umJ9uYRAKhINuwcv229UZUN9_oIQfm9vwAxM32FOPR9wV1/exec",
   /* ── 담당 선생님 ───────────────────────────────────────────────
      선생님마다 '자기 구글 시트 + 자기 드라이브'를 씁니다.
@@ -67,7 +67,11 @@ window.GEO_CONFIG = {
     { id:'pdet', unit:2, href:'pos-det.html', short:'결정조건', grp:'g-rel',
       curve:'평면의 결정조건', title:'평면의 결정조건' },
     { id:'prel', unit:2, href:'pos-rel.html', short:'위치관계', grp:'g-rel',
-      curve:'직선과 평면의 위치 관계', title:'직선과 평면의 위치 관계' }
+      curve:'직선과 평면의 위치 관계', title:'직선과 평면의 위치 관계' },
+    { id:'pang', unit:2, href:'pos-angle.html', short:'두 직선의 각', grp:'g-rel',
+      curve:'공간에서 두 직선이 이루는 각', title:'공간에서 두 직선이 이루는 각' },
+    { id:'pperp', unit:2, href:'perp3.html', short:'삼수선', grp:'g-perp',
+      curve:'삼수선의 정리', title:'삼수선의 정리' }
   ],
   /* 홈 화면 묶음 — 큰 제목 4개 (하위 메뉴는 grp로 자동 수집) */
   /* 홈 타임라인의 묶음 — soon 은 아직 안 만든(준비 중) 활동 이름 */
@@ -427,7 +431,9 @@ window.GEO_TASKS = {
   light:    ['see-ell','see-hyp','see-tel','see-litho'],// 타원·쌍곡선·반사 망원경·쇄석기 탭
   /* 2단원 */
   pdet:     ['pos2-det-1','pos2-q1-open'],             // 결정조건 하나 찾기 + 문제 01 열기
-  prel:     ['pos2-tab-lp','pos2-q2-open']             // 직선과 평면 탭 + 문제 02 열기
+  prel:     ['pos2-tab-lp','pos2-q2-open'],            // 직선과 평면 탭 + 문제 02 열기
+  pang:     ['ang2-drag','ang2-q6-open'],              // 직선 l 끌어 보기 + 문제 06 열기
+  pperp:    ['perp3-tab-t2','perp3-ex1-ok']         // 증명 탭 열기 + 예제 1 정답
 };
 window.GEO_task = function(key){
   const page = window.PAGE_ID;
