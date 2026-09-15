@@ -144,6 +144,8 @@ details.qcard summary::-webkit-details-marker{display:none}
 details.qcard summary::before{content:"+ "; color:var(--acc); font-family:'IBM Plex Mono',monospace} details.qcard[open] summary::before{content:"− "}
 details.keychk #keys{margin-top:9px} details.keychk .note{margin-top:9px}
 .keychk .kv b{font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:12px}
+/* 키워드 목록 복사 금지 */
+.keychk, .keychk *, .keys, .keys *{-webkit-user-select:none; user-select:none; -webkit-touch-callout:none}
 @keyframes rowFlash{0%,100%{background:transparent} 40%{background:rgba(242,162,46,.3)}}
 .kv.flash{animation:rowFlash 1.15s ease-out 2; border-radius:7px}
 .c3wrap{padding:0; overflow:hidden; width:min(440px,100%)} .c3wrap canvas{display:block; width:100%; height:320px; touch-action:none}
@@ -458,6 +460,8 @@ const pStore=k=>{ try{ return localStorage.getItem(STORE_PFX+k)||''; }catch(e){ 
 const pSave=(k,v)=>{ try{ localStorage.setItem(STORE_PFX+k,v); }catch(e){} };
 function stampNow(){ const d=new Date(), z=n=>String(n).padStart(2,'0');
   return (d.getMonth()+1)+'/'+d.getDate()+' '+z(d.getHours())+':'+z(d.getMinutes()); }
+document.addEventListener('copy',e=>{ const sel=document.getSelection(); if(sel&&sel.anchorNode&&(sel.anchorNode.parentElement||sel.anchorNode).closest&&(sel.anchorNode.parentElement||sel.anchorNode).closest('.keychk,[id^=keys]')) e.preventDefault(); });
+document.addEventListener('copy',e=>{ const a=document.activeElement; const sel=document.getSelection(); const n=sel&&sel.anchorNode; const el=n&&(n.nodeType===1?n:n.parentElement); if(el&&el.closest&&el.closest('.keychk,.keys')) e.preventDefault(); });
 function makeProof(cfg){
   const ta=$('ta'+cfg.sfx), keysEl=$('keys'+cfg.sfx), pass=$('pass'+cfg.sfx), b=$('sendBtn'+cfg.sfx), m=$('sendMsg'+cfg.sfx);
   if(!ta) return;
