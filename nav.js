@@ -6,7 +6,7 @@
      먼저 선언한 뒤 이 파일을 불러오면 하단 바가 자동으로 생깁니다.
    ════════════════════════════════════════════════════════════ */
 window.GEO_CONFIG = {
-  VERSION: "v1.60",                 // ★ 1단원=v1.x, 2단원=v2.x, 3단원=v3.x — 업로드마다 뒷자리 +1 (v1.11, v1.12, …)
+  VERSION: "v1.61",                 // ★ 1단원=v1.x, 2단원=v2.x, 3단원=v3.x — 업로드마다 뒷자리 +1 (v1.11, v1.12, …)
   APPS_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbx3Ay-gudjjSoRlngyu54umJ9uYRAKhINuwcv229UZUN9_oIQfm9vwAxM32FOPR9wV1/exec",
   /* ── 담당 선생님 ───────────────────────────────────────────────
      선생님마다 '자기 구글 시트 + 자기 드라이브'를 씁니다.
@@ -2334,4 +2334,34 @@ window.__pt = function(){
     notes: notes.map(function(m){ return { id:m.id, x:Math.round(m.x), y:Math.round(m.y), w:m.w||0, h:m.h||0,
       ci:m.ci, ai:m.ai, folded:!!m.folded, s:m.strokes.length }; }) };
 };
+})();
+
+/* ══ GEO_THEME v1.61 ══ */
+/* 상단·하단 바를 가운데 화면과 같은 종이색으로, 높이를 낮게 (2026-09-15 선생님 요청)
+   · 수행평가·오늘과제(그림 버튼) 20% 축소 (40→32px), 옆 아이콘 3개는 크기 그대로 · 간격만 축소
+   · 하단 바는 홈 화면 하단처럼 회색 알약 테두리 + 종이색 배경, 연습장·포스트잇·책갈피 아이콘 20% 축소 */
+(function(){
+  const st=document.createElement('style'); st.id='geoTheme';
+  st.textContent=`
+  #gtop{ background:#EFEFE3 !important; border-bottom:1px solid #DCDACD !important; padding:3px 12px !important; }
+  #gtop .gtLeft span{ color:#A8A79A !important; font-size:10.5px !important; } #gtop .gtLeft b{ color:#7C7B6F !important; }
+  #gtop .gtLeft img{ width:20px !important; height:20px !important; }
+  #gtBtns{ gap:4px !important; align-items:center; }
+  #gtBtns .gtBtn.wideBtn{ height:32px !important; } #gtBtns .gtBtn.wideBtn img{ height:32px !important; }
+  #gtBtns .gtBtn.imgBtn{ width:40px; height:40px; }
+  #gtBtns .gtBtn.wideBtn{ width:auto !important; margin-right:4px; }
+  #gnav{ background:#EFEFE3 !important; border-top:1px solid #DCDACD !important; padding:5px 12px !important; }
+  #gnav button, #gnav a{ padding:6px 13px !important; font-size:12px !important; font-weight:700 !important; border-radius:999px !important;
+    border:1.5px solid #DCDACD !important; background:transparent !important; color:#A8A79A !important; }
+  #gnav a:hover, #gnav button:hover{ border-color:#C7C5B6 !important; color:#7C7B6F !important; }
+  #gnav a#gnavNext, #gnav button#gnavNext{ background:#2F45EC !important; border-color:#2F45EC !important; color:#fff !important; padding:6px 15px !important; }
+  #gnav a#gnavNext:hover{ background:#1B2FC4 !important; border-color:#1B2FC4 !important; }
+  #gnavMark{ padding:5px 10px !important; background:transparent !important; border-color:#DCDACD !important; }
+  #gnavMark svg{ width:12px; height:15px; }
+  #gnBtn{ padding:3px 7px !important; } #gnBtn img{ height:22px !important; }
+  #ptBtn{ padding:3px 7px !important; } #ptBtn img{ height:21px !important; }
+  #gnav .gnPage, .gnPage{ width:25px !important; height:25px !important; min-width:25px !important; font-size:10.5px !important; }
+  #gnavRight{ gap:6px !important; }
+  `;
+  document.head.appendChild(st);
 })();
