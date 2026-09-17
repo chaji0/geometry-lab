@@ -6,7 +6,7 @@
      먼저 선언한 뒤 이 파일을 불러오면 하단 바가 자동으로 생깁니다.
    ════════════════════════════════════════════════════════════ */
 window.GEO_CONFIG = {
-  VERSION: "v1.63",                 // ★ 1단원=v1.x, 2단원=v2.x, 3단원=v3.x — 업로드마다 뒷자리 +1 (v1.11, v1.12, …)
+  VERSION: "v1.64",                 // ★ 1단원=v1.x, 2단원=v2.x, 3단원=v3.x — 업로드마다 뒷자리 +1 (v1.11, v1.12, …)
   APPS_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbx3Ay-gudjjSoRlngyu54umJ9uYRAKhINuwcv229UZUN9_oIQfm9vwAxM32FOPR9wV1/exec",
   /* ── 담당 선생님 ───────────────────────────────────────────────
      선생님마다 '자기 구글 시트 + 자기 드라이브'를 씁니다.
@@ -77,7 +77,9 @@ window.GEO_CONFIG = {
     { id:'pproj', unit:2, href:'proj.html', short:'정사영', grp:'g-proj',
       curve:'정사영', title:'정사영' },
     { id:'plen', unit:2, href:'projlen.html', short:'길이와 넓이', grp:'g-proj',
-      curve:'정사영의 길이와 넓이', title:'정사영의 길이와 넓이' }
+      curve:'정사영의 길이와 넓이', title:'정사영의 길이와 넓이' },
+    { id:'psun', unit:2, href:'sundial.html', short:'해시계', grp:'g-proj',
+      curve:'해의 움직임과 그림자의 길이', title:'해의 움직임과 그림자의 길이' }
   ],
   /* 홈 화면 묶음 — 큰 제목 4개 (하위 메뉴는 grp로 자동 수집) */
   /* 홈 타임라인의 묶음 — soon 은 아직 안 만든(준비 중) 활동 이름 */
@@ -442,7 +444,8 @@ window.GEO_TASKS = {
   pperp:    ['perp3-tab-t2','perp3-ex1-ok'],        // 증명 탭 열기 + 예제 1 정답
   pdih:     ['dih-o-click','dih-q3-open'],           // 점 O 누르기 + 문제 03 열기
   pproj:    ['proj-shadow','proj-q1-1'],             // 그림자 보기 + 문제 01 (1)
-  plen:     ['plen-ab','plen-who-ok']                // 정사영 모션 + 대화 문제 정답
+  plen:     ['plen-ab','plen-who-ok'],              // 정사영 모션 + 대화 문제 정답
+  psun:     ['sun-q1-ok','sun-q2']                   // 문제 1 정답 + 문제 2 증명 제출
 };
 window.GEO_task = function(key){
   const page = window.PAGE_ID;
