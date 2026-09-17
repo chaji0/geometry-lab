@@ -110,6 +110,8 @@
     letter-spacing:.16em; color:var(--acc);
   }
   #tlTop h2 { font-size:25px; font-weight:700; letter-spacing:-.02em; margin-top:7px; color:var(--ink); }
+  .askBtn { flex:none; align-self:flex-start; margin-top:6px; font-size:11.5px; font-weight:700; color:var(--acc, #2F45EC); border:1.5px solid currentColor; border-radius:999px; padding:5px 11px; text-decoration:none; background:#fff; }
+  .askBtn:active { opacity:.7; }
   #tlTop .who2 { font-size:12.5px; color:var(--mute); margin-top:6px; font-weight:500; }
   #tlMeter { display:flex; align-items:center; gap:10px; margin-top:16px; }
   #tlMeter .num {
@@ -220,6 +222,19 @@
     .secRow::before { left:0; right:96px; top:16px; bottom:auto; width:auto; height:1.5px; }
     .sec + .sec { margin-top:42px; }
   }
+
+  /* ── 두 단원 두 열 홈 ── */
+  #tlCols { display:flex; flex-direction:column; gap:34px; margin-top:26px; }
+  #tlCols .ucol { flex:1; min-width:0; }
+  #tlCols .ut { margin:0 0 16px; font-size:16.5px; font-weight:800; color:var(--ink); letter-spacing:-.2px; }
+  #tlCols .ut span { display:inline-block; padding-bottom:4px; border-bottom:2px solid var(--ink); }
+  #tlCols .stage { padding-left:0; padding-bottom:18px; }
+  #tlCols .stage .node { display:none; }
+  #tlCols .items { margin-top:10px; }
+  @media (min-width:860px){
+    #tlCols { flex-direction:row; gap:44px; }
+    #tl > .rail, #tl > .railOn, #tlSvg { display:none !important; }
+  }
   /* ── 단원 목차 ── */
   .unit {
     display:flex; align-items:center; gap:13px; width:100%; text-align:left;
@@ -328,35 +343,16 @@
 
   <!-- ── 승인 후: 목차 / 홈 ── -->
   <div class="card" id="menu">
-    <div id="tocView">
-      <div class="hello"><b id="helloName"></b>님, 환영해요! 공부할 단원을 골라 보세요.</div>
-      <button class="unit" id="unit1">
-        <span class="no" style="background:#3b82f6">1</span>
-        <span><span class="tt">이차곡선</span><br>
-          <span class="dd">원뿔을 자르면 나타나는 네 가지 곡선 — 포물선·타원·쌍곡선.</span></span>
-        <span class="tag">›</span>
-      </button>
-      <button class="unit" id="unit2">
-        <span class="no" style="background:#f0a25f">2</span>
-        <span><span class="tt">공간도형과 공간좌표</span><br>
-          <span class="dd">삼수선의 정리, 정사영, 그리고 좌표공간.</span></span>
-        <span class="tag">›</span>
-      </button>
-      <button class="unit soon">
-        <span class="no" style="background:#6ecb8f">3</span>
-        <span><span class="tt">벡터</span><br>
-          <span class="dd">크기와 방향 — 화살표로 공간을 읽는다.</span></span>
-        <span class="tag">추후 공개</span>
-      </button>
-    </div>
+    <div id="tocView" style="display:none"><b id="helloName"></b></div>
     <div id="homeView" style="display:none">
       <div id="tlWrap">
         <div id="tlTop">
           <div>
             <div class="eyebrow">GEOMETRY LAB</div>
-            <h2 id="tlTitle">1. 이차곡선</h2>
+            <h2 id="tlTitle">기하 탐구실</h2>
             <div class="who2" id="tlWho"></div>
           </div>
+          <a id="askBtn" class="askBtn" href="ask.html" style="display:none">A반 질문받기</a>
         </div>
         <div id="tlMeter"><span class="num" id="tlNum"></span><span class="bar"><i id="tlBar"></i></span></div>
         <div id="tl">
@@ -365,13 +361,13 @@
           <div id="tlRow1"></div>
           <div id="tlRow2"></div>
           <div id="tlSecs"></div>
+          <div id="tlCols"></div>
         </div>
         <div id="tlFoot">
           <span class="sg"><img src="splash-emblem.png" alt="">
             <span>단국대학교사범대학부속고등학교 <b>수학과</b></span>
             <span class="pol"><a onclick="GEO_openPolicy('terms')">이용약관</a> · <a onclick="GEO_openPolicy('privacy')">개인정보처리방침</a></span></span>
           <span style="display:flex; gap:8px;">
-            <button id="backToc">목차</button>
             <button id="logout2">다른 학생으로</button>
             <a id="tlNext" class="go">다음 ›</a>
           </span>
@@ -452,93 +448,61 @@ function esc2(t){ return String(t).replace(/[&<>"]/g, m => ({'&':'&amp;','<':'&l
 
 function renderActs(){
   const done = doneList();
-  const U = CURUNIT || 1;
-  const unitInfo = (GEO_CONFIG.UNITS || []).find(u => u.n === U);
-  if($('tlTitle') && unitInfo) $('tlTitle').textContent = unitInfo.title;
-  /* 이 단원의 활동만 */
-  const acts = GEO_CONFIG.ACTIVITIES.filter(a => (a.unit || 1) === U);
-  const groups = (U === 2 ? GEO_CONFIG.HOME_GROUPS2 : GEO_CONFIG.HOME_GROUPS) || [];
   const closed = closedSet();
-  /* 홈 묶음에 속한 활동만 셈 (지오지브라 바로가기·준비 중 자리는 제외) */
-  const keys = groups.map(g => g.key);
-  const listed = acts.filter(a => keys.indexOf(a.grp) >= 0 && !a.soon);
-  const total = listed.length;
-  const nDone = listed.filter(a => done.includes(a.id)).length;
-  const nowId = (listed.find(a => !done.includes(a.id)) || {}).id;
-
   $('tlWho').textContent = (localStorage.getItem('geoName') || '') + '님, 순서대로 따라가 보세요.';
-  $('tlNext').href = listed.length ? listed[0].href : '#';             // 첫 활동으로
+  if($('askBtn')) $('askBtn').style.display = (window.GEO_teacherId && window.GEO_teacherId()==='cha') ? 'inline-block' : 'none';
+
+  const UNITS = [
+    { n:1, title:'1. 이차곡선', groups: GEO_CONFIG.HOME_GROUPS || [] },
+    { n:2, title:'2. 공간도형', groups: (GEO_CONFIG.HOME_GROUPS2 || []).filter(g => g.sec === '1. 공간도형') }
+  ];
+  let total = 0, nDone = 0, nowId = null, firstHref = '#';
+  const cols = UNITS.map(u => {
+    const acts = GEO_CONFIG.ACTIVITIES.filter(a => (a.unit || 1) === u.n);
+    const keys = u.groups.map(g => g.key);
+    const listed = acts.filter(a => keys.indexOf(a.grp) >= 0 && !a.soon);
+    total += listed.length; nDone += listed.filter(a => done.includes(a.id)).length;
+    const nw = listed.find(a => !done.includes(a.id));
+    if(nw && !nowId){ nowId = nw.id; firstHref = nw.href; }
+    if(firstHref === '#' && listed.length) firstHref = listed[0].href;
+    const html = u.groups.map((g, gi) => {
+      const kids = acts.filter(a => a.grp === g.key);
+      const real = kids.filter(k => !k.soon);
+      const soon = g.soon || [];
+      const allDone = real.length > 0 && real.every(k => done.includes(k.id));
+      const isSoon = real.length === 0;
+      const hasNow = real.some(k => k.id === nowId);
+      const rows = kids.map(k => {
+        const head = k.sub ? '<div class="subhead">' + esc2(k.sub) + '</div>' : '';
+        if(k.soon) return head + '<span class="it dead todo">' + MARK.todo
+             + '<span>' + esc2(k.curve || k.title) + '</span></span>';
+        const st = done.includes(k.id) ? 'done' : (k.id === nowId ? 'now' : 'todo');
+        return head
+             + '<a class="it ' + st + '" href="' + k.href + '">' + MARK[st]
+             + '<span>' + esc2(k.curve || k.title) + '</span></a>';
+      }).concat(soon.map(t =>
+        '<span class="it dead todo">' + MARK.todo + '<span>' + esc2(t) + '</span></span>'
+      )).join('');
+      const isClosed = closed.indexOf(g.key) >= 0;
+      const cls = 'stage' + (isClosed ? ' closed' : '') + (isSoon ? ' soon' : '')
+                + ((allDone || hasNow) ? ' reached' : '');
+      return '<div class="' + cls + '" data-g="' + g.key + '">'
+           + '<button class="chip" data-g="' + g.key + '">'
+           +   '<span class="no">' + String(gi + 1).padStart(2, '0') + '</span>'
+           +   '<span class="nm">' + esc2(g.title) + '</span>'
+           +   (isSoon ? '<span class="tag">준비 중</span>' : '') + CARET
+           + '</button>'
+           + '<div class="items">' + rows + '</div></div>';
+    }).join('');
+    return '<div class="ucol"><h3 class="ut"><span>' + esc2(u.title) + '</span></h3>' + html + '</div>';
+  });
+  $('tlCols').innerHTML = cols.join('');
+  $('tlNext').href = firstHref;
   $('tlNum').textContent = nDone + ' / ' + total + ' 완료';
   $('tlBar').style.width = total ? Math.round(nDone / total * 100) + '%' : '0%';
-
-  let reached = true;
-  const secNo = {};
-  const html = groups.map((g, gi) => {
-    const sk = g.sec || '';
-    secNo[sk] = (secNo[sk] || 0) + 1;
-    const no = secNo[sk];
-    const kids = acts.filter(a => a.grp === g.key);
-    const real = kids.filter(k => !k.soon);
-    const soon = g.soon || [];
-    const allDone = real.length > 0 && real.every(k => done.includes(k.id));
-    const isSoon = real.length === 0;
-    const hasNow = real.some(k => k.id === nowId);
-    const rows = kids.map(k => {
-      const head = k.sub ? '<div class="subhead">' + esc2(k.sub) + '</div>' : '';
-      if(k.soon) return head + '<span class="it dead todo">' + MARK.todo
-           + '<span>' + esc2(k.curve || k.title) + '</span></span>';
-      const st = done.includes(k.id) ? 'done' : (k.id === nowId ? 'now' : 'todo');
-      return head
-           + '<a class="it ' + st + '" href="' + k.href + '">' + MARK[st]
-           + '<span>' + esc2(k.curve || k.title) + '</span></a>';
-    }).concat(soon.map(t =>
-      '<span class="it dead todo">' + MARK.todo + '<span>' + esc2(t) + '</span></span>'
-    )).join('');
-    const isClosed = closed.indexOf(g.key) >= 0;
-    const cls = 'stage' + (isClosed ? ' closed' : '') + (isSoon ? ' soon' : '')
-              + ((allDone || hasNow) ? ' reached' : '');
-    return '<div class="' + cls + '" data-g="' + g.key + '">'
-         + '<span class="node"></span>'
-         + '<button class="chip" data-g="' + g.key + '">'
-         +   '<span class="no">' + String(no).padStart(2, '0') + '</span>'
-         +   '<span class="nm">' + esc2(g.title) + '</span>'
-         +   (isSoon ? '<span class="tag">준비 중</span>' : '') + CARET
-         + '</button>'
-         + '<div class="items">' + rows + '</div></div>';
-  });
-
-  /* ── 큰 제목(sec)이 있는 단원: 제목마다 한 줄씩 ── */
-  if(groups.some(g => g.sec)){
-    const order = [];
-    groups.forEach(g => { if(order.indexOf(g.sec) < 0) order.push(g.sec); });
-    $('tlSecs').innerHTML = order.map(secName =>
-        '<div class="sec"><div class="secT"><span>' + esc2(secName) + '</span></div>'
-      + '<div class="secRow">'
-      + groups.map((g, gi) => g.sec === secName ? html[gi] : '').join('')
-      + '</div></div>').join('');
-    $('tlRow1').innerHTML = ''; $('tlRow2').innerHTML = '';
-    $('tlRow1').style.display = 'none'; $('tlRow2').style.display = 'none';
-    $('tlSecs').style.display = '';
-    const rl = document.querySelector('#tl > .rail'), ro = $('tlRailOn');
-    if(rl) rl.style.display = 'none';
-    if(ro) ro.style.display = 'none';
-    if($('tlSvg')) $('tlSvg').style.display = 'none';
-    bindChips();
-    return;
-  }
-  $('tlSecs').innerHTML = ''; $('tlSecs').style.display = 'none';
-  $('tlRow1').style.display = ''; 
-  if($('tlSvg')) $('tlSvg').style.display = '';
-  const rl0 = document.querySelector('#tl > .rail'), ro0 = $('tlRailOn');
-  if(rl0) rl0.style.display = ''; if(ro0) ro0.style.display = '';
-
-  /* 윗줄 4개, 아랫줄은 오른쪽에서 왼쪽으로 (S자 순서) */
-  $('tlRow1').innerHTML = html.slice(0, 4).join('');
-  const r2 = html.slice(4).reverse();
-  const padN = Math.max(0, 4 - r2.length);
-  $('tlRow2').innerHTML = r2.length ? ('<div class="spacer"></div>'.repeat(padN) + r2.join('')) : '';
-  $('tlRow2').style.display = r2.length ? '' : 'none';
-
+  ['tlSecs','tlRow1','tlRow2','tlSvg'].forEach(id => { if($(id)){ $(id).innerHTML=''; $(id).style.display='none'; } });
+  const rl = document.querySelector('#tl > .rail'), ro = $('tlRailOn');
+  if(rl) rl.style.display = 'none'; if(ro) ro.style.display = 'none';
   bindChips();
 }
 
@@ -560,6 +524,7 @@ function bindChips(){
 
 /* 레일 — 넓은 화면에서는 오른쪽에서 꺾여 아랫줄로 내려간다 */
 function drawRail(){
+  return;
   const tl = $('tl'), svg = $('tlSvg');
   if(!tl || !svg) return;
   const wide = window.matchMedia('(min-width:1040px)').matches;
@@ -623,7 +588,7 @@ window.addEventListener('resize', () => { clearTimeout(railTm); railTm = setTime
 let CURUNIT = 1;
 function showView(){
   const h = location.hash;
-  const home = (h === '#home' || h === '#home2');
+  const home = true;                               // 목차 화면 없이 바로 홈
   CURUNIT = (h === '#home2') ? 2 : 1;
   $('tocView').style.display  = home ? 'none' : 'block';
   $('homeView').style.display = home ? 'block' : 'none';
@@ -795,9 +760,6 @@ async function tryEnter(silent){
 btn.addEventListener('click', ()=>tryEnter(false));
 [$('sid'),$('name')].forEach(el=>el.addEventListener('keydown',e=>{ if(e.key==='Enter') tryEnter(false); }));
 
-$('unit1').addEventListener('click', ()=>{ location.hash = '#home'; });
-$('unit2').addEventListener('click', ()=>{ location.hash = '#home2'; });
-$('backToc').addEventListener('click', ()=>{ location.hash = '#toc'; });
 
 $('logout').addEventListener('click', hardLogout);
 $('logout2').addEventListener('click', hardLogout);
