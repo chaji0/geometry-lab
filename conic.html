@@ -171,10 +171,25 @@ if (localStorage.getItem('geoAppOk') !== '1') location.replace('index.html');
     100%{ transform:translate(var(--dx), var(--dy)) rotate(var(--rot)); opacity:0; }
   }
 </style>
+
+<style>
+/* ── 색 통일 : 앱 바탕(종이색) 테마 ── */
+body{background:#EFEFE3;color:#23241D}
+header{background:#EFEFE3;border-bottom:1px solid #DCDACD} header h1{color:#23241D} header p{color:#A8A79A}
+#panel{background:#EFEFE3;border-left:1px solid #DCDACD}
+.card{background:#F5F5EC;border:1px solid #DCDACD} .card h2{color:#23241D}
+.angleVal{color:#2F45EC} .angleVal i{color:#2F45EC} .angleVal small{color:#A8A79A} input[type=range]{accent-color:#2F45EC}
+.segRow button,.quizBtns button,.proofBtns button,.subBtns button{background:#fff;border-color:#C7C5B6;color:#23241D;border-radius:999px}
+.segRow button.on,.proofBtns button.on,.subBtns button.on{background:#2F45EC;border-color:#2F45EC;color:#fff}
+.quizBtns button:hover:not(:disabled),.proofBtns button:hover,.subBtns button:hover{border-color:#2F45EC;color:#2F45EC;background:#fff}
+#cutBtn{background:#2F45EC;border-radius:999px}
+details.proof{background:#F5F5EC;border:1px solid #DCDACD} details.proof summary{display:none} details.proof .proofBtns{margin-top:0}
+.note,.scoreBox .lab,#proofDesc{color:#7C7B6F} .scoreBox .val{color:#23241D} .eq{color:#23241D}
+</style>
 </head>
 <body>
 <header>
-  <h1><img class="h1ico" src="icon-conic.png" alt=""> 원뿔곡선 탐구 — 이중원뿔의 단면 자르기</h1>
+  <h1>원뿔곡선 탐구 — 이중원뿔의 단면 자르기</h1>
   <p>평면의 기울기를 조절해 단면을 자르고, 어떤 곡선인지 맞혀 보세요!</p>
 </header>
 
@@ -194,7 +209,7 @@ if (localStorage.getItem('geoAppOk') !== '1') location.replace('index.html');
       <div class="genLine">원뿔 모선의 기울기 <i>θ</i> = <b>60°</b> (고정)</div>
       <label class="chkRow">
         <input type="checkbox" id="angChk" checked>
-        <span><i>α</i> · <i>θ</i> 보조선 표시 — 기준 수평선 · 모선 · 평면의 최대경사선</span>
+        <span><i>α</i> · <i>θ</i></span>
       </label>
       <div class="segRow">
         <span>각을 재는 기준 수평면</span>
@@ -203,7 +218,7 @@ if (localStorage.getItem('geoAppOk') !== '1') location.replace('index.html');
       </div>
     </div>
 
-    <button id="cutBtn">🔪 단면 확인</button>
+    <button id="cutBtn">단면 확인</button>
 
     <div class="card" id="quizCard">
       <h2>② 이 단면은 어떤 곡선일까요?</h2>
@@ -216,7 +231,7 @@ if (localStorage.getItem('geoAppOk') !== '1') location.replace('index.html');
       <div id="quizResult"></div>
     </div>
 
-    <details class="proof" id="proofBox">
+    <details class="proof" id="proofBox" open>
       <summary>📐 증명으로 이어가기</summary>
       <div class="proofBtns">
         <button id="pfParab">포물선 증명</button>
@@ -738,7 +753,7 @@ function render(){
     canvas.width=Math.round(w*dpr); canvas.height=Math.round(h*dpr);
   }
   ctx.setTransform(dpr,0,0,dpr,0,0);
-  ctx.fillStyle='#eef3fa'; ctx.fillRect(0,0,w,h);
+  ctx.fillStyle='#EFEFE3'; ctx.fillRect(0,0,w,h);
   const cam=viewSetup(w,h);
 
   const b=planeBasis(alphaDeg);
