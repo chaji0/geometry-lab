@@ -6,7 +6,7 @@
      먼저 선언한 뒤 이 파일을 불러오면 하단 바가 자동으로 생깁니다.
    ════════════════════════════════════════════════════════════ */
 window.GEO_CONFIG = {
-  VERSION: "v1.69",                 // ★ 1단원=v1.x, 2단원=v2.x, 3단원=v3.x — 업로드마다 뒷자리 +1 (v1.11, v1.12, …)
+  VERSION: "v1.70",                 // ★ 1단원=v1.x, 2단원=v2.x, 3단원=v3.x — 업로드마다 뒷자리 +1 (v1.11, v1.12, …)
   APPS_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbx3Ay-gudjjSoRlngyu54umJ9uYRAKhINuwcv229UZUN9_oIQfm9vwAxM32FOPR9wV1/exec",
   /* ── 담당 선생님 ───────────────────────────────────────────────
      선생님마다 '자기 구글 시트 + 자기 드라이브'를 씁니다.
@@ -81,7 +81,12 @@ window.GEO_CONFIG = {
     { id:'psun', unit:2, href:'sundial.html', short:'해시계', grp:'g-proj',
       curve:'해의 움직임과 그림자의 길이', title:'해의 움직임과 그림자의 길이' },
     { id:'prev', unit:2, href:'review.html', short:'학습 점검', grp:'g-review',
-      curve:'공간도형 마무리 문제', title:'중단원 학습 점검' }
+      curve:'공간도형 마무리 문제', title:'중단원 학습 점검' },
+    /* 수능특강 — 문항별 STEP 힌트 */
+    { id:'snpar', unit:2, href:'snt-parabola.html', short:'수특 포물선', grp:'g-snt',
+      curve:'포물선', title:'수능특강 · 포물선' },
+    { id:'snell', unit:2, href:'snt-ellipse.html', short:'수특 타원', grp:'g-snt',
+      curve:'타원', title:'수능특강 · 타원' }
   ],
   /* 홈 화면 묶음 — 큰 제목 4개 (하위 메뉴는 grp로 자동 수집) */
   /* 홈 타임라인의 묶음 — soon 은 아직 안 만든(준비 중) 활동 이름 */
@@ -99,6 +104,7 @@ window.GEO_CONFIG = {
     { key:'g-perp', sec:'1. 공간도형', title:'삼수선의 정리' },
     { key:'g-proj', sec:'1. 공간도형', title:'정사영' },
     { key:'g-review', sec:'1. 공간도형', title:'중단원 학습 점검' },
+    { key:'g-snt', sec:'1. 공간도형', title:'수능특강', soon:['쌍곡선','공간도형'] },
     { key:'g-pt',   sec:'2. 공간좌표', title:'공간에서 점의 좌표' },
     { key:'g-sph',  sec:'2. 공간좌표', title:'구의 방정식' }
   ],
@@ -249,7 +255,7 @@ window.GEO_addExtraButtons = function(){
     color:'#0d9488', shadow:'rgba(13,148,136,.28)', right:base,
     onClick:()=>window.GEO_openGallery() });
   window.GEO_addSubmitButton(base + 96);        // 질문방 왼쪽
-  window.GEO_addNoticeButton(base + 195);      // 오늘과제 왼쪽
+  /* 수행평가 공지 버튼은 v1.70에서 상단 바에서 뺐다 (GEO_addNoticeButton 함수는 남겨 둠) */
 };
 
 /* 오늘과제 버튼 — 상단 바에서는 맨 앞(질문방 왼쪽)으로 옮긴다 */
@@ -449,7 +455,9 @@ window.GEO_TASKS = {
   pproj:    ['proj-shadow','proj-q1-1'],             // 그림자 보기 + 문제 01 (1)
   plen:     ['plen-ab','plen-who-ok'],              // 정사영 모션 + 대화 문제 정답
   psun:     ['sun-q1-ok','sun-q2'],                  // 문제 1 정답 + 문제 2 증명 제출
-  prev:     ['rev-q14','rev-m14']                    // 14번 열기 + 풀이 보기
+  prev:     ['rev-q14','rev-m14'],                   // 14번 열기 + 풀이 보기
+  snpar:    ['sn-step'],                             // STEP 힌트 한 번 열기
+  snell:    ['sn-step']
 };
 window.GEO_task = function(key){
   const page = window.PAGE_ID;
