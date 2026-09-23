@@ -6,7 +6,7 @@
      먼저 선언한 뒤 이 파일을 불러오면 하단 바가 자동으로 생깁니다.
    ════════════════════════════════════════════════════════════ */
 window.GEO_CONFIG = {
-  VERSION: "v1.70",                 // ★ 1단원=v1.x, 2단원=v2.x, 3단원=v3.x — 업로드마다 뒷자리 +1 (v1.11, v1.12, …)
+  VERSION: "v1.71",                 // ★ 1단원=v1.x, 2단원=v2.x, 3단원=v3.x — 업로드마다 뒷자리 +1 (v1.11, v1.12, …)
   APPS_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbx3Ay-gudjjSoRlngyu54umJ9uYRAKhINuwcv229UZUN9_oIQfm9vwAxM32FOPR9wV1/exec",
   /* ── 담당 선생님 ───────────────────────────────────────────────
      선생님마다 '자기 구글 시트 + 자기 드라이브'를 씁니다.
@@ -86,7 +86,11 @@ window.GEO_CONFIG = {
     { id:'snpar', unit:2, href:'snt-parabola.html', short:'수특 포물선', grp:'g-snt',
       curve:'포물선', title:'수능특강 · 포물선' },
     { id:'snell', unit:2, href:'snt-ellipse.html', short:'수특 타원', grp:'g-snt',
-      curve:'타원', title:'수능특강 · 타원' }
+      curve:'타원', title:'수능특강 · 타원' },
+    { id:'snhyp', unit:2, href:'snt-hyperbola.html', short:'수특 쌍곡선', grp:'g-snt',
+      curve:'쌍곡선', title:'수능특강 · 쌍곡선' },
+    { id:'snsol', unit:2, href:'snt-solid.html', short:'수특 공간도형', grp:'g-snt',
+      curve:'공간도형', title:'수능특강 · 공간도형' }
   ],
   /* 홈 화면 묶음 — 큰 제목 4개 (하위 메뉴는 grp로 자동 수집) */
   /* 홈 타임라인의 묶음 — soon 은 아직 안 만든(준비 중) 활동 이름 */
@@ -104,7 +108,7 @@ window.GEO_CONFIG = {
     { key:'g-perp', sec:'1. 공간도형', title:'삼수선의 정리' },
     { key:'g-proj', sec:'1. 공간도형', title:'정사영' },
     { key:'g-review', sec:'1. 공간도형', title:'중단원 학습 점검' },
-    { key:'g-snt', sec:'1. 공간도형', title:'수능특강', soon:['쌍곡선','공간도형'] },
+    { key:'g-snt', sec:'1. 공간도형', title:'수능특강' },
     { key:'g-pt',   sec:'2. 공간좌표', title:'공간에서 점의 좌표' },
     { key:'g-sph',  sec:'2. 공간좌표', title:'구의 방정식' }
   ],
@@ -457,7 +461,9 @@ window.GEO_TASKS = {
   psun:     ['sun-q1-ok','sun-q2'],                  // 문제 1 정답 + 문제 2 증명 제출
   prev:     ['rev-q14','rev-m14'],                   // 14번 열기 + 풀이 보기
   snpar:    ['sn-step'],                             // STEP 힌트 한 번 열기
-  snell:    ['sn-step']
+  snell:    ['sn-step'],
+  snhyp:    ['sn-step'],
+  snsol:    ['sn-step']
 };
 window.GEO_task = function(key){
   const page = window.PAGE_ID;
