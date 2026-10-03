@@ -225,14 +225,15 @@
 
   /* ── 두 단원 두 열 홈 ── */
   #tlCols { display:flex; flex-direction:column; gap:34px; margin-top:26px; }
-  #tlCols .ucol { flex:1; min-width:0; }
+  #tlCols .ucol { flex:0 1 auto; min-width:0; }
   #tlCols .ut { margin:0 0 16px; font-size:16.5px; font-weight:800; color:var(--ink); letter-spacing:-.2px; }
   #tlCols .ut span { display:inline-block; padding-bottom:4px; border-bottom:2px solid var(--ink); }
   #tlCols .stage { padding-left:0; padding-bottom:18px; }
   #tlCols .stage .node { display:none; }
   #tlCols .items { margin-top:10px; }
   @media (min-width:860px){
-    #tlCols { flex-direction:row; gap:44px; }
+    #tlCols { flex-direction:row; flex-wrap:wrap; gap:34px 64px; align-items:flex-start; }
+    #tlCols .ucol { flex:0 1 auto; min-width:200px; }
     #tl > .rail, #tl > .railOn, #tlSvg { display:none !important; }
   }
   /* ── 단원 목차 ── */
@@ -452,9 +453,12 @@ function renderActs(){
   $('tlWho').textContent = (localStorage.getItem('geoName') || '') + '님, 순서대로 따라가 보세요.';
   if($('askBtn')) $('askBtn').style.display = (window.GEO_teacherId && window.GEO_teacherId()==='cha') ? 'inline-block' : 'none';
 
+  const G2 = GEO_CONFIG.HOME_GROUPS2 || [];
   const UNITS = [
-    { n:1, title:'1. 이차곡선', groups: GEO_CONFIG.HOME_GROUPS || [] },
-    { n:2, title:'2. 공간도형', groups: (GEO_CONFIG.HOME_GROUPS2 || []).filter(g => g.sec === '1. 공간도형') }
+    { n:1, title:'1. 이차곡선',   groups: GEO_CONFIG.HOME_GROUPS || [] },
+    { n:2, title:'2-1. 공간도형', groups: G2.filter(g => g.sec === '1. 공간도형') },
+    { n:2, title:'2-2. 공간좌표', groups: G2.filter(g => g.sec === '2. 공간좌표') },
+    { n:3, title:'3. 벡터',       groups: GEO_CONFIG.HOME_GROUPS3 || [] }
   ];
   let total = 0, nDone = 0, nowId = null, firstHref = '#';
   const cols = UNITS.map(u => {
@@ -589,7 +593,7 @@ let CURUNIT = 1;
 function showView(){
   const h = location.hash;
   const home = true;                               // 목차 화면 없이 바로 홈
-  CURUNIT = (h === '#home2') ? 2 : 1;
+  CURUNIT = (h === '#home2') ? 2 : (h === '#home3') ? 3 : 1;
   $('tocView').style.display  = home ? 'none' : 'block';
   $('homeView').style.display = home ? 'block' : 'none';
   document.body.classList.toggle('homeMode', home);

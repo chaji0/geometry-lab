@@ -6,7 +6,7 @@
      먼저 선언한 뒤 이 파일을 불러오면 하단 바가 자동으로 생깁니다.
    ════════════════════════════════════════════════════════════ */
 window.GEO_CONFIG = {
-  VERSION: "v1.71",                 // ★ 1단원=v1.x, 2단원=v2.x, 3단원=v3.x — 업로드마다 뒷자리 +1 (v1.11, v1.12, …)
+  VERSION: "v1.72",                 // ★ 1단원=v1.x, 2단원=v2.x, 3단원=v3.x — 업로드마다 뒷자리 +1 (v1.11, v1.12, …)
   APPS_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbx3Ay-gudjjSoRlngyu54umJ9uYRAKhINuwcv229UZUN9_oIQfm9vwAxM32FOPR9wV1/exec",
   /* ── 담당 선생님 ───────────────────────────────────────────────
      선생님마다 '자기 구글 시트 + 자기 드라이브'를 씁니다.
@@ -109,13 +109,20 @@ window.GEO_CONFIG = {
     { key:'g-proj', sec:'1. 공간도형', title:'정사영' },
     { key:'g-review', sec:'1. 공간도형', title:'중단원 학습 점검' },
     { key:'g-snt', sec:'1. 공간도형', title:'수능특강' },
-    { key:'g-pt',   sec:'2. 공간좌표', title:'공간에서 점의 좌표' },
+    { key:'g-pt',   sec:'2. 공간좌표', title:'공간에서의 점의 좌표' },
     { key:'g-sph',  sec:'2. 공간좌표', title:'구의 방정식' }
+  ],
+  /* 3단원 홈 묶음 — 활동이 없으면 '준비 중' (활동에 unit:3 을 달면 바로 열린다) */
+  HOME_GROUPS3: [
+    { key:'v-op',  sec:'3. 벡터', title:'벡터의 연산' },
+    { key:'v-dot', sec:'3. 벡터', title:'벡터의 성분과 내적' },
+    { key:'v-fig', sec:'3. 벡터', title:'도형의 방정식' }
   ],
   /* 대단원 — 홈 화면 제목과 주소 */
   UNITS: [
     { n:1, title:'1. 이차곡선',            hash:'#home'  },
-    { n:2, title:'2. 공간도형과 공간좌표', hash:'#home2' }
+    { n:2, title:'2. 공간도형과 공간좌표', hash:'#home2' },
+    { n:3, title:'3. 벡터',                hash:'#home3' }
   ]
 };
 
@@ -124,7 +131,7 @@ window.GEO_unitOf = function(pageId){
   const a = (window.GEO_CONFIG.ACTIVITIES || []).find(x => x.id === pageId);
   return (a && a.unit) || 1;
 };
-window.GEO_homeHref = function(u){ return (u === 2) ? 'index.html#home2' : 'index.html#home'; };
+window.GEO_homeHref = function(u){ return (u === 2) ? 'index.html#home2' : (u === 3) ? 'index.html#home3' : 'index.html#home'; };
 
 /* ════════════════════════════════════════════════════════════
    이 학생의 담당 선생님 주소
