@@ -6,7 +6,7 @@
      먼저 선언한 뒤 이 파일을 불러오면 하단 바가 자동으로 생깁니다.
    ════════════════════════════════════════════════════════════ */
 window.GEO_CONFIG = {
-  VERSION: "v1.72",                 // ★ 1단원=v1.x, 2단원=v2.x, 3단원=v3.x — 업로드마다 뒷자리 +1 (v1.11, v1.12, …)
+  VERSION: "v1.73",                 // ★ 1단원=v1.x, 2단원=v2.x, 3단원=v3.x — 업로드마다 뒷자리 +1 (v1.11, v1.12, …)
   APPS_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbx3Ay-gudjjSoRlngyu54umJ9uYRAKhINuwcv229UZUN9_oIQfm9vwAxM32FOPR9wV1/exec",
   /* ── 담당 선생님 ───────────────────────────────────────────────
      선생님마다 '자기 구글 시트 + 자기 드라이브'를 씁니다.
@@ -90,7 +90,10 @@ window.GEO_CONFIG = {
     { id:'snhyp', unit:2, href:'snt-hyperbola.html', short:'수특 쌍곡선', grp:'g-snt',
       curve:'쌍곡선', title:'수능특강 · 쌍곡선' },
     { id:'snsol', unit:2, href:'snt-solid.html', short:'수특 공간도형', grp:'g-snt',
-      curve:'공간도형', title:'수능특강 · 공간도형' }
+      curve:'공간도형', title:'수능특강 · 공간도형' },
+    /* 공간좌표 */
+    { id:'pdrone', unit:2, href:'dronshow.html', short:'드론쇼', grp:'g-pt',
+      curve:'공간좌표로 만드는 드론쇼', title:'우리 반 드론쇼' }
   ],
   /* 홈 화면 묶음 — 큰 제목 4개 (하위 메뉴는 grp로 자동 수집) */
   /* 홈 타임라인의 묶음 — soon 은 아직 안 만든(준비 중) 활동 이름 */
@@ -465,6 +468,7 @@ window.GEO_TASKS = {
   pdih:     ['dih-o-click','dih-q3-open'],           // 점 O 누르기 + 문제 03 열기
   pproj:    ['proj-shadow','proj-q1-1'],             // 그림자 보기 + 문제 01 (1)
   plen:     ['plen-ab','plen-who-ok'],              // 정사영 모션 + 대화 문제 정답
+  pdrone:   ['coord','order','class'],                // 시운전 3번 + 연습 순서 정리 + 우리 반 공연 순서 완료
   psun:     ['sun-q1-ok','sun-q2'],                  // 문제 1 정답 + 문제 2 증명 제출
   prev:     ['rev-q14','rev-m14'],                   // 14번 열기 + 풀이 보기
   snpar:    ['sn-step'],                             // STEP 힌트 한 번 열기

@@ -1,9 +1,16 @@
 <!doctype html>
 <html lang="ko">
 <head>
+<script>
+/* 입장 가드 */
+if (localStorage.getItem('geoAppOk') !== '1') location.replace('index.html');
+</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>우리 반 드론쇼 제작소</title>
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="icon" type="image/svg+xml" href="icon.svg">
+<link rel="apple-touch-icon" href="icon-180.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&display=swap" rel="stylesheet">
@@ -24,7 +31,7 @@
 :root[data-theme="dark"]{--bg:#1A1934;--card:#24234A;--ink:#EDEBFF;--sub:#ABA6D6;--line:#38366A;--line2:#4A4785;--tint:#2E2C5C;--acc:#9A8CFF;--acc2:#B3A8FF}
 html{scroll-padding-top:env(safe-area-inset-top,0px);height:100%}
 *,*::before,*::after{box-sizing:border-box}
-body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased}
+body{margin:0;height:100dvh;display:flex;flex-direction:column;overflow:hidden;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased}
 button,input,select{font:inherit;color:inherit}
 button{cursor:pointer}
 [hidden]{display:none!important}
@@ -33,7 +40,7 @@ button{cursor:pointer}
 .rm{font-family:Georgia,'Times New Roman',serif;font-style:normal;font-weight:700}
 .rm sub,sub.s{font-family:Georgia,serif;font-style:normal;font-size:.72em}
 
-#app{display:grid;grid-template-rows:auto auto minmax(0,1fr);height:100%}
+#app{display:grid;grid-template-rows:auto auto minmax(0,1fr);flex:1;min-height:0}
 header{display:flex;align-items:center;gap:12px;padding:10px 16px 4px;flex-wrap:wrap}
 header h1{font-family:var(--hand);font-weight:400;font-size:24px;margin:0;letter-spacing:-.01em}
 header .sp{flex:1}
@@ -155,7 +162,7 @@ ul.chk li.no .mk{background:rgba(238,75,103,.14);color:var(--red)}
 
 /* 공연 모드 */
 #showCtl{display:none}
-body.showmode header,body.showmode #steps,body.showmode #panel,body.showmode .hint{display:none}
+body.showmode header,body.showmode #steps,body.showmode #panel,body.showmode .hint,body.showmode #gtop,body.showmode #gnav{display:none!important}
 body.showmode #app{display:block}
 body.showmode main{display:block;padding:0}
 body.showmode #stage{position:fixed;inset:0;border-radius:0;box-shadow:none;z-index:10}
@@ -168,6 +175,7 @@ body.showmode #showEnd.on{display:block;position:absolute;left:50%;top:50%;trans
 #showEnd .stat span{color:#6E6A94}
 
 @media (max-width:980px){
+  body{height:auto;display:block;overflow:visible}
   #app{display:block;height:auto}
   main{display:block;padding:0 10px 10px}
   #stage{height:54vh;min-height:320px}
@@ -367,6 +375,7 @@ function dsCore(db, q, now) {
 (function(){
 'use strict';
 const $=s=>document.querySelector(s);
+const stamp=k=>{try{if(typeof window.GEO_task==='function')window.GEO_task(k)}catch(e){}};
 const MIN=2,CRASH=1,SMIN=3,PF=12,MOVE=5,HOLD=3,T0=1.5;
 const RM=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
 const COLORS=[['분홍','#FF8FC0'],['민트','#5EF0C4'],['노랑','#FFD95E'],['하늘','#86C8FF'],['보라','#B99BFF'],['흰빛','#F4F2FF'],['무지개','rainbow']];
@@ -802,7 +811,7 @@ function bindLearn(){const pv=$('#bPrev'),nx=$('#bNext'),tc=$('#bToClass');if(pv
   if(step===0){['x','y','z'].forEach(a=>{$('#r'+a).oninput=e=>{GM.pos[a]=+e.target.value;$('#o'+a).textContent=f1(GM.pos[a]);$('#gpos').innerHTML=ptH('<b class="rm">D</b>',GM.pos);dirty=true}});
     $('#bHelp').onclick=()=>{GM.helper=!GM.helper;renderLearn()};
     $('#bArrive').onclick=()=>{const t=GM.target,p=GM.pos;const wrong=['x','y','z'].filter(a=>t[a]!==p[a]);
-      if(!wrong.length){if(!GM.solved){PR.game=Math.min(3,PR.game+1);savePR()}GM.solved=true;renderLearn();renderSteps();$('#gfb').innerHTML=`<div class="fb good">도착! 별의 좌표는 ${ptH('<b class="rm">S</b>',t)}이다.${PR.game>=3?' 시운전을 모두 통과했다.':''}</div>`}
+      if(!wrong.length){if(!GM.solved){PR.game=Math.min(3,PR.game+1);savePR()}if(PR.game>=3)stamp('coord');GM.solved=true;renderLearn();renderSteps();$('#gfb').innerHTML=`<div class="fb good">도착! 별의 좌표는 ${ptH('<b class="rm">S</b>',t)}이다.${PR.game>=3?' 시운전을 모두 통과했다.':''}</div>`}
       else $('#gfb').innerHTML=`<div class="fb bad">아직 별과 떨어져 있다. ${wrong.map(a=>M(a)).join(', ')}좌표를 다시 본다.</div>`};
     const ns=$('#bNextStar');if(ns)ns.onclick=()=>{newTarget();renderLearn()}}
   if(step===1){const ch=()=>{savePR();dirty=true;drawEditor();updList();const c=$('#cnt');c.textContent=`${PF}대 중 ${PR.pts.length}개`;c.classList.toggle('ok',PR.pts.length>=3);renderSteps()};
@@ -815,7 +824,7 @@ function bindLearn(){const pv=$('#bPrev'),nx=$('#bNext'),tc=$('#bToClass');if(pv
     $('#bQn').onclick=()=>{let q;do{q=ri(1,PF-1)}while(q===GQ.q);GQ.q=q;renderLearn()}}
   if(step===3){if(!pracReady()){$('#bGo2').onclick=()=>goLearn(1);$('#bStarEx').onclick=()=>{PR.pts=preset('star',PF);PR.src=null;savePR();renderLearn();renderSteps()};VIEW={kind:'empty'};return}
     VIEW={kind:'order'};setCam('fly');
-    const rebuild=()=>{const C=compile(PF,PR.d,pracScenes(),1);buildOrd(C.st,PR.pts,PR.src||naiveSrc(C.st.pts.length,PR.pts.length),PR.color,EX);PR.src=ORD.src;savePR();$('#ordStat').innerHTML=ordStatHTML();$('#badList').innerHTML=badListHTML();drawEditor();dirty=true;renderSteps()};
+    const rebuild=()=>{const C=compile(PF,PR.d,pracScenes(),1);buildOrd(C.st,PR.pts,PR.src||naiveSrc(C.st.pts.length,PR.pts.length),PR.color,EX);PR.src=ORD.src;savePR();if(!ORD.ana.bad.length)stamp('order');$('#ordStat').innerHTML=ordStatHTML();$('#badList').innerHTML=badListHTML();drawEditor();dirty=true;renderSteps()};
     initEditor({pts:()=>PR.pts,max:PF,color:()=>PR.color,swap:true,onSwap:(a,b)=>{const s=ORD.src.slice();[s[a],s[b]]=[s[b],s[a]];PR.src=s;rebuild()}});
     $('#bShuf').onclick=()=>{const s=ORD.src.slice();for(let i=s.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[s[i],s[j]]=[s[j],s[i]]}PR.src=s;rebuild()};
     $('#bAuto').onclick=()=>{PR.src=autoSrc(ORD.st,PR.pts);rebuild();toast('날아가는 거리가 가장 짧은 짝으로 바꿨다')};rebuild()}
@@ -932,7 +941,7 @@ function renderOrder(){const R=CL.data.room,me=meRec();VIEW={kind:'order'};setCa
     $('#bAuto').onclick=()=>{CL.src=autoSrc(ORD.st,ORD.P2);refreshOrder(false);toast('날아가는 거리가 가장 짧은 짝으로 바꿨다')}}
   $('#bOD').onclick=async()=>{if(ORD.ana.bad.length&&!confirm(`위험한 짝이 ${ORD.ana.bad.length}쌍 남아 있다. 그래도 완료할까?`))return;
     $('#bOD').disabled=true;try{const q={action:'order',room:CL.room,sid:CL.sid,uid:CL.uid,src:ORD.src};if(k===0)q.d=CL.myD!=null?CL.myD:R.d;
-      const res=await api(q);if(res.ok){CL.ver=0;applyData(res);if(phase()==='show')renderClass();else{$('#bOD').textContent='다시 완료!';toast('순서를 완료했다');liveUpdate()}}else toast('완료하지 못했다')}catch(e){toast('서버에 연결하지 못했다')}
+      const res=await api(q);if(res.ok){CL.ver=0;applyData(res);stamp('class');if(phase()==='show')renderClass();else{$('#bOD').textContent='다시 완료!';toast('순서를 완료했다');liveUpdate()}}else toast('완료하지 못했다')}catch(e){toast('서버에 연결하지 못했다')}
     const b=$('#bOD');if(b)b.disabled=false};
   refreshOrder(false);liveUpdate()}
 
@@ -1021,5 +1030,7 @@ if(CL.room){goClass()}else{goLearn(0)}
 resize();requestAnimationFrame(loop);
 })();
 </script>
+<script>window.PAGE_ID="pdrone";</script>
+<script src="nav.js"></script>
 </body>
 </html>
