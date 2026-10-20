@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<script>
+/* 입장 가드 */
+if (localStorage.getItem('geoAppOk') !== '1') location.replace('index.html');
+</script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="icon" type="image/svg+xml" href="icon.svg">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="apple-mobile-web-app-title" content="기하">
+<meta name="theme-color" content="#B32017">
+<title>p83</title>
+<link rel="stylesheet" media="print" onload="this.media='all'"
+  href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap">
+<style>
+:root{ --paper:#EFEFE3; --ink:#23241D; --dim:#A8A79A; --line:#DCDACD; --line2:#C7C5B6;
+  --acc:#2F45EC; --acc2:#1B2FC4; --card:#F5F5EC; --org:#E0891A; --grn:#12876A; --red:#D9463F; --vio:#7A3FB5; }
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;overflow:hidden}
+body{font-family:'IBM Plex Sans KR','Apple SD Gothic Neo','Malgun Gothic',system-ui,sans-serif;
+  background:var(--paper); color:var(--ink); font-size:14.5px; line-height:1.55; display:flex; flex-direction:column; height:100dvh}
+header{padding:12px 22px 10px; border-bottom:1px solid var(--line); display:flex; align-items:flex-end; gap:18px; flex-wrap:wrap; flex:none}
+h1{font-size:17.5px; margin:0; letter-spacing:-.3px; font-weight:700}
+.sub{font-size:12px; color:var(--dim); margin-top:3px}
+#tabs{display:flex; gap:6px; margin-left:auto; flex-wrap:wrap}
+#tabs button{height:34px; padding:0 13px; border-radius:999px; border:1.5px solid var(--line2); background:transparent;
+  font:inherit; font-size:12.5px; font-weight:700; color:var(--ink); cursor:pointer; display:flex; align-items:center; gap:7px}
+#tabs button .no{font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:11px; color:var(--acc); font-weight:600}
+#tabs button.on{background:var(--acc); border-color:var(--acc); color:#fff} #tabs button.on .no{color:#fff}
+#app{display:flex; flex:1; min-height:0}
+#stage{flex:1; position:relative; min-width:0}
+canvas{display:block; width:100%; height:100%; touch-action:none}
+#panel{width:392px; flex:none; border-left:1px solid var(--line); overflow-y:auto; overscroll-behavior:contain; padding:16px 18px 80px}
+@media (max-width:940px){ #app{flex-direction:column} #stage{flex:0 0 46%; min-height:220px} #panel{width:auto; flex:1; border-left:0; border-top:1px solid var(--line); padding:12px 14px 80px} }
+i.m,.eq i,.m{font-family:Georgia,'Times New Roman',serif; font-style:italic; font-size:1.05em}
+.rm{font-family:Georgia,'Times New Roman',serif; font-style:normal}
+.ov{text-decoration:overline}
+.eq{font-family:Georgia,'Times New Roman',serif; font-size:15.5px; line-height:1.8}
+.eq .fr{display:inline-flex; flex-direction:column; align-items:center; vertical-align:middle; margin:0 3px; line-height:1.15}
+.eq .fr span{padding:0 4px} .eq .fr span:first-child{border-bottom:1px solid var(--ink)}
+.sq{white-space:nowrap} .sq .r{border-top:1px solid var(--ink); padding:0 1px 0 2px; margin-left:1px}
+.card{border:1px solid var(--line); border-radius:12px; padding:12px 13px 14px; margin-bottom:12px; background:var(--card)}
+.card h2{font-size:12px; margin:0 0 9px; letter-spacing:.06em; color:var(--dim); font-family:'IBM Plex Mono',ui-monospace,monospace; text-transform:uppercase; font-weight:600; display:flex; align-items:center}
+.pane{display:none} .pane.on{display:block}
+.stmt{font-size:13.5px; line-height:1.8; padding:10px 13px; border-left:3px solid var(--acc); background:#E9E9DC; border-radius:0 10px 10px 0; margin-bottom:12px}
+.stmt b{color:var(--acc)}
+.step{font-size:13.5px; line-height:1.8; min-height:60px}
+.step b{color:var(--acc)} .step .hint,.hint{color:var(--dim); font-size:12.5px}
+.btnrow{display:flex; gap:7px; align-items:center; margin-top:10px; flex-wrap:wrap}
+.btn{border:1.5px solid var(--line2); background:transparent; color:var(--dim); font:inherit; font-size:12px; font-weight:700; padding:0 14px; height:32px; border-radius:999px; cursor:pointer}
+.btn:hover{border-color:var(--acc); color:var(--acc)} .btn.pri{background:var(--acc); border-color:var(--acc); color:#fff}
+.btn.pri:hover{background:var(--acc2); border-color:var(--acc2); color:#fff}
+.btn.sm{height:28px; padding:0 11px; font-size:11.5px}
+.no{margin-left:auto; font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:11.5px; color:var(--dim)}
+.row{display:flex; align-items:center; gap:10px; margin:9px 0}
+.row label{width:118px; flex:none; font-size:12px; color:var(--dim)}
+.row input[type=range]{flex:1; accent-color:var(--acc); height:20px; min-width:0}
+.row .num{width:62px; text-align:right; font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:12px; flex:none}
+.kv{display:flex; justify-content:space-between; gap:10px; font-size:12.5px; padding:6px 0; border-bottom:1px solid var(--line); align-items:center}
+.kv:last-child{border-bottom:0} .kv b{font-family:'IBM Plex Mono',ui-monospace,monospace; font-weight:600; white-space:nowrap}
+.kv .ok{color:var(--grn)} .kv .lim{color:var(--org)} .kv .bad{color:var(--red)}
+.toggles{display:flex; flex-wrap:wrap; gap:6px}
+.toggles label{display:inline-flex; align-items:center; gap:5px; border:1px solid var(--line2); border-radius:999px; padding:5px 10px; font-size:12px; cursor:pointer; user-select:none; color:var(--dim)}
+.toggles label:has(input:checked){color:var(--acc); border-color:var(--acc)} .toggles input{accent-color:var(--acc); margin:0}
+details{border:1px solid var(--line); border-radius:12px; padding:10px 13px; margin-bottom:10px; background:var(--card)}
+details summary{cursor:pointer; font-weight:600; font-size:13px; list-style:none}
+details summary::-webkit-details-marker{display:none}
+details summary::before{content:"+ "; color:var(--acc); font-family:'IBM Plex Mono',monospace} details[open] summary::before{content:"− "}
+details p,details li{font-size:12.5px; line-height:1.8} details ol,details ul{margin:8px 0 2px; padding-left:19px}
+.note{font-size:11.5px; color:var(--dim); line-height:1.6; margin-top:8px}
+#hud{position:absolute; left:12px; bottom:12px; display:flex; flex-wrap:wrap; gap:6px; max-width:calc(100% - 24px); pointer-events:none}
+.chip{background:rgba(239,239,227,.9); border:1px solid var(--line); border-radius:999px; padding:4px 11px; font-size:11.5px; font-family:'IBM Plex Mono',ui-monospace,monospace}
+.chip i{font-style:normal; color:var(--dim); margin-right:4px}
+#tip{position:absolute; left:12px; top:12px; font-size:11.5px; color:var(--dim); background:rgba(239,239,227,.86); border:1px solid var(--line); border-radius:999px; padding:5px 12px; max-width:calc(100% - 130px); pointer-events:none}
+#tools{position:absolute; right:12px; top:12px; display:flex; gap:6px}
+#tools .btn{background:rgba(239,239,227,.9); height:30px; padding:0 12px; display:flex; align-items:center; gap:5px}
+.foot{font-size:11px; color:var(--dim); text-align:center; margin-top:14px; font-family:'IBM Plex Mono',ui-monospace,monospace}
+.q{font-size:13.5px; line-height:1.8}
+.q .opts{display:flex; flex-direction:column; gap:0; margin-top:8px}
+.q .opts button{height:36px; text-align:left; padding:0 10px; border:0; border-bottom:1px solid var(--line); background:transparent; font:inherit; font-size:13px; color:var(--ink); cursor:pointer; display:flex; align-items:center; gap:10px}
+.q .opts button .k{font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:11px; color:var(--dim); width:20px; flex:none}
+.q .opts button:hover{color:var(--acc)}
+.q .opts button.pick{color:var(--acc); border-bottom:1.5px solid var(--acc)}
+.q .opts button.right{color:var(--grn); border-bottom-color:var(--grn)} .q .opts button.wrong{color:var(--red); border-bottom-color:var(--red)}
+.q .opts button.right .k,.q .opts button.wrong .k,.q .opts button.pick .k{color:inherit}
+.chips{display:flex; flex-wrap:wrap; gap:6px; margin-top:8px}
+.chips button{height:30px; padding:0 12px; border-radius:999px; border:1.5px solid var(--line2); background:transparent; font:inherit; font-size:12.5px; color:var(--ink); cursor:pointer; font-family:Georgia,'Times New Roman',serif}
+.chips button.pick{border-color:var(--acc); color:var(--acc)} .chips button.right{border-color:var(--grn); color:var(--grn); background:#E4F0EA}
+.chips button.wrong{border-color:var(--red); color:var(--red)}
+.fb{font-size:12.5px; margin-top:8px; min-height:20px; line-height:1.7} .fb.ok{color:var(--grn)} .fb.no{color:var(--red)}
+.blank{display:inline-block; min-width:44px; height:26px; border:1.5px solid var(--line2); border-radius:6px; padding:0 8px; font:inherit; font-family:Georgia,serif; font-size:14px; text-align:center; background:#fff; color:var(--ink); vertical-align:middle; margin:0 3px}
+.blank.right{border-color:var(--grn); color:var(--grn)} .blank.wrong{border-color:var(--red); color:var(--red)}
+.tag{display:inline-block; font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:10.5px; letter-spacing:.06em; color:var(--acc); border:1px solid var(--acc); border-radius:999px; padding:1px 8px; margin-right:6px; vertical-align:2px}
+.tag.dim{color:var(--dim); border-color:var(--line2)}
+.done{color:var(--grn); font-weight:600}
+
+#wrap{flex:1; min-height:0; overflow-y:auto; overscroll-behavior:contain; padding:16px 22px 90px}
+.grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(400px,1fr)); gap:14px; max-width:1100px; margin:0 auto}
+@media (max-width:860px){ .grid{grid-template-columns:1fr} #wrap{padding:12px 14px 90px} }
+.qcard{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:14px 16px 14px; display:flex; flex-direction:column}
+.qhead{display:flex; align-items:center; gap:8px; margin-bottom:8px}
+.badge{display:inline-block; background:var(--acc); color:#fff; border-radius:999px; padding:1px 10px; font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:12px; font-weight:600; letter-spacing:.05em}
+.qtext{font-size:14px; line-height:1.85}
+.qtext sub{font-size:.75em} .qtext sup{font-size:.72em}
+.qtext .ov{text-decoration:overline}
+.fr{display:inline-flex; flex-direction:column; align-items:center; vertical-align:middle; margin:0 2px; line-height:1.15; font-family:Georgia,'Times New Roman',serif}
+.fr span{padding:0 3px} .fr span:first-child{border-bottom:1px solid var(--ink)}
+.fig{display:block; margin:8px auto 2px; width:min(300px,100%); border:1px solid var(--line); border-radius:10px}
+.ans{display:flex; align-items:center; flex-wrap:wrap; gap:6px; margin-top:12px; font-family:Georgia,'Times New Roman',serif; font-size:15px}
+.ans .lab{font-family:'IBM Plex Sans KR',system-ui,sans-serif; font-size:12.5px; color:var(--dim); margin-right:4px}
+.ans .m{font-size:1.05em}
+.ans .blank{width:84px; min-width:0; flex:none}
+.ans .btn{margin-left:auto}
+.fb{margin-top:6px}
+details{margin:10px 0 0; background:transparent; border-color:var(--line)}
+details .sol{font-size:13px; line-height:1.9}
+details .sol .ov{text-decoration:overline} details .sol sub{font-size:.75em}
+.sol .eq{font-size:14.5px; line-height:1.9; padding-left:10px}
+.sol .fr span:first-child{border-bottom-color:var(--ink)}
+.sq{white-space:nowrap} .sq .r{border-top:1px solid var(--ink); padding:0 1px 0 2px; margin-left:1px}
+.foot{margin-top:18px}
+</style>
+</head>
+<body>
+<header>
+  <div><h1>p83</h1><div class="sub">기본 문제 13 ~ 15 · 도전 문제 16 ~ 18</div></div>
+</header>
+<div id="wrap">
+<div class="grid">
+
+  <div class="qcard" data-q="13"><div class="qhead"><span class="badge">13</span></div>
+    <div class="qtext"><i class="m">yz</i>평면이 구 (<i class="m">x</i> − 2 + 3<i class="m">k</i>)<sup>2</sup> + (<i class="m">y</i> − <i class="m">k</i>)<sup>2</sup> + (<i class="m">z</i> − 2)<sup>2</sup> = 5의 부피를 이등분할 때, 실수 <i class="m">k</i>의 값을 구하시오.</div></div>
+
+  <div class="qcard" data-q="16"><div class="qhead"><span class="badge">16</span><span class="tag">도전</span></div>
+    <div class="qtext">점 P(1, 1, 2)를 지나고 <i class="m">xy</i>평면, <i class="m">yz</i>평면, <i class="m">zx</i>평면에 동시에 접하는 구는 2개이다. 이 두 구의 반지름의 길이의 합을 구하시오.</div></div>
+
+  <div class="qcard" data-q="14"><div class="qhead"><span class="badge">14</span></div>
+    <div class="qtext">점 P(−1, 4, 8)에서 구 <i class="m">x</i><sup>2</sup> + <i class="m">y</i><sup>2</sup> + <i class="m">z</i><sup>2</sup> − 4<i class="m">x</i> + 2<i class="m">y</i> − 8<i class="m">z</i> − 4 = 0에 그은 접선의 접점을 Q라고 할 때, 선분 PQ의 길이를 구하시오.</div></div>
+
+  <div class="qcard" data-q="17"><div class="qhead"><span class="badge">17</span><span class="tag">도전</span></div>
+    <div class="qtext">두 점 A(2, 4, 3), B(−1, 1, 6)의 <i class="m">xy</i>평면 위로의 정사영을 각각 P, Q라 하고 선분 AB를 2 : 1로 내분하는 점을 R라 할 때, 삼각형 PQR의 넓이를 구하시오.</div></div>
+
+  <div class="qcard" data-q="15"><div class="qhead"><span class="badge">15</span></div>
+    <div class="qtext">중심의 좌표가 (−4, −3, 5)인 구와 <i class="m">z</i>축이 서로 다른 두 점에서 만난다. 두 점 사이의 거리가 24일 때, 이 구의 반지름의 길이를 구하시오.</div></div>
+
+  <div class="qcard" data-q="18"><div class="qhead"><span class="badge">18</span><span class="tag">도전</span></div>
+    <div class="qtext">구 <i class="m">x</i><sup>2</sup> + <i class="m">y</i><sup>2</sup> + <i class="m">z</i><sup>2</sup> − 2<i class="m">k</i><i class="m">x</i> − 4<i class="m">y</i> − 6<i class="m">z</i> + 14 = 0이 <i class="m">zx</i>평면, <i class="m">xy</i>평면과 각각 만나서 생기는 원의 넓이의 비가 3 : 2일 때, 실수 <i class="m">k</i>의 값을 모두 구하시오.</div></div>
+
+</div>
+<div class="foot">기본 문제 13 ~ 15 · 도전 문제 16 ~ 18 · 구의 방정식</div>
+</div>
+<script>
+if(typeof GEO_task==='function') GEO_task('p83-open');
+</script>
+<script>window.PAGE_ID="pp83";</script>
+<script src="nav.js"></script>
+</body>
+</html>
