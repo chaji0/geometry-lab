@@ -98,26 +98,36 @@ details p,details li{font-size:12.5px; line-height:1.8} details ol,details ul{ma
 .tag.dim{color:var(--dim); border-color:var(--line2)}
 .done{color:var(--grn); font-weight:600}
 
-.stmt sub{font-size:.75em}
+.stmt sub{font-size:.75em} .stmt .fr span{padding:0 3px}
 .gb{height:40px; width:100%; padding:0 14px; border-radius:11px; cursor:pointer; font-family:'IBM Plex Sans KR','Apple SD Gothic Neo',system-ui,sans-serif; font-size:13.5px; font-weight:700; color:var(--acc); letter-spacing:.2px;
   border:1px solid rgba(47,69,236,.35); background:linear-gradient(180deg,rgba(255,255,255,.85) 0%,rgba(255,255,255,.35) 45%,rgba(226,230,255,.55) 100%);
   box-shadow:0 3px 8px rgba(35,36,29,.14), inset 0 1.5px 0 rgba(255,255,255,.95), inset 0 -3px 6px rgba(47,69,236,.10); position:relative; transition:transform .12s, box-shadow .12s}
 .gb::after{content:""; position:absolute; left:10%; top:9%; width:40%; height:30%; border-radius:999px; background:linear-gradient(180deg,rgba(255,255,255,.95),rgba(255,255,255,0)); pointer-events:none}
 .gb:hover{transform:translateY(-1px)} .gb:active{transform:translateY(1px)}
 .gb .m{font-size:1.15em}
+.gb.done{color:var(--red); border-color:rgba(217,70,63,.4); background:linear-gradient(180deg,rgba(255,255,255,.85) 0%,rgba(255,255,255,.35) 45%,rgba(255,228,224,.6) 100%)}
+.gb2{display:flex; gap:8px; margin-top:8px} .gb2 .gb{width:auto; flex:1; height:36px; font-size:13px; padding:0 8px}
 .row label{width:34px} .row label .m{font-size:16px}
 .eqs{font-family:Georgia,'Times New Roman',serif; font-size:15px; line-height:1.9; padding:4px 0 0 4px}
 .eqs i{font-style:italic} .eqs sub{font-size:.7em} .eqs .ov{text-decoration:overline}
 .eqs .ln{opacity:.15; transition:opacity .45s; margin:4px 0} .eqs .ln.on{opacity:1}
+.eqs .kor{font-family:'IBM Plex Sans KR','Apple SD Gothic Neo',system-ui,sans-serif; font-size:13.5px}
 .fr{display:inline-flex; flex-direction:column; align-items:center; vertical-align:middle; margin:0 3px; line-height:1.15}
 .fr span{padding:0 4px} .fr span:first-child{border-bottom:1px solid var(--ink)}
 .eqs .big{font-size:16px; color:var(--red); font-weight:600}
 .eqs .big .fr span:first-child{border-bottom-color:var(--red)}
+.pfig{display:block; margin:4px auto 0; width:min(230px,100%)}
+.pcap{font-family:Georgia,'Times New Roman',serif; font-size:14.5px; text-align:center; margin-top:4px; line-height:1.7}
+.pcap i{font-style:italic} .pcap .kor{font-family:'IBM Plex Sans KR','Apple SD Gothic Neo',system-ui,sans-serif; font-size:13px}
 </style>
 </head>
 <body>
 <header>
   <div><h1>선분의 내분점의 좌표</h1></div>
+  <div id="tabs">
+    <button class="on" data-t="div"><span class="no">01</span>내분점</button>
+    <button data-t="cent"><span class="no">02</span>무게중심</button>
+  </div>
 </header>
 <div id="app">
   <div id="stage">
@@ -126,23 +136,65 @@ details p,details li{font-size:12.5px; line-height:1.8} details ol,details ul{ma
     <div id="hud"></div>
   </div>
   <div id="panel">
+
+    <div class="pane on" data-p="div">
     <div class="card">
       <div class="row" style="margin-top:0"><label><span class="m">m</span></label><input type="range" id="rm" min="1" max="5" step="1" value="2"><span class="num" id="nm">2</span></div>
       <div class="row"><label><span class="m">n</span></label><input type="range" id="rn" min="1" max="5" step="1" value="1"><span class="num" id="nn">1</span></div>
       <button class="gb" id="bGo">선분 AB를 <span class="m">m</span> : <span class="m">n</span>으로 내분하는 점 P</button>
+      <div class="gb2"><button class="gb" id="bPxy"><span class="m">xy</span>평면으로 정사영</button><button class="gb" id="bPyz"><span class="m">yz</span>평면으로 정사영</button></div>
       <div class="eqs" id="eq">
-        <div class="ln" data-s="1"><span class="ov">AP</span> : <span class="ov">PB</span> = <i>m</i> : <i>n</i></div>
-        <div class="ln" data-s="2"><span class="ov">A′P′</span> : <span class="ov">P′B′</span> = <span class="ov">AP</span> : <span class="ov">PB</span> = <i>m</i> : <i>n</i></div>
-        <div class="ln" data-s="3"><i>x</i> = <span class="fr"><span><i>m</i><i>x</i><sub>2</sub> + <i>n</i><i>x</i><sub>1</sub></span><span><i>m</i> + <i>n</i></span></span>, &nbsp;<i>y</i> = <span class="fr"><span><i>m</i><i>y</i><sub>2</sub> + <i>n</i><i>y</i><sub>1</sub></span><span><i>m</i> + <i>n</i></span></span></div>
-        <div class="ln" data-s="4">같은 방법으로 &nbsp;<i>z</i> = <span class="fr"><span><i>m</i><i>z</i><sub>2</sub> + <i>n</i><i>z</i><sub>1</sub></span><span><i>m</i> + <i>n</i></span></span></div>
-        <div class="ln big" data-s="4">P<span style="font-size:.85em">(</span><span class="fr"><span><i>m</i><i>x</i><sub>2</sub> + <i>n</i><i>x</i><sub>1</sub></span><span><i>m</i> + <i>n</i></span></span>, <span class="fr"><span><i>m</i><i>y</i><sub>2</sub> + <i>n</i><i>y</i><sub>1</sub></span><span><i>m</i> + <i>n</i></span></span>, <span class="fr"><span><i>m</i><i>z</i><sub>2</sub> + <i>n</i><i>z</i><sub>1</sub></span><span><i>m</i> + <i>n</i></span></span><span style="font-size:.85em">)</span></div>
+        <div class="ln" data-s="p"><span class="ov">AP</span> : <span class="ov">PB</span> = <i>m</i> : <i>n</i></div>
+        <div class="ln" data-s="q"><span class="ov">A′P′</span> : <span class="ov">P′B′</span> = <span class="ov">AP</span> : <span class="ov">PB</span> = <i>m</i> : <i>n</i></div>
+        <div class="ln" data-s="xy"><i>x</i> = <span class="fr"><span><i>m</i><i>x</i><sub>2</sub> + <i>n</i><i>x</i><sub>1</sub></span><span><i>m</i> + <i>n</i></span></span>, &nbsp;<i>y</i> = <span class="fr"><span><i>m</i><i>y</i><sub>2</sub> + <i>n</i><i>y</i><sub>1</sub></span><span><i>m</i> + <i>n</i></span></span></div>
+        <div class="ln" data-s="yz"><i>y</i> = <span class="fr"><span><i>m</i><i>y</i><sub>2</sub> + <i>n</i><i>y</i><sub>1</sub></span><span><i>m</i> + <i>n</i></span></span>, &nbsp;<i>z</i> = <span class="fr"><span><i>m</i><i>z</i><sub>2</sub> + <i>n</i><i>z</i><sub>1</sub></span><span><i>m</i> + <i>n</i></span></span></div>
+        <div class="ln big" data-s="all">P<span style="font-size:.85em">(</span><span class="fr"><span><i>m</i><i>x</i><sub>2</sub> + <i>n</i><i>x</i><sub>1</sub></span><span><i>m</i> + <i>n</i></span></span>, <span class="fr"><span><i>m</i><i>y</i><sub>2</sub> + <i>n</i><i>y</i><sub>1</sub></span><span><i>m</i> + <i>n</i></span></span>, <span class="fr"><span><i>m</i><i>z</i><sub>2</sub> + <i>n</i><i>z</i><sub>1</sub></span><span><i>m</i> + <i>n</i></span></span><span style="font-size:.85em">)</span></div>
       </div>
     </div>
     <div class="card">
-      <h2>선분의 내분점</h2>
-      <div class="stmt">좌표공간의 두 점 A(<i class="m">x</i><sub>1</sub>, <i class="m">y</i><sub>1</sub>, <i class="m">z</i><sub>1</sub>), B(<i class="m">x</i><sub>2</sub>, <i class="m">y</i><sub>2</sub>, <i class="m">z</i><sub>2</sub>)에 대하여 선분 AB를 <i class="m">m</i> : <i class="m">n</i> (<i class="m">m</i> &gt; 0, <i class="m">n</i> &gt; 0)으로 내분하는 점을 P(<i class="m">x</i>, <i class="m">y</i>, <i class="m">z</i>)라고 하자.</div>
-      <div class="stmt">세 점 A, P, B에서 <i class="m">xy</i>평면에 내린 수선의 발을 각각 A′, P′, B′이라고 하면 세 점 A′, P′, B′의 좌표는 각각 (<i class="m">x</i><sub>1</sub>, <i class="m">y</i><sub>1</sub>, 0), (<i class="m">x</i>, <i class="m">y</i>, 0), (<i class="m">x</i><sub>2</sub>, <i class="m">y</i><sub>2</sub>, 0)이고, 평행선 사이의 선분의 길이의 비에 의하여 점 P′은 선분 A′B′을 <i class="m">m</i> : <i class="m">n</i>으로 내분하는 점이다.</div>
+      <svg class="pfig" viewBox="0 0 230 150" fill="none" stroke="#23241D" stroke-width="1.4" stroke-linecap="round">
+        <g><line x1="14" y1="30" x2="196" y2="30"/><polygon points="196,26 206,30 196,34" fill="#23241D" stroke="none"/>
+           <line x1="14" y1="72" x2="196" y2="72"/><polygon points="196,68 206,72 196,76" fill="#23241D" stroke="none"/>
+           <line x1="14" y1="120" x2="196" y2="120"/><polygon points="196,116 206,120 196,124" fill="#23241D" stroke="none"/></g>
+        <line x1="78" y1="8" x2="48" y2="142"/><line x1="146" y1="8" x2="176" y2="142"/>
+        <circle cx="73" cy="30" r="2.6" fill="#23241D" stroke="none"/><circle cx="63.6" cy="72" r="2.6" fill="#23241D" stroke="none"/><circle cx="53" cy="120" r="2.6" fill="#23241D" stroke="none"/>
+        <circle cx="150.9" cy="30" r="2.6" fill="#23241D" stroke="none"/><circle cx="160.3" cy="72" r="2.6" fill="#23241D" stroke="none"/><circle cx="171" cy="120" r="2.6" fill="#23241D" stroke="none"/>
+        <path d="M60 36 Q50 50 60 66" stroke="#E0891A" stroke-dasharray="3 2.5"/><path d="M50 78 Q40 96 50 114" stroke="#2F45EC" stroke-dasharray="3 2.5"/>
+        <path d="M164 36 Q174 50 164 66" stroke="#E0891A" stroke-dasharray="3 2.5"/><path d="M174 78 Q184 96 174 114" stroke="#2F45EC" stroke-dasharray="3 2.5"/>
+        <g font-family="Georgia,serif" font-style="italic" font-size="13" fill="#23241D" stroke="none">
+          <text x="212" y="34">l</text><text x="212" y="76">m</text><text x="212" y="124">n</text>
+          <text x="38" y="55" fill="#E0891A">a</text><text x="26" y="101" fill="#2F45EC">b</text>
+          <text x="178" y="55" fill="#E0891A">a′</text><text x="188" y="101" fill="#2F45EC">b′</text>
+        </g>
+      </svg>
+      <div class="pcap"><i>l</i> ∥ <i>m</i> ∥ <i>n</i><span class="kor">이면</span><br><i>a</i> : <i>b</i> = <i>a′</i> : <i>b′</i><span class="kor">이다.</span></div>
     </div>
+    <div class="card">
+      <h2>선분의 외분점</h2>
+      <div class="stmt">두 점 A(<i class="m">x</i><sub>1</sub>, <i class="m">y</i><sub>1</sub>, <i class="m">z</i><sub>1</sub>), B(<i class="m">x</i><sub>2</sub>, <i class="m">y</i><sub>2</sub>, <i class="m">z</i><sub>2</sub>)에 대하여 선분 AB를 <i class="m">m</i> : <i class="m">n</i> (<i class="m">m</i> &gt; 0, <i class="m">n</i> &gt; 0, <i class="m">m</i> ≠ <i class="m">n</i>)으로 외분하는 점의 좌표는
+        <span style="display:block;font-family:Georgia,serif;font-size:15px;padding:4px 0 0 12px">(<span class="fr"><span><i class="m">m</i><i class="m">x</i><sub>2</sub> − <i class="m">n</i><i class="m">x</i><sub>1</sub></span><span><i class="m">m</i> − <i class="m">n</i></span></span>, <span class="fr"><span><i class="m">m</i><i class="m">y</i><sub>2</sub> − <i class="m">n</i><i class="m">y</i><sub>1</sub></span><span><i class="m">m</i> − <i class="m">n</i></span></span>, <span class="fr"><span><i class="m">m</i><i class="m">z</i><sub>2</sub> − <i class="m">n</i><i class="m">z</i><sub>1</sub></span><span><i class="m">m</i> − <i class="m">n</i></span></span>)</span></div>
+      <div class="stmt">특히 선분 AB의 중점의 좌표는
+        <span style="display:block;font-family:Georgia,serif;font-size:15px;padding:4px 0 0 12px">(<span class="fr"><span><i class="m">x</i><sub>1</sub> + <i class="m">x</i><sub>2</sub></span><span>2</span></span>, <span class="fr"><span><i class="m">y</i><sub>1</sub> + <i class="m">y</i><sub>2</sub></span><span>2</span></span>, <span class="fr"><span><i class="m">z</i><sub>1</sub> + <i class="m">z</i><sub>2</sub></span><span>2</span></span>)</span></div>
+    </div>
+    </div>
+
+    <div class="pane" data-p="cent">
+    <div class="card">
+      <button class="gb" id="bCent">삼각형 ABC의 무게중심 G</button>
+      <div class="eqs" id="eqc">
+        <div class="ln" data-s="1"><span class="kor">변 BC의 중점</span> M(<i>x</i><sub>4</sub>, <i>y</i><sub>4</sub>, <i>z</i><sub>4</sub>): &nbsp;<i>x</i><sub>4</sub> = <span class="fr"><span><i>x</i><sub>2</sub> + <i>x</i><sub>3</sub></span><span>2</span></span>, <i>y</i><sub>4</sub> = <span class="fr"><span><i>y</i><sub>2</sub> + <i>y</i><sub>3</sub></span><span>2</span></span>, <i>z</i><sub>4</sub> = <span class="fr"><span><i>z</i><sub>2</sub> + <i>z</i><sub>3</sub></span><span>2</span></span></div>
+        <div class="ln" data-s="2"><span class="kor">점 G는 선분 AM을 2 : 1로 내분하는 점이므로</span></div>
+        <div class="ln" data-s="3"><i>x</i> = <span class="fr"><span>2<i>x</i><sub>4</sub> + <i>x</i><sub>1</sub></span><span>2 + 1</span></span> = <span class="fr"><span><i>x</i><sub>1</sub> + <i>x</i><sub>2</sub> + <i>x</i><sub>3</sub></span><span>3</span></span>, &nbsp;<i>y</i> = <span class="fr"><span>2<i>y</i><sub>4</sub> + <i>y</i><sub>1</sub></span><span>2 + 1</span></span> = <span class="fr"><span><i>y</i><sub>1</sub> + <i>y</i><sub>2</sub> + <i>y</i><sub>3</sub></span><span>3</span></span>, &nbsp;<i>z</i> = <span class="fr"><span>2<i>z</i><sub>4</sub> + <i>z</i><sub>1</sub></span><span>2 + 1</span></span> = <span class="fr"><span><i>z</i><sub>1</sub> + <i>z</i><sub>2</sub> + <i>z</i><sub>3</sub></span><span>3</span></span></div>
+        <div class="ln big" data-s="3">G<span style="font-size:.85em">(</span><span class="fr"><span><i>x</i><sub>1</sub> + <i>x</i><sub>2</sub> + <i>x</i><sub>3</sub></span><span>3</span></span>, <span class="fr"><span><i>y</i><sub>1</sub> + <i>y</i><sub>2</sub> + <i>y</i><sub>3</sub></span><span>3</span></span>, <span class="fr"><span><i>z</i><sub>1</sub> + <i>z</i><sub>2</sub> + <i>z</i><sub>3</sub></span><span>3</span></span><span style="font-size:.85em">)</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>삼각형의 무게중심</h2>
+      <div class="stmt">좌표공간의 세 점 A(<i class="m">x</i><sub>1</sub>, <i class="m">y</i><sub>1</sub>, <i class="m">z</i><sub>1</sub>), B(<i class="m">x</i><sub>2</sub>, <i class="m">y</i><sub>2</sub>, <i class="m">z</i><sub>2</sub>), C(<i class="m">x</i><sub>3</sub>, <i class="m">y</i><sub>3</sub>, <i class="m">z</i><sub>3</sub>)을 꼭짓점으로 하는 삼각형 ABC의 무게중심의 좌표는
+        <span class="fm" style="display:block;font-family:Georgia,serif;font-size:15px;padding:4px 0 0 12px">(<span class="fr"><span><i class="m">x</i><sub>1</sub> + <i class="m">x</i><sub>2</sub> + <i class="m">x</i><sub>3</sub></span><span>3</span></span>, <span class="fr"><span><i class="m">y</i><sub>1</sub> + <i class="m">y</i><sub>2</sub> + <i class="m">y</i><sub>3</sub></span><span>3</span></span>, <span class="fr"><span><i class="m">z</i><sub>1</sub> + <i class="m">z</i><sub>2</sub> + <i class="m">z</i><sub>3</sub></span><span>3</span></span>)</span></div>
+    </div>
+    </div>
+
   </div>
 </div>
 <script>
@@ -273,14 +325,17 @@ g.minDist=8; g.maxDist=40;
 const ease=t=>t<0?0:t>1?1:(t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2);
 const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
 const R=6.2;
-const CAM0={az:0.5,el:0.3,dist:19,target:[2.2,2.6,1.6]};
+const CAM0={az:0.5,el:0.3,dist:20,target:[2.4,2.8,1.6]};
+const CAMC={az:0.5,el:0.3,dist:20,target:[2.6,3.0,2.2]};
 const rgba=(r,gg,b,a)=>'rgba('+r+','+gg+','+b+','+a.toFixed(3)+')';
+let tab='div';
+setupTabs(t=>{ tab=t; camFly(t==='div'?CAM0:CAMC,0.8); });
 let fly=null;
 function camFly(to,dur){ const c=g.cam; fly={from:{az:c.az,el:c.el,dist:c.dist,target:c.target.slice()},to,t:0,dur:dur||1}; }
 function camStep(dt){ if(!fly) return; fly.t+=dt; const s=ease(fly.t/fly.dur); const a=fly.from,b=fly.to;
   g.cam.az=a.az+(b.az-a.az)*s; g.cam.el=a.el+(b.el-a.el)*s; g.cam.dist=a.dist+(b.dist-a.dist)*s; g.cam.target=V3.lerp(a.target,b.target,s); if(fly.t>=fly.dur) fly=null; }
 g.onOrbit=()=>{ fly=null; };
-$('bView').onclick=()=>camFly(CAM0,0.7);
+$('bView').onclick=()=>camFly(tab==='div'?CAM0:CAMC,0.7);
 
 function fontOf(pt,sz){ if(pt.sub) return '600 '+(sz*0.7)+'px '+SERIF; return pt.math?('italic 600 '+(sz+1)+'px '+SERIF):pt.rm?('600 '+(sz+0.5)+'px '+SERIF):('600 '+(sz-1.5)+'px '+KOR); }
 function mixLabel(p,parts,col,dx,dy,size,align){ const q=g.proj(p); if(!q) return; const ctx=g.ctx; const sz=size||14.5;
@@ -290,52 +345,82 @@ function mixLabel(p,parts,col,dx,dy,size,align){ const q=g.proj(p); if(!q) retur
   parts.forEach(pt=>{ ctx.font=fontOf(pt,sz); const yy=y+(pt.sub?sz*0.3:0); ctx.lineWidth=4; ctx.strokeStyle=HALO; ctx.strokeText(pt.s,x,yy); ctx.fillStyle=col||INK; ctx.fillText(pt.s,x,yy); x+=ctx.measureText(pt.s).width; });
   ctx.restore(); }
 const SUB=(v,sub)=>sub?[{s:v,math:true},{s:sub,rm:true,sub:true}]:[{s:v,math:true}];
+const PT=(name,sub)=>[{s:name,rm:true},{s:'(',rm:true},{s:'x',math:true},{s:sub,rm:true,sub:true},{s:', ',rm:true},{s:'y',math:true},{s:sub,rm:true,sub:true},{s:', ',rm:true},{s:'z',math:true},{s:sub,rm:true,sub:true},{s:')',rm:true}];
 function axes(){
   g.arrow([-R,0,0],[R+0.6,0,0],INK,1.5,9); g.arrow([0,-R,0],[0,R+0.6,0],INK,1.5,9); g.seg([0,0,0],[0,0,-R*0.5],INK,1.5); g.arrow([0,0,0],[0,0,R+0.6],INK,1.5,9);
   g.mathText([R+0.6,0,0],'x',INK,12,10,16); g.mathText([0,R+0.6,0],'y',INK,12,-2,16); g.mathText([0,0,R+0.6],'z',INK,-11,-8,16);
   g.romanText([0,0,0],'O',INK,-11,12,15); }
 function gridXY(alpha){ const col=rgba(35,36,29,0.13*alpha); for(let i=-5;i<=6;i++){ if(i===0) continue; g.seg([i,-5,0],[i,6,0],col,1); g.seg([-5,i,0],[6,i,0],col,1); } }
+const dashed=(p,q,col)=>g.seg(p,q,col||'rgba(35,36,29,.5)',1.2,[5,4]);
 
-const A=[1.5,1.5,2.6], B=[4.2,4.8,4.0];
+/* ───── 01 내분점 ───── */
+const A=[2.8,1.5,2.4], B=[4.6,4.8,3.8];
 const M=()=>+$('rm').value, N=()=>+$('rn').value;
 const Ppt=()=>V3.lerp(A,B,M()/(M()+N()));
 ['rm','rn'].forEach(id=>$(id).oninput=()=>{ $('nm').textContent=M(); $('nn').textContent=N(); });
-/* v: 0~1 P 가 A 에서 내분점까지 / 1~2 수선 / 2~3 A′B′ 과 좌표축 점선 / 3 식 */
-const st={v:0,playing:false};
-$('bGo').onclick=()=>{ st.v=0; st.playing=true; camFly(CAM0,0.7); };
-function step(dt){ if(!st.playing){ return; } st.v+=dt/1.1; if(st.v>=3.2){ st.v=3.2; st.playing=false; } }
-const floor=p=>[p[0],p[1],0];
-function draw(){
+const st={v:0,playing:false, pl:null, w:0, wplay:false, done:{xy:false,yz:false}};
+$('bGo').onclick=()=>{ st.v=0; st.playing=true; st.pl=null; st.w=0; st.done={xy:false,yz:false}; camFly(CAM0,0.7); };
+function projGo(pl){ if(st.v<1){ st.v=1; st.playing=false; } st.pl=pl; st.w=0; st.wplay=true; camFly(CAM0,0.7); }
+$('bPxy').onclick=()=>projGo('xy'); $('bPyz').onclick=()=>projGo('yz');
+function step(dt){ if(st.playing){ st.v+=dt/1.1; if(st.v>=1){ st.v=1; st.playing=false; } }
+  if(st.wplay){ st.w+=dt/1.1; if(st.w>=2.2){ st.w=2.2; st.wplay=false; st.done[st.pl]=true; } } }
+const foot=(p,pl)=>pl==='xy'?[p[0],p[1],0]:[0,p[1],p[2]];
+function drawDiv(){
   gridXY(0.8); axes();
-  const v=st.v, s1=ease(clamp(v,0,1)), s2=ease(clamp(v-1,0,1)), s3=ease(clamp(v-2,0,1));
-  const P=Ppt(); const Am=floor(A), Pm=floor(P), Bm=floor(B);
+  const v=st.v, s1=ease(clamp(v,0,1)); const P=Ppt();
   g.seg(A,B,INK,1.8);
-  /* 수선 */
-  if(s2>0.001){ [[A,Am],[P,Pm],[B,Bm]].forEach(([p,q])=>g.seg(p,V3.lerp(p,q,s2),'rgba(35,36,29,.55)',1.2,[5,4])); }
-  if(s2>0.98){ g.pt(Am,null,INK,0,0,3.4); g.pt(Pm,null,RED,0,0,3.4); g.pt(Bm,null,INK,0,0,3.4);
-    g.romanText(Am,'A′',INK,-12,-12,15); g.romanText(Pm,'P′',INK,14,-10,15); g.romanText(Bm,'B′',INK,14,10,15);
-    const e=[0,0,1]; g.rightMark(Pm,V3.sub(Bm,Pm),e,INK,0.32); g.rightMark(Bm,V3.sub(Am,Bm),e,INK,0.32); }
-  /* A′B′ 과 좌표축 점선 */
-  if(s3>0.001){ g.seg(Am,V3.lerp(Am,Bm,s3),RED,2.0); }
-  if(s3>0.98){ [Am,Pm,Bm].forEach(q=>{ g.seg(q,[q[0],0,0],'rgba(35,36,29,.5)',1.1,[4,4]); g.seg(q,[0,q[1],0],'rgba(35,36,29,.5)',1.1,[4,4]); });
-    mixLabel([A[0],0,0],SUB('x','1'),INK,-14,8,14); mixLabel([P[0],0,0],SUB('x'),RED,-12,8,14); mixLabel([B[0],0,0],SUB('x','2'),INK,-14,8,14);
-    mixLabel([0,A[1],0],SUB('y','1'),INK,0,-12,14); mixLabel([0,P[1],0],SUB('y'),RED,0,-12,14); mixLabel([0,B[1],0],SUB('y','2'),INK,0,-12,14); }
-  /* 점 P 와 비 */
+  if(st.pl){ const pl=st.pl, s2=ease(clamp(st.w,0,1)), s3=ease(clamp(st.w-1,0,1)); const Am=foot(A,pl),Pm=foot(P,pl),Bm=foot(B,pl);
+    [[A,Am],[P,Pm],[B,Bm]].forEach(([p,q])=>g.seg(p,V3.lerp(p,q,s2),'rgba(35,36,29,.55)',1.2,[5,4]));
+    if(s2>0.98){ g.pt(Am,null,INK,0,0,3.4); g.pt(Pm,null,RED,0,0,3.4); g.pt(Bm,null,INK,0,0,3.4);
+      if(pl==='xy'){ g.romanText(Am,'A′',INK,-12,-12,15); g.romanText(Pm,'P′',INK,14,-10,15); g.romanText(Bm,'B′',INK,14,10,15); }
+      else { g.romanText(Am,'A′',INK,-14,6,15); g.romanText(Pm,'P′',INK,-14,6,15); g.romanText(Bm,'B′',INK,-14,6,15); }
+      const e=pl==='xy'?[0,0,1]:[1,0,0]; g.rightMark(Pm,V3.sub(Bm,Pm),e,INK,0.32); g.rightMark(Bm,V3.sub(Am,Bm),e,INK,0.32); }
+    if(s3>0.001) g.seg(Am,V3.lerp(Am,Bm,s3),RED,2.0);
+    if(s3>0.98){
+      if(pl==='xy'){ [Am,Pm,Bm].forEach(q=>{ dashed(q,[q[0],0,0]); dashed(q,[0,q[1],0]); });
+        mixLabel([A[0],0,0],SUB('x','1'),INK,-14,8,14); mixLabel([P[0],0,0],SUB('x'),RED,-12,8,14); mixLabel([B[0],0,0],SUB('x','2'),INK,-14,8,14);
+        mixLabel([0,A[1],0],SUB('y','1'),INK,0,-12,14); mixLabel([0,P[1],0],SUB('y'),RED,0,-12,14); mixLabel([0,B[1],0],SUB('y','2'),INK,0,-12,14); }
+      else { [Am,Pm,Bm].forEach(q=>{ dashed(q,[0,q[1],0]); dashed(q,[0,0,q[2]]); });
+        mixLabel([0,A[1],0],SUB('y','1'),INK,0,14,14); mixLabel([0,P[1],0],SUB('y'),RED,0,14,14); mixLabel([0,B[1],0],SUB('y','2'),INK,0,14,14);
+        mixLabel([0,0,A[2]],SUB('z','1'),INK,-14,0,14); mixLabel([0,0,P[2]],SUB('z'),RED,-12,0,14); mixLabel([0,0,B[2]],SUB('z','2'),INK,-14,0,14); } } }
   const Q=V3.lerp(A,P,s1);
-  if(s1>0.001){ g.seg(A,Q,RED,2.4); }
+  if(s1>0.001) g.seg(A,Q,RED,2.4);
   g.pt(A,null,INK,0,0,4.2); g.romanText(A,'A',INK,-14,0,15);
   g.pt(B,null,INK,0,0,4.2); g.romanText(B,'B',INK,14,0,15);
-  if(v>0.001){ g.pt(Q,null,RED,0,0,4.4); if(s1>0.98){ g.romanText(P,'P',INK,-4,-15,15);
-      g.seg(P,B,BLU,2.4);
-      const am=V3.lerp(A,P,0.5), an=V3.lerp(P,B,0.5);
-      g.mathText(am,'m',RED,-2,-16,16); g.mathText(an,'n',BLU,-2,-16,16); } }
-  /* 식 */
-  const stg=v<=0?0:v<1?0:v<2?1:v<3?2:v<3.2?3:4;
-  [...$('eq').children].forEach(el=>el.classList.toggle('on',+el.dataset.s<=stg));
-  if(v>=3.2) geoTask('div-p');
+  if(v>0.001){ g.pt(Q,null,RED,0,0,4.4); if(s1>0.98){ g.romanText(P,'P',INK,-4,-15,15); g.seg(P,B,BLU,2.4);
+      g.mathText(V3.lerp(A,P,0.5),'m',RED,-2,-16,16); g.mathText(V3.lerp(P,B,0.5),'n',BLU,-2,-16,16); } }
+  const on={p:v>=1, q:st.done.xy||st.done.yz, xy:st.done.xy, yz:st.done.yz, all:st.done.xy||st.done.yz};
+  [...$('eq').children].forEach(el=>el.classList.toggle('on',!!on[el.dataset.s]));
+  $('bPxy').classList.toggle('done',st.done.xy); $('bPyz').classList.toggle('done',st.done.yz);
+  if(on.all) geoTask('div-p');
   $('hud').innerHTML=v>0.001?'<div class="chip"><i>m : n</i>'+M()+' : '+N()+'</div>':'';
 }
-g.loop(dt=>{ g.clear(); camStep(dt); step(dt); draw(); });
+
+/* ───── 02 무게중심 ───── */
+const CA=[0.6,5.0,3.4], CB=[3.4,0.6,4.6], CC=[4.8,3.8,1.0];
+const CM=V3.mid(CB,CC), CG=V3.lerp(CA,CM,2/3);
+const ct={v:0,playing:false};  /* 0~1 M, 1~2 G */
+$('bCent').onclick=()=>{ ct.v=0; ct.playing=true; camFly(CAMC,0.7); };
+function cstep(dt){ if(!ct.playing) return; ct.v+=dt/1.0; if(ct.v>=2){ ct.v=2; ct.playing=false; } }
+function tick(p,q,n){ const d=V3.norm(V3.sub(q,p)); const u=V3.norm(V3.cross(d,[0,0,1])); const m=V3.mid(p,q);
+  for(let i=0;i<n;i++){ const c=V3.add(m,V3.mul(d,(i-(n-1)/2)*0.16)); g.seg(V3.add(c,V3.mul(u,0.14)),V3.sub(c,V3.mul(u,0.14)),INK,1.3); } }
+function drawCent(){
+  gridXY(0.8); axes();
+  const v=ct.v, s1=ease(clamp(v,0,1)), s2=ease(clamp(v-1,0,1));
+  g.poly([CA,CB,CC],'rgba(35,36,29,.11)','rgba(35,36,29,.8)',1.5);
+  g.pt(CA,null,INK,0,0,4); mixLabel(CA,PT('A','1'),INK,10,-10,14.5,'left');
+  g.pt(CB,null,INK,0,0,4); mixLabel(CB,PT('B','2'),INK,-10,-10,14.5,'right');
+  g.pt(CC,null,INK,0,0,4); mixLabel(CC,PT('C','3'),INK,8,14,14.5,'left');
+  if(s1>0.001){ const q=V3.lerp(CB,CM,s1); g.pt(q,null,INK,0,0,3.6);
+    if(s1>0.98){ tick(CB,CM,1); tick(CM,CC,1); mixLabel(CM,PT('M','4'),INK,-10,14,14.5,'right'); } }
+  if(s1>0.98){ dashed(CA,CM); const G=V3.lerp(CA,CM,s2*2/3); g.seg(CA,G,RED,2.2); g.pt(G,null,RED,0,0,4.4);
+    if(s2>0.98){ g.romanText(CG,'G',INK,12,10,15); g.mathText(V3.lerp(CA,CG,0.5),'2',RED,10,-8,14); g.mathText(V3.lerp(CG,CM,0.5),'1',BLU,10,-8,14); g.seg(CG,CM,BLU,2.0); } }
+  const stg=v<=0?0:v<1?1:v<2?2:3;
+  [...$('eqc').children].forEach(el=>el.classList.toggle('on',+el.dataset.s<=stg));
+  if(v>=2) geoTask('cent-g');
+  $('hud').innerHTML='';
+}
+g.loop(dt=>{ g.clear(); camStep(dt); if(tab==='div'){ step(dt); drawDiv(); } else { cstep(dt); drawCent(); } });
 </script>
 <script>window.PAGE_ID="pdiv";</script>
 <script src="nav.js"></script>
