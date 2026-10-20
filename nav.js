@@ -6,7 +6,7 @@
      먼저 선언한 뒤 이 파일을 불러오면 하단 바가 자동으로 생깁니다.
    ════════════════════════════════════════════════════════════ */
 window.GEO_CONFIG = {
-  VERSION: "v1.73",                 // ★ 1단원=v1.x, 2단원=v2.x, 3단원=v3.x — 업로드마다 뒷자리 +1 (v1.11, v1.12, …)
+  VERSION: "v1.74",                 // ★ 1단원=v1.x, 2단원=v2.x, 3단원=v3.x — 업로드마다 뒷자리 +1 (v1.11, v1.12, …)
   APPS_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbx3Ay-gudjjSoRlngyu54umJ9uYRAKhINuwcv229UZUN9_oIQfm9vwAxM32FOPR9wV1/exec",
   /* ── 담당 선생님 ───────────────────────────────────────────────
      선생님마다 '자기 구글 시트 + 자기 드라이브'를 씁니다.
@@ -92,6 +92,12 @@ window.GEO_CONFIG = {
     { id:'snsol', unit:2, href:'snt-solid.html', short:'수특 공간도형', grp:'g-snt',
       curve:'공간도형', title:'수능특강 · 공간도형' },
     /* 공간좌표 */
+    { id:'pcoord', unit:2, href:'coord-point.html', short:'점의 좌표', grp:'g-pt',
+      curve:'공간에서의 점의 좌표', title:'공간에서의 점의 좌표' },
+    { id:'pdist', unit:2, href:'coord-dist.html', short:'두 점 사이의 거리', grp:'g-pt',
+      curve:'두 점 사이의 거리', title:'두 점 사이의 거리' },
+    { id:'pdiv', unit:2, href:'coord-div.html', short:'내분점', grp:'g-pt',
+      curve:'선분의 내분점의 좌표', title:'선분의 내분점의 좌표' },
     { id:'pdrone', unit:2, href:'dronshow.html', short:'드론쇼', grp:'g-pt',
       curve:'공간좌표로 만드는 드론쇼', title:'우리 반 드론쇼' }
   ],
@@ -468,6 +474,9 @@ window.GEO_TASKS = {
   pdih:     ['dih-o-click','dih-q3-open'],           // 점 O 누르기 + 문제 03 열기
   pproj:    ['proj-shadow','proj-q1-1'],             // 그림자 보기 + 문제 01 (1)
   plen:     ['plen-ab','plen-who-ok'],              // 정사영 모션 + 대화 문제 정답
+  pcoord:   ['sc-space','sc-point'],                // 좌표공간 모션 + 점 P 모션
+  pdist:    ['dist-ab','dist-root'],                // AB 상자 + 루트 상자
+  pdiv:     ['div-p'],                              // 내분점 모션
   pdrone:   ['coord','order','class'],                // 시운전 3번 + 연습 순서 정리 + 우리 반 공연 순서 완료
   psun:     ['sun-q1-ok','sun-q2'],                  // 문제 1 정답 + 문제 2 증명 제출
   prev:     ['rev-q14','rev-m14'],                   // 14번 열기 + 풀이 보기
