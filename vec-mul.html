@@ -1,0 +1,410 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<script>
+/* 입장 가드 */
+if (localStorage.getItem('geoAppOk') !== '1') location.replace('index.html');
+</script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="icon" type="image/svg+xml" href="icon.svg">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="apple-mobile-web-app-title" content="기하">
+<meta name="theme-color" content="#B32017">
+<title>벡터의 실수배</title>
+<link rel="stylesheet" media="print" onload="this.media='all'"
+  href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap">
+<style>
+:root{ --paper:#EFEFE3; --ink:#23241D; --dim:#A8A79A; --line:#DCDACD; --line2:#C7C5B6;
+  --acc:#2F45EC; --acc2:#1B2FC4; --card:#F5F5EC; --org:#E0891A; --grn:#12876A; --red:#D9463F; --vio:#7A3FB5; }
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;overflow:hidden}
+body{font-family:'IBM Plex Sans KR','Apple SD Gothic Neo','Malgun Gothic',system-ui,sans-serif;
+  background:var(--paper); color:var(--ink); font-size:14.5px; line-height:1.55; display:flex; flex-direction:column; height:100dvh}
+header{padding:12px 22px 10px; border-bottom:1px solid var(--line); display:flex; align-items:flex-end; gap:18px; flex-wrap:wrap; flex:none}
+h1{font-size:17.5px; margin:0; letter-spacing:-.3px; font-weight:700}
+#tabs{display:flex; gap:6px; margin-left:auto; flex-wrap:wrap}
+#tabs button{height:34px; padding:0 13px; border-radius:999px; border:1.5px solid var(--line2); background:transparent;
+  font:inherit; font-size:12.5px; font-weight:700; color:var(--ink); cursor:pointer; display:flex; align-items:center; gap:7px}
+#tabs button .no{font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:11px; color:var(--acc); font-weight:600}
+#tabs button.on{background:var(--acc); border-color:var(--acc); color:#fff} #tabs button.on .no{color:#fff}
+#panel{flex:1; min-height:0; overflow-y:auto; overscroll-behavior:contain; padding:18px 22px 90px}
+.wrap{max-width:960px; margin:0 auto}
+.pane{display:none} .pane.on{display:block}
+.card{border:1px solid var(--line); border-radius:12px; padding:13px 15px 15px; margin-bottom:12px; background:var(--card)}
+.card h2{font-size:12px; margin:0 0 10px; letter-spacing:.06em; color:var(--dim); font-family:'IBM Plex Mono',ui-monospace,monospace; text-transform:uppercase; font-weight:600}
+.m{font-family:Georgia,'Times New Roman',serif; font-style:italic; font-size:1.05em}
+.rm{font-family:Georgia,'Times New Roman',serif; font-style:normal; font-size:1.03em}
+.vec{display:inline-block; position:relative; font-family:Georgia,'Times New Roman',serif; font-size:1.03em; padding:.55em 2px 0 1px; line-height:1; vertical-align:-.1em; margin:0 1px; min-width:1.15em; text-align:center; white-space:nowrap}
+.vec::before{content:""; position:absolute; left:1px; right:5px; top:.28em; border-top:1.3px solid currentColor}
+.vec::after{content:""; position:absolute; right:0; top:.1em; width:0; height:0; border-left:6px solid currentColor; border-top:3.5px solid transparent; border-bottom:3.5px solid transparent; transform:translateY(-.5px)}
+.vec i{font-style:italic} .vec .r{font-style:normal}
+.sym,.abs{font-family:Georgia,'Times New Roman',serif; font-size:1.03em}
+.hl{color:var(--red); font-weight:700}
+.gb{height:36px; padding:0 14px; border-radius:11px; cursor:pointer; font-family:'IBM Plex Sans KR','Apple SD Gothic Neo',system-ui,sans-serif; font-size:14px; font-weight:700; color:var(--acc); letter-spacing:.2px;
+  border:1px solid rgba(47,69,236,.35); background:linear-gradient(180deg,rgba(255,255,255,.85) 0%,rgba(255,255,255,.35) 45%,rgba(226,230,255,.55) 100%);
+  box-shadow:0 3px 8px rgba(35,36,29,.14), inset 0 1.5px 0 rgba(255,255,255,.95), inset 0 -3px 6px rgba(47,69,236,.10); position:relative; transition:transform .12s, box-shadow .12s; white-space:nowrap; vertical-align:middle; min-width:64px}
+.gb::after{content:""; position:absolute; left:10%; top:9%; width:40%; height:30%; border-radius:999px; background:linear-gradient(180deg,rgba(255,255,255,.95),rgba(255,255,255,0)); pointer-events:none}
+.gb:hover{transform:translateY(-1px); box-shadow:0 5px 12px rgba(35,36,29,.18), inset 0 1.5px 0 rgba(255,255,255,.95), inset 0 -3px 6px rgba(47,69,236,.12)}
+.gb:active{transform:translateY(1px); box-shadow:0 1px 3px rgba(35,36,29,.14), inset 0 1.5px 0 rgba(255,255,255,.9)}
+.gb.done{color:var(--red); border-color:rgba(217,70,63,.4); background:linear-gradient(180deg,rgba(255,255,255,.85) 0%,rgba(255,255,255,.35) 45%,rgba(255,228,224,.6) 100%); box-shadow:0 3px 8px rgba(35,36,29,.14), inset 0 1.5px 0 rgba(255,255,255,.95), inset 0 -3px 6px rgba(217,70,63,.12); cursor:default}
+.gb.done:hover{transform:none}
+.gb .vec,.gb .sym{font-family:Georgia,'Times New Roman',serif; font-size:16px; font-weight:600}
+.gb .vec::before{border-top-width:1.5px}
+.gb.sm{height:30px; font-size:13px; padding:0 10px; min-width:52px} .gb.sm .vec,.gb.sm .sym{font-size:15px}
+.two{display:grid; grid-template-columns:1fr 340px; gap:16px; align-items:center}
+.two.top{align-items:start}
+@media (max-width:760px){ .two{grid-template-columns:1fr} }
+.txt{font-size:13.5px; line-height:1.95}
+.txt .eqc{text-align:center; font-family:Georgia,'Times New Roman',serif; font-size:17px; margin:6px 0; display:flex; justify-content:center; align-items:center; gap:6px; flex-wrap:wrap}
+.fig{background:#fff; border:1px solid var(--line); border-radius:12px; padding:8px 8px 6px}
+.fig svg{display:block; width:100%; height:auto}
+.fig .cap{display:flex; justify-content:flex-end; padding:4px 6px 0; gap:6px; align-items:center}
+.btn{border:1.5px solid var(--line2); background:transparent; color:var(--dim); font:inherit; font-size:11.5px; font-weight:700; padding:0 11px; height:28px; border-radius:999px; cursor:pointer}
+.btn:hover{border-color:var(--acc); color:var(--acc)} .btn.on{border-color:var(--acc); color:var(--acc)}
+.q{font-size:13.5px; line-height:1.9}
+.badge{display:inline-block; background:var(--acc); color:#fff; border-radius:999px; padding:1px 10px; font-size:11px; font-family:'IBM Plex Mono',ui-monospace,monospace; font-weight:600; letter-spacing:.06em; margin-right:8px; vertical-align:2px}
+.badge.w{background:var(--org)}
+svg text{font-family:Georgia,'Times New Roman',serif; font-weight:600; fill:#23241D}
+svg .it{font-style:italic}
+svg .k{font-family:'IBM Plex Sans KR','Apple SD Gothic Neo',system-ui,sans-serif; font-weight:700; font-size:12px; font-style:normal}
+/* 워밍업 */
+.warm{display:grid; grid-template-columns:1fr 1fr; gap:14px}
+@media (max-width:760px){ .warm{grid-template-columns:1fr} }
+.warm .one{border:1px solid var(--line); border-radius:12px; background:#fff; padding:10px 12px 10px}
+.warm .one .t{font-size:13.5px; line-height:1.85; margin-bottom:6px}
+.warm .one svg{display:block; width:100%; height:auto}
+.row{display:flex; align-items:center; gap:10px; margin:6px 0 0}
+.row label{font-size:12px; color:var(--dim); flex:none}
+.row input[type=range]{flex:1; accent-color:var(--acc); height:20px; min-width:0}
+.row .num{font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:12px; width:46px; text-align:right}
+.ans{display:flex; gap:14px; flex-wrap:wrap; align-items:center; margin-top:6px; font-size:13.5px}
+/* 격자 문제 */
+.grids{display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-top:8px}
+@media (max-width:820px){ .grids{grid-template-columns:1fr} }
+.gq{background:#fff; border:1px solid var(--line); border-radius:12px; padding:8px 8px 6px}
+.gq .h{font-size:13px; display:flex; align-items:center; gap:8px; padding:0 2px 6px; min-height:36px}
+.gq svg{display:block; width:100%; height:auto; touch-action:none; user-select:none; -webkit-user-select:none}
+.gq .drag{cursor:grab} .gq .drag.on{cursor:grabbing}
+/* 성질 */
+.law{display:grid; grid-template-columns:1fr 1fr; gap:14px}
+@media (max-width:760px){ .law{grid-template-columns:1fr} }
+.law .one{border:1px solid var(--line); border-radius:12px; background:#fff; padding:10px 10px 6px}
+.law .one .t{font-size:13.5px; line-height:1.9; padding:0 4px 6px; display:flex; align-items:center; gap:8px; flex-wrap:wrap}
+.law .one .t .k{color:var(--acc); font-weight:700; margin-right:2px}
+.law .one svg{display:block; width:100%; height:auto}
+.pair{display:flex; gap:8px} .pair svg{width:50%; min-width:0}
+.eqwrap{position:relative; font-family:Georgia,'Times New Roman',serif; font-size:17px; line-height:2.2; padding:2px 0}
+.eqwrap .ln{display:flex; align-items:center; gap:4px; flex-wrap:wrap; min-height:38px}
+.eqwrap .ln2 .t2{visibility:hidden} .eqwrap .ln2.show .t2{visibility:visible}
+.eqwrap .ghost{position:absolute; left:0; top:0; margin:0; transition:transform 1s cubic-bezier(.4,0,.2,1); pointer-events:none; color:var(--acc)}
+.qrow{display:flex; gap:16px; align-items:start; flex-wrap:wrap}
+.qrow .qt{flex:1; min-width:260px} .qrow .qfig{width:300px; flex:none; background:#fff; border:1px solid var(--line); border-radius:12px; padding:6px}
+.qrow .qfig svg{display:block; width:100%; height:auto}
+.sub2{display:flex; flex-direction:column; gap:6px; margin-top:8px}
+.sub2>div{display:flex; align-items:center; gap:8px; flex-wrap:wrap}
+.ineq{font-family:Georgia,'Times New Roman',serif; font-size:17px; text-align:center; margin:8px 0 4px; display:flex; justify-content:center; align-items:center; gap:6px; flex-wrap:wrap}
+.ineq .v{font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:14px; color:var(--red); font-weight:600}
+.shr{display:inline-block; overflow:hidden; vertical-align:bottom; white-space:nowrap; transition:width .9s cubic-bezier(.4,0,.2,1), opacity .6s}
+
+.fr{display:inline-flex; flex-direction:column; align-items:center; vertical-align:middle; margin:0 2px; line-height:1.15; font-family:Georgia,serif; font-size:.9em}
+.fr span{padding:0 3px} .fr span:first-child{border-bottom:1px solid currentColor}
+.defbox{border-left:3px solid var(--acc); background:#E9E9DC; border-radius:0 10px 10px 0; padding:10px 14px; margin:10px 0; font-size:13.5px; line-height:2.1}
+.defbox .k{color:var(--acc); font-weight:700; margin-right:6px; font-family:'IBM Plex Mono',monospace; font-size:12px}
+.defbox .in{padding-left:18px}
+.chainbox{display:flex; flex-direction:column; align-items:center; gap:4px; margin:8px 0}
+.chainbox .bx{border:1.5px solid var(--acc); color:var(--acc); border-radius:8px; padding:4px 12px; font-size:13px; background:#fff; font-family:Georgia,serif}
+.chainbox .ar{color:var(--acc); font-size:14px}
+.pt{font-size:12.5px; color:var(--dim); line-height:1.8}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 1.2 L10 5 L0 8.8 z" fill="#23241D"/></marker>
+    <marker id="ahR" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 1.2 L10 5 L0 8.8 z" fill="#D9463F"/></marker>
+    <marker id="ahB" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 1.2 L10 5 L0 8.8 z" fill="#2F45EC"/></marker>
+    <marker id="ahG" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 1.2 L10 5 L0 8.8 z" fill="#A8A79A"/></marker>
+    <marker id="ahV" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 1.2 L10 5 L0 8.8 z" fill="#7A3FB5"/></marker>
+    <marker id="ahO" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 1.2 L10 5 L0 8.8 z" fill="#E0891A"/></marker>
+  </defs>
+</svg>
+<header>
+  <div><h1>벡터의 실수배</h1></div>
+  <div id="tabs">
+    <button class="on" data-t="a"><span class="no">01</span>벡터의 실수배</button>
+    <button data-t="b"><span class="no">02</span>벡터의 평행</button>
+    <button data-t="c"><span class="no">03</span><span class="sym"><span class='vec'><span class='r'>AC</span></span> = <i class='m'>k</i><span class='vec'><span class='r'>AB</span></span></span></button>
+  </div>
+</header>
+<div id="panel"><div class="wrap">
+
+<!-- ───────── 01 벡터의 실수배 ───────── -->
+<div class="pane on" data-p="a">
+  <div class="card">
+    <div class="two">
+      <div class="txt">
+        영벡터가 아닌 벡터 <span class='vec'><i>a</i></span>에 대하여 <span class='vec'><i>a</i></span> + <span class='vec'><i>a</i></span>는 벡터 <span class='vec'><i>a</i></span>와 방향이 같고 크기가 2배인 벡터이다. 이것을
+        <div class="eqc"><button class="gb" id="b2a" data-w="2<span class='vec'><i>a</i></span>"></button></div>
+        로 나타낸다.<br>
+        또 (−<span class='vec'><i>a</i></span>) + (−<span class='vec'><i>a</i></span>)는 벡터 <span class='vec'><i>a</i></span>와 방향이 반대이고 크기가 2배인 벡터이다. 이것을
+        <div class="eqc"><button class="gb" id="bm2a" data-w="−2<span class='vec'><i>a</i></span>"></button></div>
+        로 나타낸다.
+      </div>
+      <div class="fig"><svg viewBox="0 0 340 170" id="f2a"></svg></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="txt">일반적으로 실수 <i class='m'>k</i>와 벡터 <span class='vec'><i>a</i></span>의 곱 <i class='m'>k</i><span class='vec'><i>a</i></span>를 벡터 <span class='vec'><i>a</i></span>의 <button class="gb sm" data-w="실수배"></button>라 하고, 다음과 같이 정의한다.</div>
+    <div class="two top" style="margin-top:8px">
+      <div class="defbox">
+        실수 <i class='m'>k</i>와 벡터 <span class='vec'><i>a</i></span>에 대하여<br>
+        <span class="k">1</span><span class='vec'><i>a</i></span> ≠ <span class='vec'><span class='r'>0</span></span>일 때,<br>
+        <div class="in">(i) <i class='m'>k</i> &gt; 0이면, <i class='m'>k</i><span class='vec'><i>a</i></span>는 <span class='vec'><i>a</i></span>와 방향이 <button class="gb sm" data-w="같고"></button> 크기가 <button class="gb sm" data-w="<i class='m'>k</i><span class='abs'>|</span><span class='vec'><i>a</i></span><span class='abs'>|</span>"></button>인 벡터이다.</div>
+        <div class="in">(ii) <i class='m'>k</i> &lt; 0이면, <i class='m'>k</i><span class='vec'><i>a</i></span>는 <span class='vec'><i>a</i></span>와 방향이 <button class="gb sm" data-w="반대이고"></button> 크기가 <button class="gb sm" data-w="<span class='abs'>|</span><i class='m'>k</i><span class='abs'>|</span><span class='abs'>|</span><span class='vec'><i>a</i></span><span class='abs'>|</span>"></button>인 벡터이다.</div>
+        <div class="in">(iii) <i class='m'>k</i> = 0이면, <i class='m'>k</i><span class='vec'><i>a</i></span> = <button class="gb sm" data-w="<span class='vec'><span class='r'>0</span></span>"></button>이다.</div>
+        <span class="k">2</span><span class='vec'><i>a</i></span> = <span class='vec'><span class='r'>0</span></span>일 때, <i class='m'>k</i><span class='vec'><i>a</i></span> = <button class="gb sm" data-w="<span class='vec'><span class='r'>0</span></span>"></button>이다.
+      </div>
+      <div class="fig">
+        <svg viewBox="0 0 340 150" id="fK"></svg>
+        <div class="row"><label><i class="m">k</i></label><input type="range" id="kr" min="-3" max="3" step="0.5" value="2"><span class="num" id="kv">2</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card q">
+    <div class="qrow">
+      <div class="qt"><span class="badge">문제 01</span>오른쪽 그림은 정육면체 12개를 이어 붙여 만든 직육면체이다. 세 벡터 <span class='vec'><i>a</i></span>, <span class='vec'><i>b</i></span>, <span class='vec'><i>c</i></span>가 오른쪽과 같을 때, 다음 벡터를 그림 위에 나타내시오.
+        <div class="sub2">
+          <div>(1) 3<span class='vec'><i>a</i></span> <button class="btn" data-cube="1">그림</button></div>
+          <div>(2) −2<span class='vec'><i>a</i></span> − <span class='vec'><i>c</i></span> <button class="btn" data-cube="2">그림</button></div>
+          <div>(3) −<span class='vec'><i>b</i></span> + 2<span class='vec'><i>c</i></span> <button class="btn" data-cube="3">그림</button></div>
+          <div><button class="btn" id="cubeRe">다시</button></div>
+        </div>
+      </div>
+      <div class="qfig"><svg viewBox="0 0 300 230" id="fCube"></svg></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="defbox">
+      두 실수 <i class='m'>k</i>, <i class='m'>l</i>과 두 벡터 <span class='vec'><i>a</i></span>, <span class='vec'><i>b</i></span>에 대하여<br>
+      <span class="k">1</span><i class='m'>k</i>(<i class='m'>l</i><span class='vec'><i>a</i></span>) = <button class="gb sm" data-w="(<i class='m'>k</i><i class='m'>l</i>)<span class='vec'><i>a</i></span>"></button> &nbsp;(결합법칙)<br>
+      <span class="k">2</span>(<i class='m'>k</i> + <i class='m'>l</i>)<span class='vec'><i>a</i></span> = <button class="gb sm" data-w="<i class='m'>k</i><span class='vec'><i>a</i></span> + <i class='m'>l</i><span class='vec'><i>a</i></span>"></button>, &nbsp; <i class='m'>k</i>(<span class='vec'><i>a</i></span> + <span class='vec'><i>b</i></span>) = <button class="gb sm" data-w="<i class='m'>k</i><span class='vec'><i>a</i></span> + <i class='m'>k</i><span class='vec'><i>b</i></span>"></button> &nbsp;(분배법칙)
+    </div>
+  </div>
+</div>
+
+<!-- ───────── 02 벡터의 평행 ───────── -->
+<div class="pane" data-p="b">
+  <div class="card">
+    <div class="txt">
+      영벡터가 아닌 두 벡터 <span class='vec'><i>a</i></span>, <span class='vec'><i>b</i></span>의 방향이 같거나 반대일 때, <span class='vec'><i>a</i></span>와 <span class='vec'><i>b</i></span>는 서로 <button class="gb sm" data-w="평행"></button>하다고 하고, 기호로
+      <div class="eqc"><button class="gb" data-w="<span class='vec'><i>a</i></span> ∥ <span class='vec'><i>b</i></span>"></button></div>
+      와 같이 나타낸다.<br>
+      다음 그림과 같이 두 벡터 <span class='vec'><i>a</i></span>, <span class='vec'><i>b</i></span>가 서로 평행할 때, <span class='vec'><i>a</i></span>와 <span class='vec'><i>b</i></span>의 시점을 일치시키면 한 벡터가 다른 벡터의 <button class="gb sm" data-w="실수배"></button>가 된다.
+    </div>
+    <div class="law" style="margin-top:10px">
+      <div class="one"><svg viewBox="0 0 320 200" id="fP1"></svg><div class="cap" style="display:flex; justify-content:flex-end; gap:6px; padding:4px 6px 0"><button class="btn" data-par="1">시점 일치</button></div></div>
+      <div class="one"><svg viewBox="0 0 320 200" id="fP2"></svg><div class="cap" style="display:flex; justify-content:flex-end; gap:6px; padding:4px 6px 0"><button class="btn" data-par="2">시점 일치</button></div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="txt">일반적으로 두 벡터의 평행 조건은 다음과 같다.</div>
+    <div class="defbox">
+      영벡터가 아닌 두 벡터 <span class='vec'><i>a</i></span>, <span class='vec'><i>b</i></span>에 대하여<br>
+      <div class="in"><span class='vec'><i>a</i></span> ∥ <span class='vec'><i>b</i></span> &nbsp;⟺&nbsp; <button class="gb sm" data-w="<span class='vec'><i>b</i></span> = <i class='m'>k</i><span class='vec'><i>a</i></span>"></button> &nbsp;(단, <i class='m'>k</i>는 0이 아닌 실수)</div>
+    </div>
+    <div class="pt">참고&nbsp; <i class='m'>k</i> = 0이면 <span class='vec'><i>b</i></span> = <i class='m'>k</i><span class='vec'><i>a</i></span> = 0<span class='vec'><i>a</i></span> = <span class='vec'><span class='r'>0</span></span>이므로 <span class='vec'><i>b</i></span> ≠ <span class='vec'><span class='r'>0</span></span>이라는 가정에 모순이다. 따라서 <i class='m'>k</i>는 0이 아닌 실수이다.</div>
+  </div>
+
+  <div class="card q">
+    <div class="qrow">
+      <div class="qt"><span class="badge">문제 04</span>오른쪽 그림과 같은 삼각형 <span class='rm'>ABC</span>에서 두 변 <span class='rm'>AB</span>, <span class='rm'>AC</span>의 중점을 각각 <span class='rm'>M</span>, <span class='rm'>N</span>이라 하고, <span class='vec'><span class='r'>AB</span></span> = <span class='vec'><i>a</i></span>, <span class='vec'><span class='r'>AC</span></span> = <span class='vec'><i>b</i></span>라고 할 때, 다음 물음에 답하시오.
+        <div class="sub2">
+          <div>(1) 두 벡터 <span class='vec'><span class='r'>BC</span></span>, <span class='vec'><span class='r'>MN</span></span>을 각각 <span class='vec'><i>a</i></span>, <span class='vec'><i>b</i></span>로 나타내시오.</div>
+          <div style="padding-left:18px"><span class='vec'><span class='r'>BC</span></span> = <button class="gb" id="bt1" data-w="−<span class='vec'><i>a</i></span> + <span class='vec'><i>b</i></span>"></button> &nbsp; <span class='vec'><span class='r'>MN</span></span> = <button class="gb" id="bt2" data-w="−<span class='fr'><span>1</span><span>2</span></span><span class='vec'><i>a</i></span> + <span class='fr'><span>1</span><span>2</span></span><span class='vec'><i>b</i></span>"></button></div>
+          <div>(2) (1)을 이용하여 <span class='vec'><span class='r'>MN</span></span> ∥ <span class='vec'><span class='r'>BC</span></span>임을 보이시오.</div>
+          <div style="padding-left:18px"><span class='vec'><span class='r'>MN</span></span> = <button class="gb" id="bt3" data-w="<span class='fr'><span>1</span><span>2</span></span><span class='vec'><span class='r'>BC</span></span>"></button>이므로 <span class='vec'><span class='r'>MN</span></span> ∥ <span class='vec'><span class='r'>BC</span></span>이다.</div>
+        </div>
+      </div>
+      <div class="qfig"><svg viewBox="0 0 260 220" id="fTri"></svg></div>
+    </div>
+  </div>
+
+  <div class="card q">
+    <span class="badge">예제 2</span>영벡터가 아닌 두 벡터 <span class='vec'><i>a</i></span>, <span class='vec'><i>b</i></span>가 서로 평행하지 않고 두 벡터 −5<span class='vec'><i>a</i></span> + <i class='m'>t</i><span class='vec'><i>b</i></span>, <span class='vec'><i>b</i></span> − <span class='vec'><i>a</i></span>가 서로 평행할 때, 실수 <i class='m'>t</i>의 값을 구하시오.
+    <div class="sub2">
+      <div>−5<span class='vec'><i>a</i></span> + <i class='m'>t</i><span class='vec'><i>b</i></span> = <i class='m'>k</i>(<span class='vec'><i>b</i></span> − <span class='vec'><i>a</i></span>) = <button class="gb" data-w="−<i class='m'>k</i><span class='vec'><i>a</i></span> + <i class='m'>k</i><span class='vec'><i>b</i></span>"></button> &nbsp;(<i class='m'>k</i>는 0이 아닌 실수)</div>
+      <div><span class='vec'><i>a</i></span>, <span class='vec'><i>b</i></span>가 서로 평행하지 않으므로 &nbsp;<i class='m'>k</i> = <button class="gb sm" data-w="5"></button>, &nbsp; <i class='m'>t</i> = <button class="gb sm" data-w="5"></button></div>
+    </div>
+  </div>
+</div>
+
+<!-- ───────── 03 AC = kAB ───────── -->
+<div class="pane" data-p="c">
+  <div class="card">
+    <div class="two">
+      <div class="txt">
+        일반적으로 서로 다른 세 점 <span class='rm'>A</span>, <span class='rm'>B</span>, <span class='rm'>C</span>에 대하여 <span class='vec'><span class='r'>AC</span></span> = <i class='m'>k</i><span class='vec'><span class='r'>AB</span></span>를 만족시키는 0이 아닌 실수 <i class='m'>k</i>가 존재하면 <span class='vec'><span class='r'>AB</span></span> ∥ <span class='vec'><span class='r'>AC</span></span>이므로 세 점 <span class='rm'>A</span>, <span class='rm'>B</span>, <span class='rm'>C</span>는 <button class="gb sm" data-w="한 직선 위에 있다"></button>.<br>
+        역으로 세 점 <span class='rm'>A</span>, <span class='rm'>B</span>, <span class='rm'>C</span>가 한 직선 위에 있으면 <span class='vec'><span class='r'>AC</span></span> = <i class='m'>k</i><span class='vec'><span class='r'>AB</span></span>를 만족시키는 0이 아닌 실수 <i class='m'>k</i>가 존재한다.
+        <div class="chainbox">
+          <div class="bx"><span class='vec'><span class='r'>AC</span></span> = <i class='m'>k</i><span class='vec'><span class='r'>AB</span></span> (<i class='m'>k</i> ≠ 0)</div><div class="ar">⇕</div>
+          <div class="bx"><span class='vec'><span class='r'>AB</span></span> ∥ <span class='vec'><span class='r'>AC</span></span></div><div class="ar">⇕</div>
+          <div class="bx" style="font-family:inherit">세 점 <span class='rm'>A</span>, <span class='rm'>B</span>, <span class='rm'>C</span>는 한 직선 위에 있다.</div>
+        </div>
+      </div>
+      <div class="fig">
+        <svg viewBox="0 0 340 230" id="fLine"></svg>
+        <div class="row"><label><i class="m">k</i></label><input type="range" id="kr2" min="-1.5" max="2.6" step="0.1" value="2"><span class="num" id="kv2">2.0</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card q">
+    <div class="qrow">
+      <div class="qt"><span class="badge">예제 3</span>평면 위의 서로 다른 네 점 <span class='rm'>O</span>, <span class='rm'>A</span>, <span class='rm'>B</span>, <span class='rm'>C</span>에 대하여
+        <div class="eqc" style="justify-content:flex-start"><span class='vec'><span class='r'>OA</span></span> = <span class='vec'><i>a</i></span>, &nbsp;<span class='vec'><span class='r'>OB</span></span> = <span class='vec'><i>b</i></span>, &nbsp;<span class='vec'><span class='r'>OC</span></span> = 3<span class='vec'><i>a</i></span> − 2<span class='vec'><i>b</i></span></div>
+        일 때, 세 점 <span class='rm'>A</span>, <span class='rm'>B</span>, <span class='rm'>C</span>는 한 직선 위에 있음을 증명하시오.
+        <div class="sub2">
+          <div><span class='vec'><span class='r'>AB</span></span> = <span class='vec'><span class='r'>OB</span></span> − <span class='vec'><span class='r'>OA</span></span> = <button class="gb" id="bc1" data-w="<span class='vec'><i>b</i></span> − <span class='vec'><i>a</i></span>"></button></div>
+          <div><span class='vec'><span class='r'>AC</span></span> = <span class='vec'><span class='r'>OC</span></span> − <span class='vec'><span class='r'>OA</span></span> = <button class="gb" id="bc2" data-w="2<span class='vec'><i>a</i></span> − 2<span class='vec'><i>b</i></span>"></button> = <button class="gb" id="bc3" data-w="−2<span class='vec'><span class='r'>AB</span></span>"></button></div>
+          <div>따라서 <span class='vec'><span class='r'>AC</span></span> = −2<span class='vec'><span class='r'>AB</span></span>이므로 세 점 <span class='rm'>A</span>, <span class='rm'>B</span>, <span class='rm'>C</span>는 한 직선 위에 있다.</div>
+        </div>
+      </div>
+      <div class="qfig"><svg viewBox="0 0 300 250" id="fCol"></svg><div class="cap" style="display:flex; justify-content:flex-end; padding:4px 6px 0"><button class="btn" id="bColRe">그림</button></div></div>
+    </div>
+  </div>
+</div>
+
+</div></div>
+<script>
+"use strict";
+const $=id=>document.getElementById(id);
+function geoTask(k){ if(typeof GEO_task==='function') GEO_task(k); }
+/* 탭 */
+(function(){ const bs=[...document.querySelectorAll('#tabs button')]; bs.forEach(b=>b.onclick=()=>{ bs.forEach(x=>x.classList.toggle('on',x===b));
+  document.querySelectorAll('.pane').forEach(p=>p.classList.toggle('on',p.dataset.p===b.dataset.t)); $('panel').scrollTop=0; }); })();
+const NS='http://www.w3.org/2000/svg';
+const INK='#23241D', RED='#D9463F', BLU='#2F45EC', DIM='#A8A79A', ORG='#E0891A', GRN='#12876A';
+const MK={[INK]:'url(#ah)',[RED]:'url(#ahR)',[BLU]:'url(#ahB)',[DIM]:'url(#ahG)',[ORG]:'url(#ahO)'};
+function el(tag,attrs,parent){ const e=document.createElementNS(NS,tag); for(const k in attrs) e.setAttribute(k,attrs[k]); if(parent) parent.appendChild(e); return e; }
+function arrow(p,x1,y1,x2,y2,col,w,dash){ return el('line',{x1,y1,x2,y2,stroke:col,'stroke-width':w||2,'stroke-linecap':'round','marker-end':MK[col]||MK[INK],'stroke-dasharray':dash||''},p); }
+function dot(p,x,y,col,r){ return el('circle',{cx:x,cy:y,r:r||3.4,fill:col||INK},p); }
+function label(p,x,y,s,col,size){ const t=el('text',{x,y,'font-size':size||16,fill:col||INK},p); t.textContent=s; return t; }
+/* 벡터 이름: 이탤릭 글자 위에 작은 화살표 */
+function vlab(p,x,y,s,col,size){ const g=el('g',{},p); const sz=size||16; const t=el('text',{x,y,'font-size':sz,class:'it',fill:col||INK},g);
+  const parts=s.split(''); parts.forEach(ch=>{ const ts=el('tspan',{},t); ts.textContent=ch; if(ch===' '||ch==='+'||ch==='('||ch===')'||ch==='−') ts.setAttribute('font-style','normal'); });
+  let tries=0; const put=()=>{ if(!g.isConnected) return; let b0; try{ b0=t.getBBox(); }catch(e){ b0={width:0}; }
+    if(!b0.width){ if(++tries<60) setTimeout(put,250); return; }
+    [...t.childNodes].forEach(ts=>{ if(!/[a-z]/.test(ts.textContent)) return; const b=ts.getBBox(); const cx=b.x+b.width/2+1, ty=b.y-1;
+      el('path',{d:`M${cx-5} ${ty} L${cx+6} ${ty} M${cx+3} ${ty-2.8} L${cx+6} ${ty} L${cx+3} ${ty+2.8}`,fill:'none',stroke:col||INK,'stroke-width':1.2,'stroke-linecap':'round','stroke-linejoin':'round'},g); }); };
+  requestAnimationFrame(put);
+  return g; }
+/* 선 자라기 */
+function grow(line,dur,cb){ const L=Math.hypot(+line.getAttribute('x2')-line.getAttribute('x1'),+line.getAttribute('y2')-line.getAttribute('y1')); const mk=line.getAttribute('marker-end');
+  line.style.transition='none'; line.style.strokeDasharray=L; line.style.strokeDashoffset=L; line.setAttribute('marker-end',''); line.style.opacity=1;
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{ line.style.transition='stroke-dashoffset '+(dur||.9)+'s cubic-bezier(.4,0,.2,1)'; line.style.strokeDashoffset=0;
+    setTimeout(()=>{ line.setAttribute('marker-end',mk); line.style.strokeDasharray=''; if(cb) cb(); },(dur||.9)*1000+30); })); }
+function growPath(path,dur,cb){ const L=path.getTotalLength(); path.style.transition='none'; path.style.strokeDasharray=L; path.style.strokeDashoffset=L; path.style.opacity=1;
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{ path.style.transition='stroke-dashoffset '+(dur||1)+'s linear'; path.style.strokeDashoffset=0; setTimeout(()=>{ if(cb) cb(); },(dur||1)*1000+30); })); }
+
+/* ═══════ 공통: 선분 모핑(그림자 이동) ═══════ */
+function morph(line,to,dur,cb){ const f=['x1','y1','x2','y2'].map(k=>+line.getAttribute(k)); const t0=performance.now(); const e=t=>t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;
+  const step=now=>{ const u=Math.min(1,(now-t0)/(dur*1000)), k=e(u); ['x1','y1','x2','y2'].forEach((kk,i)=>line.setAttribute(kk,f[i]+(to[i]-f[i])*k)); if(u<1) requestAnimationFrame(step); else if(cb) cb(); }; requestAnimationFrame(step); }
+/* 그림자: from 위치에 흐린 복사본이 나타나 to 로 미끄러진 뒤 진해짐 */
+function ghost(svg,from,to,col,cb,w){ const ln=arrow(svg,from[0],from[1],from[2],from[3],col,w||2.2); ln.style.opacity=.35;
+  setTimeout(()=>morph(ln,to,.9,()=>{ ln.style.transition='opacity .3s'; ln.style.opacity=1; if(cb) cb(ln); }),350); return ln; }
+
+
+/* 빈칸 */
+const blanks=[...document.querySelectorAll('.gb[data-w]')]; let filled=0;
+function fill(b){ if(b.classList.contains('done')) return false; b.classList.add('done'); b.innerHTML=b.dataset.w; if(++filled===blanks.length) geoTask('mul-terms'); return true; }
+blanks.forEach(b=>{ b.onclick=()=>{ const id=b.id; if(!fill(b)) return;
+  if(id==='b2a') twoA(1); if(id==='bm2a') twoA(-1); if(id==='bt1') triBC(); if(id==='bt2') triMN(); if(id==='bc1'||id==='bc2'||id==='bc3') colAnim(); }; });
+const VIO='#7A3FB5'; MK[VIO]='url(#ahV)';
+const seg4=(p,q)=>[p[0],p[1],q[0],q[1]];
+
+/* ═══════ 2a, −2a ═══════ */
+function twoABase(){ const s=$('f2a'); s.innerHTML=''; arrow(s,40,40,120,40,INK,2.2); vlab(s,76,32,'a',INK,15); return s; }
+twoABase();
+function twoA(sign){ const s=$('f2a'); const y=sign>0?90:140, col=sign>0?RED:BLU, x0=sign>0?40:300, dx=sign>0?80:-80;
+  const g1=ghost(s,[40,40,120,40],[x0,y,x0+dx,y],INK,()=>{ const g2=ghost(s,[40,40,120,40],[x0+dx,y,x0+2*dx,y],INK,()=>{
+    const r=arrow(s,x0,y,x0+2*dx,y,col,2.4); r.style.opacity=0; grow(r,.7,()=>{ g1.style.opacity=.35; g2.style.opacity=.35; vlab(s,x0+dx-(sign>0?10:14),y-9,(sign>0?'2a':'−2a'),col,15); }); }); });
+  if(sign<0){ /* −a 는 뒤집힌 모양 */ } }
+
+/* ═══════ k a 슬라이더 ═══════ */
+(function(){ const s=$('fK'); const O=[40,50]; arrow(s,O[0],O[1],O[0]+50,O[1],INK,2.2); vlab(s,O[0]+20,O[1]-9,'a',INK,15);
+  const ka=arrow(s,170,110,170,110,RED,2.4); const lb=el('g',{},s); const cap=el('text',{x:170,y:140,'text-anchor':'middle','font-size':12,class:'k',fill:RED},s); dot(s,170,110,INK,3);
+  function draw(k){ ka.setAttribute('x2',170+50*k); ka.style.opacity=Math.abs(k)<1e-9?0:1; lb.innerHTML=''; cap.textContent=k===0?'k = 0 이면 ka = 0':'크기 '+Math.abs(k)+'|a|'+(k>0?' · 같은 방향':' · 반대 방향');
+    vlab(lb,170+25*k-6,96,(k===1?'':k===-1?'−':k)+'a',RED,15); }
+  $('kr').oninput=e=>{ const k=+e.target.value; $('kv').textContent=k; draw(k); if(k<0) geoTask('mul-k'); }; draw(2); })();
+
+/* ═══════ 문제 01: 정육면체 12개 ═══════ */
+const CU=44, CX=30, CY=190; const P3=(x,y,z)=>[CX+x*CU+y*22, CY-z*CU-y*18];
+function cubeBase(){ const s=$('fCube'); s.innerHTML='';
+  const seg=(p,q,dash)=>el('line',{x1:p[0],y1:p[1],x2:q[0],y2:q[1],stroke:INK,'stroke-width':dash?1:1.1,'stroke-dasharray':dash?'4 3':'',opacity:dash?.7:.8},s);
+  /* 보이는 세 면(앞 y=0, 윗면 z=2, 오른쪽 x=3)의 칸 선 */
+  for(let x=0;x<=3;x++) for(let y=0;y<=2;y++) for(let z=0;z<=2;z++){
+    if(x<3&&(y===0||z===2)) seg(P3(x,y,z),P3(x+1,y,z)); if(y<2&&(z===2||x===3)) seg(P3(x,y,z),P3(x,y+1,z)); if(z<2&&(y===0||x===3)) seg(P3(x,y,z),P3(x,y,z+1)); }
+  /* 숨은 모서리 */
+  [[0,0,0,0,2,0],[0,2,0,3,2,0],[0,2,0,0,2,2]].forEach(e=>seg(P3(e[0],e[1],e[2]),P3(e[3],e[4],e[5]),true));
+  const o=[1,1,0]; const A=P3(...o); const pa=P3(2,1,0), pb=P3(1,0,0), pc=P3(1,1,1);
+  arrow(s,A[0],A[1],pa[0],pa[1],RED,2.2); arrow(s,A[0],A[1],pb[0],pb[1],BLU,2.2); arrow(s,A[0],A[1],pc[0],pc[1],VIO,2.2);
+  vlab(s,(A[0]+pa[0])/2-4,A[1]+16,'a',RED,14); vlab(s,(A[0]+pb[0])/2-16,(A[1]+pb[1])/2+16,'b',BLU,14); vlab(s,A[0]+5,(A[1]+pc[1])/2+4,'c',VIO,14); }
+cubeBase();
+function cubeChain(steps,fin,lab){ const s=$('fCube'); let i=0; const run=()=>{ if(i>=steps.length){ const r=arrow(s,...P3(...fin[0]),...P3(...fin[1]),RED,2.6); r.style.opacity=0; grow(r,.8,()=>{ const p=P3(...fin[1]); vlab(s,p[0]+lab[0],p[1]+lab[1],lab[2],RED,13); geoTask('mul-cube'); }); return; }
+  const st=steps[i++]; ghost(s,seg4(P3(...st.from[0]),P3(...st.from[1])),seg4(P3(...st.to[0]),P3(...st.to[1])),st.col,run); }; run(); }
+const o=[1,1,0];
+document.querySelectorAll('[data-cube]').forEach(b=>b.onclick=()=>{ const n=+b.dataset.cube;
+  if(n===1) cubeChain([{from:[o,[2,1,0]],to:[[0,0,0],[1,0,0]],col:RED},{from:[o,[2,1,0]],to:[[1,0,0],[2,0,0]],col:RED},{from:[o,[2,1,0]],to:[[2,0,0],[3,0,0]],col:RED}],[[0,0,0],[3,0,0]],[8,4,'3a']);
+  if(n===2) cubeChain([{from:[o,[2,1,0]],to:[[3,0,2],[2,0,2]],col:RED},{from:[o,[2,1,0]],to:[[2,0,2],[1,0,2]],col:RED},{from:[o,[1,1,1]],to:[[1,0,2],[1,0,1]],col:VIO}],[[3,0,2],[1,0,1]],[-46,-6,'−2a − c']);
+  if(n===3) cubeChain([{from:[o,[1,0,0]],to:[[0,0,0],[0,1,0]],col:BLU},{from:[o,[1,1,1]],to:[[0,1,0],[0,1,1]],col:VIO},{from:[o,[1,1,1]],to:[[0,1,1],[0,1,2]],col:VIO}],[[0,0,0],[0,1,2]],[-40,-8,'−b + 2c']); });
+$('cubeRe').onclick=cubeBase;
+
+/* ═══════ 02 평행 그림 ═══════ */
+const PAR={1:{a:[30,160,70,90],b:[130,180,210,40],lab:'b = 2a'},2:{a:[30,160,70,90],b:[230,40,170,145],lab:'b = −1.5a'}};
+function parBase(n){ const s=$('fP'+n); s.innerHTML=''; const d=PAR[n]; arrow(s,...d.a,INK,2.2); vlab(s,d.a[0]+4,d.a[1]-10,'a',INK,15); const bb=arrow(s,...d.b,RED,2.2); vlab(s,(d.b[0]+d.b[2])/2+10,(d.b[1]+d.b[3])/2,'b',RED,15); return bb; }
+parBase(1); parBase(2);
+document.querySelectorAll('[data-par]').forEach(bt=>bt.onclick=()=>{ const n=+bt.dataset.par; const s=$('fP'+n); const d=PAR[n]; parBase(n); const dx=d.a[0]-d.b[0], dy=d.a[1]-d.b[1];
+  ghost(s,d.b,[d.b[0]+dx,d.b[1]+dy,d.b[2]+dx,d.b[3]+dy],RED,()=>{ vlab(s,d.b[2]+dx+(n===1?8:-70),d.b[3]+dy+(n===1?0:24),d.lab,RED,15); geoTask('par-fig'); }); });
+
+/* ═══════ 문제 04: 삼각형 ═══════ */
+const TR={A:[130,30],B:[40,190],C:[230,190]}; TR.M=[(TR.A[0]+TR.B[0])/2,(TR.A[1]+TR.B[1])/2]; TR.N=[(TR.A[0]+TR.C[0])/2,(TR.A[1]+TR.C[1])/2];
+function triBase(){ const s=$('fTri'); s.innerHTML=''; const {A,B,C,M,N}=TR; el('path',{d:`M${A} L${B} L${C} Z`,fill:'none',stroke:INK,'stroke-width':1.4},s); el('line',{x1:M[0],y1:M[1],x2:N[0],y2:N[1],stroke:INK,'stroke-width':1.3},s);
+  arrow(s,A[0],A[1],B[0],B[1],RED,2.2); arrow(s,A[0],A[1],C[0],C[1],BLU,2.2); vlab(s,66,100,'a',RED,15); vlab(s,186,100,'b',BLU,15);
+  [A,B,C,M,N].forEach(p=>dot(s,p[0],p[1],INK,2.8)); label(s,A[0]-5,A[1]-8,'A',INK,15); label(s,B[0]-18,B[1]+6,'B',INK,15); label(s,C[0]+6,C[1]+6,'C',INK,15); label(s,M[0]-20,M[1]+4,'M',INK,15); label(s,N[0]+8,N[1]+4,'N',INK,15); }
+triBase();
+function triBC(){ triBase(); const s=$('fTri'); const {A,B,C}=TR; ghost(s,seg4(A,B),seg4(B,A),RED,()=>{ vlab(s,70,120,'−a',RED,13); const bc=arrow(s,B[0],B[1],C[0],C[1],ORG,2.4); bc.style.opacity=0; grow(bc,.8,()=>vlab(s,118,212,'−a + b',ORG,13)); }); }
+function triMN(){ triBase(); const s=$('fTri'); const {A,B,C,M,N}=TR; ghost(s,seg4(A,B),seg4(M,A),RED,()=>{ vlab(s,96,70,'−½a',RED,12); ghost(s,seg4(A,C),seg4(A,N),BLU,()=>{ vlab(s,160,60,'½b',BLU,12); const mn=arrow(s,M[0],M[1],N[0],N[1],ORG,2.4); mn.style.opacity=0; grow(mn,.8,()=>{ vlab(s,118,130,'−½a + ½b',ORG,12); geoTask('par-q4'); }); }); }); }
+
+/* ═══════ 03 한 직선 위의 세 점 ═══════ */
+(function(){ const s=$('fLine'); const A=[70,180], u=[0.84,-0.54], L=80; const B=[A[0]+u[0]*L,A[1]+u[1]*L];
+  el('line',{x1:A[0]-u[0]*110,y1:A[1]-u[1]*110,x2:A[0]+u[0]*300,y2:A[1]+u[1]*300,stroke:DIM,'stroke-width':1},s);
+  const ac=arrow(s,A[0],A[1],B[0],B[1],RED,3); const ab=arrow(s,A[0],A[1],B[0],B[1],INK,2.2); dot(s,A[0],A[1]); dot(s,B[0],B[1]); label(s,A[0]-6,A[1]+20,'A',INK,16); label(s,B[0]-2,B[1]+20,'B',INK,16);
+  const cd=dot(s,0,0,RED,4); const lc=label(s,0,0,'C',RED,16); const cap=el('text',{x:170,y:30,'text-anchor':'middle','font-size':13,class:'k',fill:RED},s);
+  function draw(k){ const C=[A[0]+u[0]*L*k,A[1]+u[1]*L*k]; ac.setAttribute('x2',C[0]); ac.setAttribute('y2',C[1]); ac.style.opacity=.55; cd.setAttribute('cx',C[0]); cd.setAttribute('cy',C[1]); lc.setAttribute('x',C[0]-2); lc.setAttribute('y',C[1]-10);
+    cap.innerHTML=''; const t=cap; t.textContent='AC = '+k.toFixed(1)+' AB'; }
+  $('kr2').oninput=e=>{ const k=+e.target.value; $('kv2').textContent=k.toFixed(1); draw(k); if(k<0) geoTask('col-k'); }; draw(2); })();
+
+/* ═══════ 예제 3 ═══════ */
+const CO={O:[50,150],a:[55,-28],b:[18,-58]}; CO.A=[CO.O[0]+CO.a[0],CO.O[1]+CO.a[1]]; CO.B=[CO.O[0]+CO.b[0],CO.O[1]+CO.b[1]]; CO.C=[CO.O[0]+3*CO.a[0]-2*CO.b[0],CO.O[1]+3*CO.a[1]-2*CO.b[1]];
+function colBase(){ const s=$('fCol'); s.innerHTML=''; const {O,A,B,C}=CO; arrow(s,O[0],O[1],A[0],A[1],RED,2.2); arrow(s,O[0],O[1],B[0],B[1],BLU,2.2); vlab(s,74,146,'a',RED,14); vlab(s,42,114,'b',BLU,14);
+  [O,A,B].forEach(p=>dot(s,p[0],p[1],INK,3)); label(s,O[0]-18,O[1]+6,'O',INK,15); label(s,A[0]+2,A[1]+18,'A',INK,15); label(s,B[0]-6,B[1]-8,'B',INK,15); return s; }
+colBase();
+let colDone=false;
+function colAnim(){ if(colDone) return; colDone=true; const s=colBase(); const {O,A,B,C,a,b}=CO; const add=(p,v,k)=>[p[0]+v[0]*k,p[1]+v[1]*k];
+  const steps=[[O,add(O,a,1),a,1,RED],[add(O,a,1),add(O,a,2),a,1,RED],[add(O,a,2),add(O,a,3),a,1,RED],[add(O,a,3),add(add(O,a,3),b,-1),b,-1,BLU],[add(add(O,a,3),b,-1),C,b,-1,BLU]];
+  let i=0; const run=()=>{ if(i>=steps.length){ dot(s,C[0],C[1],INK,3); label(s,C[0]+6,C[1]+6,'C',INK,15); const oc=arrow(s,O[0],O[1],C[0],C[1],ORG,2.4); oc.style.opacity=0; grow(oc,.8,()=>{ vlab(s,150,206,'3a − 2b',ORG,13);
+      const d=[C[0]-B[0],C[1]-B[1]], n=Math.hypot(d[0],d[1]); const ln=el('line',{x1:B[0]-d[0]/n*40,y1:B[1]-d[1]/n*40,x2:C[0]+d[0]/n*30,y2:C[1]+d[1]/n*30,stroke:GRN,'stroke-width':1.6,'stroke-dasharray':'6 4'},s); ln.style.opacity=0; ln.style.transition='opacity .8s'; setTimeout(()=>{ ln.style.opacity=1; geoTask('col-ex3'); },100); }); return; }
+    const st=steps[i++]; const from=st[3]>0?seg4(O,add(O,st[2],1)):seg4(O,add(O,st[2],1)); ghost(s,from,seg4(st[0],st[1]),st[4],run); }; run(); }
+$('bColRe').onclick=()=>{ colDone=false; colAnim(); };
+</script>
+<script>window.PAGE_ID="pvecmul";</script>
+<script src="nav.js"></script>
+</body>
+</html>

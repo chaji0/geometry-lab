@@ -6,7 +6,7 @@
      먼저 선언한 뒤 이 파일을 불러오면 하단 바가 자동으로 생깁니다.
    ════════════════════════════════════════════════════════════ */
 window.GEO_CONFIG = {
-  VERSION: "v1.77",                 // ★ 1단원=v1.x, 2단원=v2.x, 3단원=v3.x — 업로드마다 뒷자리 +1 (v1.11, v1.12, …)
+  VERSION: "v1.78",                 // ★ 1단원=v1.x, 2단원=v2.x, 3단원=v3.x — 업로드마다 뒷자리 +1 (v1.11, v1.12, …)
   APPS_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbx3Ay-gudjjSoRlngyu54umJ9uYRAKhINuwcv229UZUN9_oIQfm9vwAxM32FOPR9wV1/exec",
   /* ── 담당 선생님 ───────────────────────────────────────────────
      선생님마다 '자기 구글 시트 + 자기 드라이브'를 씁니다.
@@ -109,7 +109,11 @@ window.GEO_CONFIG = {
       curve:'p83 기본·도전 문제', title:'p83' },
     /* 3단원 벡터 — 벡터의 연산 */
     { id:'pvecdef', unit:3, href:'vec-def.html', short:'벡터의 뜻', grp:'v-op',
-      curve:'벡터의 뜻', title:'벡터의 뜻' }
+      curve:'벡터의 뜻', title:'벡터의 뜻' },
+    { id:'pvecadd', unit:3, href:'vec-add.html', short:'덧셈과 뺄셈', grp:'v-op',
+      curve:'벡터의 덧셈과 뺄셈', title:'벡터의 덧셈과 뺄셈' },
+    { id:'pvecmul', unit:3, href:'vec-mul.html', short:'실수배', grp:'v-op',
+      curve:'벡터의 실수배', title:'벡터의 실수배' }
   ],
   /* 홈 화면 묶음 — 큰 제목 4개 (하위 메뉴는 grp로 자동 수집) */
   /* 홈 타임라인의 묶음 — soon 은 아직 안 만든(준비 중) 활동 이름 */
@@ -491,6 +495,8 @@ window.GEO_TASKS = {
   psph:     ['sph-0','sph-1'],                      // 구 만들기 모션 + 구의 방정식 상자
   pp83:     ['p83-open'],
   pvecdef:  ['vec-sort','vec-terms'],              // 양궁 분류 + 용어 빈칸 다 채우기
+  pvecadd:  ['add-fig','sub-fig'],                 // 덧셈 그림 + 뺄셈 그림
+  pvecmul:  ['mul-terms','par-fig'],               // 실수배 빈칸 + 평행 시점 일치
   pdrone:   ['coord','order','class'],                // 시운전 3번 + 연습 순서 정리 + 우리 반 공연 순서 완료
   psun:     ['sun-q1-ok','sun-q2'],                  // 문제 1 정답 + 문제 2 증명 제출
   prev:     ['rev-q14','rev-m14'],                   // 14번 열기 + 풀이 보기
