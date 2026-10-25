@@ -119,6 +119,34 @@ svg .k{font-family:'IBM Plex Sans KR','Apple SD Gothic Neo',system-ui,sans-serif
 .chainbox .bx{border:1.5px solid var(--acc); color:var(--acc); border-radius:8px; padding:4px 12px; font-size:13px; background:var(--paper); font-family:Georgia,serif}
 .chainbox .ar{color:var(--acc); font-size:14px}
 .pt{font-size:12.5px; color:var(--dim); line-height:1.8}
+
+.sec{display:flex; align-items:center; gap:10px; margin:4px 0 10px}
+.sec .n{font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:#fff; background:var(--acc); border-radius:999px; padding:2px 10px; letter-spacing:.06em}
+.sec h3{margin:0; font-size:15px; font-weight:700}
+.box{border:1px solid var(--line2); border-radius:12px; padding:12px 16px; margin:8px 0 10px; background:rgba(255,255,255,.35); font-size:13.5px; line-height:2.1}
+.box .bt{font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.06em; color:var(--acc); margin-bottom:2px}
+.box .k{color:var(--acc); font-weight:700; margin-right:6px; font-family:'IBM Plex Mono',monospace; font-size:12px}
+.pt{font-size:12.5px; color:var(--dim); line-height:1.9}
+.chk{font-size:13.5px; line-height:2.2; padding:6px 0 0 4px}
+.chk .lb{font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--org); border:1px solid var(--org); border-radius:999px; padding:1px 8px; margin-right:8px; vertical-align:2px}
+.ex{display:grid; grid-template-columns:1fr; gap:6px; font-size:13.5px; line-height:2.1}
+.ex .ln{display:flex; align-items:center; gap:8px; flex-wrap:wrap}
+.ex .ln .no{font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--dim); width:26px; flex:none}
+.skill{border:1px solid var(--line); border-radius:12px; background:var(--card); padding:12px 15px 13px; margin-bottom:12px}
+.skill .ttl{display:flex; align-items:center; gap:10px; margin-bottom:6px}
+.skill .ttl .n{font-family:'IBM Plex Mono',monospace; font-size:11px; color:#fff; background:var(--red); border-radius:999px; padding:2px 9px; letter-spacing:.06em}
+.skill .ttl b{font-size:14.5px}
+.skill .core{font-family:Georgia,serif; font-size:16px; text-align:center; padding:8px 0; margin:4px 0 6px; border-top:1px dashed var(--line2); border-bottom:1px dashed var(--line2)}
+.skill .why{font-size:13px; line-height:2; color:var(--ink)}
+.cols{display:grid; grid-template-columns:1fr 1fr; gap:14px; align-items:start}
+@media (max-width:760px){ .cols{grid-template-columns:1fr} }
+.col{border:1px solid var(--line); border-radius:12px; padding:12px 14px; background:var(--card)}
+.col .h{display:flex; align-items:center; gap:8px; margin-bottom:8px; font-weight:700; font-size:14px}
+.col .h .tag{font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.06em; border-radius:999px; padding:2px 9px; color:#fff}
+.col .h .tag.a{background:var(--acc)} .col .h .tag.b{background:var(--red)}
+.col .ln{font-size:13.5px; line-height:2.2; display:flex; align-items:center; gap:6px; flex-wrap:wrap}
+.col .ln.ind{padding-left:16px}
+.col .cm{font-size:12.5px; color:var(--dim)}
 </style>
 </head>
 <body>
@@ -135,149 +163,191 @@ svg .k{font-family:'IBM Plex Sans KR','Apple SD Gothic Neo',system-ui,sans-serif
 <header>
   <div><h1>벡터의 실수배</h1></div>
   <div id="tabs">
-    <button class="on" data-t="a"><span class="no">01</span>벡터의 실수배</button>
-    <button data-t="b"><span class="no">02</span>벡터의 평행</button>
-    <button data-t="c"><span class="no">03</span><span class="sym"><span class='vec'><span class='r'>AC</span></span> =<span class="sym"> <i class='m'>k</i><span class='vec'><span class='r'>AB</span></span></span></span></button>
+    <button class="on" data-t="a"><span class="no">01</span>개념 정리</button>
+    <button data-t="b"><span class="no">02</span>수능 스킬</button>
+    <button data-t="c"><span class="no">03</span>활용 문제</button>
   </div>
 </header>
 <div id="panel"><div class="wrap">
 
-<!-- ───────── 01 벡터의 실수배 ───────── -->
 <div class="pane on" data-p="a">
+
   <div class="card">
+    <div class="sec"><span class="n">1</span><h3>벡터의 실수배</h3></div>
     <div class="two">
       <div class="txt">
-        영벡터가 아닌 벡터 <span class="sym"><span class='vec'><i>a</i></span></span>에 대하여 <span class="sym"><span class='vec'><i>a</i></span> + <span class='vec'><i>a</i></span></span>는 벡터 <span class="sym"><span class='vec'><i>a</i></span></span>와 방향이 같고 크기가 2배인 벡터이다. 이것을
-        <div class="eqc"><button class="gb" id="b2a" data-w="2<span class='vec'><i>a</i></span>"></button></div>
-        로 나타낸다.<br>
-        또 (<span class="sym">−<span class='vec'><i>a</i></span></span>) + (<span class="sym">−<span class='vec'><i>a</i></span></span>)는 벡터 <span class="sym"><span class='vec'><i>a</i></span></span>와 방향이 반대이고 크기가 2배인 벡터이다. 이것을
-        <div class="eqc"><button class="gb" id="bm2a" data-w="−<span class='sym'>2<span class='vec'><i>a</i></span></span>"></button></div>
-        로 나타낸다.
+        영벡터가 아닌 벡터 <span class='vec'><i>a</i></span>에 대하여 <span class='sym'><span class='vec'><i>a</i></span> + <span class='vec'><i>a</i></span></span>는 <span class='vec'><i>a</i></span>와 방향이 같고 크기가 2배인 벡터이다. 이것을 <button class='gb sm' data-w="<span class='sym'>2<span class='vec'><i>a</i></span></span>"></button>로 나타낸다.<br>
+        <span class='sym'>(−<span class='vec'><i>a</i></span>) + (−<span class='vec'><i>a</i></span>)</span>는 <span class='vec'><i>a</i></span>와 방향이 반대이고 크기가 2배인 벡터이다. 이것을 <button class='gb sm' data-w="<span class='sym'>−2<span class='vec'><i>a</i></span></span>"></button>로 나타낸다.
       </div>
-      <div class="fig"><svg viewBox="0 0 340 170" id="f2a"></svg></div>
+      <div class="fig"><svg viewBox="0 0 340 130" id="f2a"></svg></div>
+    </div>
+    <div class="box">
+      <div class="bt">벡터의 실수배</div>
+      실수 <i class='m'>k</i>와 벡터 <span class='vec'><i>a</i></span>에 대하여<br>
+      <span class="k">1</span><span class='vec'><i>a</i></span> ≠ <span class='vec'><span class='r'>0</span></span>일 때,<br>
+      <div style="padding-left:18px">(i) <i class='m'>k</i> &gt; 0이면, <span class='sym'><i class='m'>k</i><span class='vec'><i>a</i></span></span>는 <span class='vec'><i>a</i></span>와 방향이 <button class='gb sm' data-w="같고"></button> 크기가 <button class='gb sm' data-w="<span class='sym'><i class='m'>k</i><span class='abs'>|</span><span class='vec'><i>a</i></span><span class='abs'>|</span></span>"></button>인 벡터이다.<br>
+      (ii) <i class='m'>k</i> &lt; 0이면, <span class='sym'><i class='m'>k</i><span class='vec'><i>a</i></span></span>는 <span class='vec'><i>a</i></span>와 방향이 <button class='gb sm' data-w="반대이고"></button> 크기가 <button class='gb sm' data-w="<span class='sym'><span class='abs'>|</span><i class='m'>k</i><span class='abs'>|</span><span class='abs'>|</span><span class='vec'><i>a</i></span><span class='abs'>|</span></span>"></button>인 벡터이다.<br>
+      (iii) <i class='m'>k</i> = 0이면, <span class='sym'><i class='m'>k</i><span class='vec'><i>a</i></span></span> = <button class='gb sm' data-w="<span class='vec'><span class='r'>0</span></span>"></button>이다.</div>
+      <span class="k">2</span><span class='vec'><i>a</i></span> = <span class='vec'><span class='r'>0</span></span>일 때, <span class='sym'><i class='m'>k</i><span class='vec'><i>a</i></span></span> = <button class='gb sm' data-w="<span class='vec'><span class='r'>0</span></span>"></button>이다.
+    </div>
+    <div class="pt">참고&nbsp; <span class='sym'>1<span class='vec'><i>a</i></span></span> = <span class='vec'><i>a</i></span>, &nbsp;<span class='sym'>(−1)<span class='vec'><i>a</i></span></span> = <span class='sym'>−<span class='vec'><i>a</i></span></span>, &nbsp;<span class='abs'>|</span><span class='sym'><i class='m'>k</i><span class='vec'><i>a</i></span></span><span class='abs'>|</span> = <span class='abs'>|</span><i class='m'>k</i><span class='abs'>|</span><span class='abs'>|</span><span class='vec'><i>a</i></span><span class='abs'>|</span></div>
+    <div class="chk">
+      <span class="lb">스스로 확인</span>(1) 벡터 <span class='vec'><i>a</i></span>와 방향이 같고 크기가 <span class='abs'>|</span><span class='vec'><i>a</i></span><span class='abs'>|</span>의 <span class='fr'><span>1</span><span>3</span></span>배인 벡터는 <button class='gb sm' data-w="<span class='sym'><span class='fr'><span>1</span><span>3</span></span><span class='vec'><i>a</i></span></span>"></button>이다.<br>
+      <span class="lb" style="visibility:hidden">스스로 확인</span>(2) 벡터 <span class='vec'><i>a</i></span>와 방향이 반대이고 크기가 <span class='abs'>|</span><span class='vec'><i>a</i></span><span class='abs'>|</span>의 4배인 벡터는 <button class='gb sm' data-w="<span class='sym'>−4<span class='vec'><i>a</i></span></span>"></button>이다.
     </div>
   </div>
 
   <div class="card">
-    <div class="txt">일반적으로 실수 <i class='m'>k</i>와 벡터 <span class="sym"><span class='vec'><i>a</i></span></span>의 곱 <span class="sym"><i class='m'>k</i><span class='vec'><i>a</i></span></span>를 벡터 <span class="sym"><span class='vec'><i>a</i></span></span>의 <button class="gb sm" data-w="실수배"></button>라 하고, 다음과 같이 정의한다.</div>
-    <div class="two top" style="margin-top:8px">
-      <div class="defbox">
-        실수 <i class='m'>k</i>와 벡터 <span class="sym"><span class='vec'><i>a</i></span></span>에 대하여<br>
-        <span class="k">1</span><span class="sym"><span class='vec'><i>a</i></span></span> ≠ <span class='vec'><span class='r'>0</span></span>일 때,<br>
-        <div class="in">(i) <i class='m'>k</i> &gt; 0이면,<span class="sym"> <i class='m'>k</i><span class='vec'><i>a</i></span></span>는 <span class="sym"><span class='vec'><i>a</i></span></span>와 방향이 <button class="gb sm" data-w="같고"></button> 크기가 <button class="gb sm" data-w="<i class='m'>k</i><span class='abs'>|</span><span class='sym'><span class='vec'><i>a</i></span></span><span class='abs'>|</span>"></button>인 벡터이다.</div>
-        <div class="in">(ii) <i class='m'>k</i> &lt; 0이면,<span class="sym"> <i class='m'>k</i><span class='vec'><i>a</i></span></span>는 <span class="sym"><span class='vec'><i>a</i></span></span>와 방향이 <button class="gb sm" data-w="반대이고"></button> 크기가 <button class="gb sm" data-w="<span class='abs'>|</span><i class='m'>k</i><span class='abs'>|</span><span class='abs'>|</span><span class='sym'><span class='vec'><i>a</i></span></span><span class='abs'>|</span>"></button>인 벡터이다.</div>
-        <div class="in">(iii) <i class='m'>k</i> = 0이면,<span class="sym"> <i class='m'>k</i><span class='vec'><i>a</i></span></span> = <button class="gb sm" data-w="<span class='vec'><span class='r'>0</span></span>"></button>이다.</div>
-        <span class="k">2</span><span class="sym"><span class='vec'><i>a</i></span></span> = <span class='vec'><span class='r'>0</span></span>일 때,<span class="sym"> <i class='m'>k</i><span class='vec'><i>a</i></span></span> = <button class="gb sm" data-w="<span class='vec'><span class='r'>0</span></span>"></button>이다.
-      </div>
-      <div class="fig">
-        <svg viewBox="0 0 340 150" id="fK"></svg>
-        <div class="row"><label><i class="m">k</i></label><input type="range" id="kr" min="-3" max="3" step="0.5" value="2"><span class="num" id="kv">2</span></div>
-      </div>
-    </div>
-  </div>
-
-  <div class="card q">
-    <div class="qrow">
-      <div class="qt"><span class="badge">문제 01</span>오른쪽 그림은 정육면체 12개를 이어 붙여 만든 직육면체이다. 세 벡터 <span class="sym"><span class='vec'><i>a</i></span></span>, <span class="sym"><span class='vec'><i>b</i></span></span>, <span class="sym"><span class='vec'><i>c</i></span></span>가 오른쪽과 같을 때, 다음 벡터를 그림 위에 나타내시오.
-        <div class="sub2">
-          <div>(1) <span class="sym">3<span class='vec'><i>a</i></span></span> <button class="btn" data-cube="1">그림</button></div>
-          <div>(2) <span class="sym">−2<span class='vec'><i>a</i></span> − <span class='vec'><i>c</i></span></span> <button class="btn" data-cube="2">그림</button></div>
-          <div>(3) <span class="sym">−<span class='vec'><i>b</i></span> + 2<span class='vec'><i>c</i></span></span> <button class="btn" data-cube="3">그림</button></div>
-          <div><button class="btn" id="cubeRe">다시</button></div>
-        </div>
-      </div>
-      <div class="qfig"><svg viewBox="0 0 300 230" id="fCube"></svg></div>
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="defbox">
-      두 실수 <i class='m'>k</i>, <i class='m'>l</i>과 두 벡터 <span class="sym"><span class='vec'><i>a</i></span></span>, <span class="sym"><span class='vec'><i>b</i></span></span>에 대하여<br>
-      <span class="k">1</span><i class='m'>k</i>(<span class="sym"><i class='m'>l</i><span class='vec'><i>a</i></span></span>) = <button class="gb sm" data-w="(<i class='m'>k</i><i class='m'>l</i>)<span class='sym'><span class='vec'><i>a</i></span></span>"></button> &nbsp;(결합법칙)<br>
-      <span class="k">2</span>(<i class='m'>k</i> + <i class='m'>l</i>)<span class="sym"><span class='vec'><i>a</i></span></span> = <button class="gb sm" data-w="<i class='m'>k</i><span class='sym'><span class='vec'><i>a</i></span> + <i class='m'>l</i><span class='vec'><i>a</i></span></span>"></button>, &nbsp; <i class='m'>k</i>(<span class="sym"><span class='vec'><i>a</i></span> + <span class='vec'><i>b</i></span></span>) = <button class="gb sm" data-w="<i class='m'>k</i><span class='sym'><span class='vec'><i>a</i></span> + <i class='m'>k</i><span class='vec'><i>b</i></span></span>"></button> &nbsp;(분배법칙)
-    </div>
-  </div>
-</div>
-
-<!-- ───────── 02 벡터의 평행 ───────── -->
-<div class="pane" data-p="b">
-  <div class="card">
-    <div class="txt">
-      영벡터가 아닌 두 벡터 <span class="sym"><span class='vec'><i>a</i></span></span>, <span class="sym"><span class='vec'><i>b</i></span></span>의 방향이 같거나 반대일 때, <span class="sym"><span class='vec'><i>a</i></span></span>와 <span class="sym"><span class='vec'><i>b</i></span></span>는 서로 <button class="gb sm" data-w="평행"></button>하다고 하고, 기호로
-      <div class="eqc"><button class="gb" data-w="<span class='vec'><i>a</i></span> ∥ <span class='sym'><span class='vec'><i>b</i></span></span>"></button></div>
-      와 같이 나타낸다.<br>
-      다음 그림과 같이 두 벡터 <span class="sym"><span class='vec'><i>a</i></span></span>, <span class="sym"><span class='vec'><i>b</i></span></span>가 서로 평행할 때, <span class="sym"><span class='vec'><i>a</i></span></span>와 <span class="sym"><span class='vec'><i>b</i></span></span>의 시점을 일치시키면 한 벡터가 다른 벡터의 <button class="gb sm" data-w="실수배"></button>가 된다.
-    </div>
-    <div class="law" style="margin-top:10px">
-      <div class="one"><svg viewBox="0 0 320 200" id="fP1"></svg><div class="cap" style="display:flex; justify-content:flex-end; gap:6px; padding:4px 6px 0"><button class="btn" data-par="1">시점 일치</button></div></div>
-      <div class="one"><svg viewBox="0 0 320 200" id="fP2"></svg><div class="cap" style="display:flex; justify-content:flex-end; gap:6px; padding:4px 6px 0"><button class="btn" data-par="2">시점 일치</button></div></div>
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="txt">일반적으로 두 벡터의 평행 조건은 다음과 같다.</div>
-    <div class="defbox">
-      영벡터가 아닌 두 벡터 <span class="sym"><span class='vec'><i>a</i></span></span>, <span class="sym"><span class='vec'><i>b</i></span></span>에 대하여<br>
-      <div class="in"><span class="sym"><span class='vec'><i>a</i></span></span> ∥ <span class="sym"><span class='vec'><i>b</i></span></span> &nbsp;⟺&nbsp; <button class="gb sm" data-w="<span class='vec'><i>b</i></span> =<span class='sym'> <i class='m'>k</i><span class='vec'><i>a</i></span></span>"></button> &nbsp;(단, <i class='m'>k</i>는 0이 아닌 실수)</div>
-    </div>
-    <div class="pt">참고&nbsp; <i class='m'>k</i> = 0이면 <span class="sym"><span class='vec'><i>b</i></span></span> =<span class="sym"> <i class='m'>k</i><span class='vec'><i>a</i></span></span> = <span class="sym">0<span class='vec'><i>a</i></span></span> = <span class='vec'><span class='r'>0</span></span>이므로 <span class="sym"><span class='vec'><i>b</i></span></span> ≠ <span class='vec'><span class='r'>0</span></span>이라는 가정에 모순이다. 따라서 <i class='m'>k</i>는 0이 아닌 실수이다.</div>
-  </div>
-
-  <div class="card q">
-    <div class="qrow">
-      <div class="qt"><span class="badge">문제 04</span>오른쪽 그림과 같은 삼각형 <span class='rm'>ABC</span>에서 두 변 <span class='rm'>AB</span>, <span class='rm'>AC</span>의 중점을 각각 <span class='rm'>M</span>, <span class='rm'>N</span>이라 하고, <span class='vec'><span class='r'>AB</span></span> = <span class="sym"><span class='vec'><i>a</i></span></span>, <span class='vec'><span class='r'>AC</span></span> = <span class="sym"><span class='vec'><i>b</i></span></span>라고 할 때, 다음 물음에 답하시오.
-        <div class="sub2">
-          <div>(1) 두 벡터 <span class='vec'><span class='r'>BC</span></span>, <span class='vec'><span class='r'>MN</span></span>을 각각 <span class="sym"><span class='vec'><i>a</i></span></span>, <span class="sym"><span class='vec'><i>b</i></span></span>로 나타내시오.</div>
-          <div style="padding-left:18px"><span class='vec'><span class='r'>BC</span></span> = <button class="gb" id="bt1" data-w="−<span class='sym'><span class='vec'><i>a</i></span> + <span class='vec'><i>b</i></span></span>"></button> &nbsp; <span class='vec'><span class='r'>MN</span></span> = <button class="gb" id="bt2" data-w="−<span class='fr'><span>1</span><span>2</span></span><span class='sym'><span class='vec'><i>a</i></span></span> + <span class='fr'><span>1</span><span>2</span></span><span class='sym'><span class='vec'><i>b</i></span></span>"></button></div>
-          <div>(2) (1)을 이용하여 <span class='vec'><span class='r'>MN</span></span> ∥ <span class='vec'><span class='r'>BC</span></span>임을 보이시오.</div>
-          <div style="padding-left:18px"><span class='vec'><span class='r'>MN</span></span> = <button class="gb" id="bt3" data-w="<span class='fr'><span>1</span><span>2</span></span><span class='vec'><span class='r'>BC</span></span>"></button>이므로 <span class='vec'><span class='r'>MN</span></span> ∥ <span class='vec'><span class='r'>BC</span></span>이다.</div>
-        </div>
-      </div>
-      <div class="qfig"><svg viewBox="0 0 260 220" id="fTri"></svg></div>
-    </div>
-  </div>
-
-  <div class="card q">
-    <span class="badge">예제 2</span>영벡터가 아닌 두 벡터 <span class="sym"><span class='vec'><i>a</i></span></span>, <span class="sym"><span class='vec'><i>b</i></span></span>가 서로 평행하지 않고 두 벡터 <span class="sym">−5<span class='vec'><i>a</i></span> + <i class='m'>t</i><span class='vec'><i>b</i></span></span>, <span class="sym"><span class='vec'><i>b</i></span> − <span class='vec'><i>a</i></span></span>가 서로 평행할 때, 실수 <i class='m'>t</i>의 값을 구하시오.
-    <div class="sub2">
-      <div><span class="sym">−5<span class='vec'><i>a</i></span> + <i class='m'>t</i><span class='vec'><i>b</i></span></span> = <i class='m'>k</i>(<span class="sym"><span class='vec'><i>b</i></span> − <span class='vec'><i>a</i></span></span>) = <button class="gb" data-w="−<span class='sym'><i class='m'>k</i><span class='vec'><i>a</i></span> + <i class='m'>k</i><span class='vec'><i>b</i></span></span>"></button> &nbsp;(<i class='m'>k</i>는 0이 아닌 실수)</div>
-      <div><span class="sym"><span class='vec'><i>a</i></span></span>, <span class="sym"><span class='vec'><i>b</i></span></span>가 서로 평행하지 않으므로 &nbsp;<i class='m'>k</i> = <button class="gb sm" data-w="5"></button>, &nbsp; <i class='m'>t</i> = <button class="gb sm" data-w="5"></button></div>
-    </div>
-  </div>
-</div>
-
-<!-- ───────── 03 AC = kAB ───────── -->
-<div class="pane" data-p="c">
-  <div class="card">
+    <div class="sec"><span class="n">2</span><h3>실수배에 대한 성질</h3></div>
     <div class="two">
-      <div class="txt">
-        일반적으로 서로 다른 세 점 <span class='rm'>A</span>, <span class='rm'>B</span>, <span class='rm'>C</span>에 대하여 <span class='vec'><span class='r'>AC</span></span> =<span class="sym"> <i class='m'>k</i><span class='vec'><span class='r'>AB</span></span></span>를 만족시키는 0이 아닌 실수 <i class='m'>k</i>가 존재하면 <span class='vec'><span class='r'>AB</span></span> ∥ <span class='vec'><span class='r'>AC</span></span>이므로 세 점 <span class='rm'>A</span>, <span class='rm'>B</span>, <span class='rm'>C</span>는 <button class="gb sm" data-w="한 직선 위에 있다"></button>.<br>
-        역으로 세 점 <span class='rm'>A</span>, <span class='rm'>B</span>, <span class='rm'>C</span>가 한 직선 위에 있으면 <span class='vec'><span class='r'>AC</span></span> =<span class="sym"> <i class='m'>k</i><span class='vec'><span class='r'>AB</span></span></span>를 만족시키는 0이 아닌 실수 <i class='m'>k</i>가 존재한다.
-        <div class="chainbox">
-          <div class="bx"><span class='vec'><span class='r'>AC</span></span> =<span class="sym"> <i class='m'>k</i><span class='vec'><span class='r'>AB</span></span></span> (<i class='m'>k</i> ≠ 0)</div><div class="ar">⇕</div>
-          <div class="bx"><span class='vec'><span class='r'>AB</span></span> ∥ <span class='vec'><span class='r'>AC</span></span></div><div class="ar">⇕</div>
-          <div class="bx" style="font-family:inherit">세 점 <span class='rm'>A</span>, <span class='rm'>B</span>, <span class='rm'>C</span>는 한 직선 위에 있다.</div>
-        </div>
+      <div class="txt">두 벡터 <span class='vec'><i>a</i></span>, <span class='vec'><i>b</i></span>에 대하여 <span class='sym'>2(3<span class='vec'><i>a</i></span>)</span>, <span class='sym'>2<span class='vec'><i>a</i></span> + 3<span class='vec'><i>a</i></span></span>, <span class='sym'>3(<span class='vec'><i>a</i></span> + <span class='vec'><i>b</i></span>)</span>는 각각 <button class='gb sm' data-w="<span class='sym'>6<span class='vec'><i>a</i></span></span>"></button>, <button class='gb sm' data-w="<span class='sym'>5<span class='vec'><i>a</i></span></span>"></button>, <button class='gb sm' data-w="<span class='sym'>3<span class='vec'><i>a</i></span> + 3<span class='vec'><i>b</i></span></span>"></button>이다.</div>
+      <div class="fig"><svg viewBox="0 0 340 150" id="fProp"></svg></div>
+    </div>
+    <div class="box">
+      <div class="bt">벡터의 실수배에 대한 성질</div>
+      두 실수 <i class='m'>k</i>, <i class='m'>l</i>과 두 벡터 <span class='vec'><i>a</i></span>, <span class='vec'><i>b</i></span>에 대하여<br>
+      <span class="k">1</span><span class='sym'><i class='m'>k</i>(<i class='m'>l</i><span class='vec'><i>a</i></span>)</span> = <button class='gb sm' data-w="<span class='sym'>(<i class='m'>k</i><i class='m'>l</i>)<span class='vec'><i>a</i></span></span>"></button> &nbsp;(결합법칙)<br>
+      <span class="k">2</span><span class='sym'>(<i class='m'>k</i> + <i class='m'>l</i>)<span class='vec'><i>a</i></span></span> = <button class='gb sm' data-w="<span class='sym'><i class='m'>k</i><span class='vec'><i>a</i></span> + <i class='m'>l</i><span class='vec'><i>a</i></span></span>"></button>, &nbsp; <span class='sym'><i class='m'>k</i>(<span class='vec'><i>a</i></span> + <span class='vec'><i>b</i></span>)</span> = <button class='gb sm' data-w="<span class='sym'><i class='m'>k</i><span class='vec'><i>a</i></span> + <i class='m'>k</i><span class='vec'><i>b</i></span></span>"></button> &nbsp;(분배법칙)
+    </div>
+    <div class="txt">벡터의 실수배에 대한 성질을 이용하면 벡터의 연산은 <span class="hl">다항식의 연산과 같은 방법</span>으로 할 수 있다.</div>
+    <div class="ex" style="margin-top:8px">
+      <div class="ln"><span class="badge">예제 1</span><span class='sym'>3(2<span class='vec'><i>a</i></span> − 3<span class='vec'><i>b</i></span>) − 2(<span class='vec'><i>a</i></span> + 2<span class='vec'><i>b</i></span>)</span> = <span class='sym'>6<span class='vec'><i>a</i></span> − 9<span class='vec'><i>b</i></span> − 2<span class='vec'><i>a</i></span> − 4<span class='vec'><i>b</i></span></span> = <span class='sym'>(6 − 2)<span class='vec'><i>a</i></span> + (−9 − 4)<span class='vec'><i>b</i></span></span> = <button class='gb' data-w="<span class='sym'>4<span class='vec'><i>a</i></span> − 13<span class='vec'><i>b</i></span></span>"></button></div>
+      <div class="ln"><span class="badge">문제 02</span>(1) <span class='sym'>2(<span class='vec'><i>a</i></span> − 4<span class='vec'><i>b</i></span>) − 3(2<span class='vec'><i>a</i></span> − 3<span class='vec'><i>b</i></span>)</span> = <button class='gb' data-w="<span class='sym'>−4<span class='vec'><i>a</i></span> + <span class='vec'><i>b</i></span></span>"></button> &nbsp;&nbsp; (2) <span class='sym'>−<span class='fr'><span>1</span><span>3</span></span>(−<span class='vec'><i>a</i></span> + 3<span class='vec'><i>b</i></span>) + <span class='fr'><span>1</span><span>2</span></span>(−2<span class='vec'><i>a</i></span> − <span class='vec'><i>b</i></span>)</span> = <button class='gb' data-w="<span class='sym'>−<span class='fr'><span>2</span><span>3</span></span><span class='vec'><i>a</i></span> − <span class='fr'><span>3</span><span>2</span></span><span class='vec'><i>b</i></span></span>"></button></div>
+      <div class="ln"><span class="badge">문제 03</span>다음 등식을 만족시키는 벡터 <span class='vec'><i>x</i></span>를 <span class='vec'><i>a</i></span>, <span class='vec'><i>b</i></span>로 나타내면 &nbsp;(1) <span class='sym'>3<span class='vec'><i>x</i></span> − 4<span class='vec'><i>a</i></span> = 5<span class='vec'><i>a</i></span> − 3<span class='vec'><i>b</i></span></span> 에서 <span class='vec'><i>x</i></span> = <button class='gb' data-w="<span class='sym'>3<span class='vec'><i>a</i></span> − <span class='vec'><i>b</i></span></span>"></button> &nbsp;&nbsp; (2) <span class='sym'>6<span class='vec'><i>a</i></span> − 2<span class='vec'><i>x</i></span> = −3(<span class='vec'><i>x</i></span> + 9<span class='vec'><i>b</i></span>)</span> 에서 <span class='vec'><i>x</i></span> = <button class='gb' data-w="<span class='sym'>−6<span class='vec'><i>a</i></span> − 27<span class='vec'><i>b</i></span></span>"></button></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="sec"><span class="n">3</span><h3>두 벡터의 평행</h3></div>
+    <div class="two">
+      <div class="txt">영벡터가 아닌 두 벡터 <span class='vec'><i>a</i></span>, <span class='vec'><i>b</i></span>의 방향이 같거나 반대일 때, <span class='vec'><i>a</i></span>와 <span class='vec'><i>b</i></span>는 서로 <button class='gb sm' data-w="평행"></button>하다고 하고, 기호로 <button class='gb sm' data-w="<span class='sym'><span class='vec'><i>a</i></span> ∥ <span class='vec'><i>b</i></span></span>"></button>와 같이 나타낸다.<br>
+      두 벡터 <span class='vec'><i>a</i></span>, <span class='vec'><i>b</i></span>가 서로 평행할 때, <span class='vec'><i>a</i></span>와 <span class='vec'><i>b</i></span>의 시점을 일치시키면 한 벡터가 다른 벡터의 <button class='gb sm' data-w="실수배"></button>가 된다.</div>
+      <div class="fig"><svg viewBox="0 0 340 150" id="fPar"></svg></div>
+    </div>
+    <div class="box">
+      <div class="bt">두 벡터의 평행 조건</div>
+      영벡터가 아닌 두 벡터 <span class='vec'><i>a</i></span>, <span class='vec'><i>b</i></span>에 대하여 &nbsp; <span class='sym'><span class='vec'><i>a</i></span> ∥ <span class='vec'><i>b</i></span></span> &nbsp;⟺&nbsp; <button class='gb sm' data-w="<span class='sym'><span class='vec'><i>b</i></span> = <i class='m'>k</i><span class='vec'><i>a</i></span></span>"></button> &nbsp;(단, <i class='m'>k</i>는 0이 아닌 실수)
+    </div>
+    <div class="pt">참고&nbsp; <i class='m'>k</i> = 0이면 <span class='vec'><i>b</i></span> = <span class='sym'><i class='m'>k</i><span class='vec'><i>a</i></span></span> = <span class='sym'>0<span class='vec'><i>a</i></span></span> = <span class='vec'><span class='r'>0</span></span>이므로 <span class='vec'><i>b</i></span> ≠ <span class='vec'><span class='r'>0</span></span>이라는 가정에 모순이다. 따라서 <i class='m'>k</i>는 0이 아닌 실수이다.</div>
+    <div class="chk">
+      <span class="lb">스스로 확인</span>(1) 두 벡터 <span class='sym'><span class='fr'><span>4</span><span>5</span></span><span class='vec'><i>a</i></span></span>, <span class='sym'><span class='fr'><span>2</span><span>3</span></span><span class='vec'><i>a</i></span></span>는 <span class='sym'><span class='fr'><span>2</span><span>3</span></span><span class='vec'><i>a</i></span></span> = <button class='gb sm' data-w="<span class='sym'><span class='fr'><span>5</span><span>6</span></span></span>"></button> × <span class='sym'>(<span class='fr'><span>4</span><span>5</span></span><span class='vec'><i>a</i></span>)</span>이므로 서로 평행하다.<br>
+      <span class="lb" style="visibility:hidden">스스로 확인</span>(2) 영벡터가 아닌 두 벡터 <span class='sym'>2<span class='vec'><i>a</i></span> − 3<span class='vec'><i>b</i></span></span>, <span class='sym'>−6<span class='vec'><i>a</i></span> + 9<span class='vec'><i>b</i></span></span>에 대하여 <span class='sym'>−6<span class='vec'><i>a</i></span> + 9<span class='vec'><i>b</i></span></span> = −3(<button class='gb sm' data-w="<span class='sym'>2<span class='vec'><i>a</i></span> − 3<span class='vec'><i>b</i></span></span>"></button>)이므로 두 벡터는 서로 평행하다.
+    </div>
+    <div class="ex" style="margin-top:10px">
+      <div class="ln"><span class="badge">문제 04</span>삼각형 <span class='rm'>ABC</span>에서 <span class='rm'>AB</span>, <span class='rm'>AC</span>의 중점을 <span class='rm'>M</span>, <span class='rm'>N</span>, <span class='vec'><span class='r'>AB</span></span> = <span class='vec'><i>a</i></span>, <span class='vec'><span class='r'>AC</span></span> = <span class='vec'><i>b</i></span>일 때 &nbsp;<span class='vec'><span class='r'>BC</span></span> = <button class='gb' data-w="<span class='sym'>−<span class='vec'><i>a</i></span> + <span class='vec'><i>b</i></span></span>"></button>, &nbsp;<span class='vec'><span class='r'>MN</span></span> = <button class='gb' data-w="<span class='sym'>−<span class='fr'><span>1</span><span>2</span></span><span class='vec'><i>a</i></span> + <span class='fr'><span>1</span><span>2</span></span><span class='vec'><i>b</i></span></span>"></button> 이므로 <span class='vec'><span class='r'>MN</span></span> = <button class='gb' data-w="<span class='sym'><span class='fr'><span>1</span><span>2</span></span><span class='vec'><span class='r'>BC</span></span></span>"></button>, 즉 <span class='vec'><span class='r'>MN</span></span> ∥ <span class='vec'><span class='r'>BC</span></span></div>
+      <div class="ln"><span class="badge">예제 2</span><span class='vec'><i>a</i></span> ∦ <span class='vec'><i>b</i></span>이고 <span class='sym'>−5<span class='vec'><i>a</i></span> + <i class='m'>t</i><span class='vec'><i>b</i></span></span> ∥ <span class='sym'><span class='vec'><i>b</i></span> − <span class='vec'><i>a</i></span></span>이면 &nbsp;<span class='sym'>−5<span class='vec'><i>a</i></span> + <i class='m'>t</i><span class='vec'><i>b</i></span></span> = <span class='sym'><i class='m'>k</i>(<span class='vec'><i>b</i></span> − <span class='vec'><i>a</i></span>)</span> = <span class='sym'>−<i class='m'>k</i><span class='vec'><i>a</i></span> + <i class='m'>k</i><span class='vec'><i>b</i></span></span> 에서 &nbsp;−5 = −<i class='m'>k</i>, <i class='m'>t</i> = <i class='m'>k</i> &nbsp;∴ <i class='m'>t</i> = <button class='gb sm' data-w="5"></button></div>
+      <div class="ln"><span class="badge">문제 05</span><span class='vec'><i>a</i></span> ∦ <span class='vec'><i>b</i></span>이고 <span class='sym'>(<i class='m'>t</i> − 1)<span class='vec'><i>a</i></span> − 2<span class='vec'><i>b</i></span></span> ∥ <span class='sym'>(−<i class='m'>t</i> − 1)<span class='vec'><i>a</i></span> + 4<span class='vec'><i>b</i></span></span>일 때 &nbsp;<i class='m'>t</i> = <button class='gb sm' data-w="3"></button></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="sec"><span class="n">4</span><h3>한 직선 위에 있는 세 점</h3></div>
+    <div class="two">
+      <div class="txt">서로 다른 세 점 <span class='rm'>A</span>, <span class='rm'>B</span>, <span class='rm'>C</span>에 대하여 <span class='sym'><span class='vec'><span class='r'>AC</span></span> = <i class='m'>k</i><span class='vec'><span class='r'>AB</span></span></span>를 만족시키는 0이 아닌 실수 <i class='m'>k</i>가 존재하면 <span class='vec'><span class='r'>AB</span></span> ∥ <span class='vec'><span class='r'>AC</span></span>이므로 세 점 <span class='rm'>A</span>, <span class='rm'>B</span>, <span class='rm'>C</span>는 <button class='gb sm' data-w="한 직선 위에 있다"></button>.<br>
+      역으로 세 점 <span class='rm'>A</span>, <span class='rm'>B</span>, <span class='rm'>C</span>가 한 직선 위에 있으면 <span class='sym'><span class='vec'><span class='r'>AC</span></span> = <i class='m'>k</i><span class='vec'><span class='r'>AB</span></span></span>를 만족시키는 0이 아닌 실수 <i class='m'>k</i>가 존재한다.
+      <div class="chainbox" style="align-items:flex-start; padding-left:12px"><div class="bx"><span class='sym'><span class='vec'><span class='r'>AC</span></span> = <i class='m'>k</i><span class='vec'><span class='r'>AB</span></span></span> (<i class='m'>k</i> ≠ 0)</div><div class="ar" style="padding-left:30px">⇕</div><div class="bx"><span class='vec'><span class='r'>AB</span></span> ∥ <span class='vec'><span class='r'>AC</span></span></div><div class="ar" style="padding-left:30px">⇕</div><div class="bx" style="font-family:inherit">세 점 <span class='rm'>A</span>, <span class='rm'>B</span>, <span class='rm'>C</span>는 한 직선 위에 있다.</div></div>
       </div>
       <div class="fig">
-        <svg viewBox="0 0 340 230" id="fLine"></svg>
+        <svg viewBox="0 0 340 200" id="fLine"></svg>
         <div class="row"><label><i class="m">k</i></label><input type="range" id="kr2" min="-1.5" max="2.6" step="0.1" value="2"><span class="num" id="kv2">2.0</span></div>
       </div>
     </div>
+    <div class="ex" style="margin-top:8px">
+      <div class="ln"><span class="badge">예제 3</span><span class='vec'><span class='r'>OA</span></span> = <span class='vec'><i>a</i></span>, <span class='vec'><span class='r'>OB</span></span> = <span class='vec'><i>b</i></span>, <span class='vec'><span class='r'>OC</span></span> = <span class='sym'>3<span class='vec'><i>a</i></span> − 2<span class='vec'><i>b</i></span></span>일 때 &nbsp;<span class='vec'><span class='r'>AB</span></span> = <span class='vec'><span class='r'>OB</span></span> − <span class='vec'><span class='r'>OA</span></span> = <button class='gb' data-w="<span class='sym'><span class='vec'><i>b</i></span> − <span class='vec'><i>a</i></span></span>"></button>, &nbsp;<span class='vec'><span class='r'>AC</span></span> = <span class='vec'><span class='r'>OC</span></span> − <span class='vec'><span class='r'>OA</span></span> = <button class='gb' data-w="<span class='sym'>2<span class='vec'><i>a</i></span> − 2<span class='vec'><i>b</i></span></span>"></button> = <button class='gb' data-w="<span class='sym'>−2<span class='vec'><span class='r'>AB</span></span></span>"></button> &nbsp;∴ 세 점 <span class='rm'>A</span>, <span class='rm'>B</span>, <span class='rm'>C</span>는 한 직선 위에 있다.</div>
+      <div class="ln"><span class="badge">문제 06</span><span class='vec'><span class='r'>OA</span></span> = <span class='sym'><span class='vec'><i>a</i></span> − 2<span class='vec'><i>b</i></span></span>, <span class='vec'><span class='r'>OB</span></span> = <span class='sym'>3<span class='vec'><i>a</i></span> − <span class='vec'><i>b</i></span></span>, <span class='vec'><span class='r'>OC</span></span> = <span class='sym'>7<span class='vec'><i>a</i></span> + <i class='m'>t</i><span class='vec'><i>b</i></span></span>일 때 세 점 <span class='rm'>A</span>, <span class='rm'>B</span>, <span class='rm'>C</span>가 한 직선 위에 있도록 하는 <i class='m'>t</i> = <button class='gb sm' data-w="1"></button> &nbsp;<span class="cm" style="color:var(--dim); font-size:12.5px">(<span class='vec'><i>a</i></span> ∦ <span class='vec'><i>b</i></span>)</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="pane" data-p="b">
+  <div class="skill">
+    <div class="ttl"><span class="n">SKILL 1</span><b>계수 비교 — 일차결합 표현은 유일하다</b></div>
+    <div class="core"><span class='vec'><i>a</i></span> ∦ <span class='vec'><i>b</i></span> 이면 &nbsp; <span class='sym'><i class='m'>p</i><span class='vec'><i>a</i></span> + <i class='m'>q</i><span class='vec'><i>b</i></span> = <i class='m'>r</i><span class='vec'><i>a</i></span> + <i class='m'>s</i><span class='vec'><i>b</i></span></span> &nbsp;⟹&nbsp; <i class='m'>p</i> = <i class='m'>r</i>, <i class='m'>q</i> = <i class='m'>s</i></div>
+    <div class="why">특히 <span class='sym'><i class='m'>p</i><span class='vec'><i>a</i></span> + <i class='m'>q</i><span class='vec'><i>b</i></span> = <span class='vec'><span class='r'>0</span></span></span>이면 <i class='m'>p</i> = <i class='m'>q</i> = 0이다. 한 벡터를 <span class="hl">두 가지 방법으로 나타낸 뒤 계수를 비교</span>하는 것이 벡터 문제의 가장 기본 전략이다. (예제 2, 문제 05, 활용 문제의 정석 풀이)</div>
+  </div>
+  <div class="skill">
+    <div class="ttl"><span class="n">SKILL 2</span><b>평행 ⟺ 계수가 비례한다</b></div>
+    <div class="core"><span class='vec'><i>a</i></span> ∦ <span class='vec'><i>b</i></span> 이면 &nbsp; <span class='sym'><i class='m'>p</i><span class='vec'><i>a</i></span> + <i class='m'>q</i><span class='vec'><i>b</i></span></span> ∥ <span class='sym'><i class='m'>r</i><span class='vec'><i>a</i></span> + <i class='m'>s</i><span class='vec'><i>b</i></span></span> &nbsp;⟺&nbsp; <i class='m'>p</i> : <i class='m'>q</i> = <i class='m'>r</i> : <i class='m'>s</i> &nbsp;(<span class='sym'><i class='m'>p</i><i class='m'>s</i> = <i class='m'>q</i><i class='m'>r</i></span>)</div>
+    <div class="why"><span class='sym'><span class='vec'><i>b</i></span> = <i class='m'>k</i><span class='vec'><i>a</i></span></span>에 계수 비교를 한 번 더 한 결과이다. 예제 2는 −5 : <i class='m'>t</i> = −1 : 1 에서 바로 <i class='m'>t</i> = 5, 문제 05는 (<i class='m'>t</i> − 1) : (−2) = (−<i class='m'>t</i> − 1) : 4 에서 4(<i class='m'>t</i> − 1) = −2(−<i class='m'>t</i> − 1), <i class='m'>t</i> = 3.</div>
+  </div>
+  <div class="skill">
+    <div class="ttl"><span class="n">SKILL 3</span><b>분점의 벡터 — 중점·내분점·무게중심</b></div>
+    <div class="core"><span class='rm'>AP</span> : <span class='rm'>PB</span> = <i class='m'>m</i> : <i class='m'>n</i> 이면 &nbsp; <span class='vec'><span class='r'>OP</span></span> = <span class='fr'><span><i class='m'>n</i><span class='vec'><span class='r'>OA</span></span> + <i class='m'>m</i><span class='vec'><span class='r'>OB</span></span></span><span><i class='m'>m</i> + <i class='m'>n</i></span></span> &nbsp;&nbsp; 중점 <span class='vec'><span class='r'>OM</span></span> = <span class='fr'><span><span class='vec'><span class='r'>OA</span></span> + <span class='vec'><span class='r'>OB</span></span></span><span>2</span></span> &nbsp;&nbsp; 무게중심 <span class='vec'><span class='r'>OG</span></span> = <span class='fr'><span><span class='vec'><span class='r'>OA</span></span> + <span class='vec'><span class='r'>OB</span></span> + <span class='vec'><span class='r'>OC</span></span></span><span>3</span></span></div>
+    <div class="why"><i class='m'>m</i>, <i class='m'>n</i>이 <span class="hl">엇갈려</span> 들어간다. <span class='rm'>AP</span> : <span class='rm'>PB</span> = 1 : 2 이면 <span class='vec'><span class='r'>OP</span></span> = <span class='sym'><span class='fr'><span>2</span><span>3</span></span><span class='vec'><span class='r'>OA</span></span> + <span class='fr'><span>1</span><span>3</span></span><span class='vec'><span class='r'>OB</span></span></span> — <span class='rm'>A</span>에 가까우니 <span class='vec'><span class='r'>OA</span></span>의 계수가 크다.</div>
+  </div>
+  <div class="skill">
+    <div class="ttl"><span class="n">SKILL 4</span><b>직선 위의 점 ⟺ 계수의 합이 1</b></div>
+    <div class="two">
+      <div>
+        <div class="core"><span class='vec'><span class='r'>OP</span></span> = <span class='sym'><i class='m'>s</i><span class='vec'><span class='r'>OA</span></span> + <i class='m'>t</i><span class='vec'><span class='r'>OB</span></span></span> 이고 <i class='m'>s</i> + <i class='m'>t</i> = 1 &nbsp;⟺&nbsp; 점 <span class='rm'>P</span>는 직선 <span class='rm'>AB</span> 위에 있다</div>
+        <div class="why"><span class='vec'><span class='r'>OP</span></span> = <span class='vec'><span class='r'>OA</span></span> + <span class='sym'><i class='m'>t</i><span class='vec'><span class='r'>AB</span></span></span> = <span class='vec'><span class='r'>OA</span></span> + <span class='sym'><i class='m'>t</i>(<span class='vec'><span class='r'>OB</span></span> − <span class='vec'><span class='r'>OA</span></span>)</span> = <span class='sym'>(1 − <i class='m'>t</i>)<span class='vec'><span class='r'>OA</span></span> + <i class='m'>t</i><span class='vec'><span class='r'>OB</span></span></span> 이므로 계수의 합은 항상 1이다. 역도 성립한다.<br>
+        <i class='m'>t</i>가 0과 1 사이이면 선분 <span class='rm'>AB</span> 위, 범위를 벗어나면 연장선 위의 점이다. 두 직선의 교점은 <span class="hl">두 직선에 대해 각각 '합 = 1'</span>을 세우면 계수 비교 없이 바로 구해진다. (활용 문제의 빠른 풀이)</div>
+      </div>
+      <div class="fig">
+        <svg viewBox="0 0 340 190" id="fSum"></svg>
+        <div class="row"><label><i class="m">t</i></label><input type="range" id="tr" min="-0.6" max="1.6" step="0.05" value="0.35"><span class="num" id="tv">0.35</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="skill">
+    <div class="ttl"><span class="n">SKILL 5</span><b>세 점이 한 직선 위 ⟺ <span class='sym'><span class='vec'><span class='r'>AC</span></span> = <i class='m'>k</i><span class='vec'><span class='r'>AB</span></span></span></b></div>
+    <div class="core"><span class='vec'><span class='r'>AB</span></span>, <span class='vec'><span class='r'>AC</span></span>를 <span class='vec'><i>a</i></span>, <span class='vec'><i>b</i></span>로 나타낸 뒤 &nbsp;<span class='vec'><span class='r'>AC</span></span> = <span class='sym'><i class='m'>k</i><span class='vec'><span class='r'>AB</span></span></span> 꼴이 되는지 (SKILL 2의 비례로) 확인한다</div>
+    <div class="why">문제 06: <span class='vec'><span class='r'>AB</span></span> = <span class='sym'>2<span class='vec'><i>a</i></span> + <span class='vec'><i>b</i></span></span>, <span class='vec'><span class='r'>AC</span></span> = <span class='sym'>6<span class='vec'><i>a</i></span> + (<i class='m'>t</i> + 2)<span class='vec'><i>b</i></span></span> 이므로 2 : 1 = 6 : (<i class='m'>t</i> + 2) 에서 <i class='m'>t</i> + 2 = 3, <i class='m'>t</i> = 1. 공간에서도 똑같이 쓴다.</div>
+  </div>
+</div>
+
+<div class="pane" data-p="c">
+  <div class="card">
+    <div class="sec"><span class="n">활용 1</span><h3>두 벡터의 연산의 활용 — 교점의 위치</h3></div>
+    <div class="two top">
+      <div class="txt">삼각형 <span class='rm'>OAB</span>에서 <span class='vec'><span class='r'>OA</span></span> = <span class='vec'><i>a</i></span>, <span class='vec'><span class='r'>OB</span></span> = <span class='vec'><i>b</i></span>라 하고, <span class='vec'><span class='r'>OA</span></span>와 <span class='vec'><span class='r'>OB</span></span>를 삼등분한 점 중 <span class='rm'>A</span>와 <span class='rm'>B</span>에 가까운 점을 각각 <span class='rm'>M</span>, <span class='rm'>N</span>이라고 하자. <span class='vec'><span class='r'>AN</span></span>과 <span class='vec'><span class='r'>BM</span></span>의 교점을 <span class='rm'>C</span>라 할 때, <span class='sym'><span class='vec'><span class='r'>OC</span></span> = <i class='m'>m</i><span class='vec'><i>a</i></span> + <i class='m'>n</i><span class='vec'><i>b</i></span></span>를 만족시키는 실수 <i class='m'>m</i>, <i class='m'>n</i>의 값을 구하시오.</div>
+      <div class="fig"><svg viewBox="0 0 300 230" id="fTri"></svg><div class="cap"><button class="btn" data-hl="BM">직선 BM</button><button class="btn" data-hl="AN">직선 AN</button><button class="btn" data-hl="0">그림</button></div></div>
+    </div>
+    <div class="cols" style="margin-top:12px">
+      <div class="col">
+        <div class="h"><span class="tag a">정석 풀이</span>한 벡터를 두 가지로 나타내어 계수 비교 (SKILL 1)</div>
+        <div class="ln"><span class='vec'><span class='r'>OM</span></span> = <span class='sym'><span class='fr'><span>2</span><span>3</span></span><span class='vec'><i>a</i></span></span>, <span class='vec'><span class='r'>ON</span></span> = <span class='sym'><span class='fr'><span>2</span><span>3</span></span><span class='vec'><i>b</i></span></span> 이므로</div>
+        <div class="ln">(1) 삼각형 <span class='rm'>OMB</span>에서 <span class='vec'><span class='r'>BM</span></span> = <span class='vec'><span class='r'>OM</span></span> − <span class='vec'><span class='r'>OB</span></span> = <span class='sym'><span class='fr'><span>2</span><span>3</span></span><span class='vec'><i>a</i></span> − <span class='vec'><i>b</i></span></span></div>
+        <div class="ln ind"><span class='vec'><span class='r'>OC</span></span> = <span class='vec'><span class='r'>OB</span></span> + <span class='vec'><span class='r'>BC</span></span> = <span class='vec'><span class='r'>OB</span></span> + <span class='sym'><i class='m'>k</i><span class='vec'><span class='r'>BM</span></span></span> = <span class='vec'><i>b</i></span> + <span class='sym'><i class='m'>k</i>(<span class='fr'><span>2</span><span>3</span></span><span class='vec'><i>a</i></span> − <span class='vec'><i>b</i></span>)</span> = <button class='gb' data-w="<span class='sym'><span class='fr'><span>2</span><span>3</span></span><i class='m'>k</i><span class='vec'><i>a</i></span> + (1 − <i class='m'>k</i>)<span class='vec'><i>b</i></span></span>"></button> ····· ①</div>
+        <div class="ln">(2) 삼각형 <span class='rm'>OAN</span>에서 <span class='vec'><span class='r'>AN</span></span> = <span class='vec'><span class='r'>ON</span></span> − <span class='vec'><span class='r'>OA</span></span> = <span class='sym'><span class='fr'><span>2</span><span>3</span></span><span class='vec'><i>b</i></span> − <span class='vec'><i>a</i></span></span></div>
+        <div class="ln ind"><span class='vec'><span class='r'>OC</span></span> = <span class='vec'><span class='r'>OA</span></span> + <span class='vec'><span class='r'>AC</span></span> = <span class='vec'><span class='r'>OA</span></span> + <span class='sym'><i class='m'>l</i><span class='vec'><span class='r'>AN</span></span></span> = <span class='vec'><i>a</i></span> + <span class='sym'><i class='m'>l</i>(<span class='fr'><span>2</span><span>3</span></span><span class='vec'><i>b</i></span> − <span class='vec'><i>a</i></span>)</span> = <button class='gb' data-w="<span class='sym'>(1 − <i class='m'>l</i>)<span class='vec'><i>a</i></span> + <span class='fr'><span>2</span><span>3</span></span><i class='m'>l</i><span class='vec'><i>b</i></span></span>"></button> ····· ②</div>
+        <div class="ln">(3) ①, ②에서 <span class='vec'><i>a</i></span> ∦ <span class='vec'><i>b</i></span>이므로 계수를 비교하면 &nbsp;<span class='sym'><span class='fr'><span>2</span><span>3</span></span><i class='m'>k</i> = 1 − <i class='m'>l</i></span>, <span class='sym'>1 − <i class='m'>k</i> = <span class='fr'><span>2</span><span>3</span></span><i class='m'>l</i></span></div>
+        <div class="ln ind"><i class='m'>k</i> = <button class='gb sm' data-w="<span class='fr'><span>3</span><span>5</span></span>"></button>, <i class='m'>l</i> = <button class='gb sm' data-w="<span class='fr'><span>3</span><span>5</span></span>"></button> 이고 이를 ①에 대입하면 <span class='vec'><span class='r'>OC</span></span> = <button class='gb' data-w="<span class='sym'><span class='fr'><span>2</span><span>5</span></span><span class='vec'><i>a</i></span> + <span class='fr'><span>2</span><span>5</span></span><span class='vec'><i>b</i></span></span>"></button></div>
+        <div class="ln">따라서 <i class='m'>m</i> = <button class='gb sm' data-w="<span class='fr'><span>2</span><span>5</span></span>"></button>, <i class='m'>n</i> = <button class='gb sm' data-w="<span class='fr'><span>2</span><span>5</span></span>"></button></div>
+      </div>
+      <div class="col">
+        <div class="h"><span class="tag b">빠른 풀이</span>직선 위의 점은 계수의 합이 1 (SKILL 4)</div>
+        <div class="ln"><span class='sym'><span class='vec'><span class='r'>OC</span></span> = <i class='m'>m</i><span class='vec'><i>a</i></span> + <i class='m'>n</i><span class='vec'><i>b</i></span></span> 로 두고, <span class='vec'><i>a</i></span> = <span class='sym'><span class='fr'><span>3</span><span>2</span></span><span class='vec'><span class='r'>OM</span></span></span>, <span class='vec'><i>b</i></span> = <span class='sym'><span class='fr'><span>3</span><span>2</span></span><span class='vec'><span class='r'>ON</span></span></span> 을 이용한다.</div>
+        <div class="ln"><span class='rm'>C</span>는 직선 <span class='rm'>BM</span> 위 &nbsp;→&nbsp; <span class='vec'><span class='r'>OC</span></span> = <span class='sym'><span class='fr'><span>3</span><span>2</span></span><i class='m'>m</i><span class='vec'><span class='r'>OM</span></span> + <i class='m'>n</i><span class='vec'><span class='r'>OB</span></span></span> 에서 계수의 합 <span class='sym'><span class='fr'><span>3</span><span>2</span></span><i class='m'>m</i> + <i class='m'>n</i></span> = <button class='gb sm' data-w="1"></button></div>
+        <div class="ln"><span class='rm'>C</span>는 직선 <span class='rm'>AN</span> 위 &nbsp;→&nbsp; <span class='vec'><span class='r'>OC</span></span> = <span class='sym'><i class='m'>m</i><span class='vec'><span class='r'>OA</span></span> + <span class='fr'><span>3</span><span>2</span></span><i class='m'>n</i><span class='vec'><span class='r'>ON</span></span></span> 에서 계수의 합 <span class='sym'><i class='m'>m</i> + <span class='fr'><span>3</span><span>2</span></span><i class='m'>n</i></span> = <button class='gb sm' data-w="1"></button></div>
+        <div class="ln">두 식을 연립하면 &nbsp;<i class='m'>m</i> = <i class='m'>n</i> = <button class='gb sm' data-w="<span class='fr'><span>2</span><span>5</span></span>"></button></div>
+        <div class="cm" style="margin-top:6px">더 빠르게: <span class='rm'>M</span>, <span class='rm'>N</span>이 같은 비율의 삼등분점이므로 대칭에 의해 <i class='m'>m</i> = <i class='m'>n</i>. 한 식 <span class='sym'><span class='fr'><span>3</span><span>2</span></span><i class='m'>m</i> + <i class='m'>m</i> = 1</span> 에서 바로 <i class='m'>m</i> = <span class='fr'><span>2</span><span>5</span></span>.</div>
+        <div class="cm">정석 풀이는 미지수 <i class='m'>k</i>, <i class='m'>l</i>을 세워 식 ①, ②를 만들고 계수를 비교하지만, 빠른 풀이는 <i class='m'>m</i>, <i class='m'>n</i>만으로 식 두 개가 바로 나온다.</div>
+      </div>
+    </div>
   </div>
 
-  <div class="card q">
-    <div class="qrow">
-      <div class="qt"><span class="badge">예제 3</span>평면 위의 서로 다른 네 점 <span class='rm'>O</span>, <span class='rm'>A</span>, <span class='rm'>B</span>, <span class='rm'>C</span>에 대하여
-        <div class="eqc" style="justify-content:flex-start"><span class='vec'><span class='r'>OA</span></span> = <span class="sym"><span class='vec'><i>a</i></span></span>, &nbsp;<span class='vec'><span class='r'>OB</span></span> = <span class="sym"><span class='vec'><i>b</i></span></span>, &nbsp;<span class='vec'><span class='r'>OC</span></span> = <span class="sym">3<span class='vec'><i>a</i></span> − 2<span class='vec'><i>b</i></span></span></div>
-        일 때, 세 점 <span class='rm'>A</span>, <span class='rm'>B</span>, <span class='rm'>C</span>는 한 직선 위에 있음을 증명하시오.
-        <div class="sub2">
-          <div><span class='vec'><span class='r'>AB</span></span> = <span class='vec'><span class='r'>OB</span></span> − <span class='vec'><span class='r'>OA</span></span> = <button class="gb" id="bc1" data-w="<span class='vec'><i>b</i></span> <span class='sym'>− <span class='vec'><i>a</i></span></span>"></button></div>
-          <div><span class='vec'><span class='r'>AC</span></span> = <span class='vec'><span class='r'>OC</span></span> − <span class='vec'><span class='r'>OA</span></span> = <button class="gb" id="bc2" data-w="2<span class='vec'><i>a</i></span> <span class='sym'>− 2<span class='vec'><i>b</i></span></span>"></button> = <button class="gb" id="bc3" data-w="−<span class='sym'>2<span class='vec'><span class='r'>AB</span></span></span>"></button></div>
-          <div>따라서 <span class='vec'><span class='r'>AC</span></span> = <span class="sym">−2<span class='vec'><span class='r'>AB</span></span></span>이므로 세 점 <span class='rm'>A</span>, <span class='rm'>B</span>, <span class='rm'>C</span>는 한 직선 위에 있다.</div>
-        </div>
+  <div class="card">
+    <div class="sec"><span class="n">활용 2</span><h3>사고 확산 — 공간으로 확장</h3></div>
+    <div class="two top">
+      <div class="txt">사면체 <span class='rm'>OABC</span>에서 <span class='vec'><span class='r'>OA</span></span> = <span class='vec'><i>a</i></span>, <span class='vec'><span class='r'>OB</span></span> = <span class='vec'><i>b</i></span>, <span class='vec'><span class='r'>OC</span></span> = <span class='vec'><i>c</i></span>라 하고, <span class='rm'>AC</span>와 <span class='rm'>BC</span>의 중점을 각각 <span class='rm'>D</span>, <span class='rm'>E</span>라 하자. <span class='vec'><span class='r'>BD</span></span>와 <span class='vec'><span class='r'>AE</span></span>의 교점을 <span class='rm'>F</span>라 할 때, <span class='sym'><span class='vec'><span class='r'>OF</span></span> = <i class='m'>p</i><span class='vec'><i>a</i></span> + <i class='m'>q</i><span class='vec'><i>b</i></span> + <i class='m'>r</i><span class='vec'><i>c</i></span></span>를 만족시키는 실수 <i class='m'>p</i>, <i class='m'>q</i>, <i class='m'>r</i>의 값을 구하시오.</div>
+      <div class="fig"><svg viewBox="0 0 300 230" id="fTet"></svg></div>
+    </div>
+    <div class="cols" style="margin-top:12px">
+      <div class="col">
+        <div class="h"><span class="tag a">정석 풀이</span></div>
+        <div class="ln"><span class='vec'><span class='r'>OD</span></span> = <span class='sym'><span class='fr'><span>1</span><span>2</span></span>(<span class='vec'><i>a</i></span> + <span class='vec'><i>c</i></span>)</span>, <span class='vec'><span class='r'>OE</span></span> = <span class='sym'><span class='fr'><span>1</span><span>2</span></span>(<span class='vec'><i>b</i></span> + <span class='vec'><i>c</i></span>)</span></div>
+        <div class="ln"><span class='vec'><span class='r'>DB</span></span> = <span class='vec'><span class='r'>OB</span></span> − <span class='vec'><span class='r'>OD</span></span> = <span class='sym'><span class='vec'><i>b</i></span> − <span class='fr'><span>1</span><span>2</span></span><span class='vec'><i>a</i></span> − <span class='fr'><span>1</span><span>2</span></span><span class='vec'><i>c</i></span></span> 이므로 <span class='vec'><span class='r'>OF</span></span> = <span class='vec'><span class='r'>OD</span></span> + <span class='sym'><i class='m'>k</i><span class='vec'><span class='r'>DB</span></span></span> = <button class='gb' data-w="<span class='sym'><span class='fr'><span>1</span><span>2</span></span>(1 − <i class='m'>k</i>)<span class='vec'><i>a</i></span> + <i class='m'>k</i><span class='vec'><i>b</i></span> + <span class='fr'><span>1</span><span>2</span></span>(1 − <i class='m'>k</i>)<span class='vec'><i>c</i></span></span>"></button> ····· ①</div>
+        <div class="ln"><span class='vec'><span class='r'>EA</span></span> = <span class='vec'><span class='r'>OA</span></span> − <span class='vec'><span class='r'>OE</span></span> = <span class='sym'><span class='vec'><i>a</i></span> − <span class='fr'><span>1</span><span>2</span></span><span class='vec'><i>b</i></span> − <span class='fr'><span>1</span><span>2</span></span><span class='vec'><i>c</i></span></span> 이므로 <span class='vec'><span class='r'>OF</span></span> = <span class='vec'><span class='r'>OE</span></span> + <span class='sym'><i class='m'>l</i><span class='vec'><span class='r'>EA</span></span></span> = <button class='gb' data-w="<span class='sym'><i class='m'>l</i><span class='vec'><i>a</i></span> + <span class='fr'><span>1</span><span>2</span></span>(1 − <i class='m'>l</i>)<span class='vec'><i>b</i></span> + <span class='fr'><span>1</span><span>2</span></span>(1 − <i class='m'>l</i>)<span class='vec'><i>c</i></span></span>"></button> ····· ②</div>
+        <div class="ln">①, ②의 계수를 비교하면 <i class='m'>k</i> = <i class='m'>l</i> = <button class='gb sm' data-w="<span class='fr'><span>1</span><span>3</span></span>"></button> &nbsp;∴ <i class='m'>p</i> = <i class='m'>q</i> = <i class='m'>r</i> = <button class='gb sm' data-w="<span class='fr'><span>1</span><span>3</span></span>"></button></div>
       </div>
-      <div class="qfig"><svg viewBox="0 0 300 250" id="fCol"></svg><div class="cap" style="display:flex; justify-content:flex-end; padding:4px 6px 0"><button class="btn" id="bColRe">그림</button></div></div>
+      <div class="col">
+        <div class="h"><span class="tag b">빠른 풀이</span></div>
+        <div class="ln"><span class='rm'>F</span>는 직선 <span class='rm'>BD</span> 위: <span class='vec'><span class='r'>OF</span></span> = <span class='sym'><i class='m'>s</i><span class='vec'><span class='r'>OB</span></span> + <i class='m'>t</i><span class='vec'><span class='r'>OD</span></span></span> = <span class='sym'><span class='fr'><span><i class='m'>t</i></span><span>2</span></span><span class='vec'><i>a</i></span> + <i class='m'>s</i><span class='vec'><i>b</i></span> + <span class='fr'><span><i class='m'>t</i></span><span>2</span></span><span class='vec'><i>c</i></span></span>, <i class='m'>s</i> + <i class='m'>t</i> = 1 &nbsp;→&nbsp; <i class='m'>p</i> = <i class='m'>r</i></div>
+        <div class="ln"><span class='rm'>F</span>는 직선 <span class='rm'>AE</span> 위: <span class='vec'><span class='r'>OF</span></span> = <span class='sym'><i class='m'>u</i><span class='vec'><span class='r'>OA</span></span> + <span class='vec'><i>v</i></span><span class='vec'><span class='r'>OE</span></span></span> = <span class='sym'><i class='m'>u</i><span class='vec'><i>a</i></span> + <span class='fr'><span><span class='vec'><i>v</i></span></span><span>2</span></span><span class='vec'><i>b</i></span> + <span class='fr'><span><span class='vec'><i>v</i></span></span><span>2</span></span><span class='vec'><i>c</i></span></span> &nbsp;→&nbsp; <i class='m'>q</i> = <i class='m'>r</i></div>
+        <div class="ln">그러므로 <i class='m'>p</i> = <i class='m'>q</i> = <i class='m'>r</i>, 그리고 <i class='m'>s</i> + <i class='m'>t</i> = <i class='m'>q</i> + 2<i class='m'>p</i> = 3<i class='m'>p</i> = 1 &nbsp;∴ <i class='m'>p</i> = <i class='m'>q</i> = <i class='m'>r</i> = <button class='gb sm' data-w="<span class='fr'><span>1</span><span>3</span></span>"></button></div>
+        <div class="cm" style="margin-top:6px"><span class='rm'>F</span>는 삼각형 <span class='rm'>ABC</span>의 무게중심이다 — 두 중선의 교점이므로. 무게중심 공식(SKILL 3)으로도 <span class='vec'><span class='r'>OF</span></span> = <span class='sym'><span class='fr'><span><span class='vec'><i>a</i></span> + <span class='vec'><i>b</i></span> + <span class='vec'><i>c</i></span></span><span>3</span></span></span> 가 바로 나온다.</div>
+      </div>
     </div>
   </div>
 </div>
@@ -322,88 +392,71 @@ function ghost(svg,from,to,col,cb,w){ const ln=arrow(svg,from[0],from[1],from[2]
   setTimeout(()=>morph(ln,to,.9,()=>{ ln.style.transition='opacity .3s'; ln.style.opacity=1; if(cb) cb(ln); }),350); return ln; }
 
 
+
 /* 빈칸 */
 const blanks=[...document.querySelectorAll('.gb[data-w]')]; let filled=0;
 function fill(b){ if(b.classList.contains('done')) return false; b.classList.add('done'); b.innerHTML=b.dataset.w; if(++filled===blanks.length) geoTask('mul-terms'); return true; }
-blanks.forEach(b=>{ b.onclick=()=>{ const id=b.id; if(!fill(b)) return;
-  if(id==='b2a') twoA(1); if(id==='bm2a') twoA(-1); if(id==='bt1') triBC(); if(id==='bt2') triMN(); if(id==='bc1'||id==='bc2'||id==='bc3') colAnim(); }; });
+blanks.forEach(b=>{ b.onclick=()=>fill(b); });
 const VIO='#7A3FB5'; MK[VIO]='url(#ahV)';
-const seg4=(p,q)=>[p[0],p[1],q[0],q[1]];
 
-/* ═══════ 2a, −2a ═══════ */
-function twoABase(){ const s=$('f2a'); s.innerHTML=''; arrow(s,40,40,120,40,INK,2.2); vlab(s,76,32,'a',INK,15); return s; }
-twoABase();
-function twoA(sign){ const s=$('f2a'); const y=sign>0?90:140, col=sign>0?RED:BLU, x0=sign>0?40:300, dx=sign>0?80:-80;
-  const g1=ghost(s,[40,40,120,40],[x0,y,x0+dx,y],INK,()=>{ const g2=ghost(s,[40,40,120,40],[x0+dx,y,x0+2*dx,y],INK,()=>{
-    const r=arrow(s,x0,y,x0+2*dx,y,col,2.4); r.style.opacity=0; grow(r,.7,()=>{ g1.style.opacity=.35; g2.style.opacity=.35; vlab(s,x0+dx-(sign>0?10:14),y-9,(sign>0?'2a':'−2a'),col,15); }); }); });
-  if(sign<0){ /* −a 는 뒤집힌 모양 */ } }
+/* 1. a, 2a, −2a */
+(function(){ const s=$('f2a'); arrow(s,40,30,120,30,INK,2.2); vlab(s,76,22,'a',INK,15);
+  arrow(s,40,70,200,70,RED,2.4); el('line',{x1:120,y1:64,x2:120,y2:76,stroke:RED,'stroke-width':1.2},s); vlab(s,112,60,'2a',RED,15);
+  arrow(s,300,110,140,110,BLU,2.4); el('line',{x1:220,y1:104,x2:220,y2:116,stroke:BLU,'stroke-width':1.2},s); vlab(s,206,100,'−2a',BLU,15); })();
+/* 2. 성질 그림 */
+(function(){ const s=$('fProp'); const u=[18,-32];
+  arrow(s,30,140,30+u[0]*3,140+u[1]*3,INK,2); arrow(s,30+u[0]*3,140+u[1]*3,30+u[0]*6,140+u[1]*6,INK,2); arrow(s,44,140,44+u[0]*6,140+u[1]*6,RED,2.2);
+  vlab(s,14,96,'3a',INK,12); vlab(s,34,38,'3a',INK,12); vlab(s,98,70,'6a',RED,12);
+  arrow(s,150,140,150+u[0]*2,140+u[1]*2,INK,2); arrow(s,150+u[0]*2,140+u[1]*2,150+u[0]*5,140+u[1]*5,INK,2); arrow(s,164,140,164+u[0]*5,140+u[1]*5,RED,2.2);
+  vlab(s,134,110,'2a',INK,12); vlab(s,154,44,'3a',INK,12); vlab(s,216,80,'5a',RED,12);
+  const A=[236,140], va=[14,-26], vb=[30,4]; const P=[A[0]+va[0]*3,A[1]+va[1]*3], Q=[A[0]+vb[0]*3,A[1]+vb[1]*3], Rr=[P[0]+vb[0]*3,P[1]+vb[1]*3];
+  el('path',{d:`M${P} L${Rr} L${Q}`,fill:'none',stroke:DIM,'stroke-width':1,'stroke-dasharray':'4 3'},s);
+  arrow(s,A[0],A[1],P[0],P[1],RED,2); arrow(s,A[0],A[1],Q[0],Q[1],BLU,2); arrow(s,A[0],A[1],Rr[0],Rr[1],ORG,2.2);
+  vlab(s,A[0]+4,A[1]-40,'3a',RED,11); vlab(s,A[0]+40,A[1]+20,'3b',BLU,11); vlab(s,A[0]+70,A[1]-44,'3a + 3b',ORG,11); })();
+/* 3. 평행 */
+(function(){ const s=$('fPar'); arrow(s,30,120,70,50,INK,2); vlab(s,30,78,'a',INK,14); arrow(s,110,130,190,-10+30,RED,2); vlab(s,160,80,'b',RED,14);
+  el('line',{x1:100,y1:10,x2:100,y2:140,stroke:DIM,'stroke-width':1,'stroke-dasharray':'3 3'},s);
+  el('text',{x:36,y:20,'font-size':11,class:'k',fill:DIM},s).textContent='같은 방향';
+  arrow(s,210,120,250,50,INK,2); vlab(s,210,78,'a',INK,14); arrow(s,320,20,260,125,BLU,2); vlab(s,300,80,'b',BLU,14);
+  el('text',{x:226,y:20,'font-size':11,class:'k',fill:DIM},s).textContent='반대 방향'; })();
+/* 4. 한 직선 위의 세 점 */
+(function(){ const s=$('fLine'); const A=[60,160], u=[0.86,-0.5], L=80; const B=[A[0]+u[0]*L,A[1]+u[1]*L];
+  el('line',{x1:A[0]-u[0]*90,y1:A[1]-u[1]*90,x2:A[0]+u[0]*300,y2:A[1]+u[1]*300,stroke:DIM,'stroke-width':1},s);
+  const ac=arrow(s,A[0],A[1],B[0],B[1],RED,3); ac.style.opacity=.55; arrow(s,A[0],A[1],B[0],B[1],INK,2.2); dot(s,A[0],A[1]); dot(s,B[0],B[1]); label(s,A[0]-6,A[1]+20,'A',INK,15); label(s,B[0]-2,B[1]+20,'B',INK,15);
+  const cd=dot(s,0,0,RED,4); const lc=label(s,0,0,'C',RED,15); const cap=el('text',{x:170,y:26,'text-anchor':'middle','font-size':12.5,class:'k',fill:RED},s);
+  function draw(k){ const C=[A[0]+u[0]*L*k,A[1]+u[1]*L*k]; ac.setAttribute('x2',C[0]); ac.setAttribute('y2',C[1]); cd.setAttribute('cx',C[0]); cd.setAttribute('cy',C[1]); lc.setAttribute('x',C[0]-2); lc.setAttribute('y',C[1]-10); cap.textContent='AC = '+k.toFixed(1)+' AB'; }
+  $('kr2').oninput=e=>{ const k=+e.target.value; $('kv2').textContent=k.toFixed(1); draw(k); }; draw(2); })();
+/* SKILL 4: 계수의 합 1 */
+(function(){ const s=$('fSum'); const O=[40,160], A=[150,40], B=[300,120];
+  el('line',{x1:A[0]-(B[0]-A[0])*0.7,y1:A[1]-(B[1]-A[1])*0.7,x2:B[0]+(B[0]-A[0])*0.6,y2:B[1]+(B[1]-A[1])*0.6,stroke:DIM,'stroke-width':1},s);
+  arrow(s,O[0],O[1],A[0],A[1],INK,2); arrow(s,O[0],O[1],B[0],B[1],INK,2); const op=arrow(s,O[0],O[1],0,0,RED,2.4);
+  [O,A,B].forEach(p=>dot(s,p[0],p[1])); label(s,O[0]-16,O[1]+6,'O',INK,15); label(s,A[0]-4,A[1]-10,'A',INK,15); label(s,B[0]+6,B[1]+6,'B',INK,15);
+  const pd=dot(s,0,0,RED,4); const lp=label(s,0,0,'P',RED,15); const cap=el('text',{x:170,y:184,'text-anchor':'middle','font-size':12.5,class:'k',fill:RED},s);
+  function draw(t){ const P=[A[0]+(B[0]-A[0])*t,A[1]+(B[1]-A[1])*t]; op.setAttribute('x2',P[0]); op.setAttribute('y2',P[1]); pd.setAttribute('cx',P[0]); pd.setAttribute('cy',P[1]); lp.setAttribute('x',P[0]+4); lp.setAttribute('y',P[1]-10);
+    cap.textContent='OP = '+(1-t).toFixed(2)+' OA + '+t.toFixed(2)+' OB   (합 = 1)'; }
+  $('tr').oninput=e=>{ const t=+e.target.value; $('tv').textContent=t.toFixed(2); draw(t); }; draw(0.35); })();
+/* 활용 1: 삼각형 OAB */
+const T1={O:[40,200],A:[270,200],B:[110,30]}; T1.M=[T1.O[0]+(T1.A[0]-T1.O[0])*2/3,T1.O[1]+(T1.A[1]-T1.O[1])*2/3]; T1.N=[T1.O[0]+(T1.B[0]-T1.O[0])*2/3,T1.O[1]+(T1.B[1]-T1.O[1])*2/3];
+T1.C=[T1.O[0]+(T1.A[0]-T1.O[0])*0.4+(T1.B[0]-T1.O[0])*0.4, T1.O[1]+(T1.A[1]-T1.O[1])*0.4+(T1.B[1]-T1.O[1])*0.4];
+function triBase(hl){ const s=$('fTri'); s.innerHTML=''; const {O,A,B,M,N,C}=T1;
+  el('path',{d:`M${O} L${A} L${B} Z`,fill:'none',stroke:INK,'stroke-width':1.4},s);
+  const lw=k=>hl===k?2.6:1.2, lc=k=>hl===k?ORG:INK;
+  el('line',{x1:B[0],y1:B[1],x2:M[0],y2:M[1],stroke:lc('BM'),'stroke-width':lw('BM')},s); el('line',{x1:A[0],y1:A[1],x2:N[0],y2:N[1],stroke:lc('AN'),'stroke-width':lw('AN')},s);
+  arrow(s,O[0],O[1],A[0],A[1],RED,2.2); arrow(s,O[0],O[1],B[0],B[1],BLU,2.2); arrow(s,O[0],O[1],C[0],C[1],ORG,2.2);
+  vlab(s,150,222,'a',RED,14); vlab(s,54,112,'b',BLU,14);
+  [O,A,B,M,N,C].forEach(p=>dot(s,p[0],p[1],INK,3)); label(s,O[0]-18,O[1]+6,'O',INK,15); label(s,A[0]+6,A[1]+6,'A',INK,15); label(s,B[0]-4,B[1]-8,'B',INK,15); label(s,M[0]-6,M[1]+20,'M',INK,15); label(s,N[0]-20,N[1]+2,'N',INK,15); label(s,C[0]+8,C[1]-2,'C',INK,15);
+  if(hl==='BM'){ const t=el('text',{x:150,y:60,'font-size':12,class:'k',fill:ORG},s); t.textContent='OC = (3/2)m·OM + n·OB'; }
+  if(hl==='AN'){ const t=el('text',{x:150,y:60,'font-size':12,class:'k',fill:ORG},s); t.textContent='OC = m·OA + (3/2)n·ON'; } }
+triBase(); document.querySelectorAll('[data-hl]').forEach(b=>b.onclick=()=>triBase(b.dataset.hl==='0'?null:b.dataset.hl));
+/* 활용 2: 사면체 */
+(function(){ const s=$('fTet'); const O=[150,24], A=[36,196], B=[270,186], C=[190,120]; const mid=(p,q)=>[(p[0]+q[0])/2,(p[1]+q[1])/2]; const D=mid(A,C), E=mid(B,C); const F=[(A[0]+B[0]+C[0])/3,(A[1]+B[1]+C[1])/3];
+  el('path',{d:`M${A} L${B} L${C} Z`,fill:'rgba(18,135,106,.12)',stroke:'none'},s);
+  const seg=(p,q,dash)=>el('line',{x1:p[0],y1:p[1],x2:q[0],y2:q[1],stroke:INK,'stroke-width':dash?1.1:1.4,'stroke-dasharray':dash?'5 4':''},s);
+  seg(O,A); seg(O,B); seg(A,B); seg(O,C,true); seg(A,C,true); seg(B,C,true); seg(B,D,true); seg(A,E,true);
+  arrow(s,O[0],O[1],A[0],A[1],RED,2); arrow(s,O[0],O[1],B[0],B[1],BLU,2); arrow(s,O[0],O[1],C[0],C[1],VIO,2); arrow(s,O[0],O[1],F[0],F[1],ORG,2.2);
+  vlab(s,76,96,'a',RED,13); vlab(s,222,90,'b',BLU,13); vlab(s,180,70,'c',VIO,13);
+  [O,A,B,C,D,E,F].forEach(p=>dot(s,p[0],p[1],INK,2.8)); label(s,O[0]-4,O[1]-8,'O',INK,14); label(s,A[0]-18,A[1]+4,'A',INK,14); label(s,B[0]+6,B[1]+4,'B',INK,14); label(s,C[0]+6,C[1]-2,'C',INK,14); label(s,D[0]-18,D[1]+2,'D',INK,14); label(s,E[0]+6,E[1]-2,'E',INK,14); label(s,F[0]-4,F[1]+18,'F',INK,14); })();
 
-/* ═══════ k a 슬라이더 ═══════ */
-(function(){ const s=$('fK'); const O=[40,50]; arrow(s,O[0],O[1],O[0]+50,O[1],INK,2.2); vlab(s,O[0]+20,O[1]-9,'a',INK,15);
-  const ka=arrow(s,170,110,170,110,RED,2.4); const lb=el('g',{},s); const cap=el('text',{x:170,y:140,'text-anchor':'middle','font-size':12,class:'k',fill:RED},s); dot(s,170,110,INK,3);
-  function draw(k){ ka.setAttribute('x2',170+50*k); ka.style.opacity=Math.abs(k)<1e-9?0:1; lb.innerHTML=''; cap.textContent=k===0?'k = 0 이면 ka = 0':'크기 '+Math.abs(k)+'|a|'+(k>0?' · 같은 방향':' · 반대 방향');
-    vlab(lb,170+25*k-6,96,(k===1?'':k===-1?'−':k)+'a',RED,15); }
-  $('kr').oninput=e=>{ const k=+e.target.value; $('kv').textContent=k; draw(k); if(k<0) geoTask('mul-k'); }; draw(2); })();
-
-/* ═══════ 문제 01: 정육면체 12개 ═══════ */
-const CU=44, CX=30, CY=190; const P3=(x,y,z)=>[CX+x*CU+y*22, CY-z*CU-y*18];
-function cubeBase(){ const s=$('fCube'); s.innerHTML='';
-  const seg=(p,q,dash)=>el('line',{x1:p[0],y1:p[1],x2:q[0],y2:q[1],stroke:INK,'stroke-width':dash?1:1.1,'stroke-dasharray':dash?'4 3':'',opacity:dash?.7:.8},s);
-  /* 보이는 세 면(앞 y=0, 윗면 z=2, 오른쪽 x=3)의 칸 선 */
-  for(let x=0;x<=3;x++) for(let y=0;y<=2;y++) for(let z=0;z<=2;z++){
-    if(x<3&&(y===0||z===2)) seg(P3(x,y,z),P3(x+1,y,z)); if(y<2&&(z===2||x===3)) seg(P3(x,y,z),P3(x,y+1,z)); if(z<2&&(y===0||x===3)) seg(P3(x,y,z),P3(x,y,z+1)); }
-  /* 숨은 모서리 */
-  [[0,0,0,0,2,0],[0,2,0,3,2,0],[0,2,0,0,2,2]].forEach(e=>seg(P3(e[0],e[1],e[2]),P3(e[3],e[4],e[5]),true));
-  const o=[1,1,0]; const A=P3(...o); const pa=P3(2,1,0), pb=P3(1,0,0), pc=P3(1,1,1);
-  arrow(s,A[0],A[1],pa[0],pa[1],RED,2.2); arrow(s,A[0],A[1],pb[0],pb[1],BLU,2.2); arrow(s,A[0],A[1],pc[0],pc[1],VIO,2.2);
-  vlab(s,(A[0]+pa[0])/2-4,A[1]+16,'a',RED,14); vlab(s,(A[0]+pb[0])/2-16,(A[1]+pb[1])/2+16,'b',BLU,14); vlab(s,A[0]+5,(A[1]+pc[1])/2+4,'c',VIO,14); }
-cubeBase();
-function cubeChain(steps,fin,lab){ const s=$('fCube'); let i=0; const run=()=>{ if(i>=steps.length){ const r=arrow(s,...P3(...fin[0]),...P3(...fin[1]),RED,2.6); r.style.opacity=0; grow(r,.8,()=>{ const p=P3(...fin[1]); vlab(s,p[0]+lab[0],p[1]+lab[1],lab[2],RED,13); geoTask('mul-cube'); }); return; }
-  const st=steps[i++]; ghost(s,seg4(P3(...st.from[0]),P3(...st.from[1])),seg4(P3(...st.to[0]),P3(...st.to[1])),st.col,run); }; run(); }
-const o=[1,1,0];
-document.querySelectorAll('[data-cube]').forEach(b=>b.onclick=()=>{ const n=+b.dataset.cube;
-  if(n===1) cubeChain([{from:[o,[2,1,0]],to:[[0,0,0],[1,0,0]],col:RED},{from:[o,[2,1,0]],to:[[1,0,0],[2,0,0]],col:RED},{from:[o,[2,1,0]],to:[[2,0,0],[3,0,0]],col:RED}],[[0,0,0],[3,0,0]],[8,4,'3a']);
-  if(n===2) cubeChain([{from:[o,[2,1,0]],to:[[3,0,2],[2,0,2]],col:RED},{from:[o,[2,1,0]],to:[[2,0,2],[1,0,2]],col:RED},{from:[o,[1,1,1]],to:[[1,0,2],[1,0,1]],col:VIO}],[[3,0,2],[1,0,1]],[-46,-6,'−2a − c']);
-  if(n===3) cubeChain([{from:[o,[1,0,0]],to:[[0,0,0],[0,1,0]],col:BLU},{from:[o,[1,1,1]],to:[[0,1,0],[0,1,1]],col:VIO},{from:[o,[1,1,1]],to:[[0,1,1],[0,1,2]],col:VIO}],[[0,0,0],[0,1,2]],[-40,-8,'−b + 2c']); });
-$('cubeRe').onclick=cubeBase;
-
-/* ═══════ 02 평행 그림 ═══════ */
-const PAR={1:{a:[30,160,70,90],b:[130,180,210,40],lab:'b = 2a'},2:{a:[30,160,70,90],b:[230,40,170,145],lab:'b = −1.5a'}};
-function parBase(n){ const s=$('fP'+n); s.innerHTML=''; const d=PAR[n]; arrow(s,...d.a,INK,2.2); vlab(s,d.a[0]+4,d.a[1]-10,'a',INK,15); const bb=arrow(s,...d.b,RED,2.2); vlab(s,(d.b[0]+d.b[2])/2+10,(d.b[1]+d.b[3])/2,'b',RED,15); return bb; }
-parBase(1); parBase(2);
-document.querySelectorAll('[data-par]').forEach(bt=>bt.onclick=()=>{ const n=+bt.dataset.par; const s=$('fP'+n); const d=PAR[n]; parBase(n); const dx=d.a[0]-d.b[0], dy=d.a[1]-d.b[1];
-  ghost(s,d.b,[d.b[0]+dx,d.b[1]+dy,d.b[2]+dx,d.b[3]+dy],RED,()=>{ vlab(s,d.b[2]+dx+(n===1?8:-70),d.b[3]+dy+(n===1?0:24),d.lab,RED,15); geoTask('par-fig'); }); });
-
-/* ═══════ 문제 04: 삼각형 ═══════ */
-const TR={A:[130,30],B:[40,190],C:[230,190]}; TR.M=[(TR.A[0]+TR.B[0])/2,(TR.A[1]+TR.B[1])/2]; TR.N=[(TR.A[0]+TR.C[0])/2,(TR.A[1]+TR.C[1])/2];
-function triBase(){ const s=$('fTri'); s.innerHTML=''; const {A,B,C,M,N}=TR; el('path',{d:`M${A} L${B} L${C} Z`,fill:'none',stroke:INK,'stroke-width':1.4},s); el('line',{x1:M[0],y1:M[1],x2:N[0],y2:N[1],stroke:INK,'stroke-width':1.3},s);
-  arrow(s,A[0],A[1],B[0],B[1],RED,2.2); arrow(s,A[0],A[1],C[0],C[1],BLU,2.2); vlab(s,66,100,'a',RED,15); vlab(s,186,100,'b',BLU,15);
-  [A,B,C,M,N].forEach(p=>dot(s,p[0],p[1],INK,2.8)); label(s,A[0]-5,A[1]-8,'A',INK,15); label(s,B[0]-18,B[1]+6,'B',INK,15); label(s,C[0]+6,C[1]+6,'C',INK,15); label(s,M[0]-20,M[1]+4,'M',INK,15); label(s,N[0]+8,N[1]+4,'N',INK,15); }
-triBase();
-function triBC(){ triBase(); const s=$('fTri'); const {A,B,C}=TR; ghost(s,seg4(A,B),seg4(B,A),RED,()=>{ vlab(s,70,120,'−a',RED,13); const bc=arrow(s,B[0],B[1],C[0],C[1],ORG,2.4); bc.style.opacity=0; grow(bc,.8,()=>vlab(s,118,212,'−a + b',ORG,13)); }); }
-function triMN(){ triBase(); const s=$('fTri'); const {A,B,C,M,N}=TR; ghost(s,seg4(A,B),seg4(M,A),RED,()=>{ vlab(s,96,70,'−½a',RED,12); ghost(s,seg4(A,C),seg4(A,N),BLU,()=>{ vlab(s,160,60,'½b',BLU,12); const mn=arrow(s,M[0],M[1],N[0],N[1],ORG,2.4); mn.style.opacity=0; grow(mn,.8,()=>{ vlab(s,118,130,'−½a + ½b',ORG,12); geoTask('par-q4'); }); }); }); }
-
-/* ═══════ 03 한 직선 위의 세 점 ═══════ */
-(function(){ const s=$('fLine'); const A=[70,180], u=[0.84,-0.54], L=80; const B=[A[0]+u[0]*L,A[1]+u[1]*L];
-  el('line',{x1:A[0]-u[0]*110,y1:A[1]-u[1]*110,x2:A[0]+u[0]*300,y2:A[1]+u[1]*300,stroke:DIM,'stroke-width':1},s);
-  const ac=arrow(s,A[0],A[1],B[0],B[1],RED,3); const ab=arrow(s,A[0],A[1],B[0],B[1],INK,2.2); dot(s,A[0],A[1]); dot(s,B[0],B[1]); label(s,A[0]-6,A[1]+20,'A',INK,16); label(s,B[0]-2,B[1]+20,'B',INK,16);
-  const cd=dot(s,0,0,RED,4); const lc=label(s,0,0,'C',RED,16); const cap=el('text',{x:170,y:30,'text-anchor':'middle','font-size':13,class:'k',fill:RED},s);
-  function draw(k){ const C=[A[0]+u[0]*L*k,A[1]+u[1]*L*k]; ac.setAttribute('x2',C[0]); ac.setAttribute('y2',C[1]); ac.style.opacity=.55; cd.setAttribute('cx',C[0]); cd.setAttribute('cy',C[1]); lc.setAttribute('x',C[0]-2); lc.setAttribute('y',C[1]-10);
-    cap.innerHTML=''; const t=cap; t.textContent='AC = '+k.toFixed(1)+' AB'; }
-  $('kr2').oninput=e=>{ const k=+e.target.value; $('kv2').textContent=k.toFixed(1); draw(k); if(k<0) geoTask('col-k'); }; draw(2); })();
-
-/* ═══════ 예제 3 ═══════ */
-const CO={O:[50,150],a:[55,-28],b:[18,-58]}; CO.A=[CO.O[0]+CO.a[0],CO.O[1]+CO.a[1]]; CO.B=[CO.O[0]+CO.b[0],CO.O[1]+CO.b[1]]; CO.C=[CO.O[0]+3*CO.a[0]-2*CO.b[0],CO.O[1]+3*CO.a[1]-2*CO.b[1]];
-function colBase(){ const s=$('fCol'); s.innerHTML=''; const {O,A,B,C}=CO; arrow(s,O[0],O[1],A[0],A[1],RED,2.2); arrow(s,O[0],O[1],B[0],B[1],BLU,2.2); vlab(s,74,146,'a',RED,14); vlab(s,42,114,'b',BLU,14);
-  [O,A,B].forEach(p=>dot(s,p[0],p[1],INK,3)); label(s,O[0]-18,O[1]+6,'O',INK,15); label(s,A[0]+2,A[1]+18,'A',INK,15); label(s,B[0]-6,B[1]-8,'B',INK,15); return s; }
-colBase();
-let colDone=false;
-function colAnim(){ if(colDone) return; colDone=true; const s=colBase(); const {O,A,B,C,a,b}=CO; const add=(p,v,k)=>[p[0]+v[0]*k,p[1]+v[1]*k];
-  const steps=[[O,add(O,a,1),a,1,RED],[add(O,a,1),add(O,a,2),a,1,RED],[add(O,a,2),add(O,a,3),a,1,RED],[add(O,a,3),add(add(O,a,3),b,-1),b,-1,BLU],[add(add(O,a,3),b,-1),C,b,-1,BLU]];
-  let i=0; const run=()=>{ if(i>=steps.length){ dot(s,C[0],C[1],INK,3); label(s,C[0]+6,C[1]+6,'C',INK,15); const oc=arrow(s,O[0],O[1],C[0],C[1],ORG,2.4); oc.style.opacity=0; grow(oc,.8,()=>{ vlab(s,150,206,'3a − 2b',ORG,13);
-      const d=[C[0]-B[0],C[1]-B[1]], n=Math.hypot(d[0],d[1]); const ln=el('line',{x1:B[0]-d[0]/n*40,y1:B[1]-d[1]/n*40,x2:C[0]+d[0]/n*30,y2:C[1]+d[1]/n*30,stroke:GRN,'stroke-width':1.6,'stroke-dasharray':'6 4'},s); ln.style.opacity=0; ln.style.transition='opacity .8s'; setTimeout(()=>{ ln.style.opacity=1; geoTask('col-ex3'); },100); }); return; }
-    const st=steps[i++]; const from=st[3]>0?seg4(O,add(O,st[2],1)):seg4(O,add(O,st[2],1)); ghost(s,from,seg4(st[0],st[1]),st[4],run); }; run(); }
-$('bColRe').onclick=()=>{ colDone=false; colAnim(); };
 </script>
 <script>window.PAGE_ID="pvecmul";</script>
 <script src="nav.js"></script>
