@@ -15,7 +15,7 @@ if (localStorage.getItem('geoAppOk') !== '1') location.replace('index.html');
 <meta name="theme-color" content="#B32017">
 <title>벡터의 실수배</title>
 <link rel="stylesheet" media="print" onload="this.media='all'"
-  href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap">
+  href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Nanum+Myeongjo:wght@400;700&display=swap">
 <style>
 :root{ --paper:#EFEFE3; --ink:#23241D; --dim:#A8A79A; --line:#DCDACD; --line2:#C7C5B6;
   --acc:#2F45EC; --acc2:#1B2FC4; --card:#F5F5EC; --org:#E0891A; --grn:#12876A; --red:#D9463F; --vio:#7A3FB5; }
@@ -147,6 +147,20 @@ svg .k{font-family:'IBM Plex Sans KR','Apple SD Gothic Neo',system-ui,sans-serif
 .col .ln{font-size:13.5px; line-height:2.2; display:flex; align-items:center; gap:6px; flex-wrap:wrap}
 .col .ln.ind{padding-left:16px}
 .col .cm{font-size:12.5px; color:var(--dim)}
+
+.tbox{border-radius:10px; overflow:hidden; margin:10px 0 12px; box-shadow:0 1px 3px rgba(35,36,29,.08)}
+.tbox .hd{background:#6E9FD3; color:#fff; font-weight:700; font-size:14.5px; padding:6px 16px; font-family:'IBM Plex Sans KR','Apple SD Gothic Neo',system-ui,sans-serif}
+.tbox .bd{background:#DCE8F4; padding:12px 18px 12px; font-family:'Nanum Myeongjo','KoPubBatang',Batang,serif; font-size:15px; line-height:2.15; color:#1e1f1a}
+.tbox .bd .vec,.tbox .bd .sym,.tbox .bd .abs,.tbox .bd i.m{font-family:'Times New Roman',Times,Georgia,serif; font-size:1.05em}
+.tbox .bd .cn{background:#2F5FA8; margin-right:6px; vertical-align:1px}
+.tbox .bd .in{padding-left:26px}
+.tbox .bd .clk{cursor:pointer; border-radius:6px; padding:0 6px; margin-left:-6px; transition:background .2s; display:inline-block}
+.tbox .bd .clk:hover{background:rgba(255,255,255,.55)} .tbox .bd .clk.on{background:rgba(255,255,255,.75)}
+.gb.ans{min-width:0; padding:0 12px; height:30px; font-size:12.5px}
+.qline{display:flex; align-items:center; gap:10px; flex-wrap:wrap; font-size:14px; line-height:2.1; margin:4px 0}
+.qline .sym{font-size:1.1em}
+
+.cn{display:inline-flex; align-items:center; justify-content:center; width:19px; height:19px; border-radius:50%; background:var(--acc); color:#fff; font-size:11px; font-family:'IBM Plex Mono',monospace; flex:none; vertical-align:2px}
 </style>
 </head>
 <body>
@@ -173,50 +187,57 @@ svg .k{font-family:'IBM Plex Sans KR','Apple SD Gothic Neo',system-ui,sans-serif
 <div class="pane on" data-p="a">
 
   <div class="card">
-    <div class="sec"><span class="n">1</span><h3>벡터의 실수배</h3></div>
-    <div class="two">
-      <div class="txt">
-        영벡터가 아닌 벡터 <span class='vec'><i>a</i></span>에 대하여 <span class='sym'><span class='vec'><i>a</i></span> + <span class='vec'><i>a</i></span></span>는 <span class='vec'><i>a</i></span>와 방향이 같고 크기가 2배인 벡터이다. 이것을 <button class='gb sm' data-w="<span class='sym'>2<span class='vec'><i>a</i></span></span>"></button>로 나타낸다.<br>
-        <span class='sym'>(−<span class='vec'><i>a</i></span>) + (−<span class='vec'><i>a</i></span>)</span>는 <span class='vec'><i>a</i></span>와 방향이 반대이고 크기가 2배인 벡터이다. 이것을 <button class='gb sm' data-w="<span class='sym'>−2<span class='vec'><i>a</i></span></span>"></button>로 나타낸다.
+    <div class="two top">
+      <div>
+        <div class="tbox"><div class="hd">벡터의 실수배</div><div class="bd">
+          실수 <i class='m'>k</i>와 벡터 <span class='vec'><i>a</i></span>에 대하여<br>
+          <span class="cn">1</span><span class='vec'><i>a</i></span> ≠ <span class='vec'><span class='r'>0</span></span>일 때,<br>
+          <div class="in"><span class="clk" data-k="pos">(i) <i class='m'>k</i> &gt; 0이면, <span class='sym'><i class='m'>k</i><span class='vec'><i>a</i></span></span>는 <span class='vec'><i>a</i></span>와 방향이 같고 크기가 <span class='sym'><i class='m'>k</i><span class='abs'>|</span><span class='vec'><i>a</i></span><span class='abs'>|</span></span>인 벡터이다.</span></div>
+          <div class="in"><span class="clk" data-k="neg">(ii) <i class='m'>k</i> &lt; 0이면, <span class='sym'><i class='m'>k</i><span class='vec'><i>a</i></span></span>는 <span class='vec'><i>a</i></span>와 방향이 반대이고 크기가 <span class='sym'><span class='abs'>|</span><i class='m'>k</i><span class='abs'>|</span><span class='abs'>|</span><span class='vec'><i>a</i></span><span class='abs'>|</span></span>인 벡터이다.</span></div>
+          <div class="in">(iii) <i class='m'>k</i> = 0이면, <span class='sym'><i class='m'>k</i><span class='vec'><i>a</i></span></span> = <span class='vec'><span class='r'>0</span></span>이다.</div>
+          <span class="cn">2</span><span class='vec'><i>a</i></span> = <span class='vec'><span class='r'>0</span></span>일 때, <span class='sym'><i class='m'>k</i><span class='vec'><i>a</i></span></span> = <span class='vec'><span class='r'>0</span></span>이다.
+        </div></div>
+        <div class="pt">참고&nbsp; <span class='sym'>1<span class='vec'><i>a</i></span></span> = <span class='vec'><i>a</i></span>, &nbsp;<span class='sym'>(−1)<span class='vec'><i>a</i></span></span> = <span class='sym'>−<span class='vec'><i>a</i></span></span>, &nbsp;<span class='abs'>|</span><span class='sym'><i class='m'>k</i><span class='vec'><i>a</i></span></span><span class='abs'>|</span> = <span class='abs'>|</span><i class='m'>k</i><span class='abs'>|</span><span class='abs'>|</span><span class='vec'><i>a</i></span><span class='abs'>|</span></div>
       </div>
-      <div class="fig"><svg viewBox="0 0 340 130" id="f2a"></svg></div>
+      <div class="fig"><svg viewBox="0 0 340 300" id="fKa"></svg></div>
     </div>
-    <div class="box">
-      <div class="bt">벡터의 실수배</div>
-      실수 <i class='m'>k</i>와 벡터 <span class='vec'><i>a</i></span>에 대하여<br>
-      <span class="k">1</span><span class='vec'><i>a</i></span> ≠ <span class='vec'><span class='r'>0</span></span>일 때,<br>
-      <div style="padding-left:18px">(i) <i class='m'>k</i> &gt; 0이면, <span class='sym'><i class='m'>k</i><span class='vec'><i>a</i></span></span>는 <span class='vec'><i>a</i></span>와 방향이 <button class='gb sm' data-w="같고"></button> 크기가 <button class='gb sm' data-w="<span class='sym'><i class='m'>k</i><span class='abs'>|</span><span class='vec'><i>a</i></span><span class='abs'>|</span></span>"></button>인 벡터이다.<br>
-      (ii) <i class='m'>k</i> &lt; 0이면, <span class='sym'><i class='m'>k</i><span class='vec'><i>a</i></span></span>는 <span class='vec'><i>a</i></span>와 방향이 <button class='gb sm' data-w="반대이고"></button> 크기가 <button class='gb sm' data-w="<span class='sym'><span class='abs'>|</span><i class='m'>k</i><span class='abs'>|</span><span class='abs'>|</span><span class='vec'><i>a</i></span><span class='abs'>|</span></span>"></button>인 벡터이다.<br>
-      (iii) <i class='m'>k</i> = 0이면, <span class='sym'><i class='m'>k</i><span class='vec'><i>a</i></span></span> = <button class='gb sm' data-w="<span class='vec'><span class='r'>0</span></span>"></button>이다.</div>
-      <span class="k">2</span><span class='vec'><i>a</i></span> = <span class='vec'><span class='r'>0</span></span>일 때, <span class='sym'><i class='m'>k</i><span class='vec'><i>a</i></span></span> = <button class='gb sm' data-w="<span class='vec'><span class='r'>0</span></span>"></button>이다.
-    </div>
-    <div class="pt">참고&nbsp; <span class='sym'>1<span class='vec'><i>a</i></span></span> = <span class='vec'><i>a</i></span>, &nbsp;<span class='sym'>(−1)<span class='vec'><i>a</i></span></span> = <span class='sym'>−<span class='vec'><i>a</i></span></span>, &nbsp;<span class='abs'>|</span><span class='sym'><i class='m'>k</i><span class='vec'><i>a</i></span></span><span class='abs'>|</span> = <span class='abs'>|</span><i class='m'>k</i><span class='abs'>|</span><span class='abs'>|</span><span class='vec'><i>a</i></span><span class='abs'>|</span></div>
-    <div class="chk">
-      <span class="lb">스스로 확인</span>(1) 벡터 <span class='vec'><i>a</i></span>와 방향이 같고 크기가 <span class='abs'>|</span><span class='vec'><i>a</i></span><span class='abs'>|</span>의 <span class='fr'><span>1</span><span>3</span></span>배인 벡터는 <button class='gb sm' data-w="<span class='sym'><span class='fr'><span>1</span><span>3</span></span><span class='vec'><i>a</i></span></span>"></button>이다.<br>
-      <span class="lb" style="visibility:hidden">스스로 확인</span>(2) 벡터 <span class='vec'><i>a</i></span>와 방향이 반대이고 크기가 <span class='abs'>|</span><span class='vec'><i>a</i></span><span class='abs'>|</span>의 4배인 벡터는 <button class='gb sm' data-w="<span class='sym'>−4<span class='vec'><i>a</i></span></span>"></button>이다.
+  </div>
+
+  <div class="card q">
+    <div class="qrow">
+      <div class="qt"><span class="badge">문제 01</span>오른쪽 그림은 정육면체 12개를 이어 붙여 만든 직육면체이다. 세 벡터 <span class='vec'><i>a</i></span>, <span class='vec'><i>b</i></span>, <span class='vec'><i>c</i></span>가 오른쪽과 같을 때, 다음 벡터를 그림 위에 나타내시오.
+        <div class="sub2">
+          <div>(1) <span class='sym'>3<span class='vec'><i>a</i></span></span> <button class="btn" data-cube="1">그림</button></div>
+          <div>(2) <span class='sym'>−2<span class='vec'><i>a</i></span> − <span class='vec'><i>c</i></span></span> <button class="btn" data-cube="2">그림</button></div>
+          <div>(3) <span class='sym'>−<span class='vec'><i>b</i></span> + 2<span class='vec'><i>c</i></span></span> <button class="btn" data-cube="3">그림</button></div>
+          <div><button class="btn" id="cubeRe">다시</button></div>
+        </div>
+      </div>
+      <div class="qfig"><svg viewBox="0 0 300 230" id="fCube"></svg></div>
     </div>
   </div>
 
   <div class="card">
-    <div class="sec"><span class="n">2</span><h3>실수배에 대한 성질</h3></div>
-    <div class="two">
-      <div class="txt">두 벡터 <span class='vec'><i>a</i></span>, <span class='vec'><i>b</i></span>에 대하여 <span class='sym'>2(3<span class='vec'><i>a</i></span>)</span>, <span class='sym'>2<span class='vec'><i>a</i></span> + 3<span class='vec'><i>a</i></span></span>, <span class='sym'>3(<span class='vec'><i>a</i></span> + <span class='vec'><i>b</i></span>)</span>는 각각 <button class='gb sm' data-w="<span class='sym'>6<span class='vec'><i>a</i></span></span>"></button>, <button class='gb sm' data-w="<span class='sym'>5<span class='vec'><i>a</i></span></span>"></button>, <button class='gb sm' data-w="<span class='sym'>3<span class='vec'><i>a</i></span> + 3<span class='vec'><i>b</i></span></span>"></button>이다.</div>
-      <div class="fig"><svg viewBox="0 0 340 150" id="fProp"></svg></div>
-    </div>
-    <div class="box">
-      <div class="bt">벡터의 실수배에 대한 성질</div>
-      두 실수 <i class='m'>k</i>, <i class='m'>l</i>과 두 벡터 <span class='vec'><i>a</i></span>, <span class='vec'><i>b</i></span>에 대하여<br>
-      <span class="k">1</span><span class='sym'><i class='m'>k</i>(<i class='m'>l</i><span class='vec'><i>a</i></span>)</span> = <button class='gb sm' data-w="<span class='sym'>(<i class='m'>k</i><i class='m'>l</i>)<span class='vec'><i>a</i></span></span>"></button> &nbsp;(결합법칙)<br>
-      <span class="k">2</span><span class='sym'>(<i class='m'>k</i> + <i class='m'>l</i>)<span class='vec'><i>a</i></span></span> = <button class='gb sm' data-w="<span class='sym'><i class='m'>k</i><span class='vec'><i>a</i></span> + <i class='m'>l</i><span class='vec'><i>a</i></span></span>"></button>, &nbsp; <span class='sym'><i class='m'>k</i>(<span class='vec'><i>a</i></span> + <span class='vec'><i>b</i></span>)</span> = <button class='gb sm' data-w="<span class='sym'><i class='m'>k</i><span class='vec'><i>a</i></span> + <i class='m'>k</i><span class='vec'><i>b</i></span></span>"></button> &nbsp;(분배법칙)
-    </div>
-    <div class="txt">벡터의 실수배에 대한 성질을 이용하면 벡터의 연산은 <span class="hl">다항식의 연산과 같은 방법</span>으로 할 수 있다.</div>
-    <div class="ex" style="margin-top:8px">
-      <div class="ln"><span class="badge">예제 1</span><span class='sym'>3(2<span class='vec'><i>a</i></span> − 3<span class='vec'><i>b</i></span>) − 2(<span class='vec'><i>a</i></span> + 2<span class='vec'><i>b</i></span>)</span> = <span class='sym'>6<span class='vec'><i>a</i></span> − 9<span class='vec'><i>b</i></span> − 2<span class='vec'><i>a</i></span> − 4<span class='vec'><i>b</i></span></span> = <span class='sym'>(6 − 2)<span class='vec'><i>a</i></span> + (−9 − 4)<span class='vec'><i>b</i></span></span> = <button class='gb' data-w="<span class='sym'>4<span class='vec'><i>a</i></span> − 13<span class='vec'><i>b</i></span></span>"></button></div>
-      <div class="ln"><span class="badge">문제 02</span>(1) <span class='sym'>2(<span class='vec'><i>a</i></span> − 4<span class='vec'><i>b</i></span>) − 3(2<span class='vec'><i>a</i></span> − 3<span class='vec'><i>b</i></span>)</span> = <button class='gb' data-w="<span class='sym'>−4<span class='vec'><i>a</i></span> + <span class='vec'><i>b</i></span></span>"></button> &nbsp;&nbsp; (2) <span class='sym'>−<span class='fr'><span>1</span><span>3</span></span>(−<span class='vec'><i>a</i></span> + 3<span class='vec'><i>b</i></span>) + <span class='fr'><span>1</span><span>2</span></span>(−2<span class='vec'><i>a</i></span> − <span class='vec'><i>b</i></span>)</span> = <button class='gb' data-w="<span class='sym'>−<span class='fr'><span>2</span><span>3</span></span><span class='vec'><i>a</i></span> − <span class='fr'><span>3</span><span>2</span></span><span class='vec'><i>b</i></span></span>"></button></div>
-      <div class="ln"><span class="badge">문제 03</span>다음 등식을 만족시키는 벡터 <span class='vec'><i>x</i></span>를 <span class='vec'><i>a</i></span>, <span class='vec'><i>b</i></span>로 나타내면 &nbsp;(1) <span class='sym'>3<span class='vec'><i>x</i></span> − 4<span class='vec'><i>a</i></span> = 5<span class='vec'><i>a</i></span> − 3<span class='vec'><i>b</i></span></span> 에서 <span class='vec'><i>x</i></span> = <button class='gb' data-w="<span class='sym'>3<span class='vec'><i>a</i></span> − <span class='vec'><i>b</i></span></span>"></button> &nbsp;&nbsp; (2) <span class='sym'>6<span class='vec'><i>a</i></span> − 2<span class='vec'><i>x</i></span> = −3(<span class='vec'><i>x</i></span> + 9<span class='vec'><i>b</i></span>)</span> 에서 <span class='vec'><i>x</i></span> = <button class='gb' data-w="<span class='sym'>−6<span class='vec'><i>a</i></span> − 27<span class='vec'><i>b</i></span></span>"></button></div>
+    <div class="two top">
+      <div>
+        <div class="tbox"><div class="hd">벡터의 실수배에 대한 성질</div><div class="bd">
+          두 실수 <i class='m'>k</i>, <i class='m'>l</i>과 두 벡터 <span class='vec'><i>a</i></span>, <span class='vec'><i>b</i></span>에 대하여<br>
+          <span class="cn">1</span><span class='sym'><i class='m'>k</i>(<i class='m'>l</i><span class='vec'><i>a</i></span>)</span> = <span class='sym'>(<i class='m'>k</i><i class='m'>l</i>)<span class='vec'><i>a</i></span></span> &nbsp;&nbsp;(결합법칙)<br>
+          <span class="clk" id="clkDist"><span class="cn">2</span><span class='sym'>(<i class='m'>k</i> + <i class='m'>l</i>)<span class='vec'><i>a</i></span></span> = <span class='sym'><i class='m'>k</i><span class='vec'><i>a</i></span> + <i class='m'>l</i><span class='vec'><i>a</i></span></span><br>
+          <span style="padding-left:26px"><span class='sym'><i class='m'>k</i>(<span class='vec'><i>a</i></span> + <span class='vec'><i>b</i></span>)</span> = <span class='sym'><i class='m'>k</i><span class='vec'><i>a</i></span> + <i class='m'>k</i><span class='vec'><i>b</i></span></span></span> &nbsp;&nbsp;(분배법칙)</span>
+        </div></div>
+      </div>
+      <div class="fig"><svg viewBox="0 0 360 230" id="fProp"></svg></div>
     </div>
   </div>
 
+  <div class="card q">
+    <div class="qline"><span class="badge">예제 1</span><span class='sym'>3(2<span class='vec'><i>a</i></span> − 3<span class='vec'><i>b</i></span>) − 2(<span class='vec'><i>a</i></span> + 2<span class='vec'><i>b</i></span>)</span>를 간단히 하시오. <button class="gb ans" data-w="<span class='sym'>4<span class='vec'><i>a</i></span> − 13<span class='vec'><i>b</i></span></span>">답</button></div>
+    <div class="qline"><span class="badge">문제 02</span>다음을 간단히 하시오.</div>
+    <div class="qline" style="padding-left:18px">(1) <span class='sym'>2(<span class='vec'><i>a</i></span> − 4<span class='vec'><i>b</i></span>) − 3(2<span class='vec'><i>a</i></span> − 3<span class='vec'><i>b</i></span>)</span> <button class="gb ans" data-w="<span class='sym'>−4<span class='vec'><i>a</i></span> + <span class='vec'><i>b</i></span></span>">답</button> &nbsp;&nbsp; (2) <span class='sym'>−<span class='fr'><span>1</span><span>3</span></span>(−<span class='vec'><i>a</i></span> + 3<span class='vec'><i>b</i></span>) + <span class='fr'><span>1</span><span>2</span></span>(−2<span class='vec'><i>a</i></span> − <span class='vec'><i>b</i></span>)</span> <button class="gb ans" data-w="<span class='sym'>−<span class='fr'><span>2</span><span>3</span></span><span class='vec'><i>a</i></span> − <span class='fr'><span>3</span><span>2</span></span><span class='vec'><i>b</i></span></span>">답</button></div>
+    <div class="qline"><span class="badge">문제 03</span>다음 등식을 만족시키는 벡터 <span class='vec'><i>x</i></span>를 두 벡터 <span class='vec'><i>a</i></span>, <span class='vec'><i>b</i></span>로 나타내시오.</div>
+    <div class="qline" style="padding-left:18px">(1) <span class='sym'>3<span class='vec'><i>x</i></span> − 4<span class='vec'><i>a</i></span> = 5<span class='vec'><i>a</i></span> − 3<span class='vec'><i>b</i></span></span> <button class="gb ans" data-w="<span class='sym'>3<span class='vec'><i>a</i></span> − <span class='vec'><i>b</i></span></span>">답</button> &nbsp;&nbsp; (2) <span class='sym'>6<span class='vec'><i>a</i></span> − 2<span class='vec'><i>x</i></span> = −3(<span class='vec'><i>x</i></span> + 9<span class='vec'><i>b</i></span>)</span> <button class="gb ans" data-w="<span class='sym'>−6<span class='vec'><i>a</i></span> − 27<span class='vec'><i>b</i></span></span>">답</button></div>
+  </div>
   <div class="card">
     <div class="sec"><span class="n">3</span><h3>두 벡터의 평행</h3></div>
     <div class="two">
@@ -399,20 +420,54 @@ function fill(b){ if(b.classList.contains('done')) return false; b.classList.add
 blanks.forEach(b=>{ b.onclick=()=>fill(b); });
 const VIO='#7A3FB5'; MK[VIO]='url(#ahV)';
 
-/* 1. a, 2a, −2a */
-(function(){ const s=$('f2a'); arrow(s,40,30,120,30,INK,2.2); vlab(s,76,22,'a',INK,15);
-  arrow(s,40,70,200,70,RED,2.4); el('line',{x1:120,y1:64,x2:120,y2:76,stroke:RED,'stroke-width':1.2},s); vlab(s,112,60,'2a',RED,15);
-  arrow(s,300,110,140,110,BLU,2.4); el('line',{x1:220,y1:104,x2:220,y2:116,stroke:BLU,'stroke-width':1.2},s); vlab(s,206,100,'−2a',BLU,15); })();
-/* 2. 성질 그림 */
-(function(){ const s=$('fProp'); const u=[18,-32];
-  arrow(s,30,140,30+u[0]*3,140+u[1]*3,INK,2); arrow(s,30+u[0]*3,140+u[1]*3,30+u[0]*6,140+u[1]*6,INK,2); arrow(s,44,140,44+u[0]*6,140+u[1]*6,RED,2.2);
-  vlab(s,14,96,'3a',INK,12); vlab(s,34,38,'3a',INK,12); vlab(s,98,70,'6a',RED,12);
-  arrow(s,150,140,150+u[0]*2,140+u[1]*2,INK,2); arrow(s,150+u[0]*2,140+u[1]*2,150+u[0]*5,140+u[1]*5,INK,2); arrow(s,164,140,164+u[0]*5,140+u[1]*5,RED,2.2);
-  vlab(s,134,110,'2a',INK,12); vlab(s,154,44,'3a',INK,12); vlab(s,216,80,'5a',RED,12);
-  const A=[236,140], va=[14,-26], vb=[30,4]; const P=[A[0]+va[0]*3,A[1]+va[1]*3], Q=[A[0]+vb[0]*3,A[1]+vb[1]*3], Rr=[P[0]+vb[0]*3,P[1]+vb[1]*3];
-  el('path',{d:`M${P} L${Rr} L${Q}`,fill:'none',stroke:DIM,'stroke-width':1,'stroke-dasharray':'4 3'},s);
-  arrow(s,A[0],A[1],P[0],P[1],RED,2); arrow(s,A[0],A[1],Q[0],Q[1],BLU,2); arrow(s,A[0],A[1],Rr[0],Rr[1],ORG,2.2);
-  vlab(s,A[0]+4,A[1]-40,'3a',RED,11); vlab(s,A[0]+40,A[1]+20,'3b',BLU,11); vlab(s,A[0]+70,A[1]-44,'3a + 3b',ORG,11); })();
+/* 1. ka : (i) 누르면 2a, (ii) 누르면 −2a — 교과서 그림처럼 */
+(function(){ const s=$('fKa'); const u=[0.5,-0.866], L=84;
+  (function(){ const A=[40,200]; arrow(s,A[0],A[1],A[0]+u[0]*L,A[1]+u[1]*L,INK,2.2); vlab(s,A[0]-2,A[1]-30,'a',INK,16); })();
+  function two(sign){ const col=INK; if(sign>0){ const A=[130,250]; const B=[A[0]+u[0]*L,A[1]+u[1]*L], C=[A[0]+u[0]*2*L,A[1]+u[1]*2*L];
+      const a1=arrow(s,A[0],A[1],B[0],B[1],col,2.2); vlab(s,A[0]+6,A[1]-38,'a',col,16);
+      a1.style.opacity=0; grow(a1,.6,()=>{ const a2=arrow(s,B[0],B[1],C[0],C[1],col,2.2); a2.style.opacity=0; grow(a2,.6,()=>{ vlab(s,B[0]+6,B[1]-38,'a',col,16); vlab(s,B[0]+12,B[1]+8,'2a',col,17); geoTask('mul-k'); }); }); }
+    else{ const A=[310,80]; const B=[A[0]-u[0]*L,A[1]-u[1]*L], C=[A[0]-u[0]*2*L,A[1]-u[1]*2*L];
+      const a1=arrow(s,A[0],A[1],B[0],B[1],col,2.2); a1.style.opacity=0; grow(a1,.6,()=>{ vlab(s,A[0]-52,A[1]+30,'−a',col,16); const a2=arrow(s,B[0],B[1],C[0],C[1],col,2.2); a2.style.opacity=0; grow(a2,.6,()=>{ vlab(s,B[0]-56,B[1]+30,'−a',col,16); vlab(s,B[0]+8,B[1]+6,'−2a',col,17); geoTask('mul-k'); }); }); } }
+  let done={pos:false,neg:false};
+  document.querySelectorAll('[data-k]').forEach(c=>c.onclick=()=>{ const kk=c.dataset.k; if(done[kk]) return; done[kk]=true; c.classList.add('on'); two(kk==='pos'?1:-1); }); })();
+
+/* 2. 성질 그림: ❷ 누르면 3a, 3b, 3a+3b */
+(function(){ const s=$('fProp'); const A=[30,200], va=[16,-30], vb=[34,0];
+  const P=k=>[A[0]+va[0]*k,A[1]+va[1]*k], Q=k=>[A[0]+vb[0]*k,A[1]+vb[1]*k], Rr=(i,j)=>[A[0]+va[0]*i+vb[0]*j,A[1]+va[1]*i+vb[1]*j];
+  function base(){ s.innerHTML=''; arrow(s,A[0],A[1],P(1)[0],P(1)[1],INK,2); arrow(s,A[0],A[1],Q(1)[0],Q(1)[1],INK,2); vlab(s,A[0]-6,A[1]-26,'a',INK,15); vlab(s,A[0]+10,A[1]+22,'b',INK,15); dot(s,A[0],A[1]); }
+  base();
+  $('clkDist').onclick=()=>{ if($('clkDist').classList.contains('on')) return; $('clkDist').classList.add('on'); base();
+    el('path',{d:`M${P(1)} L${Rr(1,1)} L${Q(1)}`,fill:'none',stroke:DIM,'stroke-width':1,'stroke-dasharray':'4 3'},s);
+    const ab=arrow(s,A[0],A[1],Rr(1,1)[0],Rr(1,1)[1],INK,1.8); ab.style.opacity=0;
+    grow(ab,.6,()=>{ vlab(s,Rr(1,1)[0]-34,Rr(1,1)[1]-12,'a + b',INK,13);
+      const a3=arrow(s,A[0],A[1],P(3)[0],P(3)[1],RED,3); a3.style.opacity=0; grow(a3,.8,()=>{ vlab(s,P(2)[0]-30,P(2)[1]+6,'3a',RED,15);
+        const b3=arrow(s,A[0],A[1],Q(3)[0],Q(3)[1],BLU,3); b3.style.opacity=0; grow(b3,.8,()=>{ vlab(s,Q(2)[0]-6,Q(2)[1]+24,'3b',BLU,15);
+          el('path',{d:`M${P(3)} L${Rr(3,3)} L${Q(3)}`,fill:'none',stroke:DIM,'stroke-width':1,'stroke-dasharray':'4 3'},s);
+          const s3=arrow(s,A[0],A[1],Rr(3,3)[0],Rr(3,3)[1],ORG,3); s3.style.opacity=0; grow(s3,.9,()=>{ vlab(s,Rr(2,2)[0]+10,Rr(2,2)[1]+22,'3a + 3b',ORG,15); geoTask('mul-prop'); }); }); }); }); }; })();
+
+/* ═══════ 문제 01: 정육면체 12개 ═══════ */
+const CU=44, CX=30, CY=190; const P3=(x,y,z)=>[CX+x*CU+y*22, CY-z*CU-y*18];
+function cubeBase(){ const s=$('fCube'); s.innerHTML='';
+  const poly=(pts,fill)=>el('polygon',{points:pts.map(p=>P3(...p).join(',')).join(' '),fill,stroke:'none'},s);
+  poly([[0,0,0],[3,0,0],[3,0,2],[0,0,2]],'#F6D9A6'); poly([[0,0,2],[3,0,2],[3,2,2],[0,2,2]],'#FBE9C8'); poly([[3,0,0],[3,2,0],[3,2,2],[3,0,2]],'#EFC07A');
+  const seg=(p,q,dash)=>el('line',{x1:p[0],y1:p[1],x2:q[0],y2:q[1],stroke:INK,'stroke-width':dash?0.9:1.1,'stroke-dasharray':dash?'4 3':'',opacity:dash?.6:.85},s);
+  for(let x=0;x<=3;x++) for(let y=0;y<=2;y++) for(let z=0;z<=2;z++){
+    if(x<3) seg(P3(x,y,z),P3(x+1,y,z),!(y===0||z===2)); if(y<2) seg(P3(x,y,z),P3(x,y+1,z),!(z===2||x===3)); if(z<2) seg(P3(x,y,z),P3(x,y,z+1),!(y===0||x===3)); }
+  [[0,0,0,3,0,0],[3,0,0,3,0,2],[3,0,2,0,0,2],[0,0,2,0,0,0],[3,0,0,3,2,0],[3,2,0,3,2,2],[3,2,2,3,0,2],[0,0,2,0,2,2],[0,2,2,3,2,2]].forEach(e=>el('line',{x1:P3(e[0],e[1],e[2])[0],y1:P3(e[0],e[1],e[2])[1],x2:P3(e[3],e[4],e[5])[0],y2:P3(e[3],e[4],e[5])[1],stroke:INK,'stroke-width':1.6},s));
+  const o=[1,1,0]; const A=P3(...o); const pa=P3(2,1,0), pb=P3(1,0,0), pc=P3(1,1,1);
+  arrow(s,A[0],A[1],pa[0],pa[1],RED,2.2); arrow(s,A[0],A[1],pb[0],pb[1],BLU,2.2); arrow(s,A[0],A[1],pc[0],pc[1],VIO,2.2);
+  vlab(s,(A[0]+pa[0])/2-4,A[1]+16,'a',RED,14); vlab(s,(A[0]+pb[0])/2-16,(A[1]+pb[1])/2+16,'b',BLU,14); vlab(s,A[0]+5,(A[1]+pc[1])/2+4,'c',VIO,14); }
+cubeBase();
+function tracePts(svg,pts,col,dur,cb){ const d='M'+pts.map(p=>P3(...p).join(' ')).join(' L'); const path=el('path',{d,fill:'none',stroke:col,'stroke-width':2.4,'stroke-linecap':'round','stroke-linejoin':'round'},svg);
+  growPath(path,dur||1.1,()=>{ path.setAttribute('marker-end',MK[col]); if(cb) cb(path); }); return path; }
+function cubeAns(bend,fin,col){ const s=$('fCube'); const done=()=>{ const r=arrow(s,...P3(...fin[0]),...P3(...fin[1]),RED,2.6); r.style.opacity=0; grow(r,.8,()=>geoTask('mul-cube')); };
+  if(bend) tracePts(s,bend,col,1.1,p=>{ p.style.transition='opacity .5s'; setTimeout(()=>{ p.style.opacity=.3; done(); },300); }); else done(); }
+document.querySelectorAll('[data-cube]').forEach(b=>b.onclick=()=>{ const n=+b.dataset.cube;
+  if(n===1) cubeAns(null,[[0,0,0],[3,0,0]]);
+  if(n===2) cubeAns([[3,0,2],[1,0,2],[1,0,1]],[[3,0,2],[1,0,1]],ORG);
+  if(n===3) cubeAns([[0,0,0],[0,1,0],[0,1,2]],[[0,0,0],[0,1,2]],ORG); });
+$('cubeRe').onclick=cubeBase;
+
 /* 3. 평행 */
 (function(){ const s=$('fPar'); arrow(s,30,120,70,50,INK,2); vlab(s,30,78,'a',INK,14); arrow(s,110,130,190,-10+30,RED,2); vlab(s,160,80,'b',RED,14);
   el('line',{x1:100,y1:10,x2:100,y2:140,stroke:DIM,'stroke-width':1,'stroke-dasharray':'3 3'},s);
