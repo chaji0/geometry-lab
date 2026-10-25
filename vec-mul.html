@@ -194,6 +194,10 @@ svg .k{font-family:'IBM Plex Sans KR','Apple SD Gothic Neo',system-ui,sans-serif
 .bogi .bgt{position:absolute; top:-10px; left:12px; background:var(--card); padding:0 6px; font-size:11px; color:var(--acc); font-family:'IBM Plex Mono',monospace}
 .sq{white-space:nowrap} .sq .r{border-top:1px solid currentColor; padding:0 2px 0 3px; margin-left:1px}
 @media (max-width:700px){ .mq{grid-template-columns:34px 1fr} .mqf{grid-column:2} }
+
+.steps{background:#EDF1F5; border-radius:12px; padding:12px 16px; margin-top:10px; font-size:14px; line-height:2.2}
+.steps>div{display:grid; grid-template-columns:22px 1fr; gap:8px; align-items:start} .steps .cn{margin-top:7px} .steps .st{display:block}
+.tool{display:inline-block; border:1px solid var(--line2); border-radius:6px; padding:0 8px; font-size:12px; background:#fff; margin:0 3px; line-height:1.8; vertical-align:middle}
 </style>
 </head>
 <body>
@@ -213,6 +217,7 @@ svg .k{font-family:'IBM Plex Sans KR','Apple SD Gothic Neo',system-ui,sans-serif
     <button class="on" data-t="a"><span class="no">01</span>벡터의 실수배</button>
     <button data-t="b"><span class="no">02</span>중단원 (p106)</button>
     <button data-t="c"><span class="no">03</span>위치벡터</button>
+    <button data-t="d"><span class="no">04</span>역량 (p111)</button>
   </div>
 </header>
 <div id="panel"><div class="wrap">
@@ -374,6 +379,42 @@ svg .k{font-family:'IBM Plex Sans KR','Apple SD Gothic Neo',system-ui,sans-serif
       <div id="gFigWrap" style="display:none; margin-top:8px"><div class="cream" style="cursor:default; max-width:280px"><svg viewBox="0 0 260 270" id="fG"></svg></div></div>
     </div></div>
   </div>
+
+  <div class="plain q">
+    <div class="qline"><span class="badge">문제 01</span>세 점 <span class='rm'>A</span>, <span class='rm'>B</span>, <span class='rm'>C</span>의 위치벡터를 각각 <span class='vec'><i>a</i></span>, <span class='vec'><i>b</i></span>, <span class='vec'><i>c</i></span>라고 할 때, <span class='sym'>−2<span class='vec'><span class='r'>AB</span></span> + 3<span class='vec'><span class='r'>BC</span></span></span>를 <span class='vec'><i>a</i></span>, <span class='vec'><i>b</i></span>, <span class='vec'><i>c</i></span>로 나타내시오. <button class='gb ans' data-w="<span class='sym'>2<span class='vec'><i>a</i></span> − 5<span class='vec'><i>b</i></span> + 3<span class='vec'><i>c</i></span></span>">답</button></div>
+    <div class="qline"><span class="badge">문제 03</span>두 점 <span class='rm'>A</span>, <span class='rm'>B</span>의 위치벡터를 각각 <span class='vec'><i>a</i></span>, <span class='vec'><i>b</i></span>라고 할 때, 다음 점의 위치벡터를 <span class='vec'><i>a</i></span>, <span class='vec'><i>b</i></span>로 나타내시오.</div>
+    <div class="qline" style="padding-left:18px">(1) 선분 <span class='rm'>AB</span>의 중점 <span class='rm'>M</span> <button class='gb ans' data-w="<span class='sym'><span class='fr'><span>1</span><span>2</span></span><span class='vec'><i>a</i></span> + <span class='fr'><span>1</span><span>2</span></span><span class='vec'><i>b</i></span></span>">답</button> &nbsp;&nbsp; (2) 선분 <span class='rm'>AB</span>를 5 : 3으로 내분하는 점 <span class='rm'>P</span> <button class='gb ans' data-w="<span class='sym'><span class='fr'><span>3</span><span>8</span></span><span class='vec'><i>a</i></span> + <span class='fr'><span>5</span><span>8</span></span><span class='vec'><i>b</i></span></span>">답</button></div>
+    <div class="qline"><span class="badge">문제 04</span>삼각형 <span class='rm'>ABC</span>의 무게중심을 <span class='rm'>G</span>라고 할 때, <span class='sym'><span class='vec'><span class='r'>GA</span></span> + <span class='vec'><span class='r'>GB</span></span> + <span class='vec'><span class='r'>GC</span></span> = <span class='vec'><span class='r'>0</span></span></span>임을 증명하시오. <button class="gb ans" id="bPf4">풀이</button></div>
+    <div id="pf4" style="display:none; padding-left:18px; font-size:14px; line-height:2.2; color:#1F5FB0">네 점 <span class='rm'>A</span>, <span class='rm'>B</span>, <span class='rm'>C</span>, <span class='rm'>G</span>의 위치벡터를 각각 <span class='vec'><i>a</i></span>, <span class='vec'><i>b</i></span>, <span class='vec'><i>c</i></span>, <span class='vec'><i>g</i></span>라고 하면 <span class='sym'><span class='vec'><i>g</i></span> = <span class='fr'><span><span class='vec'><i>a</i></span> + <span class='vec'><i>b</i></span> + <span class='vec'><i>c</i></span></span><span>3</span></span></span>이므로<br>
+      <span class='sym'><span class='vec'><span class='r'>GA</span></span> + <span class='vec'><span class='r'>GB</span></span> + <span class='vec'><span class='r'>GC</span></span> = (<span class='vec'><i>a</i></span> − <span class='vec'><i>g</i></span>) + (<span class='vec'><i>b</i></span> − <span class='vec'><i>g</i></span>) + (<span class='vec'><i>c</i></span> − <span class='vec'><i>g</i></span>) = <span class='vec'><i>a</i></span> + <span class='vec'><i>b</i></span> + <span class='vec'><i>c</i></span> − 3<span class='vec'><i>g</i></span></span><br>
+      <span style="padding-left:92px"><span class='sym'>= <span class='vec'><i>a</i></span> + <span class='vec'><i>b</i></span> + <span class='vec'><i>c</i></span> − (<span class='vec'><i>a</i></span> + <span class='vec'><i>b</i></span> + <span class='vec'><i>c</i></span>) = <span class='vec'><span class='r'>0</span></span></span></span></div>
+  </div>
+</div>
+
+<!-- ───────── 04 역량 (p111) ───────── -->
+<div class="pane" data-p="d">
+  <div class="card">
+    <div class="tb">두 점 <span class='rm'>A</span>, <span class='rm'>B</span>의 위치벡터를 각각 <span class='vec'><span class='r'>OA</span></span>, <span class='vec'><span class='r'>OB</span></span>라고 할 때, 실수 <i class='m'>m</i>에 대하여 점 <span class='rm'>P</span>의 위치벡터를 <span class='sym'><span class='vec'><span class='r'>OP</span></span> = <i class='m'>m</i><span class='vec'><span class='r'>OA</span></span> + (1 − <i class='m'>m</i>)<span class='vec'><span class='r'>OB</span></span></span> (0 ≤ <i class='m'>m</i> ≤ 1)라고 하자. 아래와 같이 공학 도구를 이용하여 점 <span class='rm'>P</span>의 위치를 추측해 보고, 다음 물음에 답하시오.</div>
+    <div class="steps">
+      <div><span class="cn">1</span><span class="st"><span class="tool">벡터</span>를 선택하여 <span class='vec'><span class='r'>OA</span></span>, <span class='vec'><span class='r'>OB</span></span>를 그린다.</span></div>
+      <div><span class="cn">2</span><span class="st"><span class="tool">슬라이더</span>를 선택하여 최솟값이 0, 최댓값이 1인 <i class='m'>m</i>에 대한 슬라이더를 그린다.</span></div>
+      <div><span class="cn">3</span><span class="st"><span class="tool">입력</span>에 ‘m*벡터(O, A)+(1−m)*벡터(O, B)’를 입력한 후 <span class="tool">점으로부터의 벡터</span>를 선택하여 벡터를 그리고 이 벡터의 종점에 점 <span class='rm'>P</span>를 찍는다. 점 <span class='rm'>P</span>의 <span class="tool">자취 보이기</span>를 선택한 후 <i class='m'>m</i>에 대한 슬라이더를 움직인다.</span></div>
+    </div>
+    <div class="two top" style="grid-template-columns:1fr 1fr; margin-top:12px">
+      <div class="fig" style="padding:0; overflow:hidden; min-height:380px; position:relative">
+        <iframe id="ggbFrame" data-src="geogebra.html?id=pw84sqme" title="공학 도구" style="width:100%; height:380px; border:0; display:block" allow="fullscreen"></iframe>
+        <div class="cap" style="position:absolute; right:8px; bottom:6px"><a class="btn" href="geogebra.html?id=pw84sqme" target="_blank" style="text-decoration:none; display:inline-flex; align-items:center">공학 도구 크게 열기</a></div>
+      </div>
+      <div class="fig">
+        <svg viewBox="0 0 320 300" id="fMP"></svg>
+        <div class="row"><label><i class="m">m</i></label><input type="range" id="mr" min="0" max="1" step="0.05" value="0.7"><span class="num" id="mv">0.70</span></div>
+      </div>
+    </div>
+    <div class="plain q" style="margin-top:8px">
+      <div class="qline"><span class="badge w">1</span><i class='m'>m</i> = 0.5, <i class='m'>m</i> = 0.2일 때, 점 <span class='rm'>P</span>의 위치를 각각 말하시오. <button class='gb ans' data-w="선분 <span class='rm'>AB</span>의 중점, &nbsp;선분 <span class='rm'>AB</span>를 4 : 1로 내분하는 점">답</button></div>
+      <div class="qline"><span class="badge w">2</span><i class='m'>m</i>의 값에 따른 점 <span class='rm'>P</span>의 위치를 설명하시오. <button class='gb ans' data-w="점 <span class='rm'>P</span>는 선분 <span class='rm'>AB</span> 위에 있고, 선분 <span class='rm'>AB</span>를 (1 − <i class='m'>m</i>) : <i class='m'>m</i>으로 내분한다. <i class='m'>m</i> = 1이면 <span class='rm'>A</span>, <i class='m'>m</i> = 0이면 <span class='rm'>B</span>이다.">답</button></div>
+    </div>
+  </div>
 </div>
 </div></div>
 <script>
@@ -529,6 +570,20 @@ midCube('mCube2',1,true,true,'1');
   [O,A,B,C,Mm,G].forEach(p=>dot(s,p[0],p[1],INK,2.8)); label(s,A[0]-5,A[1]-6,'A',INK,14); label(s,B[0]-16,B[1]+4,'B',INK,14); label(s,C[0]+6,C[1]+4,'C',INK,14); label(s,Mm[0]+6,Mm[1]+14,'M',INK,14); label(s,G[0]+8,G[1]-4,'G',INK,14); label(s,O[0]-5,O[1]+16,'O',INK,14);
   vlab(s,76,120,'a',INK,13); vlab(s,46,202,'b',INK,13); vlab(s,176,202,'c',INK,13); vlab(s,128,206,'m',INK,13); vlab(s,116,150,'g',ORG,13); })();
 $('clkG').onclick=()=>{ $('clkG').classList.add('on'); $('gFigWrap').style.display='block'; geoTask('pos-g'); };
+
+/* ═══════ 04 역량: OP = mOA + (1−m)OB ═══════ */
+(function(){ const s=$('fMP'); const O=[150,250],A=[50,40],B=[280,170];
+  arrow(s,O[0],O[1],A[0],A[1],INK,2); arrow(s,O[0],O[1],B[0],B[1],INK,2); el('line',{x1:A[0],y1:A[1],x2:B[0],y2:B[1],stroke:DIM,'stroke-width':1,'stroke-dasharray':'4 3'},s);
+  const op=arrow(s,O[0],O[1],0,0,RED,2.4); const tr=el('g',{},s); const pd=dot(s,0,0,RED,4); const lp=label(s,0,0,'P',RED,15); const cap=el('text',{x:160,y:24,'text-anchor':'middle','font-size':12.5,class:'k',fill:RED},s);
+  [O,A,B].forEach(p=>dot(s,p[0],p[1])); label(s,O[0]-5,O[1]+18,'O',INK,15); label(s,A[0]-16,A[1]+2,'A',INK,15); label(s,B[0]+8,B[1]+6,'B',INK,15);
+  const seen=new Set();
+  function draw(mm){ const P=[A[0]*mm+B[0]*(1-mm),A[1]*mm+B[1]*(1-mm)]; op.setAttribute('x2',P[0]); op.setAttribute('y2',P[1]); pd.setAttribute('cx',P[0]); pd.setAttribute('cy',P[1]); lp.setAttribute('x',P[0]+6); lp.setAttribute('y',P[1]-8);
+    const key=mm.toFixed(2); if(!seen.has(key)){ seen.add(key); el('circle',{cx:P[0],cy:P[1],r:2,fill:'rgba(217,70,63,.45)'},tr); }
+    cap.textContent='OP = '+mm.toFixed(2)+' OA + '+(1-mm).toFixed(2)+' OB'; }
+  $('mr').oninput=e=>{ const mm=+e.target.value; $('mv').textContent=mm.toFixed(2); draw(mm); geoTask('mp-slide'); }; draw(0.7); })();
+$('bPf4').onclick=()=>{ $('bPf4').classList.add('done'); $('pf4').style.display='block'; };
+/* 지오지브라는 탭을 열 때만 불러옴 */
+document.querySelector('#tabs button[data-t=d]').addEventListener('click',()=>{ const f=$('ggbFrame'); if(f&&!f.src) f.src=f.dataset.src; });
 </script>
 <script>window.PAGE_ID="pvecmul";</script>
 <script src="nav.js"></script>
