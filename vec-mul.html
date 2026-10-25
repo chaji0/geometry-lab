@@ -111,7 +111,7 @@ svg .k{font-family:'IBM Plex Sans KR','Apple SD Gothic Neo',system-ui,sans-serif
 .shr{display:inline-block; overflow:hidden; vertical-align:bottom; white-space:nowrap; transition:width .9s cubic-bezier(.4,0,.2,1), opacity .6s}
 
 .fr{display:inline-flex; flex-direction:column; align-items:center; vertical-align:middle; margin:0 2px; line-height:1.15; font-family:Georgia,serif; font-size:.9em}
-.fr span{padding:0 3px} .fr span:first-child{border-bottom:1px solid currentColor}
+.fr>span{padding:1px 4px; line-height:1.25} .fr>span:first-child{border-bottom:1px solid currentColor}
 .defbox{border-left:3px solid var(--acc); background:#E9E9DC; border-radius:0 10px 10px 0; padding:10px 14px; margin:10px 0; font-size:13.5px; line-height:2.1}
 .defbox .k{color:var(--acc); font-weight:700; margin-right:6px; font-family:'IBM Plex Mono',monospace; font-size:12px}
 .defbox .in{padding-left:18px}
@@ -212,6 +212,7 @@ svg .k{font-family:'IBM Plex Sans KR','Apple SD Gothic Neo',system-ui,sans-serif
   <div id="tabs">
     <button class="on" data-t="a"><span class="no">01</span>벡터의 실수배</button>
     <button data-t="b"><span class="no">02</span>중단원 (p106)</button>
+    <button data-t="c"><span class="no">03</span>위치벡터</button>
   </div>
 </header>
 <div id="panel"><div class="wrap">
@@ -347,6 +348,33 @@ svg .k{font-family:'IBM Plex Sans KR','Apple SD Gothic Neo',system-ui,sans-serif
     
   </div>
 </div>
+<div class="pane" data-p="c">
+  <div class="card">
+    <div class="tbox"><div class="hd">위치벡터</div><div class="bd">
+      <span class="cn">1</span>평면에서 한 점 <span class='rm'>O</span>를 시점으로 하는 벡터 <span class='vec'><span class='r'>OA</span></span>를 점 <span class='rm'>O</span>에 대한 점 <span class='rm'>A</span>의 위치벡터라고 한다. 일반적으로 좌표평면에서는 원점 <span class='rm'>O</span>를 위치벡터의 시점으로 잡는다.<br>
+      <span class="cn">2</span>평면 위의 두 점 <span class='rm'>A</span>, <span class='rm'>B</span>의 위치벡터를 각각 <span class='vec'><i>a</i></span>, <span class='vec'><i>b</i></span>라 하면 <span class='sym'><span class='vec'><span class='r'>OA</span></span> = <span class='vec'><i>a</i></span></span>, <span class='sym'><span class='vec'><span class='r'>OB</span></span> = <span class='vec'><i>b</i></span></span>이므로
+      <div class="in" style="padding-left:26px"><span class='sym'><span class='vec'><span class='r'>AB</span></span> = <span class='vec'><span class='r'>OB</span></span> − <span class='vec'><span class='r'>OA</span></span> = <span class='vec'><i>b</i></span> − <span class='vec'><i>a</i></span></span></div>
+      <div class="two" style="grid-template-columns:300px 1fr; align-items:center; gap:18px; margin-top:10px">
+        <div class="cream" id="posGrid" style="cursor:pointer"><svg viewBox="0 0 300 260" id="fPos"></svg></div>
+        <div class="cream" style="cursor:default; max-width:300px"><svg viewBox="0 0 280 200" id="fOAB"></svg></div>
+      </div>
+    </div></div>
+  </div>
+
+  <div class="card">
+    <div class="tbox"><div class="hd">선분의 내분점과 외분점의 위치벡터</div><div class="bd">
+      (1) 평면 위의 두 점 <span class='rm'>A</span>, <span class='rm'>B</span>의 위치벡터를 각각 <span class='vec'><i>a</i></span>, <span class='vec'><i>b</i></span>라 하자.<br>
+      <div class="in"><span class="cn">1</span>선분 <span class='rm'>AB</span>를 <i class='m'>m</i> : <i class='m'>n</i> (<i class='m'>m</i> &gt; 0, <i class='m'>n</i> &gt; 0)으로 내분하는 점 <span class='rm'>P</span>의 위치벡터를 <span class='vec'><i>p</i></span>라 하면
+        <div style="padding-left:30px"><span class='sym'><span class='vec'><i>p</i></span> = <span class='fr'><span><i class='m'>m</i><span class='vec'><i>b</i></span> + <i class='m'>n</i><span class='vec'><i>a</i></span></span><span><i class='m'>m</i> + <i class='m'>n</i></span></span></span></div></div>
+      <div class="in"><span class="cn">2</span>선분 <span class='rm'>AB</span>를 <i class='m'>m</i> : <i class='m'>n</i> (<i class='m'>m</i> &gt; 0, <i class='m'>n</i> &gt; 0, <i class='m'>m</i> ≠ <i class='m'>n</i>)으로 외분하는 점 <span class='rm'>Q</span>의 위치벡터를 <span class='vec'><i>q</i></span>라 하면
+        <div style="padding-left:30px"><span class='sym'><span class='vec'><i>q</i></span> = <span class='fr'><span><i class='m'>m</i><span class='vec'><i>b</i></span> − <i class='m'>n</i><span class='vec'><i>a</i></span></span><span><i class='m'>m</i> − <i class='m'>n</i></span></span></span></div></div>
+      <div class="in"><span class="cn">3</span>선분 <span class='rm'>AB</span>의 중점 <span class='rm'>M</span>의 위치벡터는 &nbsp;<span class='sym'><span class='fr'><span>1</span><span>2</span></span><span class='vec'><i>a</i></span> + <span class='fr'><span>1</span><span>2</span></span><span class='vec'><i>b</i></span></span></div>
+      <div style="margin-top:8px"><span class="clk" id="clkG">(2) 세 점 <span class='rm'>A</span>, <span class='rm'>B</span>, <span class='rm'>C</span>의 위치벡터를 각각 <span class='vec'><i>a</i></span>, <span class='vec'><i>b</i></span>, <span class='vec'><i>c</i></span>라고 할 때, 삼각형 <span class='rm'>ABC</span>의 무게중심 <span class='rm'>G</span>의 위치벡터 <span class='vec'><i>g</i></span>는
+        <div style="padding-left:30px"><span class='sym'><span class='vec'><i>g</i></span> = <span class='fr'><span><span class='vec'><i>a</i></span> + <span class='vec'><i>b</i></span> + <span class='vec'><i>c</i></span></span><span>3</span></span></span></div></span></div>
+      <div id="gFigWrap" style="display:none; margin-top:8px"><div class="cream" style="cursor:default; max-width:280px"><svg viewBox="0 0 260 270" id="fG"></svg></div></div>
+    </div></div>
+  </div>
+</div>
 </div></div>
 <script>
 "use strict";
@@ -479,6 +507,28 @@ function midCube(id,L,tint,face,labLen){ const s=$(id); const A=[36,54],B=[116,5
 midCube('mCube2',1,true,true,'1');
 (function(){ const s=$('mTri'); const A=[110,18],B=[22,130],C=[180,130]; el('polygon',{points:[A,B,C].map(p=>p.join(',')).join(' '),fill:'none',stroke:INK,'stroke-width':1.3},s);
   label(s,A[0]-5,A[1]-5,'A',INK,13); label(s,B[0]-16,B[1]+5,'B',INK,13); label(s,C[0]+5,C[1]+5,'C',INK,13); })();
+
+/* ═══════ 03 위치벡터 ═══════ */
+(function(){ const s=$('fPos'); const ox=120, oy=150, u=26; const X=x=>ox+x*u, Y=y=>oy-y*u;
+  for(let x=-3;x<=5;x++) el('line',{x1:X(x),y1:Y(-2.6),x2:X(x),y2:Y(4.6),stroke:'#D8DDE6','stroke-width':1},s);
+  for(let y=-2;y<=4;y++) el('line',{x1:X(-3.6),y1:Y(y),x2:X(5.6),y2:Y(y),stroke:'#D8DDE6','stroke-width':1},s);
+  arrow(s,X(-3.6),Y(0),X(5.8),Y(0),INK,1.2); arrow(s,X(0),Y(-2.6),X(0),Y(4.8),INK,1.2);
+  for(let x=-3;x<=5;x++) if(x) label(s,X(x)-4,Y(0)+14,String(x).replace('-','−'),INK,10.5);
+  for(let y=-2;y<=4;y++) if(y) label(s,X(0)-(y<0?18:10),Y(y)+4,String(y).replace('-','−'),INK,10.5);
+  label(s,X(0)-12,Y(0)+14,'O',INK,11); vlab(s,X(5.6),Y(0)+16,'x',INK,12); vlab(s,X(0)+6,Y(4.7)+2,'y',INK,12);
+  const V=[{t:[1,1],col:RED,n:'a'},{t:[3,-2],col:BLU,n:'b'},{t:[-3,-1],col:ORG,n:'c'}]; const d=[2,3]; let moved=false;
+  const items=V.map(v=>{ const g=el('g',{},s); const L=arrow(g,X(v.t[0]),Y(v.t[1]),X(v.t[0]+d[0]),Y(v.t[1]+d[1]),v.col,2.2); dot(g,X(v.t[0]),Y(v.t[1]),INK,2.6); dot(g,X(v.t[0]+d[0]),Y(v.t[1]+d[1]),INK,2.6); vlab(g,X(v.t[0])+(v.n==='a'?-2:-14),Y(v.t[1])-24,v.n,v.col,13); g.style.transition='transform 1s cubic-bezier(.4,0,.2,1)'; return {g,v}; });
+  $('posGrid').onclick=()=>{ moved=!moved; items.forEach(({g,v})=>{ g.style.transform=moved?`translate(${-v.t[0]*u}px,${v.t[1]*u}px)`:''; }); if(moved) geoTask('pos-move'); }; })();
+(function(){ const s=$('fOAB'); const O=[30,170],A=[240,170],B=[120,30]; arrow(s,O[0],O[1],A[0],A[1],INK,2); arrow(s,O[0],O[1],B[0],B[1],INK,2); arrow(s,A[0],A[1],B[0],B[1],RED,2.2);
+  vlab(s,128,192,'a',INK,15); vlab(s,60,100,'b',INK,15); vlab(s,186,92,'b − a',RED,14); [O,A,B].forEach(p=>dot(s,p[0],p[1],INK,2.8)); label(s,O[0]-18,O[1]+6,'O',INK,15); label(s,A[0]+6,A[1]+6,'A',INK,15); label(s,B[0]-4,B[1]-8,'B',INK,15); })();
+(function(){ const s=$('fG'); const O=[100,250],A=[96,22],B=[22,150],C=[238,150]; const Mm=[(B[0]+C[0])/2,(B[1]+C[1])/2]; const G=[(A[0]+2*Mm[0])/3,(A[1]+2*Mm[1])/3];
+  const seg=(p,q)=>el('line',{x1:p[0],y1:p[1],x2:q[0],y2:q[1],stroke:INK,'stroke-width':1.3},s); seg(A,B); seg(A,C); seg(B,C); seg(A,Mm);
+  el('line',{x1:A[0],y1:A[1],x2:G[0],y2:G[1],stroke:'#F08A6E','stroke-width':1.2,'stroke-dasharray':'3 3'},s); el('line',{x1:G[0],y1:G[1],x2:Mm[0],y2:Mm[1],stroke:'#4AA3DF','stroke-width':1.2,'stroke-dasharray':'3 3'},s);
+  arrow(s,O[0],O[1],A[0],A[1],INK,2); arrow(s,O[0],O[1],B[0],B[1],INK,2); arrow(s,O[0],O[1],C[0],C[1],INK,2); arrow(s,O[0],O[1],Mm[0],Mm[1],INK,2); arrow(s,O[0],O[1],G[0],G[1],ORG,2.4);
+  el('circle',{cx:(A[0]+G[0])/2+10,cy:(A[1]+G[1])/2,r:9,fill:'#FADBD3'},s); label(s,(A[0]+G[0])/2+6,(A[1]+G[1])/2+4,'2',INK,12); el('circle',{cx:(G[0]+Mm[0])/2+12,cy:(G[1]+Mm[1])/2,r:9,fill:'#D3E6F7'},s); label(s,(G[0]+Mm[0])/2+8,(G[1]+Mm[1])/2+4,'1',INK,12);
+  [O,A,B,C,Mm,G].forEach(p=>dot(s,p[0],p[1],INK,2.8)); label(s,A[0]-5,A[1]-6,'A',INK,14); label(s,B[0]-16,B[1]+4,'B',INK,14); label(s,C[0]+6,C[1]+4,'C',INK,14); label(s,Mm[0]+6,Mm[1]+14,'M',INK,14); label(s,G[0]+8,G[1]-4,'G',INK,14); label(s,O[0]-5,O[1]+16,'O',INK,14);
+  vlab(s,76,120,'a',INK,13); vlab(s,46,202,'b',INK,13); vlab(s,176,202,'c',INK,13); vlab(s,128,206,'m',INK,13); vlab(s,116,150,'g',ORG,13); })();
+$('clkG').onclick=()=>{ $('clkG').classList.add('on'); $('gFigWrap').style.display='block'; geoTask('pos-g'); };
 </script>
 <script>window.PAGE_ID="pvecmul";</script>
 <script src="nav.js"></script>
