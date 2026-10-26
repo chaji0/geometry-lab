@@ -123,6 +123,7 @@ svg .k{font-family:'IBM Plex Sans KR','Apple SD Gothic Neo',system-ui,sans-serif
 .sec{display:flex; align-items:center; gap:10px; margin:4px 0 10px}
 .sec .n{font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:#fff; background:var(--acc); border-radius:999px; padding:2px 10px; letter-spacing:.06em}
 .sec h3{margin:0; font-size:15px; font-weight:700}
+.clk{cursor:pointer; border-radius:6px; padding:0 4px; transition:background .2s} .clk:hover{background:rgba(47,69,236,.07)} .clk.on{background:rgba(224,137,26,.15)}
 .box{border:1px solid var(--line2); border-radius:12px; padding:12px 16px; margin:8px 0 10px; background:rgba(255,255,255,.35); font-size:13.5px; line-height:2.1}
 .box .bt{font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.06em; color:var(--acc); margin-bottom:2px}
 .box .k{color:var(--acc); font-weight:700; margin-right:6px; font-family:'IBM Plex Mono',monospace; font-size:12px}
@@ -198,6 +199,12 @@ svg .k{font-family:'IBM Plex Sans KR','Apple SD Gothic Neo',system-ui,sans-serif
 .steps{background:#EDF1F5; border-radius:12px; padding:12px 16px; margin-top:10px; font-size:14px; line-height:2.2}
 .steps>div{display:grid; grid-template-columns:22px 1fr; gap:8px; align-items:start} .steps .cn{margin-top:7px} .steps .st{display:block}
 .tool{display:inline-block; border:1px solid var(--line2); border-radius:6px; padding:0 8px; font-size:12px; background:#fff; margin:0 3px; line-height:1.8; vertical-align:middle}
+
+.tbtns{display:flex; flex-wrap:wrap; gap:6px; justify-content:center; margin-bottom:6px}
+.tbtns .btn .m{font-size:13px}
+@keyframes blink{0%,100%{opacity:1} 50%{opacity:.1}}
+.blink{animation:blink .7s ease-in-out 6}
+.ptri{display:flex; align-items:center; gap:8px; flex-wrap:wrap}
 </style>
 </head>
 <body>
@@ -218,6 +225,7 @@ svg .k{font-family:'IBM Plex Sans KR','Apple SD Gothic Neo',system-ui,sans-serif
     <button data-t="b"><span class="no">02</span>중단원 (p106)</button>
     <button data-t="c"><span class="no">03</span>위치벡터</button>
     <button data-t="d"><span class="no">04</span>역량 (p111)</button>
+    <button data-t="e"><span class="no">05</span>탐구 프로젝트</button>
   </div>
 </header>
 <div id="panel"><div class="wrap">
@@ -368,12 +376,14 @@ svg .k{font-family:'IBM Plex Sans KR','Apple SD Gothic Neo',system-ui,sans-serif
 
   <div class="card">
     <div class="tbox"><div class="hd">선분의 내분점과 외분점의 위치벡터</div><div class="bd">
+      <div class="two top" style="grid-template-columns:1fr 260px; gap:14px"><div>
       (1) 평면 위의 두 점 <span class='rm'>A</span>, <span class='rm'>B</span>의 위치벡터를 각각 <span class='vec'><i>a</i></span>, <span class='vec'><i>b</i></span>라 하자.<br>
       <div class="in"><span class="cn">1</span>선분 <span class='rm'>AB</span>를 <i class='m'>m</i> : <i class='m'>n</i> (<i class='m'>m</i> &gt; 0, <i class='m'>n</i> &gt; 0)으로 내분하는 점 <span class='rm'>P</span>의 위치벡터를 <span class='vec'><i>p</i></span>라 하면
         <div style="padding-left:30px"><span class='sym'><span class='vec'><i>p</i></span> = <span class='fr'><span><i class='m'>m</i><span class='vec'><i>b</i></span> + <i class='m'>n</i><span class='vec'><i>a</i></span></span><span><i class='m'>m</i> + <i class='m'>n</i></span></span></span></div></div>
       <div class="in"><span class="cn">2</span>선분 <span class='rm'>AB</span>를 <i class='m'>m</i> : <i class='m'>n</i> (<i class='m'>m</i> &gt; 0, <i class='m'>n</i> &gt; 0, <i class='m'>m</i> ≠ <i class='m'>n</i>)으로 외분하는 점 <span class='rm'>Q</span>의 위치벡터를 <span class='vec'><i>q</i></span>라 하면
         <div style="padding-left:30px"><span class='sym'><span class='vec'><i>q</i></span> = <span class='fr'><span><i class='m'>m</i><span class='vec'><i>b</i></span> − <i class='m'>n</i><span class='vec'><i>a</i></span></span><span><i class='m'>m</i> − <i class='m'>n</i></span></span></span></div></div>
       <div class="in"><span class="cn">3</span>선분 <span class='rm'>AB</span>의 중점 <span class='rm'>M</span>의 위치벡터는 &nbsp;<span class='sym'><span class='fr'><span>1</span><span>2</span></span><span class='vec'><i>a</i></span> + <span class='fr'><span>1</span><span>2</span></span><span class='vec'><i>b</i></span></span></div>
+      </div><div class="cream" style="cursor:default"><svg viewBox="0 0 260 220" id="fDiv"></svg></div></div>
       <div style="margin-top:8px"><span class="clk" id="clkG">(2) 세 점 <span class='rm'>A</span>, <span class='rm'>B</span>, <span class='rm'>C</span>의 위치벡터를 각각 <span class='vec'><i>a</i></span>, <span class='vec'><i>b</i></span>, <span class='vec'><i>c</i></span>라고 할 때, 삼각형 <span class='rm'>ABC</span>의 무게중심 <span class='rm'>G</span>의 위치벡터 <span class='vec'><i>g</i></span>는
         <div style="padding-left:30px"><span class='sym'><span class='vec'><i>g</i></span> = <span class='fr'><span><span class='vec'><i>a</i></span> + <span class='vec'><i>b</i></span> + <span class='vec'><i>c</i></span></span><span>3</span></span></span></div></span></div>
       <div id="gFigWrap" style="display:none; margin-top:8px"><div class="cream" style="cursor:default; max-width:280px"><svg viewBox="0 0 260 270" id="fG"></svg></div></div>
@@ -394,11 +404,11 @@ svg .k{font-family:'IBM Plex Sans KR','Apple SD Gothic Neo',system-ui,sans-serif
 <!-- ───────── 04 역량 (p111) ───────── -->
 <div class="pane" data-p="d">
   <div class="card">
-    <div class="tb">두 점 <span class='rm'>A</span>, <span class='rm'>B</span>의 위치벡터를 각각 <span class='vec'><span class='r'>OA</span></span>, <span class='vec'><span class='r'>OB</span></span>라고 할 때, 실수 <i class='m'>m</i>에 대하여 점 <span class='rm'>P</span>의 위치벡터를 <span class='sym'><span class='vec'><span class='r'>OP</span></span> = <i class='m'>m</i><span class='vec'><span class='r'>OA</span></span> + (1 − <i class='m'>m</i>)<span class='vec'><span class='r'>OB</span></span></span> (0 ≤ <i class='m'>m</i> ≤ 1)라고 하자. 아래와 같이 공학 도구를 이용하여 점 <span class='rm'>P</span>의 위치를 추측해 보고, 다음 물음에 답하시오.</div>
+    <div class="tb">두 점 <span class='rm'>A</span>, <span class='rm'>B</span>의 위치벡터를 각각 <span class='vec'><span class='r'>OA</span></span>, <span class='vec'><span class='r'>OB</span></span>라고 할 때, 실수 <i class='m'>t</i>에 대하여 점 <span class='rm'>P</span>의 위치벡터를 <span class='sym'><span class='vec'><span class='r'>OP</span></span> = <i class='m'>t</i><span class='vec'><span class='r'>OA</span></span> + (1 − <i class='m'>t</i>)<span class='vec'><span class='r'>OB</span></span></span> (0 ≤ <i class='m'>t</i> ≤ 1)라고 하자. 아래와 같이 공학 도구를 이용하여 점 <span class='rm'>P</span>의 위치를 추측해 보고, 다음 물음에 답하시오.</div>
     <div class="steps">
       <div><span class="cn">1</span><span class="st"><span class="tool">벡터</span>를 선택하여 <span class='vec'><span class='r'>OA</span></span>, <span class='vec'><span class='r'>OB</span></span>를 그린다.</span></div>
-      <div><span class="cn">2</span><span class="st"><span class="tool">슬라이더</span>를 선택하여 최솟값이 0, 최댓값이 1인 <i class='m'>m</i>에 대한 슬라이더를 그린다.</span></div>
-      <div><span class="cn">3</span><span class="st"><span class="tool">입력</span>에 ‘m*벡터(O, A)+(1−m)*벡터(O, B)’를 입력한 후 <span class="tool">점으로부터의 벡터</span>를 선택하여 벡터를 그리고 이 벡터의 종점에 점 <span class='rm'>P</span>를 찍는다. 점 <span class='rm'>P</span>의 <span class="tool">자취 보이기</span>를 선택한 후 <i class='m'>m</i>에 대한 슬라이더를 움직인다.</span></div>
+      <div><span class="cn">2</span><span class="st"><span class="tool">슬라이더</span>를 선택하여 최솟값이 0, 최댓값이 1인 <i class='m'>t</i>에 대한 슬라이더를 그린다.</span></div>
+      <div><span class="cn">3</span><span class="st"><span class="tool">입력</span>에 ‘t*벡터(O, A)+(1−t)*벡터(O, B)’를 입력한 후 <span class="tool">점으로부터의 벡터</span>를 선택하여 벡터를 그리고 이 벡터의 종점에 점 <span class='rm'>P</span>를 찍는다. 점 <span class='rm'>P</span>의 <span class="tool">자취 보이기</span>를 선택한 후 <i class='m'>t</i>에 대한 슬라이더를 움직인다.</span></div>
     </div>
     <div class="two top" style="grid-template-columns:1fr 1fr; margin-top:12px">
       <div class="fig" style="padding:0; overflow:hidden; min-height:380px; position:relative">
@@ -406,13 +416,41 @@ svg .k{font-family:'IBM Plex Sans KR','Apple SD Gothic Neo',system-ui,sans-serif
         <div class="cap" style="position:absolute; right:8px; bottom:6px"><a class="btn" href="geogebra.html?id=pw84sqme" target="_blank" style="text-decoration:none; display:inline-flex; align-items:center">공학 도구 크게 열기</a></div>
       </div>
       <div class="fig">
+        <div class="eqc" style="justify-content:center; margin:4px 0 6px; font-size:16px"><span class='sym'><span class='vec'><span class='r'>OP</span></span> = <i class='m'>t</i><span class='vec'><span class='r'>OA</span></span> + (1 − <i class='m'>t</i>)<span class='vec'><span class='r'>OB</span></span></span></div>
+        <div class="tbtns">
+          <button class="btn" data-tc="all">모든 실수 <i class='m'>t</i></button><button class="btn" data-tc="0"><i class='m'>t</i> = 0</button><button class="btn" data-tc="1"><i class='m'>t</i> = 1</button><button class="btn" data-tc="01">0 &lt; <i class='m'>t</i> &lt; 1</button><button class="btn" data-tc="neg"><i class='m'>t</i> &lt; 0</button><button class="btn" data-tc="pos"><i class='m'>t</i> &gt; 1</button>
+        </div>
         <svg viewBox="0 0 320 300" id="fMP"></svg>
-        <div class="row"><label><i class="m">m</i></label><input type="range" id="mr" min="0" max="1" step="0.05" value="0.7"><span class="num" id="mv">0.70</span></div>
+        <div class="row"><label><i class="m">t</i></label><input type="range" id="mr" min="-1" max="2" step="0.05" value="0.7"><span class="num" id="mv">0.70</span></div>
+        <div id="mpCap" class="eqc" style="justify-content:center; font-size:14px; margin:2px 0 0; color:var(--red)"></div>
       </div>
     </div>
     <div class="plain q" style="margin-top:8px">
-      <div class="qline"><span class="badge w">1</span><i class='m'>m</i> = 0.5, <i class='m'>m</i> = 0.2일 때, 점 <span class='rm'>P</span>의 위치를 각각 말하시오. <button class='gb ans' data-w="선분 <span class='rm'>AB</span>의 중점, &nbsp;선분 <span class='rm'>AB</span>를 4 : 1로 내분하는 점">답</button></div>
-      <div class="qline"><span class="badge w">2</span><i class='m'>m</i>의 값에 따른 점 <span class='rm'>P</span>의 위치를 설명하시오. <button class='gb ans' data-w="점 <span class='rm'>P</span>는 선분 <span class='rm'>AB</span> 위에 있고, 선분 <span class='rm'>AB</span>를 (1 − <i class='m'>m</i>) : <i class='m'>m</i>으로 내분한다. <i class='m'>m</i> = 1이면 <span class='rm'>A</span>, <i class='m'>m</i> = 0이면 <span class='rm'>B</span>이다.">답</button></div>
+      <div class="qline"><span class="badge w">1</span><i class='m'>t</i> = 0.5, <i class='m'>t</i> = 0.2일 때, 점 <span class='rm'>P</span>의 위치를 각각 말하시오. <button class='gb ans' data-w="선분 <span class='rm'>AB</span>의 중점, &nbsp;선분 <span class='rm'>AB</span>를 4 : 1로 내분하는 점">답</button></div>
+      <div class="qline"><span class="badge w">2</span><i class='m'>t</i>의 값에 따른 점 <span class='rm'>P</span>의 위치를 설명하시오. <button class='gb ans' data-w="점 <span class='rm'>P</span>는 선분 <span class='rm'>AB</span> 위에 있고, 선분 <span class='rm'>AB</span>를 (1 − <i class='m'>t</i>) : <i class='m'>t</i>으로 내분한다. <i class='m'>t</i> = 1이면 <span class='rm'>A</span>, <i class='m'>t</i> = 0이면 <span class='rm'>B</span>이다.">답</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- ───────── 05 탐구 프로젝트 ───────── -->
+<div class="pane" data-p="e">
+  <div class="card">
+    <div class="sec"><h3>두 벡터의 연산의 활용</h3></div>
+    <div class="qrow">
+      <div class="qt">
+        <div class="qline"><span class="badge">1</span>오른쪽 그림과 같이 삼각형 <span class='rm'>OAB</span>에서 <span class='sym'><span class='vec'><span class='r'>OA</span></span> = <span class='vec'><i>a</i></span></span>, <span class='sym'><span class='vec'><span class='r'>OB</span></span> = <span class='vec'><i>b</i></span></span>라 하고, <span class='vec'><span class='r'>OA</span></span>와 <span class='vec'><span class='r'>OB</span></span>를 삼등분한 점 중 <span class='rm'>A</span>와 <span class='rm'>B</span>에 가까운 점을 각각 <span class='rm'>M</span>, <span class='rm'>N</span>이라고 하자. <span class='vec'><span class='r'>AN</span></span>과 <span class='vec'><span class='r'>BM</span></span>의 교점을 <span class='rm'>C</span>라 할 때, 다음 물음에 답하시오.</div>
+        <div class="qline" style="padding-left:18px"><span class="clk" data-col="BM">(1) <span class='sym'><span class='vec'><span class='r'>BC</span></span> = <i class='m'>k</i><span class='vec'><span class='r'>BM</span></span></span>임을 이용하여 <span class='vec'><span class='r'>OC</span></span>를 두 벡터 <span class='vec'><i>a</i></span>, <span class='vec'><i>b</i></span>와 실수 <i class='m'>k</i>를 사용하여 나타내시오.</span> <button class='gb ans' data-w="<span class='sym'><span class='fr'><span>2</span><span>3</span></span><i class='m'>k</i><span class='vec'><i>a</i></span> + (1 − <i class='m'>k</i>)<span class='vec'><i>b</i></span></span>">답</button></div>
+        <div class="qline" style="padding-left:18px"><span class="clk" data-col="AN">(2) <span class='sym'><span class='vec'><span class='r'>AC</span></span> = <i class='m'>l</i><span class='vec'><span class='r'>AN</span></span></span>임을 이용하여 <span class='vec'><span class='r'>OC</span></span>를 두 벡터 <span class='vec'><i>a</i></span>, <span class='vec'><i>b</i></span>와 실수 <i class='m'>l</i>을 사용하여 나타내시오.</span> <button class='gb ans' data-w="<span class='sym'>(1 − <i class='m'>l</i>)<span class='vec'><i>a</i></span> + <span class='fr'><span>2</span><span>3</span></span><i class='m'>l</i><span class='vec'><i>b</i></span></span>">답</button></div>
+        <div class="qline" style="padding-left:18px">(3) (1), (2)를 이용하여 <span class='sym'><span class='vec'><span class='r'>OC</span></span> = <i class='m'>m</i><span class='vec'><i>a</i></span> + <i class='m'>n</i><span class='vec'><i>b</i></span></span>를 만족시키는 실수 <i class='m'>m</i>, <i class='m'>n</i>의 값을 구하시오. <button class='gb ans' data-w="<i class='m'>m</i> = <span class='fr'><span>2</span><span>5</span></span>, <i class='m'>n</i> = <span class='fr'><span>2</span><span>5</span></span>">답</button></div>
+      </div>
+      <div class="qfig"><svg viewBox="0 0 300 230" id="fTri"></svg></div>
+    </div>
+    <div class="qrow" style="margin-top:14px">
+      <div class="qt">
+        <div class="qline"><span class="badge" style="background:var(--org)">사고 확산하기</span></div>
+        <div class="qline"><span class="badge">2</span>오른쪽 그림과 같은 사면체 <span class='rm'>OABC</span>에서 <span class='sym'><span class='vec'><span class='r'>OA</span></span> = <span class='vec'><i>a</i></span></span>, <span class='sym'><span class='vec'><span class='r'>OB</span></span> = <span class='vec'><i>b</i></span></span>, <span class='sym'><span class='vec'><span class='r'>OC</span></span> = <span class='vec'><i>c</i></span></span>라 하고, <span class='rm'>AC</span>와 <span class='rm'>BC</span>의 중점을 각각 <span class='rm'>D</span>, <span class='rm'>E</span>라 하자. <span class='vec'><span class='r'>BD</span></span>와 <span class='vec'><span class='r'>AE</span></span>의 교점을 <span class='rm'>F</span>라고 할 때, 1과 같은 방법으로 <span class='sym'><span class='vec'><span class='r'>OF</span></span> = <i class='m'>p</i><span class='vec'><i>a</i></span> + <i class='m'>q</i><span class='vec'><i>b</i></span> + <i class='m'>r</i><span class='vec'><i>c</i></span></span>를 만족시키는 실수 <i class='m'>p</i>, <i class='m'>q</i>, <i class='m'>r</i>의 값을 구하시오. <button class='gb ans' data-w="<i class='m'>p</i> = <span class='fr'><span>1</span><span>3</span></span>, <i class='m'>q</i> = <span class='fr'><span>1</span><span>3</span></span>, <i class='m'>r</i> = <span class='fr'><span>1</span><span>3</span></span>">답</button></div>
+      </div>
+      <div class="qfig"><svg viewBox="0 0 300 230" id="fTet"></svg></div>
     </div>
   </div>
 </div>
@@ -571,19 +609,57 @@ midCube('mCube2',1,true,true,'1');
   vlab(s,76,120,'a',INK,13); vlab(s,46,202,'b',INK,13); vlab(s,176,202,'c',INK,13); vlab(s,128,206,'m',INK,13); vlab(s,116,150,'g',ORG,13); })();
 $('clkG').onclick=()=>{ $('clkG').classList.add('on'); $('gFigWrap').style.display='block'; geoTask('pos-g'); };
 
-/* ═══════ 04 역량: OP = mOA + (1−m)OB ═══════ */
-(function(){ const s=$('fMP'); const O=[150,250],A=[50,40],B=[280,170];
-  arrow(s,O[0],O[1],A[0],A[1],INK,2); arrow(s,O[0],O[1],B[0],B[1],INK,2); el('line',{x1:A[0],y1:A[1],x2:B[0],y2:B[1],stroke:DIM,'stroke-width':1,'stroke-dasharray':'4 3'},s);
-  const op=arrow(s,O[0],O[1],0,0,RED,2.4); const tr=el('g',{},s); const pd=dot(s,0,0,RED,4); const lp=label(s,0,0,'P',RED,15); const cap=el('text',{x:160,y:24,'text-anchor':'middle','font-size':12.5,class:'k',fill:RED},s);
+/* ═══════ 04 역량: OP = tOA + (1−t)OB ═══════ */
+(function(){ const s=$('fMP'); const O=[150,250],A=[50,40],B=[280,170]; const d=[B[0]-A[0],B[1]-A[1]];
+  const P=t=>[A[0]*t+B[0]*(1-t),A[1]*t+B[1]*(1-t)];
+  const loc=el('line',{stroke:RED,'stroke-width':5,'stroke-linecap':'round',opacity:0},s); const locDot=el('circle',{r:7,fill:RED,opacity:0},s);
+  arrow(s,O[0],O[1],A[0],A[1],INK,2); arrow(s,O[0],O[1],B[0],B[1],INK,2); el('line',{x1:P(2.2)[0],y1:P(2.2)[1],x2:P(-1.3)[0],y2:P(-1.3)[1],stroke:DIM,'stroke-width':1,'stroke-dasharray':'4 3'},s);
+  const op=arrow(s,O[0],O[1],0,0,RED,2.4); const pd=dot(s,0,0,RED,4); const lp=label(s,0,0,'P',RED,15);
   [O,A,B].forEach(p=>dot(s,p[0],p[1])); label(s,O[0]-5,O[1]+18,'O',INK,15); label(s,A[0]-16,A[1]+2,'A',INK,15); label(s,B[0]+8,B[1]+6,'B',INK,15);
-  const seen=new Set();
-  function draw(mm){ const P=[A[0]*mm+B[0]*(1-mm),A[1]*mm+B[1]*(1-mm)]; op.setAttribute('x2',P[0]); op.setAttribute('y2',P[1]); pd.setAttribute('cx',P[0]); pd.setAttribute('cy',P[1]); lp.setAttribute('x',P[0]+6); lp.setAttribute('y',P[1]-8);
-    const key=mm.toFixed(2); if(!seen.has(key)){ seen.add(key); el('circle',{cx:P[0],cy:P[1],r:2,fill:'rgba(217,70,63,.45)'},tr); }
-    cap.textContent='OP = '+mm.toFixed(2)+' OA + '+(1-mm).toFixed(2)+' OB'; }
-  $('mr').oninput=e=>{ const mm=+e.target.value; $('mv').textContent=mm.toFixed(2); draw(mm); geoTask('mp-slide'); }; draw(0.7); })();
+  const V=(t)=>"<span class='vec'><span class='r'>"+t+"</span></span>";
+  function draw(t){ const Pt=P(t); op.setAttribute('x2',Pt[0]); op.setAttribute('y2',Pt[1]); pd.setAttribute('cx',Pt[0]); pd.setAttribute('cy',Pt[1]); lp.setAttribute('x',Pt[0]+6); lp.setAttribute('y',Pt[1]-8);
+    $('mpCap').innerHTML="<span class='sym'>"+V('OP')+' = '+t.toFixed(2)+V('OA')+' + '+(1-t).toFixed(2)+V('OB')+'</span>'; }
+  $('mr').oninput=e=>{ const t=+e.target.value; $('mv').textContent=t.toFixed(2); draw(t); }; draw(0.7);
+  const show=(t1,t2)=>{ const p=P(t1),q=P(t2); loc.setAttribute('x1',p[0]); loc.setAttribute('y1',p[1]); loc.setAttribute('x2',q[0]); loc.setAttribute('y2',q[1]); loc.style.opacity=.45; locDot.style.opacity=0; };
+  const showPt=t=>{ const p=P(t); locDot.setAttribute('cx',p[0]); locDot.setAttribute('cy',p[1]); locDot.style.opacity=.5; loc.style.opacity=0; };
+  const MAP={all:()=>show(-1.3,2.2),'0':()=>showPt(0),'1':()=>showPt(1),'01':()=>show(0,1),neg:()=>show(0,-1.3),pos:()=>show(1,2.2)};
+  document.querySelectorAll('[data-tc]').forEach(bt=>bt.onclick=()=>{ document.querySelectorAll('[data-tc]').forEach(x=>x.classList.toggle('on',x===bt)); MAP[bt.dataset.tc](); const tv={'0':0,'1':1}[bt.dataset.tc]; if(tv!==undefined){ $('mr').value=tv; $('mv').textContent=tv.toFixed(2); draw(tv); } geoTask('mp-slide'); }); })();
 $('bPf4').onclick=()=>{ $('bPf4').classList.add('done'); $('pf4').style.display='block'; };
 /* 지오지브라는 탭을 열 때만 불러옴 */
 document.querySelector('#tabs button[data-t=d]').addEventListener('click',()=>{ const f=$('ggbFrame'); if(f&&!f.src) f.src=f.dataset.src; });
+
+/* ═══════ 내분점 그림 (m : n) ═══════ */
+(function(){ const s=$('fDiv'); const O=[30,190],A=[160,30],B=[236,190]; const t=0.68; const P=[A[0]+(B[0]-A[0])*t,A[1]+(B[1]-A[1])*t];
+  arrow(s,O[0],O[1],A[0],A[1],INK,2); arrow(s,O[0],O[1],B[0],B[1],INK,2); el('line',{x1:A[0],y1:A[1],x2:B[0],y2:B[1],stroke:INK,'stroke-width':1.6},s); arrow(s,O[0],O[1],P[0],P[1],ORG,2.4);
+  const mid1=[(A[0]+P[0])/2+18,(A[1]+P[1])/2-6], mid2=[(P[0]+B[0])/2+18,(P[1]+B[1])/2+2];
+  el('path',{d:`M${A[0]+6} ${A[1]} Q ${mid1[0]+8} ${mid1[1]-10} ${P[0]+4} ${P[1]-4}`,fill:'none',stroke:'#F08A6E','stroke-width':1.1,'stroke-dasharray':'3 3'},s);
+  el('path',{d:`M${P[0]+6} ${P[1]+2} Q ${mid2[0]+10} ${mid2[1]} ${B[0]+2} ${B[1]-4}`,fill:'none',stroke:'#4AA3DF','stroke-width':1.1,'stroke-dasharray':'3 3'},s);
+  el('circle',{cx:mid1[0],cy:mid1[1],r:11,fill:'#FADBD3'},s); el('circle',{cx:mid2[0],cy:mid2[1],r:11,fill:'#D3E6F7'},s);
+  label(s,mid1[0]-6,mid1[1]+4,'m',INK,13).setAttribute('font-style','italic'); label(s,mid2[0]-5,mid2[1]+4,'n',INK,13).setAttribute('font-style','italic');
+  vlab(s,74,100,'a',INK,15); vlab(s,128,214,'b',INK,15); vlab(s,120,150,'p',ORG,15);
+  [O,A,B,P].forEach(p=>dot(s,p[0],p[1],INK,2.8)); label(s,O[0]-18,O[1]+6,'O',INK,15); label(s,A[0]-5,A[1]-8,'A',INK,15); label(s,B[0]+6,B[1]+6,'B',INK,15); label(s,P[0]+8,P[1]-2,'P',INK,15); })();
+
+/* ═══════ 05 탐구 프로젝트 ═══════ */
+const T1={O:[40,200],A:[270,200],B:[110,30]}; T1.M=[T1.O[0]+(T1.A[0]-T1.O[0])*2/3,T1.O[1]+(T1.A[1]-T1.O[1])*2/3]; T1.N=[T1.O[0]+(T1.B[0]-T1.O[0])*2/3,T1.O[1]+(T1.B[1]-T1.O[1])*2/3];
+T1.C=[T1.O[0]+(T1.A[0]-T1.O[0])*0.4+(T1.B[0]-T1.O[0])*0.4, T1.O[1]+(T1.A[1]-T1.O[1])*0.4+(T1.B[1]-T1.O[1])*0.4];
+function triBase(hl){ const s=$('fTri'); s.innerHTML=''; const {O,A,B,M,N,C}=T1;
+  el('path',{d:`M${O} L${A} L${B} Z`,fill:'none',stroke:INK,'stroke-width':1.4},s);
+  const lw=k=>hl===k?3:1.2, lc=k=>hl===k?ORG:INK;
+  if(hl==='BM'){ const d=[M[0]-B[0],M[1]-B[1]]; el('line',{x1:B[0]-d[0]*.25,y1:B[1]-d[1]*.25,x2:M[0]+d[0]*.3,y2:M[1]+d[1]*.3,stroke:'rgba(224,137,26,.35)','stroke-width':8,'stroke-linecap':'round'},s); }
+  if(hl==='AN'){ const d=[N[0]-A[0],N[1]-A[1]]; el('line',{x1:A[0]-d[0]*.2,y1:A[1]-d[1]*.2,x2:N[0]+d[0]*.3,y2:N[1]+d[1]*.3,stroke:'rgba(224,137,26,.35)','stroke-width':8,'stroke-linecap':'round'},s); }
+  el('line',{x1:B[0],y1:B[1],x2:M[0],y2:M[1],stroke:lc('BM'),'stroke-width':lw('BM')},s); el('line',{x1:A[0],y1:A[1],x2:N[0],y2:N[1],stroke:lc('AN'),'stroke-width':lw('AN')},s);
+  arrow(s,O[0],O[1],A[0],A[1],RED,2.2); arrow(s,O[0],O[1],B[0],B[1],BLU,2.2); arrow(s,O[0],O[1],C[0],C[1],ORG,2.2);
+  vlab(s,150,222,'a',RED,14); vlab(s,54,112,'b',BLU,14);
+  const pts={O,A,B,M,N,C}; for(const k in pts){ const p=pts[k]; const d=dot(s,p[0],p[1],INK,3); if((hl==='BM'&&'BCM'.includes(k))||(hl==='AN'&&'ACN'.includes(k))){ d.setAttribute('r',6); d.setAttribute('fill',ORG); d.classList.add('blink'); } }
+  label(s,O[0]-18,O[1]+6,'O',INK,15); label(s,A[0]+6,A[1]+6,'A',INK,15); label(s,B[0]-4,B[1]-8,'B',INK,15); label(s,M[0]-6,M[1]+20,'M',INK,15); label(s,N[0]-20,N[1]+2,'N',INK,15); label(s,C[0]+8,C[1]-2,'C',INK,15); }
+triBase(); document.querySelectorAll('[data-col]').forEach(b=>b.onclick=()=>{ document.querySelectorAll('[data-col]').forEach(x=>x.classList.toggle('on',x===b)); triBase(b.dataset.col); geoTask('proj-col'); });
+(function(){ const s=$('fTet'); const O=[150,24], A=[36,196], B=[270,186], C=[190,120]; const mid=(p,q)=>[(p[0]+q[0])/2,(p[1]+q[1])/2]; const D=mid(A,C), E=mid(B,C); const F=[(A[0]+B[0]+C[0])/3,(A[1]+B[1]+C[1])/3];
+  el('path',{d:`M${A} L${B} L${C} Z`,fill:'rgba(18,135,106,.12)',stroke:'none'},s);
+  const seg=(p,q,dash)=>el('line',{x1:p[0],y1:p[1],x2:q[0],y2:q[1],stroke:INK,'stroke-width':dash?1.1:1.4,'stroke-dasharray':dash?'5 4':''},s);
+  seg(O,A); seg(O,B); seg(A,B); seg(O,C,true); seg(A,C,true); seg(B,C,true); seg(B,D,true); seg(A,E,true);
+  arrow(s,O[0],O[1],A[0],A[1],RED,2); arrow(s,O[0],O[1],B[0],B[1],BLU,2); arrow(s,O[0],O[1],C[0],C[1],VIO,2); arrow(s,O[0],O[1],F[0],F[1],ORG,2.2);
+  vlab(s,76,96,'a',RED,13); vlab(s,222,90,'b',BLU,13); vlab(s,180,70,'c',VIO,13);
+  [O,A,B,C,D,E,F].forEach(p=>dot(s,p[0],p[1],INK,2.8)); label(s,O[0]-4,O[1]-8,'O',INK,14); label(s,A[0]-18,A[1]+4,'A',INK,14); label(s,B[0]+6,B[1]+4,'B',INK,14); label(s,C[0]+6,C[1]-2,'C',INK,14); label(s,D[0]-18,D[1]+2,'D',INK,14); label(s,E[0]+6,E[1]-2,'E',INK,14); label(s,F[0]-4,F[1]+18,'F',INK,14); })();
 </script>
 <script>window.PAGE_ID="pvecmul";</script>
 <script src="nav.js"></script>
