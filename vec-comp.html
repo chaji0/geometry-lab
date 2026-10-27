@@ -39,7 +39,7 @@ h1{font-size:17.5px; margin:0; letter-spacing:-.3px; font-weight:700}
 .vec::before{content:""; position:absolute; left:1px; right:5px; top:.28em; border-top:1.3px solid currentColor}
 .vec::after{content:""; position:absolute; right:0; top:.1em; width:0; height:0; border-left:6px solid currentColor; border-top:3.5px solid transparent; border-bottom:3.5px solid transparent; transform:translateY(-.5px)}
 .vec i{font-style:italic} .vec .r{font-style:normal}
-.vec.n{min-width:0; padding-left:0; padding-right:7px; margin-right:0} .vec.n::before{left:0; right:6px} .vec.n+sub{margin-left:-1px}
+.vec.n{min-width:0; padding-left:0; padding-right:7px; margin-right:0} .vec.n::before{left:0; right:6px} .vec.n+sub{margin-left:-4px}
 .sym,.abs{font-family:Georgia,'Times New Roman',serif; font-size:1.03em}
 .sym{white-space:nowrap} .sym .vec{margin:0 0 0 1px; min-width:.95em; font-size:1em} .sym i{font-style:italic}
 sub{font-size:.68em; vertical-align:-.32em; font-style:normal; line-height:0; margin-right:1px}
@@ -103,6 +103,68 @@ svg .it{font-style:italic}
 .sec h3{margin:0; font-size:14px; font-weight:700; color:var(--acc)}
 .sec::after{content:""; flex:1; border-top:1px dashed var(--line2)}
 .hr{border-top:1px dashed #B9CCE0; margin:8px 0 6px}
+.btn{border:1.5px solid var(--line2); background:transparent; color:var(--ink); font:inherit; font-size:12.5px; font-weight:700; padding:0 12px; height:30px; border-radius:999px; cursor:pointer; display:inline-flex; align-items:center; gap:6px}
+.btn:hover{border-color:var(--acc); color:var(--acc)} .btn.on{border-color:var(--acc); color:var(--acc); background:rgba(47,69,236,.08)} .btn:disabled{opacity:.4; cursor:default}
+.btn .cn{width:17px; height:17px; font-size:10px}
+.tbtns{display:flex; flex-wrap:wrap; gap:6px; margin:8px 0 4px}
+.prow{display:grid; grid-template-columns:1fr 340px; gap:16px; align-items:start}
+@media (max-width:760px){ .prow{grid-template-columns:1fr} }
+.ptxt{font-size:14px; line-height:2.1}
+.ptxt .eqc{text-align:center; font-family:Georgia,'Times New Roman',serif; font-size:19px; margin:4px 0}
+.bub{display:flex; gap:10px; align-items:flex-start; margin-top:8px}
+.bub .who{flex:none; width:38px; height:38px; border-radius:50%; background:#DCE8F4; color:#2F5FA8; font-size:11px; font-weight:700; display:flex; align-items:center; justify-content:center}
+.bub .say{background:#DCE8F4; border-radius:12px; padding:8px 14px; font-size:13.5px; line-height:1.9}
+.msg{min-height:26px; font-size:13.5px; line-height:1.9; padding:4px 2px 0; color:var(--ink)}
+.msg .cr{color:var(--red); font-weight:700} .msg .cb{color:var(--acc); font-weight:700} .msg .vec{font-size:1.1em}
+.alts{display:grid; grid-template-columns:1fr 1fr; gap:10px}
+@media (max-width:760px){ .alts{grid-template-columns:1fr} }
+.alt{border:1px solid var(--line); border-radius:12px; padding:10px 14px 12px; background:rgba(255,255,255,.3)}
+.alt.on{border-color:var(--acc); box-shadow:0 0 0 1px var(--acc) inset}
+.alt .ah{display:flex; align-items:center; gap:8px; font-weight:700; font-size:14px; margin-bottom:4px} .alt .ah .btn{margin-left:auto}
+.btn.sm{height:26px; font-size:12px; padding:0 10px}
+.alt .at{font-size:13.5px; line-height:2}
+.alt .af{font-family:'Times New Roman',Times,Georgia,serif; font-size:15px; line-height:2; text-align:center; margin:2px 0}
+.alt .at .vec{font-size:1.05em}
+.figs{display:grid; grid-template-columns:1.15fr 1fr; gap:12px; align-items:start; max-width:760px}
+.figs .cream svg{max-height:290px; margin:0 auto; width:auto; max-width:100%}
+@media (max-width:760px){ .figs{grid-template-columns:1fr} }
+.fcap{display:flex; justify-content:space-between; font-size:11.5px; color:var(--dim); padding:2px 8px 2px; font-family:'IBM Plex Sans KR',system-ui,sans-serif}
+.fcap sub{font-size:.75em}
+.cnt{min-height:40px; text-align:center; font-family:'Times New Roman',Times,Georgia,serif; font-size:19px; padding:4px 0 6px}
+.cnt .n{display:inline-block; color:var(--acc); font-weight:700; transition:transform .25s} .cnt .n.pop{transform:scale(1.5)}
+.cnt .add,.cnt .zero{display:inline-block; opacity:0; transition:opacity .5s} .cnt .add.on,.cnt .zero.on{opacity:1}
+.cnt .add{color:var(--red)}
+.s2eqs{font-family:'Times New Roman',Times,Georgia,serif; font-size:17px; line-height:2.1; min-height:30px}
+.s2eqs .ln{opacity:0; transition:opacity .5s} .s2eqs .ln.on{opacity:1}
+.s2eqs .cb{color:var(--acc)} .s2eqs .cr{color:var(--red)}
+.s2eqs .nt{font-family:'IBM Plex Sans KR',system-ui,sans-serif; font-size:12.5px; color:#4b5a6a}
+.alt{position:relative}
+.alt .ah .stp{margin-left:auto; display:flex; gap:4px} .alt .ah .stp .btn{margin-left:0}
+.a2col{display:grid; grid-template-columns:1fr 1fr; gap:8px 14px; align-items:start; font-family:'Times New Roman',Times,Georgia,serif; font-size:15.5px; line-height:2}
+.colsum{display:grid; grid-template-columns:22px auto; column-gap:4px; visibility:hidden}
+.colsum.show{visibility:visible}
+.colsum>div{display:contents} .colsum .pl{text-align:right; color:var(--acc)} .colsum .t{white-space:nowrap; opacity:0; transition:opacity .5s}
+.colsum .r3 .t{border-top:1.5px solid var(--ink); padding-top:2px} .colsum .r3 .pl{border-top:1.5px solid var(--ink)}
+.colsum .on .t{opacity:1} .colsum .r3 .pl.on{visibility:visible}
+.colsum .r3 .pl,.colsum .r3 .t{border-top-color:transparent} .colsum.line .r3 .pl,.colsum.line .r3 .t{border-top-color:var(--ink)}
+.beq{font-family:'Times New Roman',Times,Georgia,serif; font-size:16.5px; line-height:2.2}
+.beq .ln{white-space:nowrap} .beq .ln.pre>*{opacity:0} .beq .ln.pre.show>*{opacity:1; transition:opacity .5s}
+.beq .sg{margin:0 3px} .beq .L{display:inline-block}
+.beq .half{opacity:0; transition:opacity .5s} .beq .half.on{opacity:1}
+.beq .nt{font-family:'IBM Plex Sans KR',system-ui,sans-serif; font-size:12.5px; color:#4b5a6a}
+.flyL{position:absolute; margin:0; pointer-events:none; color:var(--acc); font-family:'Times New Roman',Times,Georgia,serif; font-size:16.5px; transition:transform .9s cubic-bezier(.4,0,.2,1); z-index:5}
+.chain>div{opacity:0; transition:opacity .5s; white-space:nowrap} .chain>div.on{opacity:1} .chain .ind{padding-left:4.3em}
+.chain .fr{font-size:.95em} .chain .fr>span{padding:0 4px}
+.fml{margin-top:6px; font-family:'Times New Roman',Times,Georgia,serif; font-size:15.5px; line-height:2}
+.fml .fl{border-left:3px solid var(--line2); padding:2px 12px; margin:6px 0; background:rgba(255,255,255,.35); border-radius:0 8px 8px 0}
+.fml .cr{color:var(--red)} .fml .cb{color:var(--acc)} .fml .vec{font-size:1em}
+.fr{display:inline-flex; flex-direction:column; align-items:center; vertical-align:middle; margin:0 2px; line-height:1.15; font-family:Georgia,serif; font-size:.85em}
+.fr>span{padding:0 4px; line-height:1.25} .fr>span:first-child{border-bottom:1px solid currentColor}
+.sol{border:1px solid var(--line2); border-radius:12px; background:rgba(255,255,255,.35); margin-top:12px}
+.sol summary{cursor:pointer; padding:8px 14px; font-weight:700; font-size:13.5px; color:var(--acc); list-style:none} .sol summary::-webkit-details-marker{display:none}
+.sol .sb{padding:2px 16px 12px; font-size:14px; line-height:2.2; font-family:'Nanum Myeongjo',Batang,serif}
+.sol .sb .vec,.sol .sb .sym,.sol .sb .rm,.sol .sb i.m{font-family:'Times New Roman',Times,Georgia,serif}
+.sol .sb .ind{padding-left:22px}
 </style>
 </head>
 <body>
@@ -115,6 +177,7 @@ svg .it{font-style:italic}
     <marker id="ahG" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 1.2 L10 5 L0 8.8 z" fill="#A8A79A"/></marker>
     <marker id="ahV" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 1.2 L10 5 L0 8.8 z" fill="#7A3FB5"/></marker>
     <marker id="ahO" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 1.2 L10 5 L0 8.8 z" fill="#E0891A"/></marker>
+    <marker id="ahGr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 1.2 L10 5 L0 8.8 z" fill="#12876A"/></marker>
     <marker id="ahS" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 1.2 L10 5 L0 8.8 z" fill="#F08A6E"/></marker>
   </defs>
 </svg>
@@ -123,6 +186,8 @@ svg .it{font-style:italic}
   <div id="tabs">
     <button class="on" data-t="a"><span class="no">01</span>평면벡터의 성분</button>
     <button data-t="b"><span class="no">02</span>공간벡터의 성분</button>
+    <button data-t="c"><span class="no">03</span>역량 (p117)</button>
+    <button data-t="d"><span class="no">04</span>메테인 분자 (p127)</button>
   </div>
 </header>
 <div id="panel"><div class="wrap">
@@ -225,6 +290,115 @@ svg .it{font-style:italic}
 
 </div>
 
+<!-- ═══════════════ 03 역량 (p117) ═══════════════ -->
+<div class="pane" data-p="c">
+  <div class="prow">
+    <div>
+      <div class="ptxt"><span class="badge w">내 역량</span>오른쪽 그림에서 정육면체의 내부의 임의의 점 <span class='rm'>P</span>에 대하여
+        <div class="eqc"><span class='vec'><span class='r'>PA</span></span> + <span class='vec'><span class='r'>PG</span></span> = <span class='vec'><span class='r'>PD</span></span> + <span class='vec'><span class='r'>PF</span></span></div>
+        가 성립한다. 다음 서하의 말을 이용하여 등식이 성립함을 보이고 친구에게 설명하시오.
+        <div class="bub"><div class="who">서하</div><div class="say">벡터는 성분으로 나타낼 수 있으므로 정육면체를 좌표공간 위에 놓고 생각해 봐.</div></div>
+      </div>
+      <div class="tbtns">
+        <button class="btn" data-st="1"><span class="cn">1</span>좌표공간에 놓기</button>
+        <button class="btn" data-st="2"><span class="cn">2</span><span class='vec'><span class='r'>PA</span></span> + <span class='vec'><span class='r'>PG</span></span></button>
+        <button class="btn" data-st="3"><span class="cn">3</span><span class='vec'><span class='r'>PD</span></span> + <span class='vec'><span class='r'>PF</span></span></button>
+        <button class="btn" data-st="4"><span class="cn">4</span>비교</button>
+        <button class="btn" id="cbRe">다시</button>
+        <button class="btn" id="cbP">P 옮기기</button>
+      </div>
+      <div class="msg" id="cbMsg"></div>
+      <div class="fml" id="cbFml"></div>
+    </div>
+    <div class="cream"><svg viewBox="0 0 340 300" id="fCube"></svg></div>
+  </div>
+
+  <div class="sec"><h3>다른 증명 방법</h3></div>
+  <div class="alts" id="alts">
+    <div class="alt" data-m="A">
+      <div class="ah"><span class="badge">방법 1</span>중점 M으로 쪼개기 <span class="stp"><button class="btn sm" data-a1="1">STEP 1</button><button class="btn sm" data-a1="2">STEP 2</button></span></div>
+      <div class="a2col">
+        <div class="colsum" id="a1s1">
+          <div class="r1"><span class="pl"></span><span class="t"><span class='vec'><span class='r'>PA</span></span> = <span class='vec'><span class='r'>PM</span></span> + <span class='vec'><span class='r'>MA</span></span></span></div>
+          <div class="r2"><span class="pl">+)</span><span class="t"><span class='vec'><span class='r'>PG</span></span> = <span class='vec'><span class='r'>PM</span></span> + <span class='vec'><span class='r'>MG</span></span></span></div>
+          <div class="r3"><span class="pl"></span><span class="t"><span class='vec'><span class='r'>PA</span></span> + <span class='vec'><span class='r'>PG</span></span> = <span class='sym'>2<span class='vec'><span class='r'>PM</span></span></span></span></div>
+        </div>
+        <div class="colsum" id="a1s2">
+          <div class="r1"><span class="pl"></span><span class="t"><span class='vec'><span class='r'>PD</span></span> = <span class='vec'><span class='r'>PM</span></span> + <span class='vec'><span class='r'>MD</span></span></span></div>
+          <div class="r2"><span class="pl">+)</span><span class="t"><span class='vec'><span class='r'>PF</span></span> = <span class='vec'><span class='r'>PM</span></span> + <span class='vec'><span class='r'>MF</span></span></span></div>
+          <div class="r3"><span class="pl"></span><span class="t"><span class='vec'><span class='r'>PD</span></span> + <span class='vec'><span class='r'>PF</span></span> = <span class='sym'>2<span class='vec'><span class='r'>PM</span></span></span></span></div>
+        </div>
+      </div>
+    </div>
+    <div class="alt" data-m="B">
+      <div class="ah"><span class="badge">방법 2</span>이항해서 뺄셈으로 <span class="stp"><button class="btn sm" data-b2="1">STEP 1</button><button class="btn sm" data-b2="2">STEP 2</button><button class="btn sm" data-b2="3">STEP 3</button></span></div>
+      <div class="beq">
+        <div class="ln" id="bl1"><span class='vec' id='b1PA'><span class='r'><span class='L' id='b1PAP'>P</span><span class='L' id='b1PAA'>A</span></span></span> <span class="sg">+</span> <span class='vec' id='b1PG'><span class='r'><span class='L' id='b1PGP'>P</span><span class='L' id='b1PGG'>G</span></span></span> <span class="sg">=</span> <span class='vec' id='b1PD'><span class='r'><span class='L' id='b1PDP'>P</span><span class='L' id='b1PDD'>D</span></span></span> <span class="sg">+</span> <span class='vec' id='b1PF'><span class='r'><span class='L' id='b1PFP'>P</span><span class='L' id='b1PFF'>F</span></span></span></div>
+        <div class="ln pre" id="bl2"><span class='vec' id='b2PA'><span class='r'><span class='L' id='b2PAP'>P</span><span class='L' id='b2PAA'>A</span></span></span> <span class="sg">−</span> <span class='vec' id='b2PD'><span class='r'><span class='L' id='b2PDP'>P</span><span class='L' id='b2PDD'>D</span></span></span> <span class="sg">=</span> <span class='vec' id='b2PF'><span class='r'><span class='L' id='b2PFP'>P</span><span class='L' id='b2PFF'>F</span></span></span> <span class="sg">−</span> <span class='vec' id='b2PG'><span class='r'><span class='L' id='b2PGP'>P</span><span class='L' id='b2PGG'>G</span></span></span></div>
+        <div class="ln pre" id="bl3"><span class="half" id="bl3L"><span class='vec' id='b3DA'><span class='r'><span class='L' id='b3DAD'>D</span><span class='L' id='b3DAA'>A</span></span></span></span> <span class="half" id="bl3M"><span class="sg">=</span></span> <span class="half" id="bl3R"><span class='vec' id='b3GF'><span class='r'><span class='L' id='b3GFG'>G</span><span class='L' id='b3GFF'>F</span></span></span></span> <span class="half nt" id="bl3N">(평행하고 길이가 같은 모서리)</span></div>
+      </div>
+    </div>
+    <div class="alt" data-m="C">
+      <div class="ah"><span class="badge">방법 3</span>기준점 O의 위치벡터로 <span class="stp"><button class="btn sm" data-c3="1">STEP 1</button><button class="btn sm" data-c3="2">STEP 2</button></span></div>
+      <div class="a2col">
+        <div class="chain" id="c3s1">
+          <div><span class='vec'><span class='r'>PA</span></span> + <span class='vec'><span class='r'>PG</span></span> = <span class='vec'><span class='r'>OA</span></span> + <span class='vec'><span class='r'>OG</span></span> − <span class='sym'>2<span class='vec'><span class='r'>OP</span></span></span></div>
+          <div class="ind">= 2 · <span class='fr'><span><span class='vec'><span class='r'>OA</span></span> + <span class='vec'><span class='r'>OG</span></span></span><span>2</span></span> − <span class='sym'>2<span class='vec'><span class='r'>OP</span></span></span></div>
+          <div class="ind">= <span class='sym'>2<span class='vec'><span class='r'>OM</span></span></span> − <span class='sym'>2<span class='vec'><span class='r'>OP</span></span></span></div>
+          <div class="ind">= <span class='sym'>2<span class='vec'><span class='r'>PM</span></span></span></div>
+        </div>
+        <div class="chain" id="c3s2">
+          <div><span class='vec'><span class='r'>PD</span></span> + <span class='vec'><span class='r'>PF</span></span> = <span class='vec'><span class='r'>OD</span></span> + <span class='vec'><span class='r'>OF</span></span> − <span class='sym'>2<span class='vec'><span class='r'>OP</span></span></span></div>
+          <div class="ind">= 2 · <span class='fr'><span><span class='vec'><span class='r'>OD</span></span> + <span class='vec'><span class='r'>OF</span></span></span><span>2</span></span> − <span class='sym'>2<span class='vec'><span class='r'>OP</span></span></span></div>
+          <div class="ind">= <span class='sym'>2<span class='vec'><span class='r'>OM</span></span></span> − <span class='sym'>2<span class='vec'><span class='r'>OP</span></span></span></div>
+          <div class="ind">= <span class='sym'>2<span class='vec'><span class='r'>PM</span></span></span></div>
+        </div>
+      </div>
+    </div>
+    <div class="alt" data-m="D">
+      <div class="ah"><span class="badge">방법 4</span>점대칭으로 일반화 <button class="btn sm" data-alt="D">그림</button></div>
+      <div class="at">M을 지나는 선분 XY(M이 중점)에 대하여 항상 <span class='vec'><span class='r'>PX</span></span> + <span class='vec'><span class='r'>PY</span></span> = <span class='sym'>2<span class='vec'><span class='r'>PM</span></span></span>이다. 정육면체의 네 대각선 AG, DF, BH, CE는 모두 M에서 서로를 이등분하므로
+        <div class="af"><span class='vec'><span class='r'>PA</span></span> + <span class='vec'><span class='r'>PG</span></span> = <span class='vec'><span class='r'>PD</span></span> + <span class='vec'><span class='r'>PF</span></span> = <span class='vec'><span class='r'>PB</span></span> + <span class='vec'><span class='r'>PH</span></span> = <span class='vec'><span class='r'>PC</span></span> + <span class='vec'><span class='r'>PE</span></span> = <span class='sym'>2<span class='vec'><span class='r'>PM</span></span></span></div>
+        정육면체일 필요도 없다. 네 점 A, G, D, F가 서로를 이등분하는 두 선분의 끝점(평행사변형의 꼭짓점)이기만 하면 성립한다.</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══════════════ 04 메테인 분자 ═══════════════ -->
+<div class="pane" data-p="d">
+  <div class="prow">
+  <div class="ptxt" style="margin-bottom:8px"><span class="badge w">탐구</span><b>메테인 분자의 구조</b><br>
+        메테인(CH<sub>4</sub>) 분자는 정사면체의 네 꼭짓점에 각각 하나의 수소(H) 원자가 있고, 탄소(C) 원자는 네 꼭짓점에서 마주 보는 면에 내린 수선의 교점에 있는 대칭 구조이다. 정사면체 H<sub>1</sub>H<sub>2</sub>H<sub>3</sub>H<sub>4</sub>의 꼭짓점이
+        <div class="eqc" style="font-size:15.5px">H<sub>1</sub>(6, 0, 0), H<sub>2</sub>(0, 6, 0), H<sub>3</sub>(0, 0, 6), H<sub>4</sub>(6, 6, 6)</div>
+        일 때, 삼각형 H<sub>1</sub>H<sub>2</sub>H<sub>3</sub>, H<sub>1</sub>H<sub>2</sub>H<sub>4</sub>의 무게중심을 각각 G<sub>1</sub>, G<sub>2</sub>, 선분 H<sub>1</sub>H<sub>2</sub>의 중점을 M이라 하자. 점 C는 선분 H<sub>4</sub>G<sub>1</sub>과 H<sub>3</sub>G<sub>2</sub>의 교점이다.</div>
+    <div class="cream"><svg viewBox="0 0 340 330" id="fMol"></svg><div class="fcap"><span>메테인 분자</span><span id="mHint" style="transition:opacity .4s">분자를 누르면 좌표공간 위에 놓입니다</span></div></div>
+  </div>
+  <div class="figs">
+    <div class="cream"><svg viewBox="0 0 340 330" id="fMet"></svg><div class="fcap"><span>[그림 1]</span><span></span></div></div>
+    <div class="cream" style="cursor:default"><svg viewBox="0 0 300 330" id="fMet2"></svg><div class="fcap"><span>[그림 2] 삼각형 H<sub>3</sub>MH<sub>4</sub></span><span></span></div></div>
+  </div>
+  <div class="tbtns">
+    <button class="btn" id="mCon">무게중심 G<sub>1</sub>, G<sub>2</sub>와 점 C 작도</button>
+    <button class="btn" id="mConRe">처음부터</button>
+  </div>
+  <div class="msg" id="mCMsg"></div>
+
+  <div class="qline" style="margin-top:14px"><span class="badge">문제</span><span class='vec n'><span class='r'>CH</span></span><sub>1</sub> + <span class='vec n'><span class='r'>CH</span></span><sub>2</sub> + <span class='vec n'><span class='r'>CH</span></span><sub>3</sub> + <span class='vec n'><span class='r'>CH</span></span><sub>4</sub> = <span class='vec'><span class='r'>0</span></span>임을 확인하시오.</div>
+  <div class="tbtns"><button class="btn" id="bSol1">교과서 풀이 (공간좌표)</button><button class="btn" id="bSol2">풀이 2</button></div>
+  <div class="fml" id="sol1" hidden>
+    <div class="fl"><b style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:var(--acc);margin-right:8px">STEP 1</b>G<sub>1</sub>(2, 2, 2), G<sub>2</sub>(4, 4, 2)이므로 <span class='vec'><span class='r'>G<sub>1</sub>G<sub>2</sub></span></span> = (2, 2, 0) = <span class='fr'><span>1</span><span>3</span></span><span class='vec'><span class='r'>H<sub>3</sub>H<sub>4</sub></span></span> &nbsp;⇒&nbsp; <span class='vec'><span class='r'>G<sub>1</sub>G<sub>2</sub></span></span> ∥ <span class='vec'><span class='r'>H<sub>3</sub>H<sub>4</sub></span></span></div>
+    <div class="fl"><b style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:var(--acc);margin-right:8px">STEP 2</b>△CG<sub>1</sub>G<sub>2</sub> ∽ △CH<sub>4</sub>H<sub>3</sub>(닮음비 1 : 3)이므로 G<sub>1</sub>C : CH<sub>4</sub> = G<sub>2</sub>C : CH<sub>3</sub> = 1 : 3 &nbsp;⇒&nbsp; C(3, 3, 3)</div>
+    <div class="fl"><b style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:var(--acc);margin-right:8px">STEP 3</b><span class='vec n'><span class='r'>CH</span></span><sub>1</sub> + <span class='vec n'><span class='r'>CH</span></span><sub>2</sub> + <span class='vec n'><span class='r'>CH</span></span><sub>3</sub> + <span class='vec n'><span class='r'>CH</span></span><sub>4</sub> = (3, −3, −3) + (−3, 3, −3) + (−3, −3, 3) + (3, 3, 3) = (0, 0, 0) = <span class='vec'><span class='r'>0</span></span></div>
+  </div>
+  <div id="sol2" hidden>
+    <div class="figs" style="margin-top:6px">
+      <div class="cream"><svg viewBox="0 0 340 300" id="fS2a"></svg><div class="fcap" style="align-items:center"><span>정사면체</span><span class="tbtns" style="margin:0"><button class="btn sm" id="s2go">다음</button><button class="btn sm" id="s2re">다시</button></span></div></div>
+      <div class="cream" style="cursor:default"><svg viewBox="0 0 300 260" id="fS2b"></svg><div class="cnt" id="s2cnt"></div></div>
+    </div>
+    <div class="s2eqs" id="s2eq"></div>
+  </div>
+</div>
 </div></div>
 
 <script>
@@ -236,7 +410,8 @@ function geoTask(k){ if(typeof GEO_task==='function') GEO_task(k); }
   document.querySelectorAll('.pane').forEach(p=>p.classList.toggle('on',p.dataset.p===b.dataset.t)); $('panel').scrollTop=0; }); })();
 const NS='http://www.w3.org/2000/svg';
 const INK='#23241D', RED='#D9463F', BLU='#2F45EC', CYA='#1E9BD7', DIM='#A8A79A', ORG='#E0891A', SAL='#F08A6E', VIO='#7A3FB5';
-const MK={[INK]:'url(#ah)',[RED]:'url(#ahR)',[BLU]:'url(#ahB)',[CYA]:'url(#ahC)',[DIM]:'url(#ahG)',[ORG]:'url(#ahO)',[SAL]:'url(#ahS)',[VIO]:'url(#ahV)'};
+const GRN='#12876A';
+const MK={[INK]:'url(#ah)',[GRN]:'url(#ahGr)',[RED]:'url(#ahR)',[BLU]:'url(#ahB)',[CYA]:'url(#ahC)',[DIM]:'url(#ahG)',[ORG]:'url(#ahO)',[SAL]:'url(#ahS)',[VIO]:'url(#ahV)'};
 function el(tag,attrs,parent){ const e=document.createElementNS(NS,tag); for(const k in attrs) e.setAttribute(k,attrs[k]); if(parent) parent.appendChild(e); return e; }
 function arrow(p,x1,y1,x2,y2,col,w,dash){ return el('line',{x1,y1,x2,y2,stroke:col,'stroke-width':w||2,'stroke-linecap':'round','marker-end':MK[col]||MK[INK],'stroke-dasharray':dash||''},p); }
 function seg(p,a,b,col,w,dash){ return el('line',{x1:a[0],y1:a[1],x2:b[0],y2:b[1],stroke:col||INK,'stroke-width':w||1.3,'stroke-dasharray':dash||'','stroke-linecap':'round'},p); }
@@ -321,6 +496,265 @@ blanks.forEach(b=>{ b.onclick=()=>{ if(b.classList.contains('done')) return; b.c
             geoTask('comp-box'); }); },500); }); },700);
   };
 })();
+
+/* ═══════ 03 역량: 정육면체 그림 증명 (드래그로 회전) ═══════ */
+(function(){ const s=$('fCube'); const CX=170, CY=150, U=52, a=2.4;
+  let az=0.5, elv=0.38; const cam={};
+  function upd(){ cam.ca=Math.cos(az); cam.sa=Math.sin(az); cam.ce=Math.cos(elv); cam.se=Math.sin(elv); }
+  function dep(p){ const x=p[0]-a/2,y=p[1]-a/2,z=p[2]-a/2; const d=x*cam.ca+y*cam.sa; return d*cam.ce+z*cam.se; }
+  function P3(x,y,z){ x-=a/2; y-=a/2; z-=a/2; const u=-x*cam.sa+y*cam.ca, d=x*cam.ca+y*cam.sa; return [CX+U*u, CY-U*(z*cam.ce-d*cam.se)]; }
+  const V={E:[0,0,0],F:[a,0,0],H:[0,a,0],G:[a,a,0],A:[0,0,a],B:[a,0,a],D:[0,a,a],C:[a,a,a]};
+  const EDGES=[['E','F'],['E','H'],['E','A'],['F','G'],['H','G'],['A','B'],['B','C'],['C','D'],['A','D'],['F','B'],['G','C'],['H','D']];
+  const FACES=[['E','F','G','H'],['A','B','C','D'],['E','F','B','A'],['H','G','C','D'],['E','H','D','A'],['F','G','C','B']];
+  let Pc=[0.8,1.5,0.7]; let st=0;
+  const add=(p,q)=>[p[0]+q[0],p[1]+q[1],p[2]+q[2]], sub=(p,q)=>[p[0]-q[0],p[1]-q[1],p[2]-q[2]];
+  const msg=$('cbMsg'), fml=$('cbFml'); const bs=[...document.querySelectorAll('[data-st]')];
+  function ar3(p,q,col,w,dash){ const a1=P3(...p), b1=P3(...q); return arrow(s,a1[0],a1[1],b1[0],b1[1],col,w||2.2,dash); }
+  function sg3(p,q,col,w,dash){ return seg(s,P3(...p),P3(...q),col,w,dash); }
+  function lab3(p,txt,col,size,dx,dy){ const q=P3(...p); return mlab(s,q[0]+(dx||0),q[1]+(dy||0),txt,col||INK,size||14); }
+  /* 라벨을 정육면체 중심 반대쪽으로 밀어내기 */
+  function out(name,txt,col,size){ const p=V[name]; const q=P3(...p), c=P3(a/2,a/2,a/2); let dx=q[0]-c[0], dy=q[1]-c[1]; const n=Math.hypot(dx,dy)||1; dx/=n; dy/=n;
+    const w=(txt.length)*6.5; return mlab(s,q[0]+dx*12-(dx<0?w:0)+(dx<0?-2:0),q[1]+dy*12+5,txt,col||INK,size||14); }
+  function base(coords){ upd(); s.innerHTML='';
+    /* 면: 먼 것부터 */
+    FACES.map(f=>({f,d:f.reduce((t,k)=>t+dep(V[k]),0)})).sort((p,q)=>p.d-q.d).forEach(o=>el('polygon',{points:o.f.map(k=>P3(...V[k]).join(',')).join(' '),fill:'rgba(140,120,200,.07)',stroke:'none'},s));
+    if(coords){ const E=P3(0,0,0), X=P3(a+1.2,0,0),Y=P3(0,a+1.2,0),Z=P3(0,0,a+1);
+      arrow(s,E[0],E[1],X[0],X[1],DIM,1.4); arrow(s,E[0],E[1],Y[0],Y[1],DIM,1.4); arrow(s,E[0],E[1],Z[0],Z[1],DIM,1.4);
+      mlab(s,X[0]-4,X[1]+16,'x',DIM,15); mlab(s,Y[0]+4,Y[1]+14,'y',DIM,15); mlab(s,Z[0]+6,Z[1]-2,'z',DIM,15); }
+    /* 가장 뒤 꼭짓점의 세 모서리는 점선 */
+    let far=null, fd=1e9; for(const k in V){ const d=dep(V[k]); if(d<fd){ fd=d; far=k; } }
+    EDGES.forEach(e=>{ const hid=e.includes(far); sg3(V[e[0]],V[e[1]],INK,hid?1.1:1.4,hid?'4 3':''); });
+    for(const k in V){ const q=P3(...V[k]); dot(s,q[0],q[1],INK,2.6); }
+    const CO={A:'A(0, 0, a)',D:'D(0, a, a)',F:'F(a, 0, 0)',G:'G(a, a, 0)',E:'E(0, 0, 0)'};
+    for(const k in V) out(k,(coords&&CO[k])?CO[k]:k,INK,coords&&CO[k]?13:14);
+    const p=P3(...Pc); dot(s,p[0],p[1],RED,4); mlab(s,p[0]+7,p[1]+5,coords?'P(x, y, z)':'P',RED,14); }
+  function drawSum(P,X,Y,col,tag){ const Q=sub(add(X,Y),P); ar3(P,X,col,2.4); ar3(P,Y,col,2.4); ar3(X,Q,col,1.6,'5 4'); ar3(Y,Q,col,1.6,'5 4'); ar3(P,Q,col,3.4); const q=P3(...Q); dot(s,q[0],q[1],col,4); mlab(s,q[0]+8,q[1]-6,tag,col,13); }
+  function drawCmp(){ const M=[a/2,a/2,a/2]; sg3(V.A,V.G,ORG,1.4,'3 3'); sg3(V.D,V.F,ORG,1.4,'3 3'); const m=P3(...M); dot(s,m[0],m[1],ORG,4.5); mlab(s,m[0]+8,m[1]+4,'M',ORG,15);
+    const q=P3(...sub(add(V.A,V.G),Pc)); const c=el('circle',{cx:q[0],cy:q[1],r:12,fill:'none',stroke:ORG,'stroke-width':2.5},s); c.classList.add('blink'); }
+  /* 현재 단계까지 정지 상태로 다시 그리기 (회전 시) */
+  function render(){ if(mode){ base(false); altStatic(mode); return; } base(st>=1); if(st>=2) drawSum(Pc,V.A,V.G,RED,'Q'); if(st>=3) drawSum(Pc,V.D,V.F,BLU,'Q′'); if(st>=4) drawCmp(); }
+  function para(P,X,Y,col,tag,cb){ const Q=sub(add(X,Y),P); const l1=ar3(P,X,col,2.4), l2=ar3(P,Y,col,2.4); l1.style.opacity=0; l2.style.opacity=0;
+    grow(l1,.6); grow(l2,.6,()=>{ const g1=ar3(X,Q,col,1.6,'5 4'), g2=ar3(Y,Q,col,1.6,'5 4'); g1.style.opacity=0; g2.style.opacity=0; grow(g1,.6); grow(g2,.6,()=>{
+      const r=ar3(P,Q,col,3.4); r.style.opacity=0; grow(r,.7,()=>{ const q=P3(...Q); dot(s,q[0],q[1],col,4); mlab(s,q[0]+8,q[1]-6,tag,col,13); if(cb) cb(Q); }); }); }); }
+  const v=x=>`<span class='vec'><span class='r'>${x}</span></span>`, m=x=>`<i class='m'>${x}</i>`;
+  const T={1:'정육면체의 한 모서리의 길이를 '+m('a')+'라 하고 E를 원점, EF·EH·EA를 '+m('x')+'축·'+m('y')+'축·'+m('z')+'축 위에 놓습니다. 그림을 끌어서 돌려 보세요.',
+    2:`<span class="cr">${v('PA')} + ${v('PG')}</span> : 두 벡터로 평행사변형을 만들면 대각선이 합 벡터입니다. 도착점을 Q라 하면 ${v('PQ')} = ${v('PA')} + ${v('PG')}.`,
+    3:`<span class="cb">${v('PD')} + ${v('PF')}</span> : 같은 방법으로 평행사변형을 만들면 도착점 Q′에 대하여 ${v('PQ′')} = ${v('PD')} + ${v('PF')}.`,
+    4:`두 합의 성분이 같으므로 Q와 Q′는 같은 점입니다. AG와 DF는 정육면체의 중심 M(<span class='fr'><span>${m('a')}</span><span>2</span></span>, <span class='fr'><span>${m('a')}</span><span>2</span></span>, <span class='fr'><span>${m('a')}</span><span>2</span></span>)에서 서로를 이등분하므로 두 합은 모두 <span class='sym'>2${v('PM')}</span>입니다. 따라서 P가 어디에 있어도 등식이 성립합니다.`};
+  const F={1:`A(0, 0, ${m('a')}), G(${m('a')}, ${m('a')}, 0), D(0, ${m('a')}, ${m('a')}), F(${m('a')}, 0, 0), P(${m('x')}, ${m('y')}, ${m('z')})`,
+    2:`<div class="cr">${v('PA')} = (−${m('x')}, −${m('y')}, ${m('a')} − ${m('z')}), &nbsp;${v('PG')} = (${m('a')} − ${m('x')}, ${m('a')} − ${m('y')}, −${m('z')})<br>${v('PA')} + ${v('PG')} = (${m('a')} − 2${m('x')}, ${m('a')} − 2${m('y')}, ${m('a')} − 2${m('z')})</div>`,
+    3:`<div class="cb">${v('PD')} = (−${m('x')}, ${m('a')} − ${m('y')}, ${m('a')} − ${m('z')}), &nbsp;${v('PF')} = (${m('a')} − ${m('x')}, −${m('y')}, −${m('z')})<br>${v('PD')} + ${v('PF')} = (${m('a')} − 2${m('x')}, ${m('a')} − 2${m('y')}, ${m('a')} − 2${m('z')})</div>`,
+    4:`<div>∴ ${v('PA')} + ${v('PG')} = ${v('PD')} + ${v('PF')} = (${m('a')} − 2${m('x')}, ${m('a')} − 2${m('y')}, ${m('a')} − 2${m('z')})</div>
+      <div style="font-size:.92em;color:#4b5a6a">그림으로: ${v('PA')} + ${v('PG')} = (${v('PM')} + ${v('MA')}) + (${v('PM')} + ${v('MG')}) = <span class='sym'>2${v('PM')}</span> + (${v('MA')} + ${v('MG')}) = <span class='sym'>2${v('PM')}</span> &nbsp;(∵ M은 AG의 중점이므로 ${v('MA')} + ${v('MG')} = <span class='vec'><span class='r'>0</span></span>)<br>
+      마찬가지로 ${v('PD')} + ${v('PF')} = <span class='sym'>2${v('PM')}</span> &nbsp;(M은 DF의 중점)</div>`};
+  function setBtns(){ bs.forEach(b=>{ const k=+b.dataset.st; b.classList.toggle('on',k<=st); b.disabled=k!==st+1&&k>st; }); }
+  function go(k){ if(mode){ mode=null; document.querySelectorAll('.alt').forEach(x=>x.classList.remove('on')); base(false); } if(k!==st+1) return; st=k; setBtns(); msg.innerHTML=T[k]; fml.innerHTML+=`<div class="fl">${F[k]}</div>`;
+    if(k===1) base(true);
+    if(k===2) para(Pc,V.A,V.G,RED,'Q');
+    if(k===3) para(Pc,V.D,V.F,BLU,'Q′');
+    if(k===4){ drawCmp(); geoTask('comp-cube'); } }
+  /* ─ 다른 증명 그림 ─ */
+  let mode=null; const M3=[a/2,a/2,a/2]; const AS={A:0,B:0,C:0}; let abusy=false;
+  const HB='rgba(47,69,236,.30)', HR='rgba(217,70,63,.30)', HG='rgba(18,135,106,.35)';
+  function hlPath(pts,col,w){ const path=el('path',{d:'M'+pts.map(p=>P3(...p).join(' ')).join(' L'),fill:'none',stroke:col,'stroke-width':w||9,'stroke-linecap':'round','stroke-linejoin':'round'},s); return path; }
+  function hlGrow(pts,col,dur,cb){ const path=hlPath(pts,col); growPath(path,dur||.8,cb); return path; }
+  function seqGrow(items,cb){ let i=0; const next=()=>{ if(i>=items.length){ if(cb) cb(); return; } const it=items[i++]; const l=ar3(it[0],it[1],it[2],it[3],it[4]); l.style.opacity=0; grow(l,.55,next); }; next(); }
+  function markM(){ const m=P3(...M3); dot(s,m[0],m[1],ORG,4.5); mlab(s,m[0]+8,m[1]+4,'M',ORG,15); }
+  function altStatic(k){ const m=P3(...M3);
+    if(k==='A'){ if(AS.A>=1){ sg3(V.A,V.G,ORG,1.2,'3 3'); hlPath([Pc,M3],HB); hlPath([Pc,M3],HB); ar3(Pc,V.A,INK,1.4,'4 3'); ar3(Pc,V.G,INK,1.4,'4 3'); }
+      if(AS.A>=2){ sg3(V.D,V.F,ORG,1.2,'3 3'); hlPath([Pc,M3],HR); hlPath([Pc,M3],HR); ar3(Pc,V.D,INK,1.4,'4 3'); ar3(Pc,V.F,INK,1.4,'4 3'); }
+      if(AS.A>=1){ ar3(Pc,M3,ORG,3); markM(); } }
+    if(k==='B'){ if(AS.B>=2){ hlPath([V.D,V.A],HG); ar3(V.D,V.A,GRN,2.2); } if(AS.B>=3){ hlPath([V.G,V.F],HG); ar3(V.G,V.F,GRN,2.2); } }
+    if(k==='C'){ }
+    if(k==='D'){ [['A','G',RED],['D','F',BLU],['B','H',GRN],['C','E',VIO]].forEach(e=>{ sg3(V[e[0]],V[e[1]],e[2],1.3,'3 3'); ar3(Pc,V[e[0]],e[2],1.5); ar3(Pc,V[e[1]],e[2],1.5); });
+      ar3(Pc,sub(add(M3,M3),Pc),ORG,3.4); markM(); } }
+  function setMode(k){ if(mode!==k){ mode=k; st=0; setBtns(); msg.innerHTML=''; fml.innerHTML=''; document.querySelectorAll('.alt').forEach(x=>x.classList.toggle('on',x.dataset.m===k)); } }
+  function stepBtns(sel,n){ document.querySelectorAll(sel).forEach(b=>{ const k=+(b.dataset.a1||b.dataset.b2||b.dataset.c3); b.classList.toggle('on',k<=n); b.disabled=k!==n+1&&k>n; }); }
+  /* 방법 1: 중점 M으로 쪼개기 — STEP1 (A,G) / STEP2 (D,F) */
+  function m1(k){ if(abusy||k!==AS.A+1) return; setMode('A'); abusy=true; const X=k===1?V.A:V.D, Y=k===1?V.G:V.F, col=k===1?HB:HR; const box=$(k===1?'a1s1':'a1s2'); box.classList.add('show');
+    base(false); altStatic('A'); if(k===1) markM();
+    sg3(X,Y,ORG,1.2,'3 3'); const a1=ar3(Pc,X,INK,1.4,'4 3'), a2=ar3(Pc,Y,INK,1.4,'4 3');
+    const r=[...box.querySelectorAll('.r1,.r2,.r3')];
+    /* PX = PM + MX : P→M→X 형광펜 */
+    r[0].classList.add('on'); const h1=hlPath([Pc,M3],col), h2=hlPath([M3,X],col); growPath(h1,.6,()=>growPath(h2,.6,()=>{
+      r[1].classList.add('on'); const h3=hlPath([Pc,M3],col), h4=hlPath([M3,Y],col); growPath(h3,.6,()=>growPath(h4,.6,()=>{
+        /* 양변 더하기: MX + MY = 0 상쇄 */
+        setTimeout(()=>{ box.classList.add('line'); [h2,h4].forEach(h=>{ h.style.transition='opacity 1s'; h.style.opacity=0; });
+          setTimeout(()=>{ r[2].classList.add('on'); const pm=ar3(Pc,M3,ORG,3); pm.style.opacity=0; grow(pm,.5,()=>{ AS.A=k; stepBtns('[data-a1]',k); abusy=false; if(k===2) geoTask('cube-m1'); }); },900); },400); })); })); }
+  document.querySelectorAll('[data-a1]').forEach(b=>b.onclick=()=>m1(+b.dataset.a1)); stepBtns('[data-a1]',0);
+  /* 방법 2: 이항 — 글자 날아가기 */
+  function fly(fromEl,toEl,cont,cb){ const r0=fromEl.getBoundingClientRect(), r1=toEl.getBoundingClientRect(), rc=cont.getBoundingClientRect(); const c=fromEl.cloneNode(true); c.className='flyL'; c.style.left=(r0.left-rc.left)+'px'; c.style.top=(r0.top-rc.top)+'px'; cont.appendChild(c);
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{ c.style.transform=`translate(${r1.left-r0.left}px,${r1.top-r0.top}px)`; })); setTimeout(()=>{ c.remove(); if(cb) cb(); },950); }
+  function m2(k){ if(abusy||k!==AS.B+1) return; setMode('B'); abusy=true; const card=document.querySelector('.alt[data-m="B"]'); const fin=()=>{ AS.B=k; stepBtns('[data-b2]',k); abusy=false; };
+    if(k===1){ base(false); /* PG ↔ PD 자리 바꾸며 부호 변화 */ const l2=$('bl2'); l2.querySelectorAll('.vec').forEach(v=>v.style.visibility='hidden'); l2.classList.add('show');
+      [['b1PA','b2PA'],['b1PG','b2PG'],['b1PD','b2PD'],['b1PF','b2PF']].forEach(pr=>fly($(pr[0]),$(pr[1]),card));
+      setTimeout(()=>{ l2.querySelectorAll('.vec').forEach(v=>v.style.visibility=''); fin(); },1000); }
+    if(k===2){ /* PA − PD → DA : A, D 글자 이동 + 육면체 DA 형광펜 */ const l3=$('bl3'); l3.classList.add('show'); $('b3DAD').style.visibility='hidden'; $('b3DAA').style.visibility='hidden'; $('bl3L').classList.add('on');
+      fly($('b2PDD'),$('b3DAD'),card); fly($('b2PAA'),$('b3DAA'),card,()=>{ $('b3DAD').style.visibility=''; $('b3DAA').style.visibility=''; hlGrow([V.D,V.A],HG,.7,()=>{ const g=ar3(V.D,V.A,GRN,2.2); g.style.opacity=0; grow(g,.5,fin); }); }); }
+    if(k===3){ $('bl3M').classList.add('on'); $('b3GFG').style.visibility='hidden'; $('b3GFF').style.visibility='hidden'; $('bl3R').classList.add('on');
+      fly($('b2PGG'),$('b3GFG'),card); fly($('b2PFF'),$('b3GFF'),card,()=>{ $('b3GFG').style.visibility=''; $('b3GFF').style.visibility=''; hlGrow([V.G,V.F],HG,.7,()=>{ const g=ar3(V.G,V.F,GRN,2.2); g.style.opacity=0; grow(g,.5,()=>{ $('bl3N').classList.add('on'); fin(); geoTask('cube-m2'); }); }); }); } }
+  document.querySelectorAll('[data-b2]').forEach(b=>b.onclick=()=>m2(+b.dataset.b2)); stepBtns('[data-b2]',0);
+  /* 방법 3: 기준점 O(=E) */
+  function m3(k){ if(abusy||k!==AS.C+1) return; setMode('C'); abusy=true; const ch=[...$(k===1?'c3s1':'c3s2').children];
+    ch.forEach((d,i)=>setTimeout(()=>d.classList.add('on'),i*650)); setTimeout(()=>{ AS.C=k; stepBtns('[data-c3]',k); abusy=false; if(k===2) geoTask('cube-m3'); },ch.length*650); }
+  document.querySelectorAll('[data-c3]').forEach(b=>b.onclick=()=>m3(+b.dataset.c3)); stepBtns('[data-c3]',0);
+  /* 방법 4 */
+  document.querySelectorAll('[data-alt]').forEach(b=>b.onclick=()=>{ if(abusy) return; setMode('D'); base(false); const m=P3(...M3); markM(); const pairs=[['A','G',RED],['D','F',BLU],['B','H',GRN],['C','E',VIO]]; let i=0; abusy=true;
+    const next=()=>{ if(i>=pairs.length){ abusy=false; return; } const e=pairs[i++]; sg3(V[e[0]],V[e[1]],e[2],1.3,'3 3'); seqGrow([[Pc,V[e[0]],e[2],1.5],[Pc,V[e[1]],e[2],1.5]],()=>{ if(i===1){ const r=ar3(Pc,sub(add(M3,M3),Pc),ORG,3.4); r.style.opacity=0; grow(r,.6,next); } else setTimeout(next,250); }); }; next();
+    $('fCube').scrollIntoView({behavior:'smooth',block:'nearest'}); });
+  bs.forEach(b=>b.onclick=()=>go(+b.dataset.st));
+  function reset(){ st=0; mode=null; document.querySelectorAll('.alt').forEach(x=>x.classList.remove('on')); setBtns(); msg.innerHTML=''; fml.innerHTML=''; base(false);
+    AS.A=AS.B=AS.C=0; stepBtns('[data-a1]',0); stepBtns('[data-b2]',0); stepBtns('[data-c3]',0);
+    document.querySelectorAll('.colsum').forEach(x=>{ x.classList.remove('show','line'); x.querySelectorAll('.on').forEach(y=>y.classList.remove('on')); });
+    document.querySelectorAll('.beq .pre').forEach(x=>x.classList.remove('show')); document.querySelectorAll('.beq .half').forEach(x=>x.classList.remove('on'));
+    document.querySelectorAll('.chain>div').forEach(x=>x.classList.remove('on')); }
+  $('cbRe').onclick=reset;
+  $('cbP').onclick=()=>{ Pc=[0.4+Math.random()*1.6, 0.4+Math.random()*1.6, 0.4+Math.random()*1.6]; reset(); };
+  /* 드래그 회전 */
+  let dr=null; s.style.touchAction='none'; s.style.cursor='grab'; s.style.userSelect='none'; s.style.webkitUserSelect='none';
+  s.addEventListener('pointerdown',e=>{ e.preventDefault(); dr={x:e.clientX,y:e.clientY,az,el:elv}; s.setPointerCapture(e.pointerId); s.style.cursor='grabbing'; });
+  s.addEventListener('pointermove',e=>{ if(!dr) return; az=dr.az-(e.clientX-dr.x)*0.012; elv=Math.max(-1.3,Math.min(1.3,dr.el+(e.clientY-dr.y)*0.012)); render(); });
+  const up=()=>{ dr=null; s.style.cursor='grab'; }; s.addEventListener('pointerup',up); s.addEventListener('pointercancel',up);
+  reset(); })();
+
+/* ═══════ 04 메테인 (p127) ═══════ */
+/* 공통 3D 뷰: 드래그 회전 */
+function View3D(svg,CX,CY,U,center,onRender,onTap){ const v={svg,az:0.5,elv:0.38,busy:false}; const c=center; const cam={};
+  v.upd=()=>{ cam.ca=Math.cos(v.az); cam.sa=Math.sin(v.az); cam.ce=Math.cos(v.elv); cam.se=Math.sin(v.elv); };
+  v.dep=p=>{ const x=p[0]-c[0],y=p[1]-c[1],z=p[2]-c[2]; return (x*cam.ca+y*cam.sa)*cam.ce+z*cam.se; };
+  v.P=p=>{ const x=p[0]-c[0],y=p[1]-c[1],z=p[2]-c[2]; const u=-x*cam.sa+y*cam.ca, d=x*cam.ca+y*cam.sa; return [CX+U*u, CY-U*(z*cam.ce-d*cam.se)]; };
+  v.seg=(p,q,col,w,dash,par)=>seg(par||svg,v.P(p),v.P(q),col,w,dash);
+  v.arrow=(p,q,col,w,dash,par)=>{ const a1=v.P(p), b1=v.P(q); return arrow(par||svg,a1[0],a1[1],b1[0],b1[1],col,w||2.2,dash); };
+  v.dot=(p,col,r,par)=>{ const q=v.P(p); return el('circle',{cx:q[0],cy:q[1],r:r||3.2,fill:col||INK},par||svg); };
+  v.lab=(p,txt,dx,dy,col,size,par)=>{ const q=v.P(p); return mlab(par||svg,q[0]+(dx||0),q[1]+(dy||0),txt,col||INK,size||14); };
+  v.render=()=>{ v.upd(); svg.innerHTML=''; onRender(v); };
+  let dr=null; svg.style.touchAction='none'; svg.style.cursor='grab'; svg.style.userSelect='none'; svg.style.webkitUserSelect='none';
+  svg.addEventListener('pointerdown',e=>{ e.preventDefault(); dr={x:e.clientX,y:e.clientY,az:v.az,el:v.elv,mv:0}; svg.setPointerCapture(e.pointerId); svg.style.cursor='grabbing'; });
+  svg.addEventListener('pointermove',e=>{ if(!dr) return; dr.mv=Math.max(dr.mv,Math.hypot(e.clientX-dr.x,e.clientY-dr.y)); if(dr.mv<4||v.busy) return; v.az=dr.az-(e.clientX-dr.x)*0.012; v.elv=Math.max(-1.3,Math.min(1.3,dr.el+(e.clientY-dr.y)*0.012)); v.render(); });
+  const up=()=>{ if(dr&&dr.mv<4&&onTap) onTap(v); dr=null; svg.style.cursor='grab'; }; svg.addEventListener('pointerup',up); svg.addEventListener('pointercancel',()=>{ dr=null; });
+  v.upd(); return v; }
+const MET=(function(){ const a=6; const Hs={1:[6,0,0],2:[0,6,0],3:[0,0,6],4:[6,6,6]}, C=[3,3,3], O3=[0,0,0];
+  const mid=(p,q)=>[(p[0]+q[0])/2,(p[1]+q[1])/2,(p[2]+q[2])/2]; const M=mid(Hs[1],Hs[2]), G1=[2,2,2], G2=[4,4,2];
+  return {Hs,C,O3,M,G1,G2,TE:[[1,2],[1,3],[1,4],[2,3],[2,4],[3,4]],mid}; })();
+function fade(g,dur,delay){ g.style.opacity=0; g.style.transition='opacity '+(dur||.6)+'s ease '+(delay||0)+'s'; requestAnimationFrame(()=>requestAnimationFrame(()=>{ g.style.opacity=1; })); return g; }
+function fadeOut(g,dur,cb){ g.style.transition='opacity '+(dur||.6)+'s'; g.style.opacity=0; setTimeout(()=>{ g.remove(); if(cb) cb(); },(dur||.6)*1000+30); }
+function tetraLines(v,par){ MET.TE.forEach(e=>v.seg(MET.Hs[e[0]],MET.Hs[e[1]],INK,1.3,'',par)); }
+function hLabels(v,par,big){ const L=[[1,'H1',4,16],[2,'H2',4,18],[3,'H3',8,2],[4,'H4',8,-4]]; L.forEach(q=>{ v.lab(MET.Hs[q[0]],q[1],q[2],q[3],INK,big?15:14,par); v.dot(MET.Hs[q[0]],INK,3.2,par); }); }
+
+/* ── 1) 우측 위: 분자 모형 (누르면 사면체 → 좌표공간) ── */
+(function(){ const s=$('fMol'), hint=$('mHint'); const {Hs,C,O3,TE}=MET; let phase=0;
+  const CUBE=[[0,0,0],[6,0,0],[6,6,0],[0,6,0],[0,0,6],[6,0,6],[6,6,6],[0,6,6]], CE=[[0,1],[1,2],[2,3],[3,0],[4,5],[5,6],[6,7],[7,4],[0,4],[1,5],[2,6],[3,7]];
+  const NEON='#1E9BD7', NEON2='#3AC8F0';
+  function defs(){ const d=el('defs',{},s);
+    const gC=el('radialGradient',{id:'gC',cx:'35%',cy:'30%',r:'75%'},d); el('stop',{offset:'0','stop-color':'#7a7f86'},gC); el('stop',{offset:'.55','stop-color':'#2b2e33'},gC); el('stop',{offset:'1','stop-color':'#0d0f12'},gC);
+    const gH=el('radialGradient',{id:'gH',cx:'35%',cy:'30%',r:'75%'},d); el('stop',{offset:'0','stop-color':'#ffffff'},gH); el('stop',{offset:'.6','stop-color':'#e9ecef'},gH); el('stop',{offset:'1','stop-color':'#b9bec6'},gH);
+    const gB=el('linearGradient',{id:'gB',x1:'0',y1:'0',x2:'0',y2:'1'},d); el('stop',{offset:'0','stop-color':'#d9dde2'},gB); el('stop',{offset:'.5','stop-color':'#aeb4bc'},gB); el('stop',{offset:'1','stop-color':'#8e949c'},gB);
+    const f=el('filter',{id:'glow',x:'-30%',y:'-30%',width:'160%',height:'160%'},d); el('feGaussianBlur',{stdDeviation:'2.6'},f); }
+  function glowSeg(v,p,q){ const a1=v.P(p), b1=v.P(q); const g=el('g',{},s);
+    el('line',{x1:a1[0],y1:a1[1],x2:b1[0],y2:b1[1],stroke:NEON2,'stroke-width':5.2,'stroke-linecap':'round',opacity:.45,filter:'url(#glow)'},g);
+    el('line',{x1:a1[0],y1:a1[1],x2:b1[0],y2:b1[1],stroke:NEON,'stroke-width':1.6,'stroke-linecap':'round'},g); return g; }
+  function molecule(v){ const items=[];
+    for(const k in Hs){ items.push({d:v.dep(MET.mid(C,Hs[k])),draw:()=>{ const a1=v.P(C), b1=v.P(Hs[k]);
+        el('line',{x1:a1[0],y1:a1[1],x2:b1[0],y2:b1[1],stroke:'url(#gB)','stroke-width':7,'stroke-linecap':'round'},s); el('line',{x1:a1[0],y1:a1[1],x2:b1[0],y2:b1[1],stroke:'rgba(255,255,255,.55)','stroke-width':2,'stroke-linecap':'round'},s); }});
+      items.push({d:v.dep(Hs[k]),draw:()=>{ const q=v.P(Hs[k]); const r=10+v.dep(Hs[k])*.5; el('circle',{cx:q[0]+2,cy:q[1]+3,r,fill:'rgba(35,36,29,.10)'},s); el('circle',{cx:q[0],cy:q[1],r,fill:'url(#gH)',stroke:'rgba(0,0,0,.18)','stroke-width':.8},s); }}); }
+    items.push({d:v.dep(C),draw:()=>{ const q=v.P(C); el('circle',{cx:q[0]+2,cy:q[1]+3,r:16,fill:'rgba(35,36,29,.12)'},s); el('circle',{cx:q[0],cy:q[1],r:16,fill:'url(#gC)'},s); el('text',{x:q[0]+19,y:q[1]+5,'font-size':14},s).textContent='C'; }});
+    items.sort((p,q)=>p.d-q.d).forEach(i=>i.draw()); }
+  function space(v){ const O=v.P(O3), X=v.P([7.5,0,0]), Y=v.P([0,7.5,0]), Z=v.P([0,0,7.5]);
+    arrow(s,O[0],O[1],X[0],X[1],DIM,1.3); arrow(s,O[0],O[1],Y[0],Y[1],DIM,1.3); arrow(s,O[0],O[1],Z[0],Z[1],DIM,1.3);
+    mlab(s,X[0]-4,X[1]+16,'x',DIM,14); mlab(s,Y[0]+6,Y[1]-4,'y',DIM,14); mlab(s,Z[0]+8,Z[1]+2,'z',DIM,14); mlab(s,O[0]-16,O[1]+14,'O',DIM,13);
+    CE.forEach(e=>v.seg(CUBE[e[0]],CUBE[e[1]],'rgba(30,155,215,.35)',1,'3 3')); }
+  function labels(v){ const L=[[1,-86,2],[2,10,24],[3,-74,-6],[4,14,-8]]; L.forEach(q=>v.lab(Hs[q[0]],`H${q[0]}(${Hs[q[0]].join(', ')})`,q[1],q[2],INK,12.5)); }
+  function tetra(v){ const F=[[1,2,3],[1,2,4],[1,3,4],[2,3,4]];
+    F.map(f=>({f,d:f.reduce((t,k)=>t+v.dep(Hs[k]),0)})).sort((p,q)=>p.d-q.d).forEach(o=>el('polygon',{points:o.f.map(k=>v.P(Hs[k]).join(',')).join(' '),fill:'rgba(30,155,215,.07)',stroke:'none'},s));
+    TE.forEach(e=>glowSeg(v,Hs[e[0]],Hs[e[1]])); }
+  const v=View3D(s,170,165,21,[3,3,3],vv=>{ defs(); if(phase>=2) space(vv); if(phase>=1) tetra(vv); molecule(vv); if(phase>=2) labels(vv); },()=>intro());
+  function intro(){ if(v.busy||phase>0) return; v.busy=true; hint.style.opacity=0;
+    const gTet=el('g',{},s); s.insertBefore(gTet, s.querySelector('defs').nextSibling);
+    TE.forEach((e,i)=>{ setTimeout(()=>{ const a1=v.P(Hs[e[0]]), b1=v.P(Hs[e[1]]); const L=Math.hypot(b1[0]-a1[0],b1[1]-a1[1]);
+      const mk=(w,col,op,flt)=>{ const l=el('line',{x1:a1[0],y1:a1[1],x2:b1[0],y2:b1[1],stroke:col,'stroke-width':w,'stroke-linecap':'round',opacity:op},gTet); if(flt) l.setAttribute('filter','url(#glow)');
+        l.style.strokeDasharray=L; l.style.strokeDashoffset=L; requestAnimationFrame(()=>requestAnimationFrame(()=>{ l.style.transition='stroke-dashoffset .7s cubic-bezier(.4,0,.2,1)'; l.style.strokeDashoffset=0; })); };
+      mk(5.2,NEON2,.45,true); mk(1.6,NEON,1,false); },i*260); });
+    setTimeout(()=>{ const F=[[1,2,3],[1,2,4],[1,3,4],[2,3,4]]; F.forEach(f=>{ const pg=el('polygon',{points:f.map(k=>v.P(Hs[k]).join(',')).join(' '),fill:'rgba(30,155,215,.07)'},gTet); gTet.insertBefore(pg,gTet.firstChild); fade(pg,.8); }); phase=1; },6*260+500);
+    setTimeout(()=>{ const gSp=el('g',{},s); s.insertBefore(gSp, s.querySelector('defs').nextSibling); const O=v.P(O3);
+      [[7.5,0,0,'x',-4,16],[0,7.5,0,'y',6,-4],[0,0,7.5,'z',8,2]].forEach((ax,i)=>{ setTimeout(()=>{ const E=v.P(ax); const l=arrow(gSp,O[0],O[1],E[0],E[1],DIM,1.3); l.style.opacity=0; grow(l,.7,()=>{ fade(mlab(gSp,E[0]+ax[4],E[1]+ax[5],ax[3],DIM,14),.4); }); },i*220); });
+      setTimeout(()=>{ fade(mlab(gSp,O[0]-16,O[1]+14,'O',DIM,13),.4); CE.forEach((e,i)=>{ const l=v.seg(CUBE[e[0]],CUBE[e[1]],'rgba(30,155,215,.35)',1,'3 3',gSp); fade(l,.5,i*.06); }); },800);
+      setTimeout(()=>{ const gL=el('g',{},s); [[1,-86,2],[2,10,24],[3,-74,-6],[4,14,-8]].forEach((q,i)=>{ const t=v.lab(Hs[q[0]],`H${q[0]}(${Hs[q[0]].join(', ')})`,q[1],q[2],INK,12.5,gL); fade(t,.5,i*.15); }); phase=2; v.busy=false; hint.textContent=''; hint.style.opacity=1; geoTask('comp-met'); },1700); },6*260+1300); }
+  v.render(); })();
+
+/* ── 2) [그림 1]·[그림 2]: 좌표공간 + 정사면체 (도식), 무게중심 작도 ── */
+(function(){ const s=$('fMet'), s2=$('fMet2'), cmsg=$('mCMsg'); const {Hs,C,O3,M,G1,G2,TE}=MET; let cst=0, busy=false;
+  const HLC='rgba(255,196,0,.45)';
+  function space(v){ const O=v.P(O3), Xe=v.P([7.6,0,0]), Ye=v.P([0,7.6,0]), Ze=v.P([0,0,7.6]);
+    arrow(s,O[0],O[1],Xe[0],Xe[1],INK,1.2); arrow(s,O[0],O[1],Ye[0],Ye[1],INK,1.2); arrow(s,O[0],O[1],Ze[0],Ze[1],INK,1.2);
+    mlab(s,Xe[0]-6,Xe[1]+16,'x',INK,14); mlab(s,Ye[0]+6,Ye[1]+4,'y',INK,14); mlab(s,Ze[0]+8,Ze[1]+2,'z',INK,14); mlab(s,O[0]-16,O[1]+4,'O',INK,13);
+    [[6,0,0,-16,-2],[0,6,0,2,-8],[0,0,6,-12,0]].forEach(t=>{ const q=v.P([t[0],t[1],t[2]]); mlab(s,q[0]+t[3],q[1]+t[4],'6',INK,13); });
+    [Hs[1],Hs[2],Hs[3]].forEach(p=>v.seg(O3,p,INK,1)); }
+  function redM(v,par){ v.seg(Hs[3],M,RED,1.8,'',par); v.seg(M,Hs[4],RED,1.8,'',par); v.dot(M,INK,3.2,par); v.lab(M,'M',-6,18,INK,14,par); }
+  function cons(v,par){ const d=(p,t,dx,dy)=>{ v.dot(p,INK,3.4,par); v.lab(p,t,dx,dy,INK,13,par); };
+    if(cst>=1) d(G1,'G1',-26,-6); if(cst>=2) v.seg(Hs[4],G1,INK,1.6,'',par); if(cst>=3) d(G2,'G2',8,12); if(cst>=4) v.seg(Hs[3],G2,INK,1.6,'',par); if(cst>=5) d(C,'C',8,-6); }
+  const v=View3D(s,170,170,21,[3,3,3],vv=>{ space(vv); tetraLines(vv); redM(vv); hLabels(vv); cons(vv); });
+  /* [그림 2] */
+  const F2={H3:[40,50],H4:[260,50],M:[150,290]}; F2.G1=[F2.H3[0]+(F2.M[0]-F2.H3[0])*2/3, F2.H3[1]+(F2.M[1]-F2.H3[1])*2/3]; F2.G2=[F2.H4[0]+(F2.M[0]-F2.H4[0])*2/3, F2.H4[1]+(F2.M[1]-F2.H4[1])*2/3];
+  F2.C=[F2.H4[0]+(F2.G1[0]-F2.H4[0])*3/4, F2.H4[1]+(F2.G1[1]-F2.H4[1])*3/4];
+  window.MET_F2=F2;
+  function d2(k,dx,dy){ const q=F2[k]; el('circle',{cx:q[0],cy:q[1],r:3.4,fill:INK},s2); return mlab(s2,q[0]+dx,q[1]+dy,k,INK,14); }
+  function sg2(p,q,col,w){ return seg(s2,F2[p],F2[q],col,w); }
+  function base2(){ s2.innerHTML=''; sg2('H3','H4',RED,1.8); sg2('H3','M',RED,1.8); sg2('M','H4',RED,1.8); d2('H3',-30,-8); d2('H4',8,-8); d2('M',-8,22);
+    if(cst>=1) d2('G1',-28,8); if(cst>=2) sg2('H4','G1',INK,1.6); if(cst>=3) d2('G2',8,8); if(cst>=4) sg2('H3','G2',INK,1.6); if(cst>=5){ d2('C',-6,-10); sg2('G1','G2',INK,1.4); } }
+  function hlFace(ks,cb){ const g=el('g',{},s); s.insertBefore(g,s.firstChild); const pts=ks.map(k=>v.P(Hs[k]));
+    const pg=el('polygon',{points:pts.map(p=>p.join(',')).join(' '),fill:'rgba(255,196,0,.18)'},g); fade(pg,.6);
+    const path=el('path',{d:`M${pts[0]} L${pts[1]} L${pts[2]} Z`,fill:'none',stroke:HLC,'stroke-width':9,'stroke-linecap':'round','stroke-linejoin':'round'},g);
+    growPath(path,1.1,()=>{ if(cb) cb(g); }); return g; }
+  function dotIn(par,q,t,dx,dy){ const g=el('g',{},par); const c=el('circle',{cx:q[0],cy:q[1],r:9,fill:INK},g); mlab(g,q[0]+dx,q[1]+dy,t,INK,13); c.style.transition='r .5s ease'; fade(g,.4); requestAnimationFrame(()=>requestAnimationFrame(()=>c.setAttribute('r',3.4))); return g; }
+  function construct(){ if(busy||cst>0) return; busy=true; v.busy=true; $('mCon').classList.add('on'); const say=t=>{ cmsg.innerHTML=t; };
+    say('삼각형 H<sub>1</sub>H<sub>2</sub>H<sub>3</sub>의 무게중심 G<sub>1</sub> : 중선 H<sub>3</sub>M 위에서 H<sub>3</sub>M을 2 : 1로 나누는 점');
+    hlFace([1,2,3],g1=>{ cst=1; dotIn(s,v.P(G1),'G1',-26,-6); dotIn(s2,F2.G1,'G1',-28,8);
+      setTimeout(()=>{ say('꼭짓점 H<sub>4</sub>와 마주 보는 면의 무게중심 G<sub>1</sub>을 잇는다.'); const l=v.seg(Hs[4],G1,INK,1.6); l.style.opacity=0; const l2=sg2('H4','G1',INK,1.6); l2.style.opacity=0; grow(l,.8); grow(l2,.8,()=>{ cst=2; fadeOut(g1,.8,()=>{
+        say('삼각형 H<sub>1</sub>H<sub>2</sub>H<sub>4</sub>의 무게중심 G<sub>2</sub> : 중선 H<sub>4</sub>M 위에서 H<sub>4</sub>M을 2 : 1로 나누는 점');
+        hlFace([1,2,4],g2=>{ cst=3; dotIn(s,v.P(G2),'G2',8,12); dotIn(s2,F2.G2,'G2',8,8);
+          setTimeout(()=>{ say('꼭짓점 H<sub>3</sub>과 마주 보는 면의 무게중심 G<sub>2</sub>를 잇는다.'); const m1=v.seg(Hs[3],G2,INK,1.6); m1.style.opacity=0; const m2=sg2('H3','G2',INK,1.6); m2.style.opacity=0; grow(m1,.8); grow(m2,.8,()=>{ cst=4; fadeOut(g2,.8,()=>{
+            say('두 선분 H<sub>4</sub>G<sub>1</sub>, H<sub>3</sub>G<sub>2</sub>의 교점이 탄소 원자의 위치 C. 두 선분이 모두 평면 H<sub>3</sub>MH<sub>4</sub> 위에 있으므로 [그림 2]에서 평면도형으로 다룰 수 있다.');
+            cst=5; dotIn(s,v.P(C),'C',8,-6); dotIn(s2,F2.C,'C',-6,-10); const gg=sg2('G1','G2',INK,1.4); fade(gg,.6,.4);
+            [s,s2].forEach((sv,i)=>{ const q=i?F2.C:v.P(C); const r=el('circle',{cx:q[0],cy:q[1],r:12,fill:'none',stroke:ORG,'stroke-width':2.2},sv); r.classList.add('blink'); setTimeout(()=>r.remove(),4300); });
+            busy=false; v.busy=false; geoTask('comp-met-cons'); }); }); },700); }); }); }); },700); }); }
+  $('mCon').onclick=construct;
+  $('mConRe').onclick=()=>{ if(busy) return; cst=0; cmsg.innerHTML=''; $('mCon').classList.remove('on'); v.render(); base2(); };
+  v.render(); base2(); })();
+
+/* ── 3) 풀이 1 / 풀이 2 ── */
+(function(){ const sol1=$('sol1'), sol2=$('sol2'); $('bSol1').onclick=()=>{ sol1.hidden=!sol1.hidden; $('bSol1').classList.toggle('on',!sol1.hidden); };
+  $('bSol2').onclick=()=>{ sol2.hidden=!sol2.hidden; $('bSol2').classList.toggle('on',!sol2.hidden); if(!sol2.hidden){ v.render(); base2(); sol2.scrollIntoView({behavior:'smooth',block:'nearest'}); } };
+  const s=$('fS2a'), s2=$('fS2b'), cnt=$('s2cnt'), eq=$('s2eq'); const {Hs,C,M,G1,G2,TE}=MET; const F2=window.MET_F2; let st=0, busy=false;
+  const BL='rgba(47,69,236,.28)', RD='rgba(217,70,63,.32)'; const marks=[]; /* {pts:[3D...], col} 누적 형광펜 */
+  const SC=0.82, OX=36, OY=-14; const f2=k=>[F2[k][0]*SC+OX,F2[k][1]*SC+OY]; const marks2=[];
+  function base3d(v){ const F=[[1,2,3],[1,2,4],[1,3,4],[2,3,4]];
+    F.map(f=>({f,d:f.reduce((t,k)=>t+v.dep(Hs[k]),0)})).sort((p,q)=>p.d-q.d).forEach(o=>el('polygon',{points:o.f.map(k=>v.P(Hs[k]).join(',')).join(' '),fill:'rgba(140,120,200,.06)',stroke:'none'},s));
+    marks.forEach(m=>el('path',{d:'M'+m.pts.map(p=>v.P(p).join(' ')).join(' L'),fill:'none',stroke:m.col,'stroke-width':9,'stroke-linecap':'round','stroke-linejoin':'round'},s));
+    tetraLines(v); v.seg(Hs[4],G1,INK,1.4); v.seg(G1,Hs[1],INK,1,'4 3'); v.seg(G1,Hs[2],INK,1,'4 3'); v.seg(G1,Hs[3],INK,1,'4 3');
+    hLabels(v,null,true); v.dot(G1,INK,3.4); v.lab(G1,'G1',-26,-6,INK,13); v.dot(C,INK,3.6); v.lab(C,'C',8,-6,INK,14); }
+  const v=View3D(s,170,155,25,[3,3,3],base3d);
+  function base2(){ s2.innerHTML=''; marks2.forEach(m=>el('path',{d:'M'+m.pts.map(p=>f2(p).join(' ')).join(' L'),fill:'none',stroke:m.col,'stroke-width':9,'stroke-linecap':'round'},s2));
+    const sg=(p,q,col,w)=>seg(s2,f2(p),f2(q),col,w); const d=(k,dx,dy)=>{ const q=f2(k); el('circle',{cx:q[0],cy:q[1],r:3.4,fill:INK},s2); mlab(s2,q[0]+dx,q[1]+dy,k,INK,14); };
+    sg('H3','H4',RED,1.8); sg('H3','M',RED,1.8); sg('M','H4',RED,1.8); sg('H4','G1',INK,1.6); sg('H3','G2',INK,1.6); sg('G1','G2',INK,1.4);
+    d('H3',-30,-8); d('H4',8,-8); d('M',-8,22); d('G1',-28,8); d('G2',8,8); d('C',-6,-12); }
+  function hl3d(pts,col,cb){ const path=el('path',{d:'M'+pts.map(p=>v.P(p).join(' ')).join(' L'),fill:'none',stroke:col,'stroke-width':9,'stroke-linecap':'round','stroke-linejoin':'round'},s); s.insertBefore(path,s.querySelector('line')); growPath(path,1,()=>{ marks.push({pts,col}); if(cb) cb(); }); }
+  function hl2d(keys,col,cb){ const path=el('path',{d:'M'+keys.map(k=>f2(k).join(' ')).join(' L'),fill:'none',stroke:col,'stroke-width':9,'stroke-linecap':'round'},s2); s2.insertBefore(path,s2.querySelector('line')); growPath(path,1,()=>{ marks2.push({pts:keys,col}); if(cb) cb(); }); }
+  const vn=(x,n)=>`<span class='vec n'><span class='r'>${x}</span></span><sub>${n}</sub>`, vv=x=>`<span class='vec'><span class='r'>${x}</span></span>`;
+  function line(html){ const d=document.createElement('div'); d.className='ln'; d.innerHTML=html; eq.appendChild(d); requestAnimationFrame(()=>requestAnimationFrame(()=>d.classList.add('on'))); return d; }
+  function counter(n){ let el0=cnt.querySelector('.n'); if(!el0){ cnt.innerHTML=`<span class="n">1</span>${vv('CG<sub>1</sub>')} <span class="add">+ ${vn('CH',4)}</span> <span class="zero">= ${vv('0')}</span>`; el0=cnt.querySelector('.n'); return; }
+    el0.textContent=n; el0.classList.add('pop'); setTimeout(()=>el0.classList.remove('pop'),300); }
+  function step(){ if(busy) return; st++; busy=true; v.busy=true;
+    if(st<=3){ const i=st; line(`<span class="cb">${vn('CH',i)} = ${vv('CG<sub>1</sub>')} + ${vv('G<sub>1</sub>H<sub>'+i+'</sub>')}</span>`);
+      hl2d(['C','G1'],BL); hl3d([C,G1,Hs[i]],BL,()=>{ counter(i); busy=false; v.busy=false; }); }
+    else if(st===4){ line(`<span class="cr">+ ${vn('CH',4)}</span>`); cnt.querySelector('.add').classList.add('on');
+      hl2d(['C','H4'],RD); hl3d([C,Hs[4]],RD,()=>{ busy=false; v.busy=false; }); }
+    else if(st===5){ cnt.querySelector('.zero').classList.add('on');
+      line(`${vn('CH',1)} + ${vn('CH',2)} + ${vn('CH',3)} + ${vn('CH',4)} = <span class="cb">3${vv('CG<sub>1</sub>')}</span> + (${vv('G<sub>1</sub>H<sub>1</sub>')} + ${vv('G<sub>1</sub>H<sub>2</sub>')} + ${vv('G<sub>1</sub>H<sub>3</sub>')}) + <span class="cr">${vn('CH',4)}</span> = <span class="cb">3${vv('CG<sub>1</sub>')}</span> + ${vv('0')} + <span class="cr">${vn('CH',4)}</span> = ${vv('0')}`);
+      line(`<span class="nt">G<sub>1</sub>은 삼각형 H<sub>1</sub>H<sub>2</sub>H<sub>3</sub>의 무게중심이므로 ${vv('G<sub>1</sub>H<sub>1</sub>')} + ${vv('G<sub>1</sub>H<sub>2</sub>')} + ${vv('G<sub>1</sub>H<sub>3</sub>')} = ${vv('0')}, &nbsp; G<sub>1</sub>C : CH<sub>4</sub> = 1 : 3이므로 ${vn('CH',4)} = −3${vv('CG<sub>1</sub>')}</span>`);
+      busy=false; v.busy=false; $('s2go').disabled=true; geoTask('comp-met-sol2'); } }
+  $('s2go').onclick=step;
+  $('s2re').onclick=()=>{ if(busy) return; st=0; marks.length=0; marks2.length=0; cnt.innerHTML=''; eq.innerHTML=''; $('s2go').disabled=false; v.render(); base2(); };
+  v.render(); base2(); })();
 </script>
 <script>window.PAGE_ID="pveccomp";</script>
 <script src="nav.js"></script>
