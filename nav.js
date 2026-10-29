@@ -6,7 +6,7 @@
      먼저 선언한 뒤 이 파일을 불러오면 하단 바가 자동으로 생깁니다.
    ════════════════════════════════════════════════════════════ */
 window.GEO_CONFIG = {
-  VERSION: "v1.80",                 // ★ 1단원=v1.x, 2단원=v2.x, 3단원=v3.x — 업로드마다 뒷자리 +1 (v1.11, v1.12, …)
+  VERSION: "v1.81",                 // ★ 1단원=v1.x, 2단원=v2.x, 3단원=v3.x — 업로드마다 뒷자리 +1 (v1.11, v1.12, …)
   APPS_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbx3Ay-gudjjSoRlngyu54umJ9uYRAKhINuwcv229UZUN9_oIQfm9vwAxM32FOPR9wV1/exec",
   /* ── 담당 선생님 ───────────────────────────────────────────────
      선생님마다 '자기 구글 시트 + 자기 드라이브'를 씁니다.
@@ -118,7 +118,10 @@ window.GEO_CONFIG = {
     { id:'pveccomp', unit:3, href:'vec-comp.html', short:'벡터의 성분', grp:'v-dot',
       curve:'벡터의 성분', title:'벡터의 성분' },
     { id:'pvecdot', unit:3, href:'vec-dot.html', short:'벡터의 내적', grp:'v-dot',
-      curve:'벡터의 내적', title:'벡터의 내적' }
+      curve:'벡터의 내적', title:'벡터의 내적' },
+    /* 3단원 벡터 — 도형의 방정식 */
+    { id:'pvecline', unit:3, href:'vec-line.html', short:'직선의 방정식', grp:'v-fig',
+      curve:'직선의 방정식', title:'직선의 방정식' }
   ],
   /* 홈 화면 묶음 — 큰 제목 4개 (하위 메뉴는 grp로 자동 수집) */
   /* 홈 타임라인의 묶음 — soon 은 아직 안 만든(준비 중) 활동 이름 */
@@ -504,6 +507,7 @@ window.GEO_TASKS = {
   pvecmul:  ['mul-terms','par-fig'],               // 실수배 빈칸 + 평행 시점 일치
   pveccomp: ['comp-ans','comp-box'],               // 답 상자 다 열기 + 공간벡터 직육면체 모션
   pvecdot:  ['dot-stand','dot-foot','dot-ex1','dot-q2','dot-q4','dot-angle'], // 단상 올리기 + 수선의 발 + 예제 1 + 문제 2·4 풀이 + 각 돌려보기
+  pvecline: ['line-t','line-der','line-comp'],     // t 슬라이더 + 식 전개 + 성분 표현
   pdrone:   ['coord','order','class'],                // 시운전 3번 + 연습 순서 정리 + 우리 반 공연 순서 완료
   psun:     ['sun-q1-ok','sun-q2'],                  // 문제 1 정답 + 문제 2 증명 제출
   prev:     ['rev-q14','rev-m14'],                   // 14번 열기 + 풀이 보기

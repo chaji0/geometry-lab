@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<script>
+/* 입장 가드 */
+if (localStorage.getItem('geoAppOk') !== '1') location.replace('index.html');
+</script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="icon" type="image/svg+xml" href="icon.svg">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="apple-mobile-web-app-title" content="기하">
+<meta name="theme-color" content="#B32017">
+<title>직선의 방정식</title>
+<link rel="stylesheet" media="print" onload="this.media='all'"
+  href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Nanum+Myeongjo:wght@400;700&display=swap">
+<style>
+:root{ --paper:#EFEFE3; --ink:#23241D; --dim:#A8A79A; --line:#DCDACD; --line2:#C7C5B6;
+  --acc:#2F45EC; --acc2:#1B2FC4; --card:#F5F5EC; --org:#E0891A; --grn:#12876A; --red:#D9463F; --vio:#7A3FB5; }
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;overflow:hidden}
+body{font-family:'IBM Plex Sans KR','Apple SD Gothic Neo','Malgun Gothic',system-ui,sans-serif;
+  background:var(--paper); color:var(--ink); font-size:14.5px; line-height:1.55; display:flex; flex-direction:column; height:100dvh}
+header{padding:12px 22px 10px; border-bottom:1px solid var(--line); display:flex; align-items:flex-end; gap:18px; flex-wrap:wrap; flex:none}
+h1{font-size:17.5px; margin:0; letter-spacing:-.3px; font-weight:700}
+#tabs{display:flex; gap:6px; margin-left:auto; flex-wrap:wrap}
+#tabs button{height:34px; padding:0 13px; border-radius:999px; border:1.5px solid var(--line2); background:transparent;
+  font:inherit; font-size:12.5px; font-weight:700; color:var(--ink); cursor:pointer; display:flex; align-items:center; gap:7px}
+#tabs button .no{font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:11px; color:var(--acc); font-weight:600}
+#tabs button.on{background:var(--acc); border-color:var(--acc); color:#fff} #tabs button.on .no{color:#fff}
+#panel{flex:1; min-height:0; overflow-y:auto; overscroll-behavior:contain; padding:18px 22px 90px}
+.wrap{max-width:960px; margin:0 auto}
+.pane{display:none} .pane.on{display:block}
+.m{font-family:Georgia,'Times New Roman',serif; font-style:italic; font-size:1.05em}
+.rm{font-family:Georgia,'Times New Roman',serif; font-style:normal; font-size:1.03em}
+.vec{display:inline-block; position:relative; font-family:Georgia,'Times New Roman',serif; font-size:1.03em; padding:.55em 2px 0 1px; line-height:1; vertical-align:-.1em; margin:0 1px; min-width:1.15em; text-align:center; white-space:nowrap}
+.vec::before{content:""; position:absolute; left:1px; right:5px; top:.28em; border-top:1.3px solid currentColor}
+.vec::after{content:""; position:absolute; right:0; top:.1em; width:0; height:0; border-left:6px solid currentColor; border-top:3.5px solid transparent; border-bottom:3.5px solid transparent; transform:translateY(-.5px)}
+.vec i{font-style:italic} .vec .r{font-style:normal}
+.vec.n{min-width:0; padding-left:0; padding-right:7px; margin-right:0} .vec.n::before{left:0; right:6px} .vec.n+sub{margin-left:-4px}
+.sym,.abs{font-family:Georgia,'Times New Roman',serif; font-size:1.03em}
+.sym{white-space:nowrap} .sym .vec{margin:0 0 0 1px; min-width:.95em; font-size:1em} .sym i{font-style:italic}
+sub{font-size:.68em; vertical-align:-.32em; font-style:normal; line-height:0; margin-right:1px}
+.sq{white-space:nowrap} .sq .r{border-top:1px solid currentColor; padding:0 2px 0 3px; margin-left:1px}
+.sup{font-size:.68em; vertical-align:.45em; line-height:0}
+.gb{height:36px; padding:0 14px; border-radius:11px; cursor:pointer; font-family:'IBM Plex Sans KR','Apple SD Gothic Neo',system-ui,sans-serif; font-size:14px; font-weight:700; color:var(--acc); letter-spacing:.2px;
+  border:1px solid rgba(47,69,236,.35); background:linear-gradient(180deg,rgba(255,255,255,.85) 0%,rgba(255,255,255,.35) 45%,rgba(226,230,255,.55) 100%);
+  box-shadow:0 3px 8px rgba(35,36,29,.14), inset 0 1.5px 0 rgba(255,255,255,.95), inset 0 -3px 6px rgba(47,69,236,.10); position:relative; transition:transform .12s, box-shadow .12s; white-space:nowrap; vertical-align:middle; min-width:64px}
+.gb::after{content:""; position:absolute; left:10%; top:9%; width:40%; height:30%; border-radius:999px; background:linear-gradient(180deg,rgba(255,255,255,.95),rgba(255,255,255,0)); pointer-events:none}
+.gb:hover{transform:translateY(-1px); box-shadow:0 5px 12px rgba(35,36,29,.18), inset 0 1.5px 0 rgba(255,255,255,.95), inset 0 -3px 6px rgba(47,69,236,.12)}
+.gb:active{transform:translateY(1px); box-shadow:0 1px 3px rgba(35,36,29,.14), inset 0 1.5px 0 rgba(255,255,255,.9)}
+.gb.done{color:var(--red); border-color:rgba(217,70,63,.4); background:linear-gradient(180deg,rgba(255,255,255,.85) 0%,rgba(255,255,255,.35) 45%,rgba(255,228,224,.6) 100%); box-shadow:0 3px 8px rgba(35,36,29,.14), inset 0 1.5px 0 rgba(255,255,255,.95), inset 0 -3px 6px rgba(217,70,63,.12); cursor:default}
+.gb.done:hover{transform:none}
+.gb .vec,.gb .sym{font-family:Georgia,'Times New Roman',serif; font-size:16px; font-weight:600}
+.gb .vec::before{border-top-width:1.5px}
+.gb.ans{min-width:0; padding:0 12px; height:30px; font-size:12.5px; display:inline-block; vertical-align:middle}
+.gb.ans.done{padding:0 10px}
+.badge{display:inline-block; background:var(--acc); color:#fff; border-radius:999px; padding:1px 10px; font-size:11px; font-family:'IBM Plex Mono',ui-monospace,monospace; font-weight:600; letter-spacing:.06em; margin-right:8px; vertical-align:2px}
+.badge.w{background:var(--org)}
+svg text{font-family:Georgia,'Times New Roman',serif; font-weight:600; fill:#23241D}
+svg .it{font-style:italic}
+
+
+/* 교과서 파란 상자 */
+.tbox{border-radius:10px; overflow:hidden; margin:4px 0 16px; box-shadow:0 1px 3px rgba(35,36,29,.08)}
+.tbox .hd{background:#6E9FD3; color:#fff; font-weight:700; font-size:14.5px; padding:6px 16px; font-family:'IBM Plex Sans KR','Apple SD Gothic Neo',system-ui,sans-serif}
+.tbox .bd{text-align:left; background:#DCE8F4; padding:12px 18px 12px; font-family:'Nanum Myeongjo','KoPubBatang',Batang,serif; font-size:15px; line-height:2.15; color:#1e1f1a}
+.tbox .bd .vec,.tbox .bd i,.tbox .bd .rm,.tbox .bd .frac{font-family:'Times New Roman',Times,Georgia,serif; font-size:1.05em}
+.tbox .bd .ln2{display:block} .tbox .bd .ind{padding-left:28px; display:block}
+.tbox .bd .cn{background:#2F5FA8; margin-right:6px; vertical-align:1px}
+.cn{display:inline-flex; align-items:center; justify-content:center; width:19px; height:19px; border-radius:50%; background:var(--acc); color:#fff; font-size:11px; font-family:'IBM Plex Mono',monospace; flex:none; vertical-align:2px}
+.vec{min-width:0; padding:.55em 8px 0 2px; margin:0} .vec::before{left:1px; right:6px} .vec::after{right:1px}
+.frac{display:inline-flex; flex-direction:column; align-items:center; vertical-align:middle; margin:0 4px; line-height:1.3}
+.frac>span{padding:0 4px} .frac>span:first-child{border-bottom:1px solid currentColor}
+.tbox .bd .frac .vec{padding-top:.5em}
+.cream{background:var(--paper); border-radius:12px; padding:4px; border:1px solid var(--line)} .cream svg{display:block; width:100%; height:auto}
+.lrow{display:grid; grid-template-columns:340px 1fr; gap:22px; align-items:start; margin-top:6px}
+@media (max-width:760px){ .lrow{grid-template-columns:1fr} }
+.tsl{display:flex; align-items:center; gap:10px; margin:8px 4px 0; font-size:13px; font-weight:700}
+.tsl .rng{flex:1; position:relative; padding-bottom:14px}
+.tsl input[type=range]{width:100%; accent-color:var(--acc); margin:0}
+.tsl .zero{position:absolute; left:50%; bottom:-2px; transform:translateX(-50%); font-family:'Times New Roman',serif; font-size:13px; font-weight:400; color:var(--ink)}
+.tsl .tv{font-family:'Times New Roman',Times,serif; font-weight:400; font-size:16px; min-width:2em}
+.figwrap{position:relative} .fbadge{position:absolute; left:10px; top:10px; z-index:2}
+.tbox .bd .pick{cursor:pointer; border-radius:8px; padding:0 6px; margin:0 -6px; transition:background .25s} .tbox .bd .pick:hover{background:rgba(255,255,255,.45)} .tbox .bd .pick.on{background:rgba(255,255,255,.75)}
+.comp{margin-top:10px; font-family:'Nanum Myeongjo',Batang,serif; font-size:15px; line-height:2.3}
+.comp .m{font-family:'Times New Roman',Times,Georgia,serif; font-style:normal; font-size:17px} .comp .m i{font-style:italic}
+.comp .step{display:block; padding:2px 8px; border-radius:8px; opacity:0; transition:opacity .5s, background .25s} .comp .step.on{opacity:1} .comp .step.clk{cursor:pointer} .comp .step.clk:hover{background:rgba(47,69,236,.07)}
+.comp .hint{font-family:'IBM Plex Sans KR',system-ui,sans-serif; font-size:11px; color:var(--dim); margin-left:10px} .comp .step.done .hint{display:none}
+.der{font-family:'Nanum Myeongjo',Batang,serif; font-size:15.5px; line-height:2.4}
+.der .m{font-family:'Times New Roman',Times,Georgia,serif; font-style:normal; font-size:17px}
+.der .m i{font-style:italic} .der .vec{font-size:1em}
+.der .step{display:block; padding:2px 10px; border-radius:8px; opacity:0; transition:opacity .5s, background .25s}
+.der .step.on{opacity:1} .der .step.clk{cursor:pointer} .der .step.clk:hover{background:rgba(47,69,236,.07)}
+.der .step .hint{font-family:'IBM Plex Sans KR',system-ui,sans-serif; font-size:11px; color:var(--dim); margin-left:10px}
+.der .step.done .hint{display:none}
+.der .iff{margin-right:8px}
+.der .step .num{float:right; font-family:'Times New Roman',serif; font-size:15px; color:#4b5a6a}
+.der .para{display:block; margin-top:8px; padding:0 10px; opacity:0; transition:opacity .6s} .der .para.on{opacity:1}
+.der .para .key{color:var(--red); font-weight:700; font-family:'IBM Plex Sans KR','Apple SD Gothic Neo','Malgun Gothic',system-ui,sans-serif}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <marker id="ahK" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 1.2 L10 5 L0 8.8 z" fill="#23241D"/></marker>
+    <marker id="ahC" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 1.2 L10 5 L0 8.8 z" fill="#1E9BD7"/></marker>
+  </defs>
+</svg>
+<header>
+  <div><h1>직선의 방정식</h1></div>
+  <div id="tabs">
+    <button class="on" data-t="a"><span class="no">01</span>직선의 방정식</button>
+  </div>
+</header>
+<div id="panel"><div class="wrap">
+
+<div class="pane on" data-p="a">
+  <div class="tbox"><div class="hd">방향벡터를 이용한 직선의 방정식</div><div class="bd">
+    <span class="ln2"><span class="cn">1</span>점 A를 지나고 방향벡터가 <span class='vec'><i>u</i></span>인 직선 위의 임의의 점을 P라고 할 때, 직선의 방정식은</span>
+    <span class="ind"><span class='vec'><i>p</i></span> = <span class='vec'><i>a</i></span> + <i>t</i><span class='vec'><i>u</i></span> (단, <span class='vec'><i>a</i></span>, <span class='vec'><i>p</i></span>는 두 점 A, P의 위치벡터, <i>t</i>는 실수)</span>
+    <span class="ln2 pick" data-m="plane"><span class="cn">2</span>좌표평면에서 점 A(<i>x</i><sub>1</sub>, <i>y</i><sub>1</sub>)을 지나고 방향벡터가 <span class='vec'><i>u</i></span> = (<i>a</i>, <i>b</i>)인 직선의 방정식은</span>
+    <span class="ind"><span class='frac'><span><i>x</i> − <i>x</i><sub>1</sub></span><span><i>a</i></span></span> = <span class='frac'><span><i>y</i> − <i>y</i><sub>1</sub></span><span><i>b</i></span></span> (단, <i>ab</i> ≠ 0)</span>
+    <span class="ln2 pick" data-m="space"><span class="cn">3</span>좌표공간에서 점 A(<i>x</i><sub>1</sub>, <i>y</i><sub>1</sub>, <i>z</i><sub>1</sub>)을 지나고 방향벡터가 <span class='vec'><i>u</i></span> = (<i>a</i>, <i>b</i>, <i>c</i>)인 직선의 방정식은</span>
+    <span class="ind"><span class='frac'><span><i>x</i> − <i>x</i><sub>1</sub></span><span><i>a</i></span></span> = <span class='frac'><span><i>y</i> − <i>y</i><sub>1</sub></span><span><i>b</i></span></span> = <span class='frac'><span><i>z</i> − <i>z</i><sub>1</sub></span><span><i>c</i></span></span> (단, <i>abc</i> ≠ 0)</span>
+  </div></div>
+
+  <div class="lrow">
+    <div>
+      <div class="cream figwrap"><span class="cn fbadge" id="fbadge">2</span><svg id="fl" viewBox="0 0 340 300"></svg></div>
+      <div class="tsl"><span><i class="m">t</i></span><div class="rng"><input type="range" id="tsl" min="-3" max="3" value="2" step="0.02"><span class="zero">0</span></div></div>
+      <div class="comp">
+        <span class="step on clk" id="cmp0">방정식 ①을 성분으로 나타내 보자.<span class="hint">누르면 좌표축</span></span>
+        <span class="step clk" id="cmp1"><span class="m">(<i>x</i>, <i>y</i>) = (<i>x</i><sub>1</sub>, <i>y</i><sub>1</sub>) + <i>t</i>(<i>a</i>, <i>b</i>)</span><span class="hint">누르기</span><br><span class="m" style="padding-left:3.6em">= (<i>x</i><sub>1</sub> + <i>at</i>, <i>y</i><sub>1</sub> + <i>bt</i>)</span></span>
+        <span class="step" id="cmp2"><span class="m"><i>x</i> = <i>x</i><sub>1</sub> + <i>at</i>, &nbsp;<i>y</i> = <i>y</i><sub>1</sub> + <i>bt</i></span></span>
+        <span class="step" id="cmp3"><span class="m"><span class='frac'><span><i>x</i> − <i>x</i><sub>1</sub></span><span><i>a</i></span></span> = <span class='frac'><span><i>y</i> − <i>y</i><sub>1</sub></span><span><i>b</i></span></span></span></span>
+      </div>
+    </div>
+    <div class="der">
+      <span class="step on">직선 <span class="m"><i>l</i></span> 위의 임의의 점을 P라고 하면</span>
+      <span class="step on clk" data-n="1"><span class="m"><span class='vec'><span class='r'>AP</span></span> ∥ <span class='vec'><i>u</i></span></span><span class="hint">누르기</span></span>
+      <span class="step clk" data-n="2"><span class="m"><span class="iff">⟺</span> <span class='vec'><span class='r'>AP</span></span> = <i>t</i><span class='vec'><i>u</i></span></span><span class="hint">누르기</span></span>
+      <span class="step clk" data-n="3"><span class="m"><span class="iff">⟺</span> <span class='vec'><i>p</i></span> = <span class='vec'><i>a</i></span> + <i>t</i><span class='vec'><i>u</i></span></span><span class="num">…… ①</span><span class="hint">누르기</span></span>
+      <span class="para" id="para">이 식을 만족시키는 벡터 <span class="m"><span class='vec'><i>p</i></span></span>를 위치벡터로 하는 점 P는 <span class="m"><i>t</i></span>의 값에 관계없이 직선 <span class="m"><i>l</i></span> 위에 있다.<br>이때 벡터 <span class="m"><span class='vec'><i>u</i></span></span>를 직선 <span class="m"><i>l</i></span>의 <span class="key">방향벡터</span>라고 한다.</span>
+    </div>
+  </div>
+</div>
+
+</div></div>
+<script>
+"use strict";
+const $=id=>document.getElementById(id);
+function geoTask(k){ if(typeof GEO_task==='function') GEO_task(k); }
+(function(){ const bs=[...document.querySelectorAll('#tabs button')]; bs.forEach(b=>b.onclick=()=>{ bs.forEach(x=>x.classList.toggle('on',x===b));
+  document.querySelectorAll('.pane').forEach(p=>p.classList.toggle('on',p.dataset.p===b.dataset.t)); $('panel').scrollTop=0; }); })();
+const NS='http://www.w3.org/2000/svg';
+function el(tag,attrs,parent){ const e=document.createElementNS(NS,tag); for(const k in attrs) e.setAttribute(k,attrs[k]); if(parent) parent.appendChild(e); return e; }
+
+/* 그림 */
+(function(){
+  const p=$('fl'); const O=[120,245], U=[50,-33], A=[70,170];
+  const T=(x,y,str,o,par)=>{ const e=el('text',Object.assign({x,y,'font-size':16,'text-anchor':'middle'},o||{}),par||p); e.innerHTML=str; return e; };
+  const vl=(x,y,str,col,par)=>{ const g=el('g',{},par||p); T(x,y,str,{class:'it',style:col?`fill:${col}`:''},g); el('line',{x1:x-5,y1:y-15,x2:x+6,y2:y-15,stroke:col||'#23241D','stroke-width':1.1},g); el('path',{d:`M${x+3} ${y-18} L${x+7} ${y-15} L${x+3} ${y-12}`,fill:'none',stroke:col||'#23241D','stroke-width':1.1},g); return g; };
+  const arrow=(a,b,col,mk,par,w)=>{ const d=Math.hypot(b[0]-a[0],b[1]-a[1]); if(d<1) return null; const k=(d-6)/d; return el('line',{x1:a[0],y1:a[1],x2:a[0]+(b[0]-a[0])*k,y2:a[1]+(b[1]-a[1])*k,stroke:col,'stroke-width':w||2.2,'marker-end':mk},par||p); };
+  const sub=(x,i)=>`<tspan class="it">${x}</tspan><tspan font-size="10" dy="4">${i}</tspan><tspan dy="-4"></tspan>`;
+  const st=el('g',{},p), dyn=el('g',{},p);
+  let mode='plane', axes=false, t=2;
+  function statik(){ st.innerHTML='';
+    if(axes){ const ac={stroke:'#23241D','stroke-width':1.1,'marker-end':'url(#ahK)'};
+      if(mode==='plane'){ el('line',Object.assign({x1:O[0]-110,y1:O[1],x2:O[0]+205,y2:O[1]},ac),st); el('line',Object.assign({x1:O[0],y1:O[1]+35,x2:O[0],y2:O[1]-225},ac),st);
+        T(O[0]+205,O[1]+18,'x',{class:'it'},st); T(O[0]-12,O[1]-212,'y',{class:'it'},st); }
+      else { el('line',Object.assign({x1:O[0]-110,y1:O[1],x2:O[0]+205,y2:O[1]},ac),st); el('line',Object.assign({x1:O[0],y1:O[1]+35,x2:O[0],y2:O[1]-225},ac),st); el('line',Object.assign({x1:O[0]+40,y1:O[1]-26,x2:O[0]-72,y2:O[1]+32},ac),st);
+        T(O[0]+205,O[1]+18,'y',{class:'it'},st); T(O[0]-12,O[1]-212,'z',{class:'it'},st); T(O[0]-80,O[1]+48,'x',{class:'it'},st); } }
+    const L1=[A[0]-3*U[0],A[1]-3*U[1]], L2=[A[0]+4.6*U[0],A[1]+4.6*U[1]];
+    el('line',{x1:L1[0],y1:L1[1],x2:L2[0],y2:L2[1],stroke:'#E8622A','stroke-width':1.8},st); T(L2[0]+10,L2[1]-2,'l',{class:'it'},st);
+    arrow(O,A,'#23241D','url(#ahK)',st); el('circle',{cx:A[0],cy:A[1],r:3,fill:'#23241D'},st);
+    const Alab=axes?(mode==='plane'?`A(${sub('x',1)}, ${sub('y',1)})`:`A(${sub('x',1)}, ${sub('y',1)}, ${sub('z',1)})`):'A';
+    T(axes?A[0]+4:A[0]-4,A[1]-10,Alab,axes?{'text-anchor':'end'}:{},st);
+    vl((O[0]+A[0])/2-14,(O[1]+A[1])/2+10,'a',null,st);
+    arrow(O,[O[0]+U[0],O[1]+U[1]],'#1E9BD7','url(#ahC)',st,2.4);
+    const ul=vl(O[0]+U[0]-2+(axes?-6:0),O[1]+U[1]+22,'u','#1E9BD7',st);
+    if(axes){ const e=T(O[0]+U[0]+10,O[1]+U[1]+22,mode==='plane'?'= (<tspan class="it">a</tspan>, <tspan class="it">b</tspan>)':'= (<tspan class="it">a</tspan>, <tspan class="it">b</tspan>, <tspan class="it">c</tspan>)',{style:'fill:#1E9BD7','text-anchor':'start'},st); }
+    el('circle',{cx:O[0],cy:O[1],r:2.5,fill:'#23241D'},st); T(O[0]-12,O[1]+18,'O',{},st);
+    draw(t); }
+  function draw(tt){ t=tt; dyn.innerHTML=''; const P=[A[0]+t*U[0],A[1]+t*U[1]];
+    if(Math.abs(t)>0.04){ arrow(A,P,'#1E9BD7','url(#ahC)',dyn,2.4); const m=[(A[0]+P[0])/2,(A[1]+P[1])/2]; const g=vl(m[0]-14,m[1]-8,'u','#1E9BD7',dyn); T(m[0]-25,m[1]-8,'t',{class:'it',style:'fill:#1E9BD7'},g); }
+    arrow(O,P,'#23241D','url(#ahK)',dyn); el('circle',{cx:P[0],cy:P[1],r:3,fill:'#23241D'},dyn);
+    const Plab=axes?(mode==='plane'?'P(<tspan class="it">x</tspan>, <tspan class="it">y</tspan>)':'P(<tspan class="it">x</tspan>, <tspan class="it">y</tspan>, <tspan class="it">z</tspan>)'):'P';
+    T(axes?P[0]+6:P[0]+2,P[1]-10,Plab,axes?{'text-anchor':'start'}:{},dyn);
+    const m2=[(O[0]+P[0])/2,(O[1]+P[1])/2]; const nx=-(P[1]-O[1]), ny=(P[0]-O[0]), nl=Math.hypot(nx,ny)||1; vl(m2[0]+nx/nl*14,m2[1]+ny/nl*14+5,'p','#23241D',dyn); }
+  $('tsl').oninput=e=>{ draw(+e.target.value); geoTask('line-t'); };
+  // 파란 상자 ❷❸ → 그림 전환
+  document.querySelectorAll('.tbox .pick').forEach(r=>r.onclick=()=>{ mode=r.dataset.m; document.querySelectorAll('.tbox .pick').forEach(x=>x.classList.toggle('on',x===r)); $('fbadge').textContent=mode==='plane'?'2':'3'; statik(); });
+  // 성분으로 나타내기
+  $('cmp0').onclick=()=>{ if($('cmp0').classList.contains('done')) return; $('cmp0').classList.add('done'); axes=true; statik(); $('cmp1').classList.add('on'); };
+  $('cmp1').onclick=()=>{ if(!$('cmp1').classList.contains('on')||$('cmp1').classList.contains('done')) return; $('cmp1').classList.add('done'); $('cmp2').classList.add('on'); setTimeout(()=>{ $('cmp3').classList.add('on'); geoTask('line-comp'); },500); };
+  statik();
+})();
+/* 전개 */
+(function(){ const steps=[...document.querySelectorAll('.der .step.clk')];
+  steps.forEach(s=>s.onclick=()=>{ if(!s.classList.contains('on')||s.classList.contains('done')) return; s.classList.add('done');
+    const n=+s.dataset.n; const nx=steps.find(x=>+x.dataset.n===n+1); if(nx) nx.classList.add('on'); else { $('para').classList.add('on'); geoTask('line-der'); } }); })();
+</script>
+<script>window.PAGE_ID="pvecline";</script>
+<script src="nav.js"></script>
+</body>
+</html>
