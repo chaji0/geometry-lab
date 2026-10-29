@@ -1,0 +1,790 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<script>
+/* 입장 가드 */
+if (localStorage.getItem('geoAppOk') !== '1') location.replace('index.html');
+</script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="icon" type="image/svg+xml" href="icon.svg">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="apple-mobile-web-app-title" content="기하">
+<meta name="theme-color" content="#B32017">
+<title>벡터의 내적</title>
+<link rel="stylesheet" media="print" onload="this.media='all'"
+  href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Nanum+Myeongjo:wght@400;700&display=swap">
+<style>
+:root{ --paper:#EFEFE3; --ink:#23241D; --dim:#A8A79A; --line:#DCDACD; --line2:#C7C5B6;
+  --acc:#2F45EC; --acc2:#1B2FC4; --card:#F5F5EC; --org:#E0891A; --grn:#12876A; --red:#D9463F; --vio:#7A3FB5; }
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;overflow:hidden}
+body{font-family:'IBM Plex Sans KR','Apple SD Gothic Neo','Malgun Gothic',system-ui,sans-serif;
+  background:var(--paper); color:var(--ink); font-size:14.5px; line-height:1.55; display:flex; flex-direction:column; height:100dvh}
+header{padding:12px 22px 10px; border-bottom:1px solid var(--line); display:flex; align-items:flex-end; gap:18px; flex-wrap:wrap; flex:none}
+h1{font-size:17.5px; margin:0; letter-spacing:-.3px; font-weight:700}
+#tabs{display:flex; gap:6px; margin-left:auto; flex-wrap:wrap}
+#tabs button{height:34px; padding:0 13px; border-radius:999px; border:1.5px solid var(--line2); background:transparent;
+  font:inherit; font-size:12.5px; font-weight:700; color:var(--ink); cursor:pointer; display:flex; align-items:center; gap:7px}
+#tabs button .no{font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:11px; color:var(--acc); font-weight:600}
+#tabs button.on{background:var(--acc); border-color:var(--acc); color:#fff} #tabs button.on .no{color:#fff}
+#panel{flex:1; min-height:0; overflow-y:auto; overscroll-behavior:contain; padding:18px 22px 90px}
+.wrap{max-width:960px; margin:0 auto}
+.pane{display:none} .pane.on{display:block}
+.m{font-family:Georgia,'Times New Roman',serif; font-style:italic; font-size:1.05em}
+.rm{font-family:Georgia,'Times New Roman',serif; font-style:normal; font-size:1.03em}
+.vec{display:inline-block; position:relative; font-family:Georgia,'Times New Roman',serif; font-size:1.03em; padding:.55em 2px 0 1px; line-height:1; vertical-align:-.1em; margin:0 1px; min-width:1.15em; text-align:center; white-space:nowrap}
+.vec::before{content:""; position:absolute; left:1px; right:5px; top:.28em; border-top:1.3px solid currentColor}
+.vec::after{content:""; position:absolute; right:0; top:.1em; width:0; height:0; border-left:6px solid currentColor; border-top:3.5px solid transparent; border-bottom:3.5px solid transparent; transform:translateY(-.5px)}
+.vec i{font-style:italic} .vec .r{font-style:normal}
+.vec.n{min-width:0; padding-left:0; padding-right:7px; margin-right:0} .vec.n::before{left:0; right:6px} .vec.n+sub{margin-left:-4px}
+.sym,.abs{font-family:Georgia,'Times New Roman',serif; font-size:1.03em}
+.sym{white-space:nowrap} .sym .vec{margin:0 0 0 1px; min-width:.95em; font-size:1em} .sym i{font-style:italic}
+sub{font-size:.68em; vertical-align:-.32em; font-style:normal; line-height:0; margin-right:1px}
+.sq{white-space:nowrap} .sq .r{border-top:1px solid currentColor; padding:0 2px 0 3px; margin-left:1px}
+.sup{font-size:.68em; vertical-align:.45em; line-height:0}
+.gb{height:36px; padding:0 14px; border-radius:11px; cursor:pointer; font-family:'IBM Plex Sans KR','Apple SD Gothic Neo',system-ui,sans-serif; font-size:14px; font-weight:700; color:var(--acc); letter-spacing:.2px;
+  border:1px solid rgba(47,69,236,.35); background:linear-gradient(180deg,rgba(255,255,255,.85) 0%,rgba(255,255,255,.35) 45%,rgba(226,230,255,.55) 100%);
+  box-shadow:0 3px 8px rgba(35,36,29,.14), inset 0 1.5px 0 rgba(255,255,255,.95), inset 0 -3px 6px rgba(47,69,236,.10); position:relative; transition:transform .12s, box-shadow .12s; white-space:nowrap; vertical-align:middle; min-width:64px}
+.gb::after{content:""; position:absolute; left:10%; top:9%; width:40%; height:30%; border-radius:999px; background:linear-gradient(180deg,rgba(255,255,255,.95),rgba(255,255,255,0)); pointer-events:none}
+.gb:hover{transform:translateY(-1px); box-shadow:0 5px 12px rgba(35,36,29,.18), inset 0 1.5px 0 rgba(255,255,255,.95), inset 0 -3px 6px rgba(47,69,236,.12)}
+.gb:active{transform:translateY(1px); box-shadow:0 1px 3px rgba(35,36,29,.14), inset 0 1.5px 0 rgba(255,255,255,.9)}
+.gb.done{color:var(--red); border-color:rgba(217,70,63,.4); background:linear-gradient(180deg,rgba(255,255,255,.85) 0%,rgba(255,255,255,.35) 45%,rgba(255,228,224,.6) 100%); box-shadow:0 3px 8px rgba(35,36,29,.14), inset 0 1.5px 0 rgba(255,255,255,.95), inset 0 -3px 6px rgba(217,70,63,.12); cursor:default}
+.gb.done:hover{transform:none}
+.gb .vec,.gb .sym{font-family:Georgia,'Times New Roman',serif; font-size:16px; font-weight:600}
+.gb .vec::before{border-top-width:1.5px}
+.gb.ans{min-width:0; padding:0 12px; height:30px; font-size:12.5px; display:inline-block; vertical-align:middle}
+.gb.ans.done{padding:0 10px}
+.badge{display:inline-block; background:var(--acc); color:#fff; border-radius:999px; padding:1px 10px; font-size:11px; font-family:'IBM Plex Mono',ui-monospace,monospace; font-weight:600; letter-spacing:.06em; margin-right:8px; vertical-align:2px}
+.badge.w{background:var(--org)}
+svg text{font-family:Georgia,'Times New Roman',serif; font-weight:600; fill:#23241D}
+svg .it{font-style:italic}
+
+
+/* 썰매 그림 */
+.cream{background:var(--paper); border-radius:12px; padding:4px; border:1px solid var(--line)} .cream svg{display:block; width:100%; height:auto}
+.scene{max-width:760px; margin:0 auto}
+.ctl{display:flex; align-items:center; gap:12px; justify-content:center; margin:10px 0 2px; font-size:13px; font-weight:700; color:var(--ink)}
+.ctl input[type=range]{width:260px; accent-color:var(--acc)}
+.ctl .deg{font-family:'Times New Roman',Times,Georgia,serif; font-weight:400; font-size:16px; min-width:64px}
+.ctl .deg i{font-style:italic}
+.formula{text-align:center; font-family:'Times New Roman',Times,Georgia,serif; font-size:24px; line-height:2; margin:12px 0 0}
+.formula .vec{font-size:1em; margin:0 1px; padding:.5em 4px 0 2px; min-width:0}
+.formula .vec::before{left:1px; right:4px; top:.22em}
+.formula .vec::after{right:-1px; top:.05em}
+.formula .vec::before{border-top-width:1.5px}
+.formula .sp{margin:0 8px}
+/* 교과서 파란 상자 */
+.tbox{border-radius:10px; overflow:hidden; margin:22px 0 14px; box-shadow:0 1px 3px rgba(35,36,29,.08)}
+.tbox .hd{background:#6E9FD3; color:#fff; font-weight:700; font-size:14.5px; padding:6px 16px; font-family:'IBM Plex Sans KR','Apple SD Gothic Neo',system-ui,sans-serif}
+.tbox .bd{text-align:left; background:#DCE8F4; padding:12px 18px 12px; font-family:'Nanum Myeongjo','KoPubBatang',Batang,serif; font-size:15px; line-height:2.15; color:#1e1f1a}
+.tbox .bd .vec,.tbox .bd i.m,.tbox .bd .rm{font-family:'Times New Roman',Times,Georgia,serif; font-size:1.05em}
+.tbox .bd .vec{padding-top:.5em}
+.tbox .bd .row{display:block; padding:0 6px; border-radius:8px; cursor:pointer; transition:background .25s}
+.tbox .bd .row:hover{background:rgba(255,255,255,.45)} .tbox .bd .row.on{background:rgba(255,255,255,.75)}
+.tbox .bd .rn{display:inline-block; min-width:2.2em}
+.tbox .bd .fm{margin-left:14px}
+.dotc{font-weight:700; margin:0 2px}
+.figs2{display:grid; grid-template-columns:1fr 1fr; gap:14px; max-width:620px; margin:0 auto}
+@media (max-width:620px){ .figs2{grid-template-columns:1fr} }
+.figs2 .cream{transition:box-shadow .3s}
+.hgrp{opacity:0; transition:opacity .5s} .hgrp.on{opacity:1}
+.hl{stroke:#FFE24D; stroke-opacity:.6; stroke-width:11; stroke-linecap:butt; transition:stroke-dashoffset .9s ease} .figs2 .cream.on{box-shadow:0 0 0 2px var(--acc) inset}
+.figs2 .cream{cursor:pointer} .figs2 .cream svg{max-height:210px; width:auto; margin:0 auto; max-width:100%}
+/* 예제 1 */
+.ex{margin:22px 0 10px}
+.ex .prow{display:grid; grid-template-columns:1fr 330px; gap:16px; align-items:center}
+@media (max-width:760px){ .ex .prow{grid-template-columns:1fr} }
+.ex .ptxt{font-size:14.5px; line-height:2.2}
+.ex .ptxt .badge{margin-right:10px}
+.ov{display:inline-block; border-top:1.2px solid currentColor; line-height:1; padding-top:1px; font-family:Georgia,'Times New Roman',serif; font-size:1.03em}
+.ex .cream svg{max-height:230px; width:auto; margin:0 auto; max-width:100%}
+.ex .qline{display:flex; align-items:center; gap:10px; margin-top:8px; font-family:'Times New Roman',Times,Georgia,serif; font-size:18px; flex-wrap:wrap; min-height:40px}
+.ex .qline .vec{font-size:1em}
+.ex .qline .res{opacity:0; transition:opacity .6s} .ex .qline .res.on{opacity:1}
+.ex .qline .res .cb{color:var(--acc)} .ex .qline .res .cy{background:rgba(255,226,77,.55); padding:0 3px; border-radius:3px}
+.ex .btn{margin-left:4px}
+.hgrp2{opacity:0; transition:opacity .5s} .hgrp2.on{opacity:1}
+.fr{display:inline-flex; flex-direction:column; align-items:center; vertical-align:middle; margin:0 3px; line-height:1.1; font-size:.8em}
+.fr>span{padding:0 3px} .fr>span:first-child{border-bottom:1px solid currentColor}
+.ex .sub{display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin:6px 0; font-family:'Times New Roman',Times,Georgia,serif; font-size:18px; min-height:40px}
+.ex .sub .no{font-family:'IBM Plex Sans KR',system-ui,sans-serif; font-size:14px; font-weight:700; margin-right:2px}
+.ex .sub .vec{font-size:1em}
+.ex .sub .res{opacity:0; transition:opacity .6s} .ex .sub .res.on{opacity:1} .ex .sub .res .cb{color:var(--acc)}
+.ex .sub .gb.ans{margin-left:2px}
+
+/* 02 탭 */
+.note2{font-family:'Times New Roman',Times,Georgia,serif; font-size:18px; margin:4px 0 18px 6px}
+.note2 .vec{font-size:1em}
+.tbox .bd .cn{background:#2F5FA8; margin-right:6px; vertical-align:1px}
+.tbox .bd .ln2{display:block; white-space:nowrap}
+.tbox .bd .fm2{margin-left:14px}
+.cosrow{display:grid; grid-template-columns:300px 1fr; gap:18px; align-items:center; margin-top:6px}
+@media (max-width:760px){ .cosrow{grid-template-columns:1fr} }
+.cosrow .cream svg{max-height:250px; width:auto; margin:0 auto; max-width:100%}
+.cosrow .txt{font-size:14.5px; line-height:2.1}
+.cosrow .ttl{font-weight:700; color:var(--acc); margin-top:4px}
+.eqg{display:grid; grid-template-columns:max-content max-content; column-gap:6px; font-family:'Times New Roman',Times,Georgia,serif; font-size:17px; line-height:2.2; margin:2px 0 6px 8px}
+.eqg .l{text-align:right} .eqg .r{text-align:left; white-space:nowrap}
+.eqg .vec{font-size:1em} .eqg sub{font-size:.65em}
+.sp2{vertical-align:.55em; font-size:.65em; line-height:0}
+.cn{display:inline-flex; align-items:center; justify-content:center; width:19px; height:19px; border-radius:50%; background:var(--acc); color:#fff; font-size:11px; font-family:'IBM Plex Mono',monospace; flex:none; vertical-align:2px}
+.eqc2{font-family:'Times New Roman',Times,Georgia,serif; font-size:17px; margin:2px 0 0 8px; white-space:nowrap; overflow-x:auto}
+.eqc2 .vec{font-size:1em} .eqc2 sub{font-size:.65em}
+.q3{margin:22px 0 6px; font-size:14.5px; line-height:2.2}
+.q3 .items{display:grid; grid-template-columns:1fr 1fr; gap:4px 20px; margin-top:2px}
+@media (max-width:760px){ .q3 .items{grid-template-columns:1fr} }
+.q3 .it2{display:flex; align-items:center; gap:8px; flex-wrap:wrap; font-family:'Times New Roman',Times,Georgia,serif; font-size:17px}
+.q3 .it2 .no{font-family:'IBM Plex Sans KR',system-ui,sans-serif; font-size:14px; font-weight:700}
+.q3 .it2 .vec{font-size:1em}
+.q3 .it2 .ans2 i{font-style:italic} .q3 .it2 .ans2{opacity:0; transition:opacity .5s; color:var(--acc); font-weight:700} .q3 .it2 .ans2.on{opacity:1}
+.ex .sol2{opacity:0; transition:opacity .6s; margin-top:6px; font-size:14px; line-height:2.1; color:#1f3f8a; font-family:'Nanum Myeongjo',Batang,serif}
+.ex .sol2.on{opacity:1}
+.ex .sol2 .vec,.ex .sol2 .rm,.ex .sol2 i{font-family:'Times New Roman',Times,Georgia,serif; font-size:1.05em}
+.ex .sol2 .ind{padding-left:1.5em; font-family:'Times New Roman',Times,Georgia,serif; font-size:16px}
+
+.pane[data-p=b] .vec{min-width:0; padding:.55em 8px 0 2px; margin:0} .pane[data-p=b] .vec::before{left:1px; right:6px} .pane[data-p=b] .vec::after{right:1px}
+/* 내적의 성질 증명 */
+.prf{font-family:'Nanum Myeongjo',Batang,serif; font-size:15px; line-height:2.3; margin:4px 0 6px 6px}
+.prf .m2,.prf .vec,.prf i,.prf .dotc{font-family:'Times New Roman',Times,Georgia,serif}
+.prf .m2{font-size:16.5px}
+.prf .vec{font-size:1em} .prf sub{font-size:.65em}
+.prf .row{display:block; padding:0 8px; border-radius:8px; cursor:pointer; transition:background .25s}
+.prf .row:hover{background:rgba(47,69,236,.06)}
+.prf .row.done{cursor:default} .prf .row.done:hover{background:transparent}
+.prf .row .cn{margin-right:8px}
+.prf .ind{padding-left:1.8em}
+.prf .eq{display:block; white-space:nowrap; overflow-x:auto}
+.prf .eq.ind2{padding-left:calc(1.8em + var(--w,0px))}
+.prf .rest{opacity:0; transition:opacity .5s} .prf .rest.on{opacity:1}
+.prf .hint{font-family:'IBM Plex Sans KR',system-ui,sans-serif; font-size:11px; color:var(--dim); margin-left:8px}
+.prf .row.done .hint{display:none}
+.prf .tail{margin-top:6px}
+.exq{margin:22px 0 8px; font-size:14.5px; line-height:2.2}
+.exq .badge{margin-right:10px}
+.exq .ctr{text-align:center; font-family:'Times New Roman',Times,Georgia,serif; font-size:19px; margin-top:4px}
+.exq .ctr .vec{font-size:1em}
+.exq .m2{font-family:'Times New Roman',Times,Georgia,serif; font-size:1.1em}
+.exq .m2 .vec{font-size:1em}
+
+.sol{border:1px solid var(--line2); border-radius:12px; background:rgba(255,255,255,.25); margin:0 0 8px}
+.sol summary{cursor:pointer; padding:8px 14px; font-weight:700; font-size:13.5px; color:var(--acc); list-style:none} .sol summary::-webkit-details-marker{display:none}
+.sol .prf{padding:0 12px 10px}
+.cols2{display:grid; grid-template-columns:1fr 1fr; gap:4px 20px} @media (max-width:620px){ .cols2{grid-template-columns:1fr} }
+/* 03 탭 — 각의 크기 */
+.pane[data-p=c] .vec{min-width:0; padding:.55em 8px 0 2px; margin:0} .pane[data-p=c] .vec::before{left:1px; right:6px} .pane[data-p=c] .vec::after{right:1px}
+.frac{display:inline-flex; flex-direction:column; align-items:center; vertical-align:middle; margin:0 4px; line-height:1.3}
+.frac>span{padding:0 4px} .frac>span:first-child{border-bottom:1px solid currentColor}
+.tbox .bd .frac .vec{padding-top:.5em}
+.angrow{display:grid; grid-template-columns:380px 1fr; gap:18px; align-items:center; margin-top:16px}
+@media (max-width:760px){ .angrow{grid-template-columns:1fr} }
+.angrow .cream svg{display:block; width:100%; height:auto}
+.angrow .side{font-family:'Times New Roman',Times,Georgia,serif; font-size:20px; line-height:2}
+.angrow .side .vec{font-size:1em}
+.angrow .side .th{font-size:17px; margin-top:4px} .angrow .side .th b{color:var(--acc); font-weight:600}
+.angrow .side .sgn{font-size:18px; min-height:36px; margin-top:2px; opacity:0; transition:opacity .4s} .angrow .side .sgn.on{opacity:1}
+.angrow .side .sgn .cb{color:var(--acc)} .angrow .side .sgn .cr{color:var(--red)} .angrow .side .sgn .cg{color:var(--grn)}
+.angrow .side .ko{font-family:'IBM Plex Sans KR',system-ui,sans-serif; font-size:14px; font-weight:700; margin-left:8px}
+.abtns{display:flex; flex-wrap:wrap; gap:8px; margin:10px 0 6px; font-family:'IBM Plex Sans KR',system-ui,sans-serif}
+.abtns .btn{height:34px; font-size:13px}
+.abtns .btn.cur{background:rgba(35,36,29,.14); border-color:rgba(35,36,29,.35); color:var(--ink)} .abtns .btn i{font-family:'Times New Roman',Times,serif; font-size:15px}
+.aslide{display:flex; align-items:center; gap:10px; font-size:13px; font-weight:700; margin-top:4px}
+.aslide input[type=range]{width:230px; accent-color:var(--acc)}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <marker id="ahR" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 1.2 L10 5 L0 8.8 z" fill="#D9463F"/></marker>
+    <marker id="ahC" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 1.2 L10 5 L0 8.8 z" fill="#1E9BD7"/></marker>
+    <marker id="ahB" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 1.2 L10 5 L0 8.8 z" fill="#2F45EC"/></marker>
+  </defs>
+</svg>
+<header>
+  <div><h1>벡터의 내적</h1></div>
+  <div id="tabs">
+    <button class="on" data-t="a"><span class="no">01</span>벡터의 내적</button>
+    <button data-t="b"><span class="no">02</span>벡터의 내적과 성분</button>
+    <button data-t="c"><span class="no">03</span>수직과 평행 조건</button>
+  </div>
+</header>
+<div id="panel"><div class="wrap">
+
+<div class="pane on" data-p="a">
+  <div class="scene">
+    <div class="cream"><svg id="sled" viewBox="0 0 700 470"></svg></div>
+    <div class="ctl">
+      <span>단상 높이</span>
+      <input type="range" id="hgt" min="0" max="215" value="0" step="1">
+      <span class="deg"><i>θ</i> = <span id="degv">0</span>°</span>
+    </div>
+    <div class="formula">
+      <i>W</i><span class="sp">=</span><i>F</i><i>s</i><span class="sp">=</span>|<span class='vec'><i>F</i></span>||<span class='vec'><i>s</i></span>| cos <i>θ</i>
+    </div>
+
+    <div class="tbox"><div class="hd">벡터의 내적</div><div class="bd">
+      두 벡터 <span class='vec'><i>a</i></span>, <span class='vec'><i>b</i></span>가 이루는 각의 크기 <i class='m'>θ</i>에 대하여
+      <span class="row" data-f="1"><span class="rn">(ⅰ)</span>0°≤<i class='m'>θ</i>≤90°일 때, <span class="fm"><span class='vec'><i>a</i></span><span class="dotc">·</span><span class='vec'><i>b</i></span> = |<span class='vec'><i>a</i></span>||<span class='vec'><i>b</i></span>| cos <i class='m'>θ</i></span></span>
+      <span class="row" data-f="2"><span class="rn">(ⅱ)</span>90°&lt;<i class='m'>θ</i>≤180°일 때, <span class="fm"><span class='vec'><i>a</i></span><span class="dotc">·</span><span class='vec'><i>b</i></span> = −|<span class='vec'><i>a</i></span>||<span class='vec'><i>b</i></span>| cos (180°−<i class='m'>θ</i>)</span></span>
+    </div></div>
+    <div class="figs2">
+      <div class="cream" id="fg1"><svg viewBox="0 0 230 150"></svg></div>
+      <div class="cream" id="fg2"><svg viewBox="0 0 300 185"></svg></div>
+    </div>
+
+    <div class="ex">
+      <div class="prow">
+        <div class="ptxt">
+          <span class="badge">예제 1</span>오른쪽 그림과 같이 <span class="ov">AB</span>=2, <span class="ov">BC</span>=3, <span class="ov">BF</span>=1인 직육면체에서
+          <span class='vec'><span class='r'>AD</span></span><span class="dotc">·</span><span class='vec'><span class='r'>BG</span></span>를 구하시오.
+          <div class="qline">
+            <span><span class='vec'><span class='r'>AD</span></span><span class="dotc">·</span><span class='vec'><span class='r'>BG</span></span> =</span>
+            <span class="res" id="exres"></span>
+            <button class="gb ans" id="exgo">풀이</button><button class="btn sm" id="exre" style="display:none">다시</button>
+          </div>
+        </div>
+        <div class="cream"><svg id="fbox" viewBox="0 0 330 232"></svg></div>
+      </div>
+    </div>
+
+    <div class="ex">
+      <div class="prow">
+        <div class="ptxt">
+          <span class="badge w">문제 02</span>오른쪽 그림과 같이 한 모서리의 길이가 1인 정육면체에서 다음을 구하시오.
+          <div class="sub"><span class="no">(1)</span><span><span class='vec'><span class='r'>FA</span></span><span class="dotc">·</span><span class='vec'><span class='r'>FD</span></span> =</span><span class="res" id="q1res"></span><button class="gb ans" id="q1go">풀이</button><button class="btn sm" id="q1re" style="display:none">다시</button></div>
+          <div class="sub"><span class="no">(2)</span><span><span class='vec'><span class='r'>BD</span></span><span class="dotc">·</span><span class='vec'><span class='r'>BG</span></span> =</span><span class="res" id="q2res"></span><button class="gb ans" id="q2go">풀이</button><button class="btn sm" id="q2re" style="display:none">다시</button></div>
+        </div>
+        <div class="cream"><svg id="fcube" viewBox="0 0 270 240"></svg></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ 02 벡터의 내적과 성분 ═══════════════ -->
+<div class="pane" data-p="b">
+  <div class="tbox"><div class="hd">벡터의 내적과 성분</div><div class="bd">
+    <span class="ln2"><span class="cn">1</span><span class='vec'><i>a</i></span> = (<i>a</i><sub>1</sub>, <i>a</i><sub>2</sub>), <span class='vec'><i>b</i></span> = (<i>b</i><sub>1</sub>, <i>b</i><sub>2</sub>)일 때, <span class="fm2"><span class='vec'><i>a</i></span><span class="dotc">·</span><span class='vec'><i>b</i></span> = <i>a</i><sub>1</sub><i>b</i><sub>1</sub> + <i>a</i><sub>2</sub><i>b</i><sub>2</sub></span></span>
+    <span class="ln2"><span class="cn">2</span><span class='vec'><i>a</i></span> = (<i>a</i><sub>1</sub>, <i>a</i><sub>2</sub>, <i>a</i><sub>3</sub>), <span class='vec'><i>b</i></span> = (<i>b</i><sub>1</sub>, <i>b</i><sub>2</sub>, <i>b</i><sub>3</sub>)일 때, <span class="fm2"><span class='vec'><i>a</i></span><span class="dotc">·</span><span class='vec'><i>b</i></span> = <i>a</i><sub>1</sub><i>b</i><sub>1</sub> + <i>a</i><sub>2</sub><i>b</i><sub>2</sub> + <i>a</i><sub>3</sub><i>b</i><sub>3</sub></span></span>
+  </div></div>
+  <div class="note2">• |<span class='vec'><i>a</i></span>|<span class='sp2'>2</span> = <span class='vec'><i>a</i></span><span class="dotc">·</span><span class='vec'><i>a</i></span></div>
+
+  <div class="cosrow">
+    <div class="cream"><svg id="fcos" viewBox="0 0 330 250"></svg></div>
+    <div class="txt">
+      <div class="ttl">코사인법칙</div>
+      <div class="eqg">
+        <span class="l">|<span class='vec'><span class='r'>AB</span></span>|<span class='sp2'>2</span></span><span class="r">= |<span class='vec'><span class='r'>OA</span></span>|<span class='sp2'>2</span> + |<span class='vec'><span class='r'>OB</span></span>|<span class='sp2'>2</span> − 2|<span class='vec'><span class='r'>OA</span></span>||<span class='vec'><span class='r'>OB</span></span>| cos <i>θ</i></span>
+        <span class="l">|<span class='vec'><i>a</i></span> − <span class='vec'><i>b</i></span>|<span class='sp2'>2</span></span><span class="r">= |<span class='vec'><i>a</i></span>|<span class='sp2'>2</span> + |<span class='vec'><i>b</i></span>|<span class='sp2'>2</span> − 2|<span class='vec'><i>a</i></span>||<span class='vec'><i>b</i></span>| cos <i>θ</i></span>
+        <span class="l"></span><span class="r">= |<span class='vec'><i>a</i></span>|<span class='sp2'>2</span> + |<span class='vec'><i>b</i></span>|<span class='sp2'>2</span> − 2<span class='vec'><i>a</i></span><span class="dotc">·</span><span class='vec'><i>b</i></span></span>
+      </div>
+      <div class="ttl">벡터의 크기를 성분으로 나타내면</div>
+      <div class="eqc2">(<i>b</i><sub>1</sub> − <i>a</i><sub>1</sub>)<span class='sp2'>2</span> + (<i>b</i><sub>2</sub> − <i>a</i><sub>2</sub>)<span class='sp2'>2</span> = (<i>a</i><sub>1</sub><span class='sp2'>2</span> + <i>a</i><sub>2</sub><span class='sp2'>2</span>) + (<i>b</i><sub>1</sub><span class='sp2'>2</span> + <i>b</i><sub>2</sub><span class='sp2'>2</span>) − 2<span class='vec'><i>a</i></span><span class="dotc">·</span><span class='vec'><i>b</i></span></div>
+    </div>
+
+  </div>
+  <div class="q3">
+    <span class="badge w">문제 03</span>다음 두 벡터의 내적을 구하시오.
+    <div class="items">
+      <div class="it2"><span class="no">(1)</span><span><span class='vec'><i>a</i></span> = (2, −3), <span class='vec'><i>b</i></span> = (5, 1)</span><button class="gb ans" data-a="7">답</button><span class="ans2"></span></div>
+      <div class="it2"><span class="no">(2)</span><span><span class='vec'><i>a</i></span> = (3, −2, 1), <span class='vec'><i>b</i></span> = (−4, 1, 5)</span><button class="gb ans" data-a="−9">답</button><span class="ans2"></span></div>
+    </div>
+  </div>
+
+  <div class="ex">
+    <div class="prow">
+      <div class="ptxt">
+        <span class="badge w">문제 04</span>오른쪽 그림과 같이 <span class="ov">AE</span>=<span class="ov">EF</span>=1, <span class="ov">FG</span>=2인 직육면체에서 <span class='vec'><span class='r'>ED</span></span><span class="dotc">·</span><span class='vec'><span class='r'>BG</span></span>를 구하는 방법을 벡터의 성분을 이용하여 설명하시오.
+        <div style="margin-top:6px"><button class="gb ans" id="q4go">풀이</button><button class="btn sm" id="q4re" style="display:none; margin-left:6px">다시</button></div>
+        <div class="sol2" id="q4sol">
+          점 E를 원점, 세 모서리 EF, EH, EA를 각각 <i>x</i>축, <i>y</i>축, <i>z</i>축 위에 놓으면 <span class="rm">E(0, 0, 0)</span>, <span class="rm">D(0, 2, 1)</span>, <span class="rm">B(1, 0, 1)</span>, <span class="rm">G(1, 2, 0)</span>이므로
+          <div class="ind"><span class='vec'><span class='r'>ED</span></span><span class="dotc">·</span><span class='vec'><span class='r'>BG</span></span> = (0, 2, 1)<span class="dotc">·</span>(0, 2, −1) = <span style="color:var(--acc);font-weight:700">3</span></div>
+        </div>
+      </div>
+      <div class="cream"><svg id="fq4" viewBox="0 0 330 250"></svg></div>
+    </div>
+  </div>
+
+  <div class="tbox"><div class="hd">벡터의 내적의 성질</div><div class="bd">
+    세 벡터 <span class='vec'><i>a</i></span>, <span class='vec'><i>b</i></span>, <span class='vec'><i>c</i></span>에 대하여
+    <span class="ln2"><span class="cn">1</span><span class='vec'><i>a</i></span><span class='dotc'>·</span><span class='vec'><i>b</i></span> = <span class='vec'><i>b</i></span><span class='dotc'>·</span><span class='vec'><i>a</i></span> (교환법칙)</span>
+    <span class="ln2"><span class="cn">2</span><span class='vec'><i>a</i></span><span class='dotc'>·</span>(<span class='vec'><i>b</i></span> + <span class='vec'><i>c</i></span>) = <span class='vec'><i>a</i></span><span class='dotc'>·</span><span class='vec'><i>b</i></span> + <span class='vec'><i>a</i></span><span class='dotc'>·</span><span class='vec'><i>c</i></span>, &nbsp;(<span class='vec'><i>a</i></span> + <span class='vec'><i>b</i></span>)<span class='dotc'>·</span><span class='vec'><i>c</i></span> = <span class='vec'><i>a</i></span><span class='dotc'>·</span><span class='vec'><i>c</i></span> + <span class='vec'><i>b</i></span><span class='dotc'>·</span><span class='vec'><i>c</i></span> (분배법칙)</span>
+    <span class="ln2"><span class="cn">3</span>(<i>k</i><span class='vec'><i>a</i></span>)<span class='dotc'>·</span><span class='vec'><i>b</i></span> = <span class='vec'><i>a</i></span><span class='dotc'>·</span>(<i>k</i><span class='vec'><i>b</i></span>) = <i>k</i>(<span class='vec'><i>a</i></span><span class='dotc'>·</span><span class='vec'><i>b</i></span>) (단, <i>k</i>는 실수)</span>
+  </div></div>
+
+  <details class="sol" id="prfbox"><summary>성질이 성립하는 이유 (성분으로 확인하기) ▾</summary>
+  <div class="prf">
+    세 벡터 <span class="m2"><span class='vec'><i>a</i></span> = (<i>a</i><sub>1</sub>, <i>a</i><sub>2</sub>), <span class='vec'><i>b</i></span> = (<i>b</i><sub>1</sub>, <i>b</i><sub>2</sub>), <span class='vec'><i>c</i></span> = (<i>c</i><sub>1</sub>, <i>c</i><sub>2</sub>)</span>에 대하여 다음이 성립한다.
+    <span class="row">
+      <span class="eq m2"><span class="cn">1</span><span class='vec'><i>a</i></span><span class='dotc'>·</span><span class='vec'><i>b</i></span> <span class='rest'>= <i>a</i><sub>1</sub><i>b</i><sub>1</sub> + <i>a</i><sub>2</sub><i>b</i><sub>2</sub></span> <span class='rest'>= <i>b</i><sub>1</sub><i>a</i><sub>1</sub> + <i>b</i><sub>2</sub><i>a</i><sub>2</sub></span> <span class='rest'>= <span class='vec'><i>b</i></span><span class='dotc'>·</span><span class='vec'><i>a</i></span></span><span class="hint">누르면 전개</span></span>
+    </span>
+    <span class="row">
+      <span class="eq m2"><span class="cn">2</span><span class='vec'><i>a</i></span><span class='dotc'>·</span>(<span class='vec'><i>b</i></span> + <span class='vec'><i>c</i></span>) <span class='rest'>= (<i>a</i><sub>1</sub>, <i>a</i><sub>2</sub>)<span class='dotc'>·</span>(<i>b</i><sub>1</sub> + <i>c</i><sub>1</sub>, <i>b</i><sub>2</sub> + <i>c</i><sub>2</sub>)</span> <span class='rest'>= <i>a</i><sub>1</sub>(<i>b</i><sub>1</sub> + <i>c</i><sub>1</sub>) + <i>a</i><sub>2</sub>(<i>b</i><sub>2</sub> + <i>c</i><sub>2</sub>)</span><span class="hint">누르면 전개</span></span>
+      <span class="eq m2 ind" style="padding-left:7.2em"><span class='rest'>= (<i>a</i><sub>1</sub><i>b</i><sub>1</sub> + <i>a</i><sub>2</sub><i>b</i><sub>2</sub>) + (<i>a</i><sub>1</sub><i>c</i><sub>1</sub> + <i>a</i><sub>2</sub><i>c</i><sub>2</sub>)</span> <span class='rest'>= <span class='vec'><i>a</i></span><span class='dotc'>·</span><span class='vec'><i>b</i></span> + <span class='vec'><i>a</i></span><span class='dotc'>·</span><span class='vec'><i>c</i></span></span></span>
+    </span>
+    <span class="row">
+      <span class="eq m2 ind" style="padding-left:2.3em">(<span class='vec'><i>a</i></span> + <span class='vec'><i>b</i></span>)<span class='dotc'>·</span><span class='vec'><i>c</i></span> <span class='rest'>= (<i>a</i><sub>1</sub> + <i>b</i><sub>1</sub>, <i>a</i><sub>2</sub> + <i>b</i><sub>2</sub>)<span class='dotc'>·</span>(<i>c</i><sub>1</sub>, <i>c</i><sub>2</sub>)</span> <span class='rest'>= (<i>a</i><sub>1</sub> + <i>b</i><sub>1</sub>)<i>c</i><sub>1</sub> + (<i>a</i><sub>2</sub> + <i>b</i><sub>2</sub>)<i>c</i><sub>2</sub></span><span class="hint">누르면 전개</span></span>
+      <span class="eq m2 ind" style="padding-left:7.2em"><span class='rest'>= (<i>a</i><sub>1</sub><i>c</i><sub>1</sub> + <i>a</i><sub>2</sub><i>c</i><sub>2</sub>) + (<i>b</i><sub>1</sub><i>c</i><sub>1</sub> + <i>b</i><sub>2</sub><i>c</i><sub>2</sub>)</span> <span class='rest'>= <span class='vec'><i>a</i></span><span class='dotc'>·</span><span class='vec'><i>c</i></span> + <span class='vec'><i>b</i></span><span class='dotc'>·</span><span class='vec'><i>c</i></span></span></span>
+    </span>
+    <span class="row">
+      <span class="eq"><span class="cn">3</span>실수 <span class="m2"><i>k</i></span>에 대하여<span class="hint">누르면 전개</span></span>
+      <span class="eq m2 ind" style="padding-left:2.3em">(<i>k</i><span class='vec'><i>a</i></span>)<span class='dotc'>·</span><span class='vec'><i>b</i></span> <span class='rest'>= (<i>k</i><i>a</i><sub>1</sub>, <i>k</i><i>a</i><sub>2</sub>)<span class='dotc'>·</span>(<i>b</i><sub>1</sub>, <i>b</i><sub>2</sub>)</span> <span class='rest'>= <i>k</i><i>a</i><sub>1</sub><i>b</i><sub>1</sub> + <i>k</i><i>a</i><sub>2</sub><i>b</i><sub>2</sub></span></span>
+      <span class="eq m2 ind" style="padding-left:6.3em"><span class='rest'>= <i>a</i><sub>1</sub>(<i>k</i><i>b</i><sub>1</sub>) + <i>a</i><sub>2</sub>(<i>k</i><i>b</i><sub>2</sub>)</span> <span class='rest'>= (<i>a</i><sub>1</sub>, <i>a</i><sub>2</sub>)<span class='dotc'>·</span>(<i>k</i><i>b</i><sub>1</sub>, <i>k</i><i>b</i><sub>2</sub>)</span> <span class='rest'>= <span class='vec'><i>a</i></span><span class='dotc'>·</span>(<i>k</i><span class='vec'><i>b</i></span>)</span></span>
+      <span class="eq ind" style="padding-left:2.3em"><span class='rest'>같은 방법으로 <span class='m2'>(<i>k</i><span class='vec'><i>a</i></span>)<span class='dotc'>·</span><span class='vec'><i>b</i></span> = <i>k</i>(<span class='vec'><i>a</i></span><span class='dotc'>·</span><span class='vec'><i>b</i></span>)</span>도 성립한다.</span></span>
+    </span>
+    <div class="tail">평면벡터와 마찬가지로 공간벡터에서도 위의 내적의 성질이 성립한다.</div>
+  </div>
+  </details>
+
+  <div class="exq">
+    <span class="badge">예제 2</span>다음 등식이 성립함을 증명하시오.
+    <div class="ctr">|<span class='vec'><i>a</i></span> + <span class='vec'><i>b</i></span>|<span class='sp2'>2</span> = |<span class='vec'><i>a</i></span>|<span class='sp2'>2</span> + 2<span class='vec'><i>a</i></span><span class='dotc'>·</span><span class='vec'><i>b</i></span> + |<span class='vec'><i>b</i></span>|<span class='sp2'>2</span></div>
+  </div>
+  <div class="exq">
+    <span class="badge">예제 3</span><span class="m2">|<span class='vec'><i>a</i></span>| = 2<span class='sq'>√<span class='r'>3</span></span>, |<span class='vec'><i>b</i></span>| = 4</span>인 두 벡터 <span class="m2"><span class='vec'><i>a</i></span>, <span class='vec'><i>b</i></span></span>가 이루는 각의 크기가 30°일 때, <span class="m2">|3<span class='vec'><i>a</i></span> + 2<span class='vec'><i>b</i></span>|</span>를 구하시오.
+  </div>
+</div>
+
+<!-- ═══════════════ 03 수직과 평행 조건 ═══════════════ -->
+<div class="pane" data-p="c">
+  <div class="tbox"><div class="hd">두 벡터가 이루는 각의 크기</div><div class="bd">
+    영벡터가 아닌 두 벡터 <span class='vec'><i>a</i></span>, <span class='vec'><i>b</i></span>가 이루는 각의 크기 <i class='m'>θ</i> (0°≤<i class='m'>θ</i>≤180°)에 대하여
+    <span class="ln2" style="margin-top:4px"><span class="fm2" style="margin-left:1.5em">cos <i class='m'>θ</i> = <span class='frac'><span><span class='vec'><i>a</i></span><span class='dotc'>·</span><span class='vec'><i>b</i></span></span><span>|<span class='vec'><i>a</i></span>| |<span class='vec'><i>b</i></span>|</span></span></span></span>
+  </div></div>
+
+  <div class="angrow">
+    <div class="cream"><svg id="fang" viewBox="0 0 380 300"></svg></div>
+    <div class="side">
+      <div><span class='vec'><i>a</i></span><span class='dotc'>·</span><span class='vec'><i>b</i></span> = |<span class='vec'><i>a</i></span>| |<span class='vec'><i>b</i></span>| cos <i>θ</i></div>
+      <div class="th"><i>θ</i> = <b id="angv">0</b>°</div>
+      <div class="sgn" id="angsgn"></div>
+      <div class="abtns">
+        <button class="btn" data-r="0,90">0° ≤ <i>θ</i> &lt; 90°</button>
+        <button class="btn" data-r="90,90"><i>θ</i> = 90°</button>
+        <button class="btn" data-r="90,180">90° &lt; <i>θ</i> ≤ 180°</button>
+        <button class="btn" data-r="0,0">처음으로</button>
+      </div>
+      <div class="aslide"><span>직접 돌리기</span><input type="range" id="angs" min="0" max="180" value="0" step="1"></div>
+    </div>
+  </div>
+
+  <div class="tbox"><div class="hd">두 벡터의 수직 조건과 평행 조건</div><div class="bd">
+    영벡터가 아닌 두 벡터 <span class='vec'><i>a</i></span>, <span class='vec'><i>b</i></span>에 대하여
+    <div class="cols2">
+      <span class="ln2"><span class="cn">1</span><span class='vec'><i>a</i></span> ⊥ <span class='vec'><i>b</i></span> &nbsp;⟺&nbsp; <span class='vec'><i>a</i></span><span class='dotc'>·</span><span class='vec'><i>b</i></span> = 0</span>
+      <span class="ln2"><span class="cn">2</span><span class='vec'><i>a</i></span> ∥ <span class='vec'><i>b</i></span> &nbsp;⟺&nbsp; <span class='vec'><i>a</i></span><span class='dotc'>·</span><span class='vec'><i>b</i></span> = ±|<span class='vec'><i>a</i></span>| |<span class='vec'><i>b</i></span>|</span>
+    </div>
+  </div></div>
+
+  <div class="q3">
+    <span class="badge w">문제 08</span>두 벡터 <span class="m2"><span class='vec'><i>a</i></span>, <span class='vec'><i>b</i></span></span>가 다음을 만족시킬 때, 실수 <i class="m">k</i>의 값을 구하시오.
+    <div class="items" style="grid-template-columns:1fr">
+      <div class="it2"><span class="no">(1)</span><span><span class='vec'><i>a</i></span> = (2, −3, 5), <span class='vec'><i>b</i></span> = (4, <i>k</i>, 2)가 서로 수직이다.</span><button class="gb ans" data-a="k = 6">답</button><span class="ans2"></span></div>
+      <div class="it2"><span class="no">(2)</span><span><span class='vec'><i>a</i></span> = (−1, 0, 1), <span class='vec'><i>b</i></span> = (3, 0, <i>k</i>)가 서로 평행하다.</span><button class="gb ans" data-a="k = −3">답</button><span class="ans2"></span></div>
+    </div>
+  </div>
+</div>
+
+</div></div>
+<script>
+"use strict";
+const $=id=>document.getElementById(id);
+function geoTask(k){ if(typeof GEO_task==='function') GEO_task(k); }
+(function(){ const bs=[...document.querySelectorAll('#tabs button')]; bs.forEach(b=>b.onclick=()=>{ bs.forEach(x=>x.classList.toggle('on',x===b));
+  document.querySelectorAll('.pane').forEach(p=>p.classList.toggle('on',p.dataset.p===b.dataset.t)); $('panel').scrollTop=0; }); })();
+const NS='http://www.w3.org/2000/svg';
+function el(tag,attrs,parent){ const e=document.createElementNS(NS,tag); for(const k in attrs) e.setAttribute(k,attrs[k]); if(parent) parent.appendChild(e); return e; }
+
+(function(){
+  const svg=$('sled'), G=400;            // 지면 y
+  const HOOK=[232,G-14];                 // 썰매 앞 고리(줄이 묶인 곳)
+  const PX=520;                          // 사람 x (단상 중심)
+  let moved=false;
+
+  function bg(){
+    // 하늘·눈 배경
+    const sky=el('rect',{x:0,y:0,width:700,height:G,fill:'#DCEAF3'},svg);
+    el('rect',{x:0,y:G,width:700,height:470-G,fill:'#F6F8F9'},svg);
+    el('path',{d:`M0 ${G} Q 350 ${G-8} 700 ${G}`,fill:'none',stroke:'#C9D5DC','stroke-width':1.5},svg);
+    // 눈송이
+    const seed=[[40,40],[120,90],[300,50],[420,30],[640,70],[560,130],[80,170],[260,140],[680,200],[180,250],[380,200],[620,250],[30,290],[460,110]];
+    seed.forEach(([x,y],i)=>el('circle',{cx:x,cy:y,r:i%3?2:3,fill:'#fff',opacity:.9},svg));
+    // 나무
+    [[60,1],[110,.8]].forEach(([x,s])=>{ const g=el('g',{transform:`translate(${x} ${G}) scale(${s})`},svg);
+      el('rect',{x:-6,y:-18,width:12,height:18,fill:'#8B5A2B'},g);
+      [[0,-18,46],[0,-50,38],[0,-78,30]].forEach(([cx,cy,w])=>{ el('path',{d:`M${cx-w} ${cy} L${cx} ${cy-44} L${cx+w} ${cy} Z`,fill:'#3F8F5A'},g);
+        el('path',{d:`M${cx-w} ${cy} Q${cx-w/2} ${cy-6} ${cx} ${cy-3} Q${cx+w/2} ${cy-6} ${cx+w} ${cy} Z`,fill:'#fff'},g); }); });
+    // 썰매 + 아이
+    const sg=el('g',{},svg);
+    el('path',{d:`M150 ${G-6} L240 ${G-6} Q252 ${G-6} 248 ${G-18} L246 ${G-22}`,fill:'none',stroke:'#8B5A2B','stroke-width':4,'stroke-linecap':'round'},sg);
+    el('rect',{x:160,y:G-30,width:72,height:22,rx:4,fill:'#C8742A'},sg);
+    el('rect',{x:160,y:G-30,width:72,height:6,fill:'#A85A1A'},sg);
+    [[170,G-12],[220,G-12]].forEach(([x,y])=>el('rect',{x:x-3,y:y-6,width:6,height:10,fill:'#8B5A2B'},sg));
+    // 아이
+    el('rect',{x:178,y:G-58,width:34,height:30,rx:8,fill:'#E8A33A'},sg);
+    el('circle',{cx:195,cy:G-70,r:15,fill:'#F7D7B8'},sg);
+    el('path',{d:`M180 ${G-72} Q195 ${G-96} 210 ${G-72} Z`,fill:'#D9463F'},sg);
+    el('circle',{cx:189,cy:G-71,r:1.8,fill:'#23241D'},sg); el('circle',{cx:201,cy:G-71,r:1.8,fill:'#23241D'},sg);
+    el('path',{d:`M189 ${G-64} Q195 ${G-59} 201 ${G-64}`,fill:'none',stroke:'#23241D','stroke-width':1.4,'stroke-linecap':'round'},sg);
+    // 팔(앞으로 뻗은 손) — 줄 고리 쪽
+    el('path',{d:`M205 ${G-50} L228 ${G-40}`,fill:'none',stroke:'#E8A33A','stroke-width':6,'stroke-linecap':'round'},sg);
+    el('circle',{cx:HOOK[0],cy:HOOK[1],r:3.5,fill:'#23241D'},sg);
+  }
+
+  let dyn;
+  function lvl(th){ return th<26?0: th<36?1: th<46?2: 3; }   // 표정 단계
+
+  function person(g,x,top,th){
+    const L=lvl(th);
+    const lean=Math.min(22,th*0.45);                 // 각이 커질수록 뒤로 버팀
+    const p=el('g',{transform:`translate(${x} ${top})`},g);
+    // 다리
+    el('path',{d:`M-4 -62 L-16 0`,stroke:'#C83A3A','stroke-width':11,'stroke-linecap':'round'},p);
+    el('path',{d:`M4 -62 L18 0`,stroke:'#C83A3A','stroke-width':11,'stroke-linecap':'round'},p);
+    el('path',{d:`M-22 2 L-12 2`,stroke:'#23241D','stroke-width':6,'stroke-linecap':'round'},p);
+    el('path',{d:`M12 2 L24 2`,stroke:'#23241D','stroke-width':6,'stroke-linecap':'round'},p);
+    // 몸통 (뒤로 기울어짐)
+    const body=el('g',{transform:`rotate(${lean} 0 -62)`},p);
+    el('rect',{x:-19,y:-128,width:38,height:70,rx:10,fill:'#3B6ED9'},body);
+    el('rect',{x:-19,y:-128,width:38,height:12,rx:6,fill:'#2C56B3'},body);
+    // 머리
+    const hd=el('g',{transform:'translate(0 -150)'},body);
+    const face=['#F7D7B8','#F7D0B0','#F3BFA6','#EE9E8C'][L];
+    el('circle',{cx:0,cy:0,r:20,fill:face},hd);
+    // 모자
+    el('path',{d:'M-20 -4 Q0 -36 20 -4 Z',fill:'#2E8B57'},hd);
+    el('rect',{x:-21,y:-8,width:42,height:8,rx:4,fill:'#246E44'},hd);
+    el('circle',{cx:1,cy:-32,r:5,fill:'#fff'},hd);
+    // 눈
+    if(L<3){ el('circle',{cx:-7,cy:-2,r:2.2,fill:'#23241D'},hd); el('circle',{cx:7,cy:-2,r:2.2,fill:'#23241D'},hd); }
+    else{ el('path',{d:'M-10 -5 L-4 -1 M-10 -1 L-4 -5',stroke:'#23241D','stroke-width':1.8,'stroke-linecap':'round'},hd);
+          el('path',{d:'M4 -5 L10 -1 M4 -1 L10 -5',stroke:'#23241D','stroke-width':1.8,'stroke-linecap':'round'},hd); }
+    if(L>=2){ el('path',{d:'M-11 -8 L-4 -6 M4 -6 L11 -8',stroke:'#23241D','stroke-width':1.6,'stroke-linecap':'round'},hd); } // 찡그린 눈썹
+    // 입
+    if(L===0) el('path',{d:'M-7 6 Q0 13 7 6',fill:'none',stroke:'#23241D','stroke-width':1.6,'stroke-linecap':'round'},hd);
+    else if(L===1) el('path',{d:'M-6 8 L6 8',fill:'none',stroke:'#23241D','stroke-width':1.6,'stroke-linecap':'round'},hd);
+    else if(L===2) el('ellipse',{cx:0,cy:9,rx:5,ry:4,fill:'#7A2A2A'},hd);
+    else { el('ellipse',{cx:0,cy:10,rx:7,ry:6,fill:'#7A2A2A'},hd); el('ellipse',{cx:0,cy:14,rx:4,ry:2.6,fill:'#E26B6B'},hd); }
+    // 볼 홍조
+    if(L>=1){ el('ellipse',{cx:-12,cy:5,rx:4,ry:2.5,fill:'#F08A8A',opacity:.25+.25*L},hd); el('ellipse',{cx:12,cy:5,rx:4,ry:2.5,fill:'#F08A8A',opacity:.25+.25*L},hd); }
+    // 땀방울
+    const drops=[[],[[24,-10]],[[24,-12],[27,2]],[[24,-14],[28,0],[-26,-8],[20,12]]][L];
+    drops.forEach(([dx,dy])=>el('path',{d:`M${dx} ${dy} q-4 6 0 9 q4 -3 0 -9 z`,fill:'#4FA3E3'},hd));
+    // 헥헥 — 입김 구름
+    if(L>=2){ const n=L===2?1:3; for(let i=0;i<n;i++){ const c=el('g',{transform:`translate(${-30-i*16} ${8-i*10})`,opacity:.9-i*.2},hd);
+      el('circle',{cx:0,cy:0,r:5,fill:'#fff'},c); el('circle',{cx:-5,cy:2,r:4,fill:'#fff'},c); el('circle',{cx:5,cy:2,r:4,fill:'#fff'},c);
+      const a=el('animateTransform',{attributeName:'transform',type:'translate',values:`${-30-i*16} ${8-i*10};${-38-i*16} ${0-i*10}`,dur:`${0.9+i*.2}s`,repeatCount:'indefinite'},c); } }
+    // 머리 흔들림(지침)
+    if(L===3) el('animateTransform',{attributeName:'transform',type:'translate',values:'0 -150;0 -148;0 -150',dur:'.35s',repeatCount:'indefinite'},hd);
+    // 팔 — 손 위치(월드 좌표) 반환
+    const hx=x-40, hy=top-115+lean*0.6;
+    el('path',{d:`M-14 -100 L${hx-x} ${hy-top}`,stroke:face,'stroke-width':9,'stroke-linecap':'round'},p);
+    el('path',{d:`M14 -104 L${hx-x+4} ${hy-top-2}`,stroke:face,'stroke-width':9,'stroke-linecap':'round'},p);
+    el('circle',{cx:hx-x,cy:hy-top,r:6,fill:'#D9463F'},p);
+    return [hx,hy];
+  }
+
+  function draw(h){
+    dyn.innerHTML='';
+    const top=G-h;
+    // 단상
+    if(h>0){ el('rect',{x:PX-46,y:top,width:92,height:h,fill:'#B98554',stroke:'#8B5A2B','stroke-width':2},dyn);
+      for(let y=top+18;y<G-6;y+=18) el('line',{x1:PX-46,y1:y,x2:PX+46,y2:y,stroke:'#8B5A2B','stroke-width':1,opacity:.6},dyn);
+      el('rect',{x:PX-50,y:top-6,width:100,height:8,rx:2,fill:'#D2A676',stroke:'#8B5A2B','stroke-width':2},dyn); }
+    // 각도 미리 계산(손 위치는 각에 따라 조금 달라지므로 두 번)
+    let th=0, hand=[PX-40,top-115];
+    for(let i=0;i<2;i++){ th=Math.atan2(HOOK[1]-hand[1],hand[0]-HOOK[0])*180/Math.PI; hand=[PX-40,top-115+Math.min(22,th*.45)*.6]; }
+    // 줄
+    el('line',{x1:HOOK[0],y1:HOOK[1],x2:hand[0],y2:hand[1],stroke:'#5B3A1E','stroke-width':2.5},dyn);
+    // 직각삼각형 보조선: 손에서 수선, 고리에서 수평선
+    el('line',{x1:HOOK[0],y1:HOOK[1],x2:hand[0],y2:HOOK[1],stroke:'#23241D','stroke-width':1.2,'stroke-dasharray':'5 4',opacity:.75},dyn);
+    el('line',{x1:hand[0],y1:hand[1],x2:hand[0],y2:HOOK[1],stroke:'#23241D','stroke-width':1.2,'stroke-dasharray':'5 4',opacity:.75},dyn);
+    el('path',{d:`M${hand[0]-9} ${HOOK[1]} L${hand[0]-9} ${HOOK[1]-9} L${hand[0]} ${HOOK[1]-9}`,fill:'none',stroke:'#23241D','stroke-width':1.1},dyn);
+    // 힘 F (줄 방향, 빨강) + 이동 방향 성분(파랑)
+    const rad=th*Math.PI/180, FL=130;
+    el('line',{x1:HOOK[0],y1:HOOK[1],x2:HOOK[0]+FL*Math.cos(rad),y2:HOOK[1]-FL*Math.sin(rad),stroke:'#D9463F','stroke-width':3,'marker-end':'url(#ahR)','stroke-linecap':'round'},dyn);
+    el('line',{x1:HOOK[0],y1:HOOK[1],x2:HOOK[0]+FL*Math.cos(rad),y2:HOOK[1],stroke:'#2F45EC','stroke-width':3,'marker-end':'url(#ahB)','stroke-linecap':'round'},dyn);
+    el('line',{x1:HOOK[0]+FL*Math.cos(rad),y1:HOOK[1]-FL*Math.sin(rad),x2:HOOK[0]+FL*Math.cos(rad),y2:HOOK[1],stroke:'#2F45EC','stroke-width':1.2,'stroke-dasharray':'3 3'},dyn);
+    // 각 θ 호
+    const r=34;
+    el('path',{d:`M${HOOK[0]+r} ${HOOK[1]} A${r} ${r} 0 0 0 ${HOOK[0]+r*Math.cos(rad)} ${HOOK[1]-r*Math.sin(rad)}`,fill:'none',stroke:'#23241D','stroke-width':1.3},dyn);
+    const mid=rad/2; const t=el('text',{x:HOOK[0]+(r+12)*Math.cos(mid),y:HOOK[1]-(r+12)*Math.sin(mid)+5,'font-size':16,'text-anchor':'middle',class:'it'},dyn); t.textContent='θ';
+    // 사람
+    person(dyn,PX,top,th);
+    $('degv').textContent=Math.round(th);
+  }
+  bg(); dyn=el('g',{},svg); draw(0);
+  $('hgt').oninput=e=>{ draw(+e.target.value); if(!moved && +e.target.value>=150){ moved=true; geoTask('dot-stand'); } };
+})();
+
+/* 내적 정의 그림 */
+(function(){
+  const t=(p,x,y,str,it,sz)=>{ const e=el('text',{x,y,'font-size':sz||15,'text-anchor':'middle',class:it?'it':''},p); e.textContent=str; return e; };
+  const vlab=(p,x,y,str)=>{ t(p,x,y,str,true,15); el('line',{x1:x-5,y1:y-15,x2:x+6,y2:y-15,stroke:'#23241D','stroke-width':1.1},p); el('path',{d:`M${x+3} ${y-18} L${x+7} ${y-15} L${x+3} ${y-12}`,fill:'none',stroke:'#23241D','stroke-width':1.1},p); };
+  const ar=(p,x1,y1,x2,y2)=>el('line',{x1,y1,x2,y2,stroke:'#23241D','stroke-width':1.6,'marker-end':'url(#ahK)'},p);
+  const defs=document.querySelector('svg defs');
+  const m=el('marker',{id:'ahK',viewBox:'0 0 10 10',refX:9,refY:5,markerWidth:6,markerHeight:6,orient:'auto-start-reverse'},defs); el('path',{d:'M0 1.2 L10 5 L0 8.8 z',fill:'#23241D'},m);
+  // 수선의 발 작도: B에서 직선 OA에 내린 수선 + 선분 OH 형광펜 + 회색 라벨
+  function foot(p,O,B,side,lab,ang){
+    const g=el('g',{class:'hgrp'},p); const H=[B[0],O[1]];
+    const hl=el('line',{x1:O[0],y1:O[1],x2:H[0],y2:H[1],class:'hl'},g);
+    const L=Math.abs(H[0]-O[0]); hl.setAttribute('stroke-dasharray',L); hl.setAttribute('stroke-dashoffset',L);
+    el('line',{x1:B[0],y1:B[1],x2:H[0],y2:H[1],stroke:'#23241D','stroke-width':1.1,'stroke-dasharray':'3 3'},g);
+    const k=7, sx=side; // 직각 표시 (O쪽, 위쪽)
+    const dx=O[0]>H[0]?k:-k;
+    el('path',{d:`M${H[0]+dx} ${H[1]} L${H[0]+dx} ${H[1]-k} L${H[0]} ${H[1]-k}`,fill:'none',stroke:'#23241D','stroke-width':1},g);
+    const tx=el('text',{x:lab[0],y:lab[1],'font-size':13,'text-anchor':'middle','font-weight':500,style:'fill:#8A8A80'},g);
+    tx.innerHTML=`|<tspan class="it" id="bb${side}${ang.length}">b</tspan>| cos ${ang.replace('θ','<tspan class="it">θ</tspan>')}`;
+    requestAnimationFrame(()=>{ const bt=tx.querySelector('tspan'); let bx; try{ const e=tx.getExtentOfChar(1); bx=e.x+e.width/2; }catch(e){ bx=lab[0]-14; }
+      el('line',{x1:bx-4.5,y1:lab[1]-13,x2:bx+5,y2:lab[1]-13,stroke:'#8A8A80','stroke-width':1},g);
+      el('path',{d:`M${bx+2} ${lab[1]-15.5} L${bx+6} ${lab[1]-13} L${bx+2} ${lab[1]-10.5}`,fill:'none',stroke:'#8A8A80','stroke-width':1},g); });
+    p.parentNode.onclick=()=>{ const on=!g.classList.contains('on'); g.classList.toggle('on',on); hl.setAttribute('stroke-dashoffset',on?0:L); if(on) geoTask('dot-foot'); };
+  }
+  // 그림 1: 예각
+  { const p=document.querySelector('#fg1 svg'); const O=[40,118], A=[200,118], B=[150,30];
+    ar(p,O[0],O[1],A[0],A[1]); ar(p,O[0],O[1],B[0],B[1]);
+    const th=Math.atan2(O[1]-B[1],B[0]-O[0]); const r=20;
+    el('path',{d:`M${O[0]+r} ${O[1]} A${r} ${r} 0 0 0 ${O[0]+r*Math.cos(th)} ${O[1]-r*Math.sin(th)}`,fill:'none',stroke:'#23241D','stroke-width':1.1},p);
+    t(p,O[0]+34,O[1]-8,'θ',true); t(p,O[0]-12,O[1]+5,'O'); t(p,A[0]+12,A[1]+5,'A'); t(p,B[0]+10,B[1]-4,'B');
+    vlab(p,180,142,'a'); vlab(p,78,70,'b'); foot(p,O,B,-1,[ (O[0]+B[0])/2, O[1]+22 ],'θ'); }
+  // 그림 2: 둔각
+  { const p=document.querySelector('#fg2 svg'); const O=[130,128], A=[285,128], B=[62,30];
+    el('line',{x1:O[0],y1:O[1],x2:20,y2:O[1],stroke:'#23241D','stroke-width':1.1,'stroke-dasharray':'4 3'},p);
+    ar(p,O[0],O[1],A[0],A[1]); ar(p,O[0],O[1],B[0],B[1]);
+    const th=Math.atan2(O[1]-B[1],B[0]-O[0]); const r=20;
+    el('path',{d:`M${O[0]+r} ${O[1]} A${r} ${r} 0 0 0 ${O[0]+r*Math.cos(th)} ${O[1]-r*Math.sin(th)}`,fill:'none',stroke:'#23241D','stroke-width':1.1},p);
+    const r2=16; el('path',{d:`M${O[0]+r2*Math.cos(th)} ${O[1]-r2*Math.sin(th)} A${r2} ${r2} 0 0 0 ${O[0]-r2} ${O[1]}`,fill:'none',stroke:'#23241D','stroke-width':1.1},p);
+    t(p,O[0]+22,O[1]-24,'θ',true); t(p,O[0]+4,O[1]+18,'O'); t(p,A[0]+8,A[1]+5,'A'); t(p,B[0]-4,B[1]-6,'B');
+    const g=el('g',{},p); t(g,52,O[1]+22,'180°−θ',false,14); g.querySelector('text').innerHTML='180°−<tspan class="it">θ</tspan>';
+    vlab(p,206,150,'a'); vlab(p,112,66,'b'); foot(p,O,B,1,[ (O[0]+B[0])/2, O[1]+44 ],'(180°−θ)'); }
+  document.querySelectorAll('.tbox .row').forEach(r=>r.onclick=()=>{ const on=!r.classList.contains('on');
+    document.querySelectorAll('.tbox .row').forEach(x=>x.classList.remove('on')); document.querySelectorAll('.figs2 .cream').forEach(x=>x.classList.remove('on'));
+    if(on){ r.classList.add('on'); $('fg'+r.dataset.f).classList.add('on'); } });
+})();
+
+/* 공통: 내적 풀이 모션 (각 θ → 수선의 발 → 한 벡터가 다른 벡터 위로 내려앉음 → 식) */
+const SOLV=[];
+function solver(cfg){
+  const p=cfg.svg, dyn=el('g',{},p); let timers=[];
+  const wait=(ms,fn)=>timers.push(setTimeout(fn,ms));
+  const T=(x,y,str,o,par)=>{ const e=el('text',Object.assign({x,y,'font-size':15,'text-anchor':'middle'},o||{}),par||dyn); e.textContent=str; return e; };
+  const vlabel=(x,y,str,col)=>{ const g=el('g',{},dyn); const tx=T(x,y,str,{style:`fill:${col}`,'font-size':14},g);
+    requestAnimationFrame(()=>{ const w=tx.getComputedTextLength(); el('line',{x1:x-w/2,y1:y-14,x2:x+w/2+1,y2:y-14,stroke:col,'stroke-width':1},g);
+      el('path',{d:`M${x+w/2-3} ${y-16.5} L${x+w/2+2} ${y-14} L${x+w/2-3} ${y-11.5}`,fill:'none',stroke:col,'stroke-width':1},g); }); return g; };
+  const arrowTo=(a,b,col,mk,o)=>{ const d=Math.hypot(b[0]-a[0],b[1]-a[1]), k=(d-7)/d; return el('line',Object.assign({x1:a[0],y1:a[1],x2:a[0]+(b[0]-a[0])*k,y2:a[1]+(b[1]-a[1])*k,stroke:col,'stroke-width':2.6,'marker-end':mk},o||{}),dyn); };
+  function reset(){ timers.forEach(clearTimeout); timers=[]; dyn.innerHTML=''; $(cfg.res).classList.remove('on'); $(cfg.res).innerHTML=''; $(cfg.go).disabled=false; $(cfg.re).style.display='none'; if(cfg.onReset) cfg.onReset(); }
+  function run(){
+    SOLV.forEach(x=>{ if(x!==api) x.reset(); });
+    $(cfg.go).disabled=true; $(cfg.re).style.display='';
+    const O=cfg.O, P=cfg.P, Q=cfg.Q, Hf=cfg.foot;
+    let t0=0; if(cfg.pre) t0=cfg.pre(dyn,wait,{arrowTo,vlabel,T});
+    else { arrowTo(O,P,'#D9463F','url(#ahR)'); vlabel(cfg.lP[0],cfg.lP[1],cfg.nP,'#D9463F'); }
+    const blue=arrowTo(O,Q,'#2F45EC','url(#ahB)'); vlabel(cfg.lQ[0],cfg.lQ[1],cfg.nQ,'#2F45EC');
+    if(cfg.extra) cfg.extra(dyn,{T});
+    // θ 호
+    wait(t0+900,()=>{ const a1=Math.atan2(P[1]-O[1],P[0]-O[0]), a2=Math.atan2(Q[1]-O[1],Q[0]-O[0]); const r=cfg.r||28;
+      let d=a2-a1; while(d>Math.PI) d-=2*Math.PI; while(d<-Math.PI) d+=2*Math.PI; const sw=d>0?1:0;
+      const g=el('g',{class:'hgrp2'},dyn);
+      el('path',{d:`M${O[0]+r*Math.cos(a1)} ${O[1]+r*Math.sin(a1)} A${r} ${r} 0 0 ${sw} ${O[0]+r*Math.cos(a2)} ${O[1]+r*Math.sin(a2)}`,fill:'none',stroke:'#23241D','stroke-width':1.2},g);
+      const m=a1+d/2; T(O[0]+(r+11)*Math.cos(m),O[1]+(r+11)*Math.sin(m)+5,cfg.thLab||'θ',{class:cfg.thLab?'':'it','font-size':cfg.thLab?13:15},g);
+      requestAnimationFrame(()=>g.classList.add('on')); });
+    // 수선 (Q → 발) + 직각 표시
+    wait(t0+1900,()=>{ const g=el('g',{class:'hgrp2'},dyn);
+      el('line',{x1:Q[0],y1:Q[1],x2:Hf[0],y2:Hf[1],stroke:'#23241D','stroke-width':1.2,'stroke-dasharray':'3 3'},g);
+      const ux=O[0]-Hf[0], uy=O[1]-Hf[1], ul=Math.hypot(ux,uy), vx=Q[0]-Hf[0], vy=Q[1]-Hf[1], vl=Math.hypot(vx,vy), k=8;
+      const u=[ux/ul*k,uy/ul*k], v=[vx/vl*k,vy/vl*k];
+      el('path',{d:`M${Hf[0]+u[0]} ${Hf[1]+u[1]} L${Hf[0]+u[0]+v[0]} ${Hf[1]+u[1]+v[1]} L${Hf[0]+v[0]} ${Hf[1]+v[1]}`,fill:'none',stroke:'#23241D','stroke-width':1},g);
+      requestAnimationFrame(()=>g.classList.add('on')); });
+    // 파란 벡터가 발 위치로 내려앉음
+    wait(t0+2800,()=>{ blue.setAttribute('opacity',.3);
+      const mv=arrowTo(O,Q,'#2F45EC','url(#ahB)'); const d0=Math.hypot(Q[0]-O[0],Q[1]-O[1]), d1=Math.hypot(Hf[0]-O[0],Hf[1]-O[1]);
+      const s0=[+mv.getAttribute('x2'),+mv.getAttribute('y2')], k1=(d1-7)/d1, s1=[O[0]+(Hf[0]-O[0])*k1,O[1]+(Hf[1]-O[1])*k1];
+      const st=performance.now(); (function f(now){ let u=Math.min(1,(now-st)/1000); u=u<.5?2*u*u:1-Math.pow(-2*u+2,2)/2;
+        mv.setAttribute('x2',s0[0]+(s1[0]-s0[0])*u); mv.setAttribute('y2',s0[1]+(s1[1]-s0[1])*u); if(u<1) requestAnimationFrame(f); })(st); });
+    // 식
+    wait(t0+4000,()=>{ $(cfg.res).innerHTML=cfg.result; $(cfg.res).classList.add('on'); geoTask(cfg.task); });
+  }
+  $(cfg.go).onclick=run; $(cfg.re).onclick=reset;
+  const api={run,reset}; SOLV.push(api); return api;
+}
+const vv=x=>`<span class='vec'><span class='r'>${x}</span></span>`, SQ2=`<span class='sq'>√<span class='r'>2</span></span>`;
+
+/* 예제 1 — 직육면체 */
+(function(){
+  const p=$('fbox'); const U=62, D=[27,-21];
+  const B=[40,140], C=[B[0]+3*U,B[1]], F=[B[0],B[1]+U], G=[C[0],C[1]+U];
+  const A=[B[0]+2*D[0],B[1]+2*D[1]], Dp=[C[0]+2*D[0],C[1]+2*D[1]], E=[F[0]+2*D[0],F[1]+2*D[1]], H=[G[0]+2*D[0],G[1]+2*D[1]];
+  const t=(x,y,str,o)=>{ const e=el('text',Object.assign({x,y,'font-size':15,'text-anchor':'middle'},o||{}),p); e.textContent=str; return e; };
+  const ln=(a,b,o)=>el('line',Object.assign({x1:a[0],y1:a[1],x2:b[0],y2:b[1],stroke:'#23241D','stroke-width':1.3},o||{}),p);
+  const poly=pts=>pts.map(q=>q.join(',')).join(' ');
+  el('polygon',{points:poly([B,C,G,F]),fill:'#9FD0F0'},p); el('polygon',{points:poly([A,Dp,C,B]),fill:'#CBE6F7'},p); el('polygon',{points:poly([C,Dp,H,G]),fill:'#7FBCE4'},p);
+  [[E,F],[E,H],[E,A]].forEach(([a,b])=>ln(a,b,{'stroke-dasharray':'4 3','stroke-width':1}));
+  [[B,C],[C,G],[G,F],[F,B],[A,Dp],[Dp,H],[B,A],[C,Dp],[G,H]].forEach(([a,b])=>ln(a,b));
+  t(A[0],A[1]-7,'A'); t(B[0]-10,B[1]+4,'B'); t(C[0]+2,C[1]-8,'C'); t(Dp[0]+10,Dp[1]-4,'D');
+  t(E[0]+4,E[1]+16,'E'); t(F[0]-4,F[1]+16,'F'); t(G[0],G[1]+17,'G'); t(H[0]+12,H[1]+5,'H');
+  t((A[0]+B[0])/2-8,(A[1]+B[1])/2-2,'2',{'font-size':13,'font-weight':400});
+  const n3=t((B[0]+C[0])/2,B[1]-5,'3',{'font-size':13,'font-weight':400});
+  t(B[0]-8,(B[1]+F[1])/2+5,'1',{'font-size':13,'font-weight':400});
+  solver({svg:p,O:B,P:C,Q:G,foot:C,go:'exgo',re:'exre',res:'exres',task:'dot-ex1',
+    nQ:'BG',lQ:[(B[0]+G[0])/2+26,(B[1]+G[1])/2+2],
+    pre:(dyn,wait,h)=>{ const ad=h.arrowTo(A,Dp,'#D9463F','url(#ahR)',{style:'transition:transform 1.1s cubic-bezier(.4,0,.2,1)'});
+      const adl=h.vlabel((A[0]+Dp[0])/2,A[1]-8,'AD','#D9463F'); adl.style.transition='transform 1.1s cubic-bezier(.4,0,.2,1)';
+      wait(900,()=>{ const dx=B[0]-A[0], dy=B[1]-A[1]; ad.style.transform=`translate(${dx}px,${dy}px)`; adl.style.transform=`translate(${dx}px,${dy+4}px)`; n3.style.opacity=0; }); return 1400; },
+    onReset:()=>{ n3.style.opacity=1; },
+    result:`${vv('BC')}<span class="dotc">·</span>${vv('BG')} = |${vv('BC')}||${vv('BG')}| cos <i>θ</i> = 3 × 3 = <span class="cb">9</span>`});
+})();
+
+/* 문제 02 — 정육면체 */
+(function(){
+  const p=$('fcube'); const U=108, D=[52,-42];
+  const B=[30,78], C=[B[0]+U,B[1]], F=[B[0],B[1]+U], G=[C[0],C[1]+U];
+  const A=[B[0]+D[0],B[1]+D[1]], Dp=[C[0]+D[0],C[1]+D[1]], E=[F[0]+D[0],F[1]+D[1]], H=[G[0]+D[0],G[1]+D[1]];
+  const t=(x,y,str,o)=>{ const e=el('text',Object.assign({x,y,'font-size':15,'text-anchor':'middle'},o||{}),p); e.textContent=str; return e; };
+  const ln=(a,b,o)=>el('line',Object.assign({x1:a[0],y1:a[1],x2:b[0],y2:b[1],stroke:'#23241D','stroke-width':1.3},o||{}),p);
+  const poly=pts=>pts.map(q=>q.join(',')).join(' ');
+  el('polygon',{points:poly([B,C,G,F]),fill:'#F2A58E'},p); el('polygon',{points:poly([A,Dp,C,B]),fill:'#F8D2C4'},p); el('polygon',{points:poly([C,Dp,H,G]),fill:'#E98A72'},p);
+  [[E,F],[E,H],[E,A]].forEach(([a,b])=>ln(a,b,{'stroke-dasharray':'4 3','stroke-width':1}));
+  [[B,C],[C,G],[G,F],[F,B],[A,Dp],[Dp,H],[B,A],[C,Dp],[G,H]].forEach(([a,b])=>ln(a,b));
+  t(A[0]-2,A[1]-7,'A'); t(B[0]-10,B[1]+2,'B'); t(C[0]+10,C[1]+5,'C'); t(Dp[0]+10,Dp[1]-3,'D');
+  t(E[0]-8,E[1]+5,'E'); t(F[0]-8,F[1]+14,'F'); t(G[0]+2,G[1]+17,'G'); t(H[0]+12,H[1]+5,'H');
+  t((A[0]+Dp[0])/2,A[1]-6,'1',{'font-size':13,'font-weight':400});
+  // (1) FA·FD : 발은 A
+  solver({svg:p,O:F,P:A,Q:Dp,foot:A,go:'q1go',re:'q1re',res:'q1res',task:'dot-q2',r:34,
+    nP:'FA',lP:[(F[0]+A[0])/2-30,(F[1]+A[1])/2-6],nQ:'FD',lQ:[(F[0]+Dp[0])/2+6,(F[1]+Dp[1])/2+22],
+    result:`|${vv('FA')}||${vv('FD')}| cos <i>θ</i> = ${SQ2} × ${SQ2} = <span class="cb">2</span>`});
+  // (2) BD·BG : 삼각형 BDG 정삼각형, 발은 BD 중점
+  const M=[(B[0]+Dp[0])/2,(B[1]+Dp[1])/2];
+  solver({svg:p,O:B,P:Dp,Q:G,foot:M,go:'q2go',re:'q2re',res:'q2res',task:'dot-q2',r:30,thLab:'60°',
+    nP:'BD',lP:[(B[0]+Dp[0])/2+10,(B[1]+Dp[1])/2-10],nQ:'BG',lQ:[(B[0]+G[0])/2+24,(B[1]+G[1])/2+4],
+    extra:(dyn,h)=>{ el('line',{x1:Dp[0],y1:Dp[1],x2:G[0],y2:G[1],stroke:'#8A8A80','stroke-width':1.2,'stroke-dasharray':'4 3'},dyn);
+      [[(B[0]+Dp[0])/2-14,(B[1]+Dp[1])/2+16],[(B[0]+G[0])/2-16,(B[1]+G[1])/2-4],[(Dp[0]+G[0])/2+16,(Dp[1]+G[1])/2]].forEach(([x,y])=>{ const e=h.T(x,y,'',{style:'fill:#8A8A80','font-size':12}); e.innerHTML='√2'; }); },
+    result:`|${vv('BD')}||${vv('BG')}| cos 60° = ${SQ2} × ${SQ2} × <span class="fr"><span>1</span><span>2</span></span> = <span class="cb">1</span>`});
+})();
+
+/* 02 탭 — 코사인법칙 그림 */
+(function(){
+  const p=$('fcos'); const O=[48,215], A=[238,150], B=[128,78];
+  const T=(x,y,str,o)=>{ const e=el('text',Object.assign({x,y,'font-size':15,'text-anchor':'middle'},o||{}),p); e.innerHTML=str; return e; };
+  // 축
+  el('line',{x1:10,y1:O[1],x2:318,y2:O[1],stroke:'#23241D','stroke-width':1.2,'marker-end':'url(#ahK)'},p);
+  el('line',{x1:O[0],y1:240,x2:O[0],y2:14,stroke:'#23241D','stroke-width':1.2,'marker-end':'url(#ahK)'},p);
+  T(312,236,'x',{class:'it'}); T(36,22,'y',{class:'it'}); T(O[0]+10,O[1]+16,'O');
+  // 직선 OA 연장
+  const ux=(A[0]-O[0]), uy=(A[1]-O[1]), L=Math.hypot(ux,uy); const ext=[A[0]+ux/L*40,A[1]+uy/L*40];
+  el('line',{x1:O[0],y1:O[1],x2:ext[0],y2:ext[1],stroke:'#23241D','stroke-width':1.2},p);
+  // 수선의 발 H
+  const t=((B[0]-O[0])*ux+(B[1]-O[1])*uy)/(L*L); const H=[O[0]+ux*t,O[1]+uy*t];
+  el('line',{x1:B[0],y1:B[1],x2:H[0],y2:H[1],stroke:'#23241D','stroke-width':1.2},p);
+  el('line',{x1:B[0],y1:B[1],x2:A[0],y2:A[1],stroke:'#23241D','stroke-width':1.2},p);
+  const k=8, u=[ux/L*k,uy/L*k], vx=B[0]-H[0], vy=B[1]-H[1], vl=Math.hypot(vx,vy), v=[vx/vl*k,vy/vl*k];
+  el('path',{d:`M${H[0]+u[0]} ${H[1]+u[1]} L${H[0]+u[0]+v[0]} ${H[1]+u[1]+v[1]} L${H[0]+v[0]} ${H[1]+v[1]}`,fill:'none',stroke:'#23241D','stroke-width':1},p);
+  // 벡터
+  const tip=(a,b)=>{ const d=Math.hypot(b[0]-a[0],b[1]-a[1]), k=(d-6)/d; return [a[0]+(b[0]-a[0])*k,a[1]+(b[1]-a[1])*k]; };
+  const tA=tip(O,A), tB=tip(O,B);
+  el('line',{x1:O[0],y1:O[1],x2:tA[0],y2:tA[1],stroke:'#D9463F','stroke-width':2.2,'marker-end':'url(#ahR)'},p);
+  el('line',{x1:O[0],y1:O[1],x2:tB[0],y2:tB[1],stroke:'#1E9BD7','stroke-width':2.2,'marker-end':'url(#ahC)'},p);
+  // θ
+  const a1=Math.atan2(A[1]-O[1],A[0]-O[0]), a2=Math.atan2(B[1]-O[1],B[0]-O[0]), r=24;
+  el('path',{d:`M${O[0]+r*Math.cos(a1)} ${O[1]+r*Math.sin(a1)} A${r} ${r} 0 0 0 ${O[0]+r*Math.cos(a2)} ${O[1]+r*Math.sin(a2)}`,fill:'none',stroke:'#23241D','stroke-width':1.1},p);
+  T(O[0]+30,O[1]-10,'θ',{class:'it'});
+  // 라벨
+  T(H[0]+8,H[1]+18,'H'); T(A[0]+36,A[1]+18,'A(<tspan class="it">a</tspan><tspan font-size="10" dy="4">1</tspan><tspan dy="-4">, </tspan><tspan class="it">a</tspan><tspan font-size="10" dy="4">2</tspan><tspan dy="-4">)</tspan>');
+  T(B[0]+36,B[1]-6,'B(<tspan class="it">b</tspan><tspan font-size="10" dy="4">1</tspan><tspan dy="-4">, </tspan><tspan class="it">b</tspan><tspan font-size="10" dy="4">2</tspan><tspan dy="-4">)</tspan>');
+  const vl2=(x,y,str)=>{ T(x,y,str,{class:'it'}); el('line',{x1:x-5,y1:y-15,x2:x+6,y2:y-15,stroke:'#23241D','stroke-width':1.1},p); el('path',{d:`M${x+3} ${y-18} L${x+7} ${y-15} L${x+3} ${y-12}`,fill:'none',stroke:'#23241D','stroke-width':1.1},p); };
+  vl2((O[0]+A[0])/2+4,(O[1]+A[1])/2+22,'a'); vl2((O[0]+B[0])/2-16,(O[1]+B[1])/2,'b');
+})();
+
+/* 문제 03 답 */
+document.querySelectorAll('.q3 .gb.ans').forEach(b=>b.onclick=()=>{ if(b.classList.contains('done')) return; b.classList.add('done'); b.textContent='답'; const a=b.nextElementSibling; a.innerHTML=b.dataset.a.replace('k','<i>k</i>'); a.classList.add('on'); geoTask('dot-q3'); });
+/* 문제 04 — 직육면체 + 좌표축 */
+(function(){
+  const p=$('fq4'); const W=78, Hh=70, d=[42,32];
+  const E=[70,150], Hp=[E[0]+2*W,E[1]], A=[E[0],E[1]-Hh], D=[Hp[0],Hp[1]-Hh];
+  const F=[E[0]+d[0],E[1]+d[1]], G=[Hp[0]+d[0],Hp[1]+d[1]], B=[A[0]+d[0],A[1]+d[1]], C=[D[0]+d[0],D[1]+d[1]];
+  const t=(x,y,str,o)=>{ const e=el('text',Object.assign({x,y,'font-size':15,'text-anchor':'middle'},o||{}),p); e.innerHTML=str; return e; };
+  const ln=(a,b,o,par)=>el('line',Object.assign({x1:a[0],y1:a[1],x2:b[0],y2:b[1],stroke:'#23241D','stroke-width':1.3},o||{}),par||p);
+  const poly=pts=>pts.map(q=>q.join(',')).join(' ');
+  el('polygon',{points:poly([A,D,C,B]),fill:'#F8D2C4'},p); el('polygon',{points:poly([B,C,G,F]),fill:'#F2A58E'},p); el('polygon',{points:poly([A,B,F,E]),fill:'#E98A72'},p);
+  [[E,Hp],[Hp,D],[Hp,G]].forEach(([a,b])=>ln(a,b,{'stroke-dasharray':'4 3','stroke-width':1}));
+  [[A,D],[D,C],[C,B],[B,A],[A,E],[E,F],[F,B],[F,G],[G,C]].forEach(([a,b])=>ln(a,b));
+  t(A[0]-10,A[1]-2,'A'); t(D[0]+2,D[1]-7,'D'); t(B[0]+10,B[1]+14,'B'); t(C[0]+12,C[1]+5,'C');
+  t(E[0]-10,E[1]+6,'E'); t(Hp[0]+10,Hp[1]+2,'H'); t(F[0]-8,F[1]+14,'F'); t(G[0]+12,G[1]+6,'G');
+  t(E[0]-10,(A[1]+E[1])/2+4,'1',{'font-size':13,'font-weight':400}); t((E[0]+F[0])/2-10,(E[1]+F[1])/2+10,'1',{'font-size':13,'font-weight':400}); t((F[0]+G[0])/2,F[1]+16,'2',{'font-size':13,'font-weight':400});
+  const dyn=el('g',{class:'hgrp2'},p); let timers=[];
+  const wait=(ms,fn)=>timers.push(setTimeout(fn,ms));
+  const ext=(a,b,L)=>{ const dd=Math.hypot(b[0]-a[0],b[1]-a[1]); return [a[0]+(b[0]-a[0])/dd*L,a[1]+(b[1]-a[1])/dd*L]; };
+  const vlabel=(x,y,str,col,par)=>{ const g=el('g',{},par); const tx=t(x,y,str,{style:`fill:${col}`,'font-size':14}); g.appendChild(tx);
+    requestAnimationFrame(()=>{ const w=tx.getComputedTextLength(); el('line',{x1:x-w/2,y1:y-14,x2:x+w/2+1,y2:y-14,stroke:col,'stroke-width':1},g);
+      el('path',{d:`M${x+w/2-3} ${y-16.5} L${x+w/2+2} ${y-14} L${x+w/2-3} ${y-11.5}`,fill:'none',stroke:col,'stroke-width':1},g); }); };
+  function run(){ $('q4go').disabled=true; $('q4re').style.display='';
+    // 좌표축
+    const ax=el('g',{class:'hgrp2'},dyn);
+    const xe=ext(E,F,105), ye=ext(E,Hp,205), ze=ext(E,A,110);
+    [[xe,'x'],[ye,'y'],[ze,'z']].forEach(([q,nm])=>{ ln(E,q,{'stroke-width':1.1,'marker-end':'url(#ahK)',stroke:'#4b5a6a'},ax); const lx=q[0]+(nm==='z'?-10:nm==='x'?10:12), ly=q[1]+(nm==='x'?12:nm==='y'?-6:0); t(lx,ly,nm,{class:'it',style:'fill:#4b5a6a','font-size':14}).remove(); const e=t(lx,ly,nm,{class:'it',style:'fill:#4b5a6a','font-size':14}); ax.appendChild(e); });
+    requestAnimationFrame(()=>ax.classList.add('on'));
+    // 좌표
+    wait(800,()=>{ const g=el('g',{class:'hgrp2'},dyn); const sty={style:'fill:#1f3f8a','font-size':12,'font-weight':500};
+      [[E[0]-26,E[1]+20,'(0, 0, 0)'],[D[0]+30,D[1]-6,'(0, 2, 1)'],[B[0]+46,B[1]+38,'(1, 0, 1)'],[G[0]+34,G[1]+22,'(1, 2, 0)']].forEach(([x,y,str])=>g.appendChild(t(x,y,str,sty)));
+      requestAnimationFrame(()=>g.classList.add('on')); });
+    // 벡터
+    wait(1600,()=>{ const g=el('g',{class:'hgrp2'},dyn); const tip=(a,b)=>ext(a,b,Math.hypot(b[0]-a[0],b[1]-a[1])-7);
+      const tD=tip(E,D), tG=tip(B,G);
+      ln(E,tD,{stroke:'#D9463F','stroke-width':2.4,'marker-end':'url(#ahR)'},g); ln(B,tG,{stroke:'#2F45EC','stroke-width':2.4,'marker-end':'url(#ahB)'},g);
+      vlabel((E[0]+D[0])/2+16,(E[1]+D[1])/2-10,'ED','#D9463F',g); vlabel((B[0]+G[0])/2+8,(B[1]+G[1])/2+20,'BG','#2F45EC',g);
+      requestAnimationFrame(()=>g.classList.add('on')); });
+    wait(2600,()=>{ $('q4sol').classList.add('on'); geoTask('dot-q4'); });
+  }
+  dyn.classList.add('on');
+  $('q4go').onclick=run;
+  $('q4re').onclick=()=>{ timers.forEach(clearTimeout); timers=[]; dyn.innerHTML=''; $('q4sol').classList.remove('on'); $('q4go').disabled=false; $('q4re').style.display='none'; };
+})();
+
+/* 내적의 성질 — 줄 누르면 차례로 전개 */
+document.querySelectorAll('.prf .row').forEach(r=>r.onclick=()=>{ if(r.classList.contains('done')) return; r.classList.add('done');
+  [...r.querySelectorAll('.rest')].forEach((e,i)=>setTimeout(()=>e.classList.add('on'),i*420)); geoTask('dot-prop'); });
+
+/* 03 탭 — 두 벡터가 이루는 각 */
+(function(){
+  const p=$('fang'); const O=[185,205], R=165, RB=140;
+  const T=(x,y,str,o,par)=>{ const e=el('text',Object.assign({x,y,'font-size':16,'text-anchor':'middle'},o||{}),par||p); e.innerHTML=str; return e; };
+  // 고정: 점선 연장선(왼쪽), a 벡터
+  const dash=el('line',{x1:O[0],y1:O[1],x2:O[0]-165,y2:O[1],stroke:'#23241D','stroke-width':1.1,'stroke-dasharray':'4 3',opacity:0,style:'transition:opacity .4s'},p);
+  el('line',{x1:O[0],y1:O[1],x2:O[0]+R-7,y2:O[1],stroke:'#D9463F','stroke-width':2.4,'marker-end':'url(#ahR)'},p);
+  T(O[0]+R+12,O[1]+5,'A'); T(O[0]-2,O[1]+20,'O');
+  const al=T(O[0]+R/2,O[1]+24,'a',{class:'it'}); el('line',{x1:O[0]+R/2-5,y1:O[1]+9,x2:O[0]+R/2+6,y2:O[1]+9,stroke:'#23241D','stroke-width':1.1},p); el('path',{d:`M${O[0]+R/2+3} ${O[1]+6} L${O[0]+R/2+7} ${O[1]+9} L${O[0]+R/2+3} ${O[1]+12}`,fill:'none',stroke:'#23241D','stroke-width':1.1},p);
+  const dyn=el('g',{},p); let th=0, anim=null;
+  function draw(){
+    dyn.innerHTML=''; const r=th*Math.PI/180; const Bp=[O[0]+RB*Math.cos(r),O[1]-RB*Math.sin(r)];
+    dash.setAttribute('opacity',th>90?1:0);
+    // θ 호
+    if(th>0.5){ const ra=34; el('path',{d:`M${O[0]+ra} ${O[1]} A${ra} ${ra} 0 ${th>180?1:0} 0 ${O[0]+ra*Math.cos(r)} ${O[1]-ra*Math.sin(r)}`,fill:'none',stroke:'#23241D','stroke-width':1.2},dyn);
+      const m=r/2; T(O[0]+(ra+13)*Math.cos(m),O[1]-(ra+13)*Math.sin(m)+5,'θ',{class:'it'},dyn); }
+    if(Math.abs(th-90)<0.5){ el('path',{d:`M${O[0]+12} ${O[1]} L${O[0]+12} ${O[1]-12} L${O[0]} ${O[1]-12}`,fill:'none',stroke:'#23241D','stroke-width':1.2},dyn); }
+    if(th>90.5){ const ra2=22; el('path',{d:`M${O[0]+ra2*Math.cos(r)} ${O[1]-ra2*Math.sin(r)} A${ra2} ${ra2} 0 0 0 ${O[0]-ra2} ${O[1]}`,fill:'none',stroke:'#23241D','stroke-width':1.1},dyn);
+      if(th<179.5) T(O[0]-40,O[1]+20,'180°−<tspan class="it">θ</tspan>',{'font-size':13},dyn); }
+    // b 벡터
+    const k=(RB-7)/RB; el('line',{x1:O[0],y1:O[1],x2:O[0]+(Bp[0]-O[0])*k,y2:O[1]+(Bp[1]-O[1])*k,stroke:'#2F45EC','stroke-width':2.4,'marker-end':'url(#ahB)'},dyn);
+    T(Bp[0]+14*Math.cos(r),Bp[1]-14*Math.sin(r)+5,'B',{},dyn);
+    const lx=O[0]+RB*0.5*Math.cos(r)-16*Math.sin(r), ly=O[1]-RB*0.5*Math.sin(r)-16*Math.cos(r)+5;
+    T(lx,ly,'b',{class:'it'},dyn); el('line',{x1:lx-5,y1:ly-15,x2:lx+6,y2:ly-15,stroke:'#23241D','stroke-width':1.1},dyn); el('path',{d:`M${lx+3} ${ly-18} L${lx+7} ${ly-15} L${lx+3} ${ly-12}`,fill:'none',stroke:'#23241D','stroke-width':1.1},dyn);
+    $('angv').textContent=Math.round(th); $('angs').value=Math.round(th);
+    const sg=$('angsgn'); const vv=`<span class='vec'><i>a</i></span><span class='dotc'>·</span><span class='vec'><i>b</i></span>`;
+    if(Math.abs(th-90)<0.5) sg.innerHTML=`cos <i>θ</i> = 0 → <span class="cg">${vv} = 0</span><span class="ko">수직</span>`;
+    else if(th<90) sg.innerHTML=`cos <i>θ</i> &gt; 0 → <span class="cb">${vv} &gt; 0</span>`+(th<0.5?`<span class="ko">같은 방향 (평행)</span>`:'');
+    else sg.innerHTML=`cos <i>θ</i> &lt; 0 → <span class="cr">${vv} &lt; 0</span>`+(th>179.5?`<span class="ko">반대 방향 (평행)</span>`:'');
+    sg.classList.add('on');
+    document.querySelectorAll('.abtns .btn').forEach(b=>{ const [f,t]=b.dataset.r.split(',').map(Number); let on=false; if(f===0&&t===90) on=th<89.5; else if(f===90&&t===90) on=Math.abs(th-90)<0.5; else if(f===90&&t===180) on=th>90.5; b.classList.toggle('cur',on); });
+  }
+  function go(from,to,dur){ if(anim) cancelAnimationFrame(anim); const st=performance.now();
+    (function f(now){ let u=Math.min(1,(now-st)/dur); u=u<.5?2*u*u:1-Math.pow(-2*u+2,2)/2; th=from+(to-from)*u; draw(); if(u<1) anim=requestAnimationFrame(f); else anim=null; })(st); }
+  document.querySelectorAll('.abtns .btn').forEach(b=>b.onclick=()=>{ const [f,t]=b.dataset.r.split(',').map(Number);
+    if(f===t) go(th,t,600); else go(f,t,1800); geoTask('dot-angle'); });
+  $('angs').oninput=e=>{ if(anim) cancelAnimationFrame(anim); anim=null; th=+e.target.value; draw(); };
+  draw();
+})();
+</script>
+<script>window.PAGE_ID="pvecdot";</script>
+<script src="nav.js"></script>
+</body>
+</html>
